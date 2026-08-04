@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compliance Calendar Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,72,400;0,72,500;0,72,600;1,72,400;1,72,500&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/shared.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><a href="/app.html">Compliance Calendar <strong>Generator</strong></a></div>
+  <div class="nav-links">
+    <a href="/app.html" class="active">Generate</a>
+    <a href="/review.html">Review Queue</a>
+  </div>
+  <div class="nav-user" id="navUser"></div>
+</div>
+
+<div class="wrap">
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-eyebrow">Internal Tool · Not Legal Advice</div>
+      <h1>Company Compliance Intake</h1>
+      <p class="sub">Fill in the company profile below. State-level requirements are pulled from the cached database when available and only re-researched live when the cache is missing or stale — either way, the result is saved as <strong>pending review</strong>, not shown as final until a teammate approves it.</p>
+    </div>
+    <div class="card-body">
+
+      <div class="grid">
+        <div class="field span2">
+          <label for="companyName">Company Name</label>
+          <input type="text" id="companyName" placeholder="e.g. Prism IT Global Inc.">
+        </div>
+
+        <div class="field">
+          <label for="state">State of Incorporation</label>
+          <select id="state"></select>
+        </div>
+        <div class="field">
+          <label for="entityType">Entity Type</label>
+          <select id="entityType">
+            <option value="Corporation">Corporation</option>
+            <option value="LLC">LLC</option>
+            <option value="Partnership">Partnership</option>
+            <option value="Disregarded Entity">Disregarded Entity</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="taxStatus">Tax Status</label>
+          <select id="taxStatus"></select>
+        </div>
+        <div class="field">
+          <label for="incorpDate">Date of Incorporation</label>
+          <input type="date" id="incorpDate">
+        </div>
+
+        <div class="field">
+          <label for="fyStart">Financial Year Start</label>
+          <select id="fyStart"></select>
+        </div>
+        <div class="field">
+          <label for="fyEnd">Financial Year End</label>
+          <select id="fyEnd"></select>
+        </div>
+      </div>
+
+      <div class="divider-label">Foreign / Related-Party Ownership</div>
+      <div class="toggle-row">
+        <label class="switch">
+          <input type="checkbox" id="hasForeignParent">
+          <span class="slider"></span>
+        </label>
+        <span class="toggle-label">Company has a foreign parent or related-party (intercompany) transactions</span>
+      </div>
+
+      <div class="conditional-block" id="foreignBlock">
+        <div class="field">
+          <label for="odiDone">Overseas Direct Investment (ODI) under RBI/FEMA?</label>
+          <select id="odiDone">
+            <option value="Yes">Yes — parent made an ODI filing in its home country</option>
+            <option value="No">No / not applicable</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="odiInvestorType">Investor Type</label>
+          <select id="odiInvestorType">
+            <option value="Indian Company">Indian Company</option>
+            <option value="Resident Individual">Resident Individual</option>
+            <option value="Other Foreign Entity">Other Foreign Entity</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="submit-row">
+        <span class="hint" id="statusHint"></span>
+        <button class="primary" id="submit">Generate Calendar →</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="resultSlot"></div>
+
+  <div class="list-section">
+    <div class="section-title">Your calendars</div>
+    <div class="section-sub">Everything you've generated, most recent first. Pending items need a teammate's review before they're final.</div>
+    <div id="mineList"><div class="empty-state">Loading…</div></div>
+  </div>
+
+</div>
+
+<script>
+  function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
+
+  async function loadUser() {
+    try {
+      const res = await fetch('/api/auth/me');
+      if (!res.ok) { location.href = '/login.html?next=/app.html'; return; }
+      const { user } = await res.json();
+      const el = document.getElementById('navUser');
+      el.innerHTML = `<span>${escapeHtml(user.email)}</span><button id="logoutBtn">Log out</button>`;
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await fetch('/api/auth/logout', { method: 'POST' });
+        location.href = '/login.html';
+      });
+    } catch (e) { location.href = '/login.html?next=/app.html'; }
+  }
+  loadUser();
+
+  const STATES = ["Delaware","California","Texas","Florida","Wyoming","New York","Illinois","Washington","Massachusetts",
+    "Alabama","Alaska","Arizona","Arkansas","Colorado","Connecticut","Georgia","Hawaii","Idaho","Indiana","Iowa","Kansas",
+    "Kentucky","Louisiana","Maine","Maryland","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada",
+    "New Hampshire","New Jersey","New Mexico","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania",
+    "Rhode Island","South Carolina","South Dakota","Tennessee","Utah","Vermont","Virginia","West Virginia","Wisconsin",
+    "District of Columbia"];
+  const TAX_STATUSES = ["C-Corp","S-Corp","Partnership","LLP","Disregarded Entity","Not sure — research applicable options"];
+  const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+  function fillSelect(id, values, selectedIndex) {
+    const el = document.getElementById(id);
+    values.forEach((v,i) => {
+      const opt = document.createElement('option');
+      opt.value = v; opt.textContent = v;
+      if (i === selectedIndex) opt.selected = true;
+      el.appendChild(opt);
+    });
+  }
+  fillSelect('state', STATES, 0);
+  fillSelect('taxStatus', TAX_STATUSES, 0);
+  fillSelect('fyStart', MONTHS, 0);
+  fillSelect('fyEnd', MONTHS, 11);
+
+  document.getElementById('hasForeignParent').addEventListener('change', e => {
+    document.getElementById('foreignBlock').classList.toggle('visible', e.target.checked);
+  });
+
+  function readProfile() {
+    return {
+      companyName: document.getElementById('companyName').value.trim(),
+      state: document.getElementById('state').value,
+      entityType: document.getElementById('entityType').value,
+      taxStatus: document.getElementById('taxStatus').value,
+      incorpDate: document.getElementById('incorpDate').value,
+      fyStart: document.getElementById('fyStart').value,
+      fyEnd: document.getElementById('fyEnd').value,
+      hasForeignParent: document.getElementById('hasForeignParent').checked,
+      odiDone: document.getElementById('odiDone').value,
+      odiInvestorType: document.getElementById('odiInvestorType').value,
+    };
+  }
+
+  const SOURCE_LABEL = { cache: 'From cached state data', live: 'Freshly researched', mixed: 'Cache + live research' };
+
+  async function handleSubmit() {
+    const profile = readProfile();
+    if (!profile.state || !profile.entityType) return;
+    const btn = document.getElementById('submit');
+    const statusHint = document.getElementById('statusHint');
+    btn.disabled = true;
+    statusHint.textContent = 'Researching — this can take 20-40s (less if the state is already cached)…';
+
+    const slot = document.getElementById('resultSlot');
+    slot.innerHTML = '';
+    const loadingEl = document.createElement('div');
+    loadingEl.className = 'loading-case';
+    loadingEl.innerHTML = `Building calendar for ${escapeHtml(profile.companyName || profile.state)}<span class="dots"></span>`;
+    slot.appendChild(loadingEl);
+
+    try {
+      const res = await fetch('/api/calendars/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profile }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `Server error ${res.status}`);
+
+      loadingEl.remove();
+      const cal = data.calendar;
+      slot.innerHTML = `
+        <div class="error-banner" style="background:var(--seal-gold-bg); border-color:var(--seal-gold); color:var(--seal-gold);">
+          Saved as <strong>pending review</strong> (${escapeHtml(SOURCE_LABEL[cal.sourceMode] || cal.sourceMode)}, ${cal.items.length} items).
+          <a href="/calendar.html?id=${cal._id}">Open it to review, edit, or approve →</a>
+        </div>`;
+      loadMine();
+    } catch (err) {
+      loadingEl.remove();
+      const errEl = document.createElement('div');
+      errEl.className = 'error-case';
+      errEl.textContent = `Generation failed: ${err.message}`;
+      slot.appendChild(errEl);
+    } finally {
+      btn.disabled = false;
+      statusHint.textContent = '';
+    }
+  }
+  document.getElementById('submit').addEventListener('click', handleSubmit);
+
+  function fmtDate(s) { return s ? new Date(s).toLocaleDateString() : '—'; }
+
+  async function loadMine() {
+    const el = document.getElementById('mineList');
+    try {
+      const res = await fetch('/api/calendars/mine');
+      const data = await res.json();
+      const list = data.calendars || [];
+      if (!list.length) {
+        el.innerHTML = '<div class="empty-state">No calendars generated yet.</div>';
+        return;
+      }
+      el.innerHTML = `<table class="list">
+        <thead><tr><th>Company</th><th>State / Entity</th><th>Status</th><th>Created</th><th></th></tr></thead>
+        <tbody>
+          ${list.map(c => `
+            <tr>
+              <td class="name">${escapeHtml(c.profile.companyName || 'Unnamed Company')}</td>
+              <td class="meta">${escapeHtml(c.profile.state)} · ${escapeHtml(c.profile.entityType)}</td>
+              <td><span class="badge ${c.status}">${c.status.replace('_',' ')}</span></td>
+              <td class="meta">${fmtDate(c.createdAt)}</td>
+              <td><a class="open-link" href="/calendar.html?id=${c._id}">Open →</a></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+    } catch (err) {
+      el.innerHTML = `<div class="empty-state">Could not load your calendars.</div>`;
+    }
+  }
+  loadMine();
+</script>
+</body>
+</html>
