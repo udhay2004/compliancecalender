@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Review Queue — Compliance Calendar Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,72,400;0,72,500;0,72,600;1,72,400;1,72,500&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/shared.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><a href="/app.html">Compliance Calendar <strong>Generator</strong></a></div>
+  <div class="nav-links">
+    <a href="/app.html">Generate</a>
+    <a href="/review.html" class="active">Review Queue</a>
+  </div>
+  <div class="nav-user" id="navUser"></div>
+</div>
+
+<div class="wrap">
+  <div class="card" style="margin-top:36px;">
+    <div class="card-head" style="padding-bottom:20px;">
+      <div class="card-eyebrow">Human-in-the-Loop</div>
+      <h1>Review Queue</h1>
+      <p class="sub">A calendar Claude generates is never the source of truth on its own. Anything below in the pending tab needs a teammate to open it, check or edit the line items, and approve or reject it before it counts as final.</p>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" id="tabPending">Pending Review</button>
+    <button class="tab-btn" id="tabApproved">Approved Library</button>
+  </div>
+
+  <div id="listSlot" style="margin-top:24px;"><div class="empty-state">Loading…</div></div>
+</div>
+
+<script>
+  function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
+  function fmtDate(s) { return s ? new Date(s).toLocaleDateString() : '—'; }
+
+  async function loadUser() {
+    try {
+      const res = await fetch('/api/auth/me');
+      if (!res.ok) { location.href = '/login.html?next=/review.html'; return; }
+      const { user } = await res.json();
+      const el = document.getElementById('navUser');
+      el.innerHTML = `<span>${escapeHtml(user.email)}</span><button id="logoutBtn">Log out</button>`;
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await fetch('/api/auth/logout', { method: 'POST' });
+        location.href = '/login.html';
+      });
+    } catch (e) { location.href = '/login.html?next=/review.html'; }
+  }
+  loadUser();
+
+  let currentTab = 'pending';
+
+  async function loadList() {
+    const slot = document.getElementById('listSlot');
+    slot.innerHTML = '<div class="empty-state">Loading…</div>';
+    const endpoint = currentTab === 'pending' ? '/api/calendars/queue' : '/api/calendars/approved';
+    try {
+      const res = await fetch(endpoint);
+      const data = await res.json();
+      const list = data.calendars || [];
+      if (!list.length) {
+        slot.innerHTML = `<div class="empty-state">${currentTab === 'pending' ? 'Nothing waiting on review right now.' : 'No approved calendars yet.'}</div>`;
+        return;
+      }
+      const dateCol = currentTab === 'pending'
+        ? { label: 'Submitted', get: c => fmtDate(c.createdAt) }
+        : { label: 'Approved', get: c => fmtDate(c.reviewedAt) };
+      const byCol = currentTab === 'pending'
+        ? { label: 'Submitted By', get: c => c.createdBy?.email || '—' }
+        : { label: 'Reviewed By', get: c => c.reviewedBy?.email || '—' };
+
+      slot.innerHTML = `<table class="list">
+        <thead><tr><th>Company</th><th>State / Entity</th><th>${byCol.label}</th><th>${dateCol.label}</th><th></th></tr></thead>
+        <tbody>
+          ${list.map(c => `
+            <tr>
+              <td class="name">${escapeHtml(c.profile.companyName || 'Unnamed Company')}</td>
+              <td class="meta">${escapeHtml(c.profile.state)} · ${escapeHtml(c.profile.entityType)}</td>
+              <td class="meta">${escapeHtml(byCol.get(c))}</td>
+              <td class="meta">${dateCol.get(c)}</td>
+              <td><a class="open-link" href="/calendar.html?id=${c._id}">Open →</a></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+    } catch (err) {
+      slot.innerHTML = '<div class="empty-state">Could not load the list.</div>';
+    }
+  }
+
+  document.getElementById('tabPending').addEventListener('click', () => {
+    currentTab = 'pending';
+    document.getElementById('tabPending').classList.add('active');
+    document.getElementById('tabApproved').classList.remove('active');
+    loadList();
+  });
+  document.getElementById('tabApproved').addEventListener('click', () => {
+    currentTab = 'approved';
+    document.getElementById('tabApproved').classList.add('active');
+    document.getElementById('tabPending').classList.remove('active');
+    loadList();
+  });
+
+  loadList();
+</script>
+</body>
+</html>
