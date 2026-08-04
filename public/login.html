@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log in — Compliance Calendar Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,72,400;0,72,500;0,72,600;1,72,400;1,72,500&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/shared.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">Compliance Calendar <strong>Generator</strong></div>
+</div>
+
+<div class="wrap narrow">
+  <div class="card">
+    <div class="card-head">
+      <div class="card-eyebrow">Internal Tool · Sign In Required</div>
+      <h1>Log in</h1>
+      <p class="sub">Sign in to generate calendars, review the queue, and download approved PDFs.</p>
+    </div>
+    <div class="card-body">
+      <form id="loginForm">
+        <div class="grid full">
+          <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" autocomplete="username" required>
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input type="password" id="password" autocomplete="current-password" required>
+          </div>
+        </div>
+        <div class="submit-row">
+          <span class="hint" id="statusHint"></span>
+          <button type="submit" class="primary" id="submit">Log in →</button>
+        </div>
+      </form>
+      <div class="form-foot">No account yet? <a href="/signup.html">Create one</a></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const form = document.getElementById('loginForm');
+  const btn = document.getElementById('submit');
+  const hint = document.getElementById('statusHint');
+
+  const params = new URLSearchParams(location.search);
+  if (params.get('reason') === 'session_expired') {
+    hint.textContent = 'Session expired — please log in again.';
+    hint.classList.add('err');
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    btn.disabled = true;
+    hint.classList.remove('err');
+    hint.textContent = 'Signing in…';
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: document.getElementById('email').value.trim(),
+          password: document.getElementById('password').value,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Login failed.');
+      const dest = params.get('next') || '/app.html';
+      location.href = dest;
+    } catch (err) {
+      hint.textContent = err.message;
+      hint.classList.add('err');
+      btn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
