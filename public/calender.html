@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendar — Compliance Calendar Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,72,400;0,72,500;0,72,600;1,72,400;1,72,500&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/shared.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><a href="/app.html">Compliance Calendar <strong>Generator</strong></a></div>
+  <div class="nav-links">
+    <a href="/app.html">Generate</a>
+    <a href="/review.html">Review Queue</a>
+  </div>
+  <div class="nav-user" id="navUser"></div>
+</div>
+
+<div class="wrap">
+  <div id="slot"><div class="empty-state">Loading…</div></div>
+</div>
+
+<script>
+  function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
+  function fmtDateTime(s) { return s ? new Date(s).toLocaleString() : '—'; }
+
+  async function loadUser() {
+    try {
+      const res = await fetch('/api/auth/me');
+      if (!res.ok) { location.href = '/login.html?next=' + encodeURIComponent(location.pathname + location.search); return; }
+      const { user } = await res.json();
+      const el = document.getElementById('navUser');
+      el.innerHTML = `<span>${escapeHtml(user.email)}</span><button id="logoutBtn">Log out</button>`;
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await fetch('/api/auth/logout', { method: 'POST' });
+        location.href = '/login.html';
+      });
+    } catch (e) { location.href = '/login.html'; }
+  }
+  loadUser();
+
+  const CATEGORY_ORDER = ["Mandatory Annual","Conditional","Transfer Pricing","Foreign Reporting (ODI/FEMA)","Event-Based"];
+  const CATEGORIES = CATEGORY_ORDER;
+  const SOURCE_LABEL = { cache: 'From cached state data', live: 'Freshly researched', mixed: 'Cache + live research' };
+
+  const id = new URLSearchParams(location.search).get('id');
+  if (!id) {
+    document.getElementById('slot').innerHTML = '<div class="empty-state">No calendar id given.</div>';
+  }
+
+  let calendar = null;
+
+  function groupByCategory(items) {
+    const groups = {};
+    items.forEach((it, i) => {
+      const cat = it.category || 'Other';
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push({ ...it, __index: i });
+    });
+    return groups;
+  }
+
+  function itemEditForm(it, idx) {
+    return `
+      <tr class="edit-row" id="editRow-${idx}">
+        <td colspan="4">
+          <div class="edit-grid">
+            <div class="field">
+              <label>Category</label>
+              <select data-f="category">
+                ${CATEGORIES.map(c => `<option value="${escapeHtml(c)}" ${c===it.category?'selected':''}>${escapeHtml(c)}</option>`).join('')}
+              </select>
+            </div>
+            <div class="field">
+              <label>Confidence</label>
+              <select data-f="confidence">
+                ${['high','medium','low'].map(c => `<option value="${c}" ${c===it.confidence?'selected':''}>${c}</option>`).join('')}
+              </select>
+            </div>
+            <div class="field">
+              <label>Compliance Name</label>
+              <input type="text" data-f="compliance_name" value="${escapeHtml(it.compliance_name)}">
+            </div>
+            <div class="field">
+              <label>Due Date</label>
+              <input type="text" data-f="due_date" value="${escapeHtml(it.due_date)}">
+            </div>
+            <div class="field">
+              <label>Applies To</label>
+              <input type="text" data-f="applicable_to" value="${escapeHtml(it.applicable_to)}">
+            </div>
+            <div class="field">
+              <label>Authority</label>
+              <input type="text" data-f="authority" value="${escapeHtml(it.authority)}">
+            </div>
+            <div class="field span2">
+              <label>Description</label>
+              <textarea data-f="description">${escapeHtml(it.description)}</textarea>
+            </div>
+            <div class="field span2">
+              <label>Source URL</label>
+              <input type="text" data-f="source_url" value="${escapeHtml(it.source_url)}">
+            </div>
+          </div>
+          <div class="edit-row-actions">
+            <button class="primary" onclick="saveItem(${idx})">Save</button>
+            <button class="ghost" onclick="closeEdit(${idx})">Cancel</button>
+          </div>
+        </td>
+      </tr>`;
+  }
+
+  function render() {
+    const slot = document.getElementById('slot');
+    const { profile, items, status, sourceMode, createdAt, createdBy, reviewedBy, reviewedAt, reviewNotes } = calendar;
+    const editable = status === 'pending_review';
+
+    const groups = groupByCategory(items);
+    const counts = { high: 0, medium: 0, low: 0 };
+    items.forEach(it => { if (counts[it.confidence] !== undefined) counts[it.confidence]++; });
+
+    let catHtml = '';
+    CATEGORY_ORDER.forEach(cat => {
+      if (!groups[cat] || !groups[cat].length) return;
+      catHtml += `<div class="cat-block">
+        <div class="cat-title">${escapeHtml(cat)}</div>
+        <table class="cal">
+          <thead><tr><th>Due Date</th><th>Compliance</th><th>Applies To</th><th>Description &amp; Source</th>${editable ? '<th></th>' : ''}</tr></thead>
+          <tbody>
+          ${groups[cat].map(it => `
+            <tr id="row-${it.__index}">
+              <td class="due">${escapeHtml(it.due_date)}</td>
+              <td class="name"><span class="dot ${escapeHtml(it.confidence||'medium')}"></span>${escapeHtml(it.compliance_name)}${it.editedByReviewer ? '<span class="edited-flag">edited</span>' : ''}</td>
+              <td class="applies">${escapeHtml(it.applicable_to)}</td>
+              <td>${escapeHtml(it.description)} — <span style="color:var(--ink-soft)">${escapeHtml(it.authority||'')}</span>
+                ${it.source_url ? `<a class="src-link" href="${escapeHtml(it.source_url)}" target="_blank" rel="noopener">${escapeHtml(it.source_url)}</a>` : ''}
+              </td>
+              ${editable ? `<td class="edit-cell"><button class="row-edit-btn" onclick="openEdit(${it.__index})">Edit</button></td>` : ''}
+            </tr>
+            ${editable ? `<tr id="editSlot-${it.__index}" style="display:none;"></tr>` : ''}
+          `).join('')}
+          </tbody>
+        </table>
+      </div>`;
+    });
+
+    const reviewInfo = status !== 'pending_review'
+      ? `<div class="review-panel">
+          <h3>${status === 'approved' ? 'Approved' : 'Rejected'}</h3>
+          <p style="font-size:13.5px; color:var(--ink-soft);">By ${escapeHtml(reviewedBy?.email || '—')} on ${fmtDateTime(reviewedAt)}${reviewNotes ? ' — “' + escapeHtml(reviewNotes) + '”' : ''}</p>
+        </div>`
+      : `<div class="review-panel">
+          <h3>Review this calendar</h3>
+          <p style="font-size:13px; color:var(--ink-soft); margin:0 0 12px;">Edit any line item above first if something needs correcting, then approve or reject.</p>
+          <div class="field span2" style="margin-bottom:14px;">
+            <label for="reviewNotes">Notes (optional)</label>
+            <textarea id="reviewNotes" placeholder="e.g. Verified franchise tax fee against DE Secretary of State site."></textarea>
+          </div>
+          <div class="case-actions">
+            <button class="primary" onclick="doAction('approve')">Approve →</button>
+            <button class="danger" onclick="doAction('reject')">Reject</button>
+          </div>
+        </div>`;
+
+    slot.innerHTML = `
+      <div class="case">
+        <div class="case-header">
+          <div>
+            <div class="case-title">${escapeHtml(profile.companyName || 'Unnamed Company')}</div>
+            <div class="case-sub">${escapeHtml(profile.entityType)} (${escapeHtml(profile.taxStatus||'')}) · ${escapeHtml(profile.state)} · FY ${escapeHtml(profile.fyStart||'')}–${escapeHtml(profile.fyEnd||'')} · Generated ${fmtDateTime(createdAt)} by ${escapeHtml(createdBy?.email || '—')}</div>
+          </div>
+          <div class="case-summary">
+            <span class="badge ${status}">${status.replace('_',' ')}</span>
+            <span class="badge ${sourceMode}">${escapeHtml(SOURCE_LABEL[sourceMode] || sourceMode)}</span><br>
+            ${items.length} items · ${counts.high} verified · ${counts.medium} review · ${counts.low} unverified
+          </div>
+        </div>
+        <div class="case-actions">
+          <a class="ghost" style="text-decoration:none; padding:10px 18px; display:inline-block;" href="/api/calendars/${id}/pdf">Download PDF ↓</a>
+          <a class="ghost" style="text-decoration:none; padding:10px 18px; display:inline-block;" href="/review.html">← Back to queue</a>
+        </div>
+        ${catHtml}
+        <div class="legend">
+          <span><span class="dot high"></span> High confidence — clearly stated on an official source</span>
+          <span><span class="dot medium"></span> Medium — needs a quick human check</span>
+          <span><span class="dot low"></span> Low — could not fully verify, don't rely on this yet</span>
+        </div>
+        <div class="disclaimer">${status === 'approved' ? 'Reviewed and approved — treat as the current source of truth, subject to periodic re-check of medium/low confidence items.' : 'Research result — not yet a verified compliance rule. Confirm anything marked medium/low confidence before relying on it.'}</div>
+        ${reviewInfo}
+      </div>`;
+  }
+
+  window.openEdit = function (idx) {
+    const it = calendar.items[idx];
+    document.getElementById(`editSlot-${idx}`).outerHTML = itemEditForm(it, idx);
+    document.getElementById(`editSlot-${idx}`)?.remove();
+  };
+  window.closeEdit = function (idx) {
+    load();
+  };
+
+  window.saveItem = async function (idx) {
+    const row = document.getElementById(`editRow-${idx}`);
+    const updates = {};
+    row.querySelectorAll('[data-f]').forEach(el => { updates[el.getAttribute('data-f')] = el.value; });
+    try {
+      const res = await fetch(`/api/calendars/${id}/items/${idx}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Save failed.');
+      calendar = data.calendar;
+      render();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  window.doAction = async function (action) {
+    const notes = document.getElementById('reviewNotes')?.value || '';
+    if (action === 'reject' && !confirm('Reject this calendar? It will be marked rejected and won\'t appear in the approved library.')) return;
+    try {
+      const res = await fetch(`/api/calendars/${id}/${action}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notes }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `${action} failed.`);
+      calendar = data.calendar;
+      render();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  async function load() {
+    try {
+      const res = await fetch(`/api/calendars/${id}`);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Could not load calendar.');
+      calendar = data.calendar;
+      render();
+    } catch (err) {
+      document.getElementById('slot').innerHTML = `<div class="error-case">${escapeHtml(err.message)}</div>`;
+    }
+  }
+  if (id) load();
+</script>
+</body>
+</html>
