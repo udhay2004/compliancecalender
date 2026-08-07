@@ -8,6 +8,7 @@
     "start": "node server.js",
     "dev": "node --watch server.js",
     "seed:states": "node scripts/seedStates.js",
+    "seed:odi": "node scripts/seedOdi.js",
     "load:states": "node scripts/loadPresearchedStates.js"
   },
   "engines": {
