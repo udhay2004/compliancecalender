@@ -9,6 +9,7 @@
 
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 
 const userSchema = new mongoose.Schema(
   {
@@ -16,9 +17,30 @@ const userSchema = new mongoose.Schema(
     passwordHash: { type: String, required: true },
     name: { type: String, trim: true, default: "" },
     role: { type: String, enum: ["member", "admin"], default: "member" },
+    // IMPORTANT: default is "approved", NOT "pending". Mongoose applies
+    // schema defaults on hydration for any field missing from the stored
+    // document — so if this defaulted to "pending", every user created
+    // before this field existed would suddenly fail the login gate the
+    // next time they're read from the DB. routes/auth.routes.js sets
+    // status to "pending" explicitly at signup time instead, so only
+    // brand-new signups go through the approval gate; anyone already in
+    // the database is treated as already-approved.
+    status: { type: String, enum: ["pending", "approved", "rejected"], default: "approved" },
+    approvalToken: { type: String, default: null, select: false },
+    approvalTokenExpires: { type: Date, default: null, select: false },
   },
   { timestamps: true }
 );
+
+// Generates a fresh, random, single-use token for the approve/reject email
+// links and sets it (with a 7-day expiry) on the document. Caller is
+// responsible for saving the document afterward.
+userSchema.methods.generateApprovalToken = function () {
+  const token = crypto.randomBytes(32).toString("hex");
+  this.approvalToken = token;
+  this.approvalTokenExpires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  return token;
+};
 
 userSchema.methods.setPassword = async function (plainPassword) {
   this.passwordHash = await bcrypt.hash(plainPassword, 10);
