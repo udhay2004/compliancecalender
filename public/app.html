@@ -67,23 +67,16 @@
         </div>
       </div>
 
-      <div class="divider-label">Foreign / Related-Party Ownership</div>
-      <div class="toggle-row">
-        <label class="switch">
-          <input type="checkbox" id="hasForeignParent">
-          <span class="slider"></span>
-        </label>
-        <span class="toggle-label">Company has a foreign parent or related-party (intercompany) transactions</span>
+      <div class="divider-label">Overseas Direct Investment (ODI)</div>
+      <div class="field">
+        <label for="odiDone">Has an Overseas Direct Investment (ODI) been done under RBI/FEMA?</label>
+        <select id="odiDone">
+          <option value="No" selected>No</option>
+          <option value="Yes">Yes</option>
+        </select>
       </div>
 
-      <div class="conditional-block" id="foreignBlock">
-        <div class="field">
-          <label for="odiDone">Overseas Direct Investment (ODI) under RBI/FEMA?</label>
-          <select id="odiDone">
-            <option value="Yes">Yes — parent made an ODI filing in its home country</option>
-            <option value="No">No / not applicable</option>
-          </select>
-        </div>
+      <div class="conditional-block" id="odiBlock">
         <div class="field">
           <label for="odiInvestorType">Investor Type</label>
           <select id="odiInvestorType">
@@ -92,6 +85,15 @@
             <option value="Other Foreign Entity">Other Foreign Entity</option>
           </select>
         </div>
+      </div>
+
+      <div class="divider-label">Foreign / Related-Party Ownership</div>
+      <div class="toggle-row">
+        <label class="switch">
+          <input type="checkbox" id="hasForeignParent">
+          <span class="slider"></span>
+        </label>
+        <span class="toggle-label">Company has a foreign parent or related-party (intercompany) transactions</span>
       </div>
 
       <div class="submit-row">
@@ -152,8 +154,12 @@
   fillSelect('fyStart', MONTHS, 0);
   fillSelect('fyEnd', MONTHS, 11);
 
-  document.getElementById('hasForeignParent').addEventListener('change', e => {
-    document.getElementById('foreignBlock').classList.toggle('visible', e.target.checked);
+  document.getElementById('odiDone').addEventListener('change', e => {
+    const isYes = e.target.value === 'Yes';
+    document.getElementById('odiBlock').classList.toggle('visible', isYes);
+    // An ODI filing means there IS a foreign parent, so keep the
+    // Foreign / Related-Party toggle in sync automatically.
+    if (isYes) document.getElementById('hasForeignParent').checked = true;
   });
 
   function readProfile() {
