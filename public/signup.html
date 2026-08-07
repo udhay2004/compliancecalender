@@ -18,9 +18,9 @@
     <div class="card-head">
       <div class="card-eyebrow">Internal Tool · Team Access</div>
       <h1>Create account</h1>
-      <p class="sub">Anyone with an account can generate calendars and review/approve teammates' work. Use your work email.</p>
+      <p class="sub">Requests are reviewed by an admin before you get access. Use your work email.</p>
     </div>
-    <div class="card-body">
+    <div class="card-body" id="cardBody">
       <form id="signupForm">
         <div class="grid full">
           <div class="field">
@@ -38,7 +38,7 @@
         </div>
         <div class="submit-row">
           <span class="hint" id="statusHint">At least 8 characters.</span>
-          <button type="submit" class="primary" id="submit">Create account →</button>
+          <button type="submit" class="primary" id="submit">Request access →</button>
         </div>
       </form>
       <div class="form-foot">Already have an account? <a href="/login.html">Log in</a></div>
@@ -68,7 +68,14 @@
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'Signup failed.');
-      location.href = '/app.html';
+
+      // Pending accounts can't log in yet — show a confirmation instead
+      // of redirecting into the app.
+      document.getElementById('cardBody').innerHTML =
+        '<p class="sub" style="margin:0;">Request received for <strong>' +
+        document.getElementById('email').value.trim() +
+        '</strong>. An admin will review it — you\'ll get an email once it\'s approved, then you can ' +
+        '<a href="/login.html">log in</a>.</p>';
     } catch (err) {
       hint.textContent = err.message;
       hint.classList.add('err');
