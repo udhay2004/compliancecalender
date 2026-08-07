@@ -1,0 +1,1864 @@
+[
+  {
+    "state": "ALABAMA",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Event-Based",
+        "compliance_name": "No Annual Report Requirement (Secretary of State)",
+        "due_date_rule": "Not Applicable",
+        "applicable_to": "All Alabama corporations (domestic and foreign-registered)",
+        "description": "Same repeal as LLCs \u2014 Act No. 2024-213 (HB 230), effective October 1, 2024, eliminated the SOS annual report requirement for all entity types, including corporations.",
+        "authority": "Alabama Secretary of State",
+        "source_url": "https://www.legalzoom.com/articles/alabama-annual-report",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Business Privilege Tax Return (Form CPT)",
+        "due_date_rule": "3.5 months after the start of the taxable year \u2014 April 15 for calendar-year C-corporations (2.5 months / September 15 for corporations with a June 30 fiscal year-end)",
+        "applicable_to": "All Alabama C-corporations (domestic and foreign-registered)",
+        "description": "Filed with ALDOR. Tax rate is graduated based on net worth apportioned to Alabama, from $0.25 to $1.75 per $1,000, subject to a minimum tax and a full exemption where calculated tax is $100 or less (tax years beginning after Dec 31, 2023). Payment is due on the original due date regardless of any filing extension.",
+        "authority": "Alabama Department of Revenue",
+        "source_url": "https://www.revenue.alabama.gov/faqs/when-is-the-alabama-business-privilege-tax-return-due/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "ALABAMA",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Event-Based",
+        "compliance_name": "No Annual Report Requirement (Secretary of State)",
+        "due_date_rule": "Not Applicable",
+        "applicable_to": "All Alabama LLCs (domestic and foreign-registered)",
+        "description": "Alabama eliminated the Secretary of State annual report requirement for all business entities effective October 1, 2024, via Act No. 2024-213 (House Bill 230), amending Ala. Code \u00a7 10A-2A-16.11. Previously only LLCs taxed as corporations had to file with the SOS; that requirement is now gone entirely for every entity type.",
+        "authority": "Alabama Secretary of State",
+        "source_url": "https://www.legalzoom.com/articles/alabama-annual-report",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Business Privilege Tax Return (Form PPT)",
+        "due_date_rule": "2.5 months after the start of the taxable year \u2014 March 15 for multi-member LLCs taxed as partnerships (calendar year); April 15 for single-member LLCs taxed as disregarded entities (calendar year, matching the individual return deadline)",
+        "applicable_to": "All LLCs organized in or doing business in Alabama (multi-member and single-member)",
+        "description": "Filed with the Alabama Department of Revenue (ALDOR), not the Secretary of State \u2014 this now functions as the LLC's only recurring state filing since the SOS annual report was eliminated. Minimum tax is $50-$100 depending on net worth tier; entities with calculated tax of $100 or less are fully exempt from filing/paying for tax years beginning after Dec 31, 2023 (Act 2022-252). LLCs electing C-corp tax status file Form CPT instead, on the corporate due date. No extension of time to pay, even if an extension to file is granted.",
+        "authority": "Alabama Department of Revenue",
+        "source_url": "https://www.revenue.alabama.gov/individual-corporate/alabama-business-privilege-tax-and-corporate-share-tax/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "ALASKA",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Alaska Biennial Report",
+        "due_date_rule": "January 2, filed biennially \u2014 corporations formed in an even-numbered year file every even-numbered year; formed in an odd-numbered year file every odd-numbered year",
+        "applicable_to": "All Alaska corporations (domestic and foreign-registered)",
+        "description": "Same uniform biennial system as LLCs. Fee is $100 for domestic corporations, $200 for foreign corporations. Late fee of $37.50 (domestic) / $47.50 (foreign) applies after the February 1 grace period; domestic corporations can face an additional 10% late penalty on business tax assessed.",
+        "authority": "Alaska Division of Corporations, Business and Professional Licensing",
+        "source_url": "https://www.zenbusiness.com/alaska-biennial-report/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "ALASKA",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Alaska Biennial Report",
+        "due_date_rule": "January 2, filed biennially \u2014 LLCs formed in an even-numbered year file every even-numbered year; LLCs formed in an odd-numbered year file every odd-numbered year (AS 10.50.760)",
+        "applicable_to": "All Alaska LLCs (domestic and foreign-registered)",
+        "description": "Filed with the Division of Corporations, Business and Professional Licensing. Fee is $100 for domestic LLCs, $200 for foreign LLCs. Filing window opens October 2 of the prior year. A one-month grace period applies; if not filed by February 1, a $37.50 (domestic) or $47.50 (foreign) late fee is added. Continued non-filing (roughly 6+ months delinquent) leads to involuntary dissolution or revocation.",
+        "authority": "Alaska Division of Corporations, Business and Professional Licensing",
+        "source_url": "https://www.zenbusiness.com/alaska-biennial-report/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "ARIZONA",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Arizona Annual Report",
+        "due_date_rule": "Anniversary date of incorporation (exact date, not just month)",
+        "applicable_to": "All Arizona corporations (domestic and foreign-registered). Does NOT apply to LLCs.",
+        "description": "Filed with the Arizona Corporation Commission. Fee is $45. A 6-month extension is available on request. Note: unlike most states, this requirement does not extend to LLCs at all.",
+        "authority": "Arizona Corporation Commission (ACC)",
+        "source_url": "https://www.zenbusiness.com/arizona-annual-report/",
+        "confidence": "high"
+      },
+      {
+        "category": "Event-Based",
+        "compliance_name": "Late Filing Penalty",
+        "due_date_rule": "As Triggered (if anniversary-date deadline is missed)",
+        "applicable_to": "Corporations that file late",
+        "description": "$9 per month penalty for delinquency.",
+        "authority": "Arizona Corporation Commission (ACC)",
+        "source_url": "https://domyllc.com/annual-reports-filing/arizona/",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "ARIZONA",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Event-Based",
+        "compliance_name": "No Annual Report Requirement",
+        "due_date_rule": "Not Applicable",
+        "applicable_to": "All Arizona LLCs",
+        "description": "Arizona is one of the few states where LLCs are NOT required to file an annual report at all \u2014 this requirement applies only to corporations in Arizona. This is a notable and commonly-confused point since most people assume all states require one. LLCs should still maintain a statutory agent and handle applicable tax filings.",
+        "authority": "Arizona Corporation Commission (ACC)",
+        "source_url": "https://formllc.us/blogs/arizona-llc-annual-report",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "ARKANSAS",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual Franchise Tax Report",
+        "due_date_rule": "May 1 annually (fixed date)",
+        "applicable_to": "All Arkansas corporations (domestic and foreign-registered)",
+        "description": "Stock corporations pay 0.3% of outstanding capital stock value, $150 minimum; non-stock corporations pay a flat $150. Same $25 late penalty plus 10% annual interest as LLCs. Nonprofit corporations file a separate annual report with no franchise tax component.",
+        "authority": "Arkansas Secretary of State",
+        "source_url": "https://fileforms.com/arkansas-franchise-tax-report-deadline",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "ARKANSAS",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual LLC Franchise Tax Report",
+        "due_date_rule": "May 1 annually (fixed date; first report is due the year AFTER formation, not in the formation year itself)",
+        "applicable_to": "All Arkansas LLCs (domestic and foreign-registered)",
+        "description": "Filed with the Secretary of State under A.C.A. \u00a7 26-54-105. Flat $150 fee regardless of income or activity. No filing extensions are available (eliminated by Acts 1046/1140 of 1991). Filing window opens January 1. Late filing triggers a $25 penalty plus 10% annual interest on the unpaid tax, and the LLC loses the ability to make any other SOS filings until current.",
+        "authority": "Arkansas Secretary of State",
+        "source_url": "https://fileforms.com/arkansas-franchise-tax-report-deadline",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "CALIFORNIA",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Statement of Information",
+        "due_date_rule": "Within 90 days of incorporation, then annually by the last day of the anniversary month",
+        "applicable_to": "All California corporations (domestic and foreign-registered)",
+        "description": "$25 total fee ($20 statement fee + $5 disclosure fee for stock/foreign corporations; nonprofits pay $20/$25). Unlike LLCs, corporations file this annually rather than biennially. Late filing triggers a $250 penalty and possible suspension by the Franchise Tax Board.",
+        "authority": "California Secretary of State",
+        "source_url": "https://compliancehippo.com/states/california/statement-of-information",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Franchise/Income Tax (Form 100) \u2014 $800 minimum",
+        "due_date_rule": "15th day of the 4th month of the taxable year (April 15 for calendar-year corporations)",
+        "applicable_to": "All California corporations doing business in or registered with the state",
+        "description": "Paid to the Franchise Tax Board; tax is the greater of 8.84% of net income or an $800 minimum franchise tax. Corporations generally owe the $800 minimum starting their first taxable year \u2014 there is no broad first-year waiver comparable to the (now-expired) LLC waiver under AB 85, though a narrow 15-days-or-less-of-activity exception can apply.",
+        "authority": "California Franchise Tax Board",
+        "source_url": "http://thetafirm.com/articles/annual_filing_requirements_ca_corp.html",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "CALIFORNIA",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Statement of Information (Form LLC-12)",
+        "due_date_rule": "Within 90 days of formation, then every 2 years by the last day of the anniversary month",
+        "applicable_to": "All California LLCs (domestic and foreign-registered)",
+        "description": "$20 filing fee to the Secretary of State via bizfileOnline (paper filing no longer accepted). Missing the deadline triggers a $250 penalty (collected by the Franchise Tax Board) and can lead to suspension or forfeiture of the LLC.",
+        "authority": "California Secretary of State",
+        "source_url": "https://www.statebusinesscompliance.com/blog/california-llc-statement-of-information-2026-20-fee-biennial-deadline-and-800-franchise-tax-trap",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual (Minimum) Franchise Tax \u2014 $800",
+        "due_date_rule": "15th day of the 4th month of the taxable year (April 15 for calendar-year LLCs); the first-year payment follows the same rule based on formation date",
+        "applicable_to": "All California LLCs doing business in or registered with the state",
+        "description": "Paid to the Franchise Tax Board via Form FTB 3522, regardless of income or activity. Applies from the LLC's first taxable year \u2014 the AB 85 first-year waiver (which applied to LLCs formed 2021-2023) has expired. LLCs with CA-source gross receipts over $250,000 also owe an income-based LLC fee (Form FTB 3536 estimate due June 15), ranging roughly $900-$11,790 depending on income tier.",
+        "authority": "California Franchise Tax Board",
+        "source_url": "https://stayonfile.com/llc/states/california/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "COLORADO",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Periodic Report",
+        "due_date_rule": "Annually, within the same 5-month filing window as LLCs (2 months before through 2 months after the anniversary month)",
+        "applicable_to": "All Colorado corporations (domestic and foreign-registered)",
+        "description": "Colorado uses one uniform Periodic Report system across entity types under C.R.S. \u00a7 7-90-501 \u2014 same $25 fee, same $50 late penalty, same escalation path (Noncompliant \u2192 Delinquent \u2192 administrative dissolution after 3+ years) as LLCs.",
+        "authority": "Colorado Secretary of State",
+        "source_url": "https://www.statebusinesscompliance.com/blog/colorado-periodic-report-requirements",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "COLORADO",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Periodic Report",
+        "due_date_rule": "Annually, within a 5-month filing window (2 months before through 2 months after the LLC's anniversary month); the formal due date is the last day of the 2nd month after the anniversary month",
+        "applicable_to": "All Colorado LLCs (domestic and foreign-registered)",
+        "description": "$25 fee (raised from $10 effective July 1, 2024), filed online-only with the Secretary of State under C.R.S. \u00a7 7-90-501 \u2014 Colorado no longer accepts paper filings for this report. Missing the window triggers a $50 late penalty and 'Noncompliant' status; continued non-filing escalates to 'Delinquent' status and, after 3+ years delinquent, administrative dissolution. No financial or ownership information is required \u2014 purely an administrative update.",
+        "authority": "Colorado Secretary of State",
+        "source_url": "https://www.statebusinesscompliance.com/blog/colorado-periodic-report-requirements",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "CONNECTICUT",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Connecticut Annual Report",
+        "due_date_rule": "Due by the last day of the anniversary month of incorporation (unlike LLCs, which use a fixed Jan 1-Mar 31 window)",
+        "applicable_to": "All Connecticut corporations (domestic and foreign-registered)",
+        "description": "Filed with the Secretary of the State via CONCORD. Fee is $150 for stock corporations, $50 for non-stock corporations and nonprofits. Missing the deadline can result in loss of good standing and eventual administrative dissolution; no automatic extension is provided.",
+        "authority": "Connecticut Secretary of the State",
+        "source_url": "https://fileforms.com/connecticut-annual-report-deadlines/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "CONNECTICUT",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Connecticut Annual Report",
+        "due_date_rule": "Filed each year between January 1 and March 31 (fixed window, not anniversary-based); first report due the year after formation",
+        "applicable_to": "All Connecticut LLCs (domestic and foreign-registered)",
+        "description": "Filed with the Secretary of the State via the CONCORD online portal (Form LLC-1.1 for paper filings). Fee is $80. The state does not send a reliable reminder, so filing is the LLC's own responsibility. Late filing adds a $50 penalty and can lead to revocation of the certificate of legal existence / administrative dissolution. An amended report costs an additional $25.",
+        "authority": "Connecticut Secretary of the State",
+        "source_url": "https://llccompass.com/connecticut-llc-annual-report/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "DELAWARE",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual Report + Franchise Tax",
+        "due_date_rule": "March 1 annually (fixed date) for domestic corporations; June 30 for foreign (out-of-state) corporations registered in Delaware",
+        "applicable_to": "All Delaware corporations (domestic and foreign-registered)",
+        "description": "Domestic corporations file online with a $50 report fee ($25 for exempt nonprofits) plus franchise tax calculated under one of two methods \u2014 the Authorized Shares Method (minimum $175) or the Assumed Par Value Capital Method (minimum $400) \u2014 using whichever produces the lower tax, capped at $200,000 (or $250,000 for Large Corporate Filers). Corporations owing $5,000+ pay quarterly estimates (40% Jun 1, 20% Sep 1, 20% Dec 1, balance Mar 1). Foreign corporations pay a flat $125 fee by June 30 and do not file online. Late filing triggers a $200 penalty plus 1.5% monthly interest.",
+        "authority": "Delaware Division of Corporations",
+        "source_url": "https://corp.delaware.gov/frtax/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "DELAWARE",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Event-Based",
+        "compliance_name": "No Annual Report Requirement",
+        "due_date_rule": "Not Applicable",
+        "applicable_to": "All Delaware LLCs (domestic and foreign-registered)",
+        "description": "Delaware LLCs, LPs, and GPs do not file an annual report with the Division of Corporations \u2014 only the flat annual tax below is required. This differs from Delaware corporations, which must file a full Annual Report alongside their franchise tax.",
+        "authority": "Delaware Division of Corporations",
+        "source_url": "https://revenue.delaware.gov/business-tax-forms/franchise-taxes",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual LLC Tax (Franchise Tax)",
+        "due_date_rule": "June 1 annually (fixed date, not anniversary-based); first payment due June 1 of the calendar year following formation",
+        "applicable_to": "All Delaware LLCs (domestic and foreign-registered)",
+        "description": "Flat $300 tax paid directly to the Delaware Division of Corporations \u2014 not income-based, not tiered, and no report to file alongside it. Late payment triggers a $200 penalty plus 1.5% monthly interest on tax and penalty. No proration for entities active any part of the year.",
+        "authority": "Delaware Division of Corporations",
+        "source_url": "https://revenue.delaware.gov/business-tax-forms/franchise-taxes",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "FEDERAL",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Form 1120 - U.S. Corporation Income Tax Return",
+        "due_date_rule": "15th day of the 4th month after fiscal year end (e.g. April 15 for calendar-year filers)",
+        "applicable_to": "All C-Corporations",
+        "description": "Annual federal income tax return. A 6-month extension is available via Form 7004, but any tax owed is still due on the original date.",
+        "authority": "Internal Revenue Service (IRS)",
+        "source_url": "https://www.irs.gov/forms-pubs/about-form-1120",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "Quarterly Estimated Tax Payments (Form 1120-W)",
+        "due_date_rule": "15th day of the 4th, 6th, 9th, and 12th months of the fiscal year",
+        "applicable_to": "Corporations expecting to owe $500+ in federal tax for the year",
+        "description": "Required if the corporation expects a federal tax liability of $500 or more.",
+        "authority": "Internal Revenue Service (IRS)",
+        "source_url": "https://www.irs.gov/forms-pubs/about-form-1120-w",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "Form 941 - Employer's Quarterly Federal Tax Return",
+        "due_date_rule": "Last day of the month following each quarter (Apr 30, Jul 31, Oct 31, Jan 31)",
+        "applicable_to": "Corporations with W-2 employees",
+        "description": "Reports withheld income tax and FICA taxes on employee wages.",
+        "authority": "Internal Revenue Service (IRS)",
+        "source_url": "https://www.irs.gov/forms-pubs/about-form-941",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "Form 1099-NEC / 1099-MISC",
+        "due_date_rule": "January 31 (to recipients and IRS for 1099-NEC)",
+        "applicable_to": "Corporations paying $600+ to any non-employee contractor in the year",
+        "description": "Reports non-employee compensation.",
+        "authority": "Internal Revenue Service (IRS)",
+        "source_url": "https://www.irs.gov/forms-pubs/about-form-1099-nec",
+        "confidence": "high"
+      },
+      {
+        "category": "Event-Based",
+        "compliance_name": "FinCEN Beneficial Ownership Information (BOI) Report",
+        "due_date_rule": "Not currently required for domestic entities",
+        "applicable_to": "Currently exempt: all U.S.-formed entities. Still applies to foreign entities registered to do business in the U.S.",
+        "description": "As of FinCEN's March 2025 interim final rule, all domestic (U.S.-formed) reporting companies and their beneficial owners are exempt from BOI reporting. Only foreign-formed entities registered to do business in the U.S. must still file. This is a regulatory pause, not a repeal, so it should be re-checked periodically.",
+        "authority": "FinCEN (Financial Crimes Enforcement Network)",
+        "source_url": "https://www.fincen.gov/boi",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "FEDERAL",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Form 1065 - U.S. Return of Partnership Income",
+        "due_date_rule": "15th day of the 3rd month after fiscal year end (e.g. March 15 for calendar-year filers)",
+        "applicable_to": "Multi-member LLCs taxed as partnerships (default classification)",
+        "description": "Informational return; the LLC itself pays no federal income tax, income passes through to members via Schedule K-1.",
+        "authority": "Internal Revenue Service (IRS)",
+        "source_url": "https://www.irs.gov/forms-pubs/about-form-1065",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "Schedule C (Form 1040)",
+        "due_date_rule": "April 15 (with the member's individual return)",
+        "applicable_to": "Single-member LLCs taxed as disregarded entities (default classification)",
+        "description": "Single-member LLCs report business income/loss on the owner's personal return rather than filing a separate business return, unless they've elected corporate taxation.",
+        "authority": "Internal Revenue Service (IRS)",
+        "source_url": "https://www.irs.gov/forms-pubs/about-schedule-c-form-1040",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "Quarterly Estimated Tax Payments (Form 1040-ES)",
+        "due_date_rule": "April 15, June 15, September 15, and January 15",
+        "applicable_to": "LLC members expecting to owe $1,000+ in federal tax individually",
+        "description": "Pass-through income is not withheld, so members typically must pay estimated tax quarterly.",
+        "authority": "Internal Revenue Service (IRS)",
+        "source_url": "https://www.irs.gov/forms-pubs/about-form-1040-es",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "Form 941 - Employer's Quarterly Federal Tax Return",
+        "due_date_rule": "Last day of the month following each quarter (Apr 30, Jul 31, Oct 31, Jan 31)",
+        "applicable_to": "LLCs with W-2 employees",
+        "description": "Reports withheld income tax and FICA taxes on employee wages.",
+        "authority": "Internal Revenue Service (IRS)",
+        "source_url": "https://www.irs.gov/forms-pubs/about-form-941",
+        "confidence": "high"
+      },
+      {
+        "category": "Event-Based",
+        "compliance_name": "FinCEN Beneficial Ownership Information (BOI) Report",
+        "due_date_rule": "Not currently required for domestic entities",
+        "applicable_to": "Currently exempt: all U.S.-formed entities. Still applies to foreign entities registered to do business in the U.S.",
+        "description": "As of FinCEN's March 2025 interim final rule, all domestic (U.S.-formed) reporting companies and their beneficial owners are exempt from BOI reporting. Only foreign-formed entities registered to do business in the U.S. must still file. This is a regulatory pause, not a repeal, so it should be re-checked periodically.",
+        "authority": "FinCEN (Financial Crimes Enforcement Network)",
+        "source_url": "https://www.fincen.gov/boi",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "FLORIDA",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Florida Annual Report",
+        "due_date_rule": "May 1 annually (fixed date, same window as LLCs: January 1 - May 1)",
+        "applicable_to": "All Florida corporations (domestic and foreign-registered)",
+        "description": "Same Sunbiz filing system as LLCs. Fee is $150 for a profit corporation, $61.25 for a not-for-profit corporation. Profit corporations face the same automatic $400 late fee after May 1 and the same administrative dissolution timeline (third Friday of September) as LLCs; nonprofit corporations are exempt from the $400 late fee.",
+        "authority": "Florida Department of State, Division of Corporations",
+        "source_url": "https://efile.sunbiz.org/sbs_ar_instr.html",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "FLORIDA",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Florida Annual Report",
+        "due_date_rule": "May 1 annually (fixed date, not anniversary-based); first report due the calendar year after formation",
+        "applicable_to": "All Florida LLCs (domestic and foreign-registered)",
+        "description": "Filed online through Sunbiz (Florida Division of Corporations). Fee is $138.75. Purely an informational update (registered agent, principal address, members/managers) \u2014 not a tax filing. Missing May 1 triggers an automatic, non-waivable $400 late fee ($538.75 total). If still unfiled by the third Friday in September, the LLC is administratively dissolved on the fourth Friday of September; reinstatement costs $100 plus all owed fees.",
+        "authority": "Florida Department of State, Division of Corporations",
+        "source_url": "https://efile.sunbiz.org/sbs_ar_instr.html",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "GEORGIA",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual Registration",
+        "due_date_rule": "Filed each year between January 1 and April 1 \u2014 the Georgia Secretary of State's own FAQ confirms the same window applies to corporations as LLCs; note that a minority of third-party filing-service sites cite a separate March 1 corporate deadline, so this is worth a quick confirmation against ecorp.sos.ga.gov for any given entity",
+        "applicable_to": "All Georgia corporations (domestic and foreign-registered)",
+        "description": "Filed via the Georgia Corporations Division eCorp portal. Total fee is $60 ($50 base + $10 service fee). New corporations file an initial registration within 90 days of incorporation (LLCs do not have this initial-filing requirement). A $25 late fee applies after the deadline, escalating toward administrative dissolution if unresolved.",
+        "authority": "Georgia Secretary of State, Corporations Division",
+        "source_url": "https://sos.ga.gov/page/business-division-faq",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "GEORGIA",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual Registration",
+        "due_date_rule": "Filed each year between January 1 and April 1 (fixed window); first registration due the year after formation",
+        "applicable_to": "All Georgia LLCs (domestic and foreign-registered)",
+        "description": "Officially called an 'Annual Registration' (not 'annual report') per O.C.G.A. \u00a7 14-11-1103, filed via the Georgia Corporations Division eCorp portal. Total fee is $60 ($50 base + $10 service fee, effective Sept 2025). Georgia offers a multi-year filing option (up to 3 years at once). A $25 late fee applies after April 1, with a roughly 90-day grace period before administrative dissolution risk. The filing does not ask for member/manager names \u2014 only the registered agent.",
+        "authority": "Georgia Secretary of State, Corporations Division",
+        "source_url": "https://sos.ga.gov/page/business-division-faq",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "HAWAII",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Hawaii Annual Report",
+        "due_date_rule": "Quarter-based: due by the last day of the calendar quarter containing the corporation's registration anniversary date (same system as LLCs)",
+        "applicable_to": "All Hawaii profit corporations (domestic and foreign-registered)",
+        "description": "Same quarterly system and BREG portal as LLCs. Fee is $12.50 online for profit corporations (vs. $2.50 for nonprofit corporations). Same $10-per-year-delinquent late fee structure applies.",
+        "authority": "Hawaii Department of Commerce and Consumer Affairs (DCCA), Business Registration Division",
+        "source_url": "https://cca.hawaii.gov/breg/first-quarter-hawai%CA%BBi-annual-business-reports-due/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "HAWAII",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Hawaii Annual Report",
+        "due_date_rule": "Quarter-based: due by the last day of the calendar quarter containing the LLC's original registration anniversary date (Q1 \u2192 Mar 31, Q2 \u2192 Jun 30, Q3 \u2192 Sep 30, Q4 \u2192 Dec 31); an LLC registered and due in the same calendar year is exempt from filing that first year",
+        "applicable_to": "All Hawaii LLCs (domestic and foreign-registered)",
+        "description": "Filed with the DCCA Business Registration Division (BREG) via Hawaii Business Express. Fee is $12.50 online ($15 by paper/mail, which includes a $1 archive fee). Late filing adds a $10 penalty for the first year delinquent, $20 for the second year (statutory maximum is $100, though BREG has historically charged less). Reminders come through electronic MyBusiness Notifications, not mail.",
+        "authority": "Hawaii Department of Commerce and Consumer Affairs (DCCA), Business Registration Division",
+        "source_url": "https://cca.hawaii.gov/breg/first-quarter-hawai%CA%BBi-annual-business-reports-due/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "IDAHO",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Idaho Annual Report",
+        "due_date_rule": "By the last day of the corporation's anniversary month each year \u2014 identical system to LLCs",
+        "applicable_to": "All Idaho corporations (domestic and foreign-registered)",
+        "description": "Same $0 fee, same SOSBiz portal, and same 60-day cure period before dissolution as LLCs. The filing content is nearly identical between entity types (officers/directors vs. members/managers being the main difference).",
+        "authority": "Idaho Secretary of State",
+        "source_url": "https://www.zenbusiness.com/idaho-annual-report/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "IDAHO",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Idaho Annual Report",
+        "due_date_rule": "By the last day of the LLC's anniversary month each year (I.C. \u00a7 30-21-213); first report due the year after formation",
+        "applicable_to": "All Idaho LLCs (domestic and foreign-registered)",
+        "description": "Filed online via SOSBiz at no charge \u2014 Idaho is one of a small handful of states with a $0 annual report fee, though the filing itself is still mandatory. Paper filing is only available in person at the Boise SOS office and carries a $20 manual-processing surcharge. There is no monetary late fee, but a 60-day cure period after the due date is followed by administrative dissolution (domestic LLCs) or termination of registration (foreign LLCs). Reinstatement costs $30 (or up to $100 expedited).",
+        "authority": "Idaho Secretary of State",
+        "source_url": "https://www.discern.com/resources/idaho-annual-report",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "ILLINOIS",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Illinois Annual Report (Form BCA 14.05)",
+        "due_date_rule": "Due before the first day of the corporation's anniversary month each year \u2014 same window structure as LLCs",
+        "applicable_to": "All Illinois corporations (domestic and foreign-registered)",
+        "description": "Filing fee is $75, matching the LLC fee (805 ILCS 5/15.10). Unlike LLCs, corporations also owe the Illinois franchise tax on paid-in capital allocated to Illinois, at a rate of 1/10 of 1%, calculated and paid together with the annual report. The first $10,000 of calculated franchise tax has been exempt since tax years beginning on/after Jan 1, 2025, which zeroes out the tax for most small and mid-size corporations \u2014 leaving only the $75 fee due. Late filing triggers a 10% penalty on any franchise tax owed plus interest, and can lead to administrative dissolution.",
+        "authority": "Illinois Secretary of State",
+        "source_url": "https://legalclarity.org/how-to-fill-out-the-illinois-corporate-annual-report/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "ILLINOIS",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Illinois Annual Report",
+        "due_date_rule": "Due before the first day of the LLC's anniversary month each year (i.e., filed during the month before the anniversary month); first report due the year after formation",
+        "applicable_to": "All Illinois LLCs (domestic and foreign-registered)",
+        "description": "Filed via Form LLC-50.1 with the Illinois Secretary of State, Department of Business Services. Fee is $75 (plus $50 per active series certificate for series LLCs). LLCs with more than 8 members must file by mail. Illinois does not offer extensions; late filing (60+ days after due date) triggers a $100 penalty, with continued non-filing leading to administrative dissolution.",
+        "authority": "Illinois Secretary of State",
+        "source_url": "https://boostsuite.com/llc-annual-report/illinois/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "INDIANA",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Indiana Business Entity Report",
+        "due_date_rule": "Biennially (every 2 years), during the anniversary month of incorporation",
+        "applicable_to": "All Indiana corporations (domestic and foreign-registered)",
+        "description": "Same biennial rule as LLCs \u2014 Indiana uses one uniform Business Entity Report system.",
+        "authority": "Indiana Secretary of State",
+        "source_url": "https://legalclarity.org/how-to-file-an-indiana-business-entity-report-fees-deadlines/",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "INDIANA",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Indiana Business Entity Report",
+        "due_date_rule": "Biennially (every 2 years), during the anniversary month of formation",
+        "applicable_to": "All Indiana LLCs (domestic and foreign-registered)",
+        "description": "Filed with the Secretary of State via INBiz. Not an annual report \u2014 biennial. Effective Jan 1, 2026, reports can be filed up to 90 days early. Fee varies by filing method (commonly cited around $32 online, higher by paper) \u2014 verify current exact amount at filing.",
+        "authority": "Indiana Secretary of State",
+        "source_url": "https://boostsuite.com/llc-biennial-report/indiana/",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "IOWA",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Iowa Biennial Report",
+        "due_date_rule": "April 1, filed biennially in EVEN-numbered years only (2024, 2026, 2028...) \u2014 the opposite parity from LLCs",
+        "applicable_to": "All Iowa for-profit corporations (domestic and foreign-registered)",
+        "description": "Same Fast Track Filing system as LLCs, but corporations report on the even-year cycle instead of the odd-year cycle. Fee is $60 flat, regardless of online or mail filing (no digital discount, unlike LLCs). Same administrative dissolution risk for non-filing.",
+        "authority": "Iowa Secretary of State, Business Services",
+        "source_url": "https://www.discern.com/resources/iowa-annual-report",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "IOWA",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Iowa Biennial Report",
+        "due_date_rule": "April 1, filed biennially in ODD-numbered years only (2025, 2027, 2029...), regardless of formation date; filing window opens January 1",
+        "applicable_to": "All Iowa LLCs (domestic and foreign-registered), along with LLPs, LPs, and nonprofits",
+        "description": "Filed with the Iowa Secretary of State via Fast Track Filing. Fee is $30 online / $45 by mail. LLCs formed in an even year still file their first report in the next odd year (e.g., formed 2026 \u2192 first report due April 1, 2027). No filing fee for nonprofits. Failure to file within roughly 60 days of the deadline risks administrative dissolution; reinstatement costs a $5 application fee plus all missed report fees.",
+        "authority": "Iowa Secretary of State, Business Services",
+        "source_url": "https://www.discern.com/resources/iowa-annual-report",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "KANSAS",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Kansas Information (Biennial) Report",
+        "due_date_rule": "Same biennial system as LLCs \u2014 15th day of the 4th month after the tax closing month, on the entity's odd/even formation-year schedule",
+        "applicable_to": "All Kansas for-profit corporations (domestic and foreign-registered)",
+        "description": "Same portal and delinquency/forfeiture structure as LLCs. Fee is slightly lower than the LLC fee: $90 online / $110 by paper.",
+        "authority": "Kansas Secretary of State",
+        "source_url": "https://legalclarity.org/how-much-is-the-kansas-annual-report-fee/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "KANSAS",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Kansas Information (Biennial) Report",
+        "due_date_rule": "15th day of the 4th month after the LLC's tax closing month, filed every 2 years on an odd/even schedule matching the formation year (April 15 for calendar-year filers)",
+        "applicable_to": "All Kansas LLCs (domestic and foreign-registered)",
+        "description": "Kansas moved from an annual to a biennial report effective January 2024. Filed with the Kansas Secretary of State. Fee is $100 online / $110 by paper. No monetary late fee, but a roughly 90-day delinquency period follows the due date, after which the entity is forfeited; reinstatement requires a Certificate of Reinstatement plus all past-due report fees (paid at the paper rate) and, in some cases, an $85 penalty.",
+        "authority": "Kansas Secretary of State",
+        "source_url": "https://legalclarity.org/how-much-is-the-kansas-annual-report-fee/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "KENTUCKY",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Kentucky Annual Report",
+        "due_date_rule": "June 30 annually (fixed date) \u2014 same uniform deadline as LLCs, applying to every registered entity type in Kentucky",
+        "applicable_to": "All Kentucky corporations (domestic and foreign-registered)",
+        "description": "Same $15 fee, same January 1-June 30 filing window, and same 60-day delinquency-notice-then-dissolution structure as LLCs. Kentucky uses one uniform Annual Report system across entity types rather than separate corporate/LLC deadlines.",
+        "authority": "Kentucky Secretary of State",
+        "source_url": "https://boostsuite.com/llc-annual-report/kentucky/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "KENTUCKY",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Kentucky Annual Report",
+        "due_date_rule": "June 30 annually (fixed date, not anniversary-based); filing window opens January 1; first report due the year after formation",
+        "applicable_to": "All Kentucky LLCs (domestic and foreign-registered)",
+        "description": "Filed via Form LLC-4 (or the mailed reminder postcard) with the Kentucky Secretary of State. Fee is $15 \u2014 one of the lowest annual report fees in the country, same whether filed online or by mail. No separate monetary late fee; instead, missing June 30 puts the LLC in 'bad standing' and triggers a 60-day delinquency notice (from July 1), after which administrative dissolution can follow (typically after August 31). Reinstatement costs $100 plus $15 for each missed report year.",
+        "authority": "Kentucky Secretary of State",
+        "source_url": "https://boostsuite.com/llc-annual-report/kentucky/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "LOUISIANA",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Louisiana Annual Report",
+        "due_date_rule": "Due before the corporation's anniversary date each year \u2014 same anniversary-based system as LLCs",
+        "applicable_to": "All Louisiana corporations (domestic and foreign-registered)",
+        "description": "Filed via geauxBIZ with the Secretary of State, Commercial Division. Louisiana uses one uniform anniversary-based Annual Report system across corporations, LLCs, and nonprofits; fee levels are the same $30/$35 tier used for LLCs.",
+        "authority": "Louisiana Secretary of State, Commercial Division",
+        "source_url": "https://www.northwestregisteredagent.com/annual-report/louisiana",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "LOUISIANA",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Louisiana Annual Report",
+        "due_date_rule": "Due before the LLC's anniversary date each year (the date the LLC was originally approved); can be filed up to 30 days early",
+        "applicable_to": "All Louisiana LLCs (domestic and foreign-registered)",
+        "description": "Filed with the Louisiana Secretary of State, Commercial Division, via geauxBIZ. Fee is $30 by mail / $35 online. No reminders are mailed (the state moved to email/text reminders roughly 30 days ahead). Missing the deadline marks the LLC 'not in good standing'; 3 consecutive years of non-filing leads to revocation of the Articles of Organization. Registered agent changes and member/manager changes each require a separate $25 filing.",
+        "authority": "Louisiana Secretary of State, Commercial Division",
+        "source_url": "https://www.llcuniversity.com/louisiana-llc/annual-report/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "MAINE",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Maine Annual Report",
+        "due_date_rule": "June 1 annually (fixed date) \u2014 same uniform deadline as LLCs",
+        "applicable_to": "All Maine corporations (domestic and foreign-registered)",
+        "description": "Same Annual Reports Online portal and fee structure as LLCs: $85 domestic, $150 foreign (nonprofit corporations pay $35). Late-filing penalty and dissolution risk follow the same pattern as LLCs.",
+        "authority": "Maine Secretary of State, Bureau of Corporations, Elections and Commissions",
+        "source_url": "https://www.maine.gov/sos/corporations-commissions/incorporating-resources/corporations-commissions/filing-requirement-reminders",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "MAINE",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Maine Annual Report",
+        "due_date_rule": "June 1 annually (fixed date, not anniversary-based); filing window opens January 1; first report due the year after formation",
+        "applicable_to": "All Maine LLCs (domestic and foreign-registered)",
+        "description": "Filed with the Maine Secretary of State's Bureau of Corporations, Elections and Commissions via the Annual Reports Online portal, using the LLC's Charter Number. Fee is $85 for domestic LLCs, $150 for foreign LLCs. Missing June 1 adds a $50 late penalty; failure to file within roughly 65 days of the deadline (by ~August 5) can lead to administrative dissolution. Dormant LLCs may qualify for a Certificate of Excuse instead of filing.",
+        "authority": "Maine Secretary of State, Bureau of Corporations, Elections and Commissions",
+        "source_url": "https://www.maine.gov/sos/corporations-commissions/incorporating-resources/corporations-commissions/filing-requirement-reminders",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "MARYLAND",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual Report / Business Personal Property Return (Form 1)",
+        "due_date_rule": "April 15 annually (fixed date, not anniversary-based)",
+        "applicable_to": "All Maryland corporations (domestic and foreign-registered)",
+        "description": "Same rule and $300 fee as LLCs \u2014 Maryland uses one uniform Form 1 filing across entity types.",
+        "authority": "Maryland Department of Assessments and Taxation (SDAT)",
+        "source_url": "https://www.statebusinesscompliance.com/blog/maryland-llc-taxes-fees-2026",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "MARYLAND",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual Report / Business Personal Property Return (Form 1)",
+        "due_date_rule": "April 15 annually (fixed date, not anniversary-based)",
+        "applicable_to": "All Maryland LLCs (domestic and foreign-registered)",
+        "description": "Filed with the Department of Assessments and Taxation (SDAT). Combined annual report + personal property tax filing. Fee is $300. Required even if the entity owns no personal property (in which case the report is still filed, just without the property schedule). A 60-day extension to June 15 is available on request.",
+        "authority": "Maryland Department of Assessments and Taxation (SDAT)",
+        "source_url": "https://www.statebusinesscompliance.com/blog/maryland-llc-taxes-fees-2026",
+        "confidence": "high"
+      },
+      {
+        "category": "Event-Based",
+        "compliance_name": "Late Filing Penalty",
+        "due_date_rule": "As Triggered (if April 15 deadline is missed)",
+        "applicable_to": "LLCs that file late",
+        "description": "Late fees can reach up to $500. Continued non-filing can result in forfeiture of the LLC's charter.",
+        "authority": "Maryland Department of Assessments and Taxation (SDAT)",
+        "source_url": "https://www.marylandresidentagent.com/annual-report",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "MASSACHUSETTS",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Massachusetts Annual Report",
+        "due_date_rule": "Due within 2.5 months after the close of the corporation's fiscal year (March 15 for calendar-year filers) \u2014 a fundamentally different structure from the LLC's anniversary-date rule",
+        "applicable_to": "All Massachusetts corporations (domestic and foreign-registered)",
+        "description": "Filed with the Secretary of the Commonwealth, Corporations Division. Fee is $109 online \u2014 far lower than the LLC fee. Missing the deadline triggers an immediate $25 late fee, with escalating penalties up to $200/day after 6 months of non-filing.",
+        "authority": "Massachusetts Secretary of the Commonwealth, Corporations Division",
+        "source_url": "https://fileforms.com/massachusetts-annual-report-filing/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "MASSACHUSETTS",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Massachusetts Annual Report",
+        "due_date_rule": "Due on the anniversary date of the LLC's Certificate of Organization, every year; first report due the year after formation",
+        "applicable_to": "All Massachusetts LLCs (domestic and foreign-registered)",
+        "description": "Filed with the Secretary of the Commonwealth, Corporations Division. Fee is $500 by mail / $520 online (electronic filings carry a $20 surcharge) \u2014 the highest recurring LLC annual report fee in the country, set under M.G.L. c. 156C \u00a712. The state sends no reminders at all. Missing the deadline causes loss of good standing immediately (no monetary late fee), and administrative dissolution follows after 2 consecutive missed years (with a warning notice mailed in September before a December 31 dissolution date).",
+        "authority": "Massachusetts Secretary of the Commonwealth, Corporations Division",
+        "source_url": "https://www.llcuniversity.com/massachusetts-llc/annual-report/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "MICHIGAN",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Michigan Annual Report",
+        "due_date_rule": "May 15 annually (fixed date, different from the LLC deadline)",
+        "applicable_to": "All Michigan corporations (domestic and foreign-registered)",
+        "description": "Filed with LARA. Fee is $25. Note the corporation deadline (May 15) differs from the LLC deadline (February 15) \u2014 a common point of confusion.",
+        "authority": "Michigan Department of Licensing and Regulatory Affairs (LARA)",
+        "source_url": "https://finlogichub5.com/tools/michigan/annual-report-deadline/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "MICHIGAN",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Michigan Annual Statement",
+        "due_date_rule": "February 15 annually (fixed date, not anniversary-based)",
+        "applicable_to": "All Michigan LLCs (domestic and foreign-registered)",
+        "description": "Filed with LARA (Licensing and Regulatory Affairs). Fee is $25. Officially called an 'Annual Statement' though commonly referred to as an annual report. LLCs formed Oct 1-Dec 31 skip the immediately-following February and file the year after.",
+        "authority": "Michigan Department of Licensing and Regulatory Affairs (LARA)",
+        "source_url": "https://filingfox.com/guides/michigan-llc-annual-report-complete-guide-to-filing-deadlines-fees-and-compliance/",
+        "confidence": "high"
+      },
+      {
+        "category": "Event-Based",
+        "compliance_name": "Late Filing Penalty",
+        "due_date_rule": "As Triggered (if February 15 deadline is missed)",
+        "applicable_to": "LLCs that file late",
+        "description": "$50 late fee. A 2-year grace period exists before loss of good standing (name becomes available to others) under MCL 450.4909.",
+        "authority": "Michigan LARA",
+        "source_url": "https://www.usepostal.com/blog/how-to-file-annual-report-for-llc-michigan",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "MINNESOTA",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Minnesota Annual Renewal",
+        "due_date_rule": "December 31 annually (fixed date, not anniversary-based)",
+        "applicable_to": "All domestic Minnesota corporations",
+        "description": "Free ($0) for domestic corporations. Foreign (out-of-state) corporations pay $135 online / $115 by mail. No grace period.",
+        "authority": "Minnesota Secretary of State",
+        "source_url": "https://www.zenbusiness.com/minnesota-annual-report/",
+        "confidence": "high"
+      },
+      {
+        "category": "Event-Based",
+        "compliance_name": "Statutory Dissolution + Reinstatement",
+        "due_date_rule": "Automatic on January 1 if December 31 deadline is missed",
+        "applicable_to": "Corporations that miss the December 31 deadline",
+        "description": "No grace period \u2014 dissolution is automatic the next day. Reinstatement costs $25 (mail) or $45 (online).",
+        "authority": "Minnesota Secretary of State",
+        "source_url": "https://www.lovie.co/formation/mn-llc-renewal",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "MINNESOTA",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Minnesota Annual Renewal",
+        "due_date_rule": "December 31 annually (fixed date, not anniversary-based)",
+        "applicable_to": "All domestic Minnesota LLCs. Foreign (out-of-state) LLCs also file but for $0.",
+        "description": "Filed with the Secretary of State. Free ($0) for both domestic and foreign LLCs. No grace period \u2014 an LLC that misses December 31 is automatically, statutorily dissolved on January 1.",
+        "authority": "Minnesota Secretary of State",
+        "source_url": "https://fileforms.com/minnesota-annual-report-filing-deadline-everything-businesses-need-to-know/",
+        "confidence": "high"
+      },
+      {
+        "category": "Event-Based",
+        "compliance_name": "Statutory Dissolution + Reinstatement",
+        "due_date_rule": "Automatic on January 1 if December 31 deadline is missed",
+        "applicable_to": "LLCs that miss the December 31 deadline",
+        "description": "No grace period at all \u2014 dissolution is automatic the next day. Reinstatement costs $25 (mail) or $45 (online).",
+        "authority": "Minnesota Secretary of State",
+        "source_url": "https://www.lovie.co/formation/mn-llc-renewal",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "MISSISSIPPI",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Mississippi Annual Report",
+        "due_date_rule": "April 15 annually (fixed date) \u2014 same window as LLCs, under Miss. Code Ann. \u00a7 79-4-16.22",
+        "applicable_to": "All Mississippi for-profit corporations (domestic and foreign-registered)",
+        "description": "Unlike domestic LLCs, domestic corporations do owe a fee \u2014 approximately $23-25 per the Secretary of State's fee schedule (sources vary slightly between $23.25 and $25). Foreign corporation and nonprofit corporation fees differ and are worth confirming directly on the SOS portal, as third-party sources show inconsistent figures for those categories. Same 60-day-then-dissolution consequence as LLCs.",
+        "authority": "Mississippi Secretary of State",
+        "source_url": "https://domyllc.com/annual-reports-filing/mississippi/",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "MISSISSIPPI",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Mississippi Annual Report",
+        "due_date_rule": "April 15 annually (fixed date, not anniversary-based); filing window opens January 1; first report due the year after formation",
+        "applicable_to": "All Mississippi LLCs (domestic and foreign-registered)",
+        "description": "Filed online only via the Mississippi Secretary of State's Business Services portal, under Miss. Code Ann. \u00a7 79-29-215. Domestic LLCs pay $0; foreign LLCs pay $250. No monetary late fee exists, but non-filing within roughly 60 days of April 15 can trigger administrative dissolution. The Secretary of State has issued warnings about third-party mailers falsely implying a fee is owed.",
+        "authority": "Mississippi Secretary of State",
+        "source_url": "https://www.discern.com/resources/mississippi-annual-report",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "MISSOURI",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Missouri Annual Registration Report",
+        "due_date_rule": "April 15 annually",
+        "applicable_to": "All Missouri corporations (domestic and foreign-registered). Does NOT apply to LLCs.",
+        "description": "Filed with the Secretary of State. Fee is $45. Note this requirement does not extend to LLCs.",
+        "authority": "Missouri Secretary of State",
+        "source_url": "https://www.wolterskluwer.com/en/solutions/bizfilings/state-guides/missouri-incorporation-requirements",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "MISSOURI",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Event-Based",
+        "compliance_name": "No Annual Report Requirement",
+        "due_date_rule": "Not Applicable",
+        "applicable_to": "All Missouri LLCs",
+        "description": "Missouri does NOT require LLCs to file an annual report \u2014 Chapter 347 (the Missouri LLC Act) contains no such provision. This requirement applies to corporations only, not LLCs. Missouri also has no franchise tax on LLCs (repealed in 2016).",
+        "authority": "Missouri Secretary of State",
+        "source_url": "https://boostsuite.com/llc-annual-report/missouri/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "MONTANA",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Montana Annual Report",
+        "due_date_rule": "January 1 - April 15 fixed annual window, per MCA \u00a7 35-14-1621(4) \u2014 same system as LLCs",
+        "applicable_to": "All Montana corporations (domestic and foreign-registered)",
+        "description": "Same $20 standard fee, same fee waiver through 2027 for on-time filers, and same $35 late fee / dissolution timeline as LLCs. Associations and cooperatives are explicitly excluded from the fee waiver and always pay the $20 fee.",
+        "authority": "Montana Secretary of State, Business Services Division",
+        "source_url": "https://www.discern.com/resources/montana-annual-report",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "MONTANA",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Montana Annual Report",
+        "due_date_rule": "January 1 - April 15 fixed annual window (not anniversary-based); first report due the year after formation, per MCA \u00a7 35-8-208(3)",
+        "applicable_to": "All Montana LLCs (domestic and foreign-registered)",
+        "description": "Filed online via biz.sosmt.gov. Standard fee is $20, but the Montana Secretary of State has waived the on-time filing fee for LLCs and corporations filing by April 15 in 2024, 2025, 2026, and 2027 \u2014 meaning on-time filings currently cost $0; confirm the waiver is still active for the relevant filing year before assuming $0. Late filing (after April 15) costs $35 regardless of the waiver. Continued non-filing leads to a September warning notice, then administrative dissolution by December 1 (revocation by November 1 for foreign entities).",
+        "authority": "Montana Secretary of State, Business Services Division",
+        "source_url": "https://www.discern.com/resources/montana-annual-report",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "NEBRASKA",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Nebraska Biennial Occupation Tax Report",
+        "due_date_rule": "March 1, filed biennially in EVEN-numbered years only (2024, 2026...) \u2014 the opposite parity from LLCs; delinquent after April 15",
+        "applicable_to": "All Nebraska domestic and foreign business/professional corporations",
+        "description": "Filed with the Nebraska Secretary of State. Unlike the LLC filing, this is an occupation tax report, not a purely informational filing \u2014 it carries a tax component tied to the corporation's capital stock. Confirm the current fee schedule directly with the SOS, as it varies by authorized capital.",
+        "authority": "Nebraska Secretary of State, Business Services",
+        "source_url": "https://sos.nebraska.gov/business-services/annualbiennial-reporting",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "NEBRASKA",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Nebraska Biennial Report",
+        "due_date_rule": "January 1 - April 1 fixed window, filed biennially in ODD-numbered years only (2025, 2027...), regardless of formation date; delinquent (and removed from the online portal) after June 1",
+        "applicable_to": "All Nebraska LLCs and Professional LLCs (domestic and foreign-registered)",
+        "description": "Filed with the Nebraska Secretary of State, Business Services. Fee is approximately $25 online (plus a small portal fee) / $30 by mail. This is NOT the same odd/even cycle as Nebraska corporations, which report in even years \u2014 a common point of confusion. The filing form is only accessible on the state's website during the Jan 1-Jun 1 window; after June 1 it's removed and the entity becomes 'Delinquent,' risking administrative revocation.",
+        "authority": "Nebraska Secretary of State, Business Services",
+        "source_url": "https://sos.nebraska.gov/business-services/annualbiennial-reporting",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "NEVADA",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual List of Officers/Directors + State Business License Renewal",
+        "due_date_rule": "Last day of the corporation's anniversary month, every year \u2014 same anniversary-month system as LLCs",
+        "applicable_to": "All Nevada corporations (domestic and foreign-registered)",
+        "description": "Same SilverFlume combined filing as LLCs, but with different fees: the Annual List fee is based on the corporation's authorized stock (starts around the LLC's $150 tier but scales up), and the State Business License renewal is $500 for profit corporations (vs. $200 for LLCs) \u2014 a substantial cost difference worth flagging for clients comparing entity types.",
+        "authority": "Nevada Secretary of State",
+        "source_url": "https://filingservices.com/blog/nevada-annual-list-requirements-deadlines-and-how-to-file/",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "NEVADA",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual List of Managers/Members + State Business License Renewal",
+        "due_date_rule": "Last day of the LLC's anniversary month, every year (NRS \u00a7 86.263); can be filed up to 90 days early",
+        "applicable_to": "All Nevada LLCs (domestic and foreign-registered)",
+        "description": "Two filings submitted together via SilverFlume: a $150 Annual List fee and a $200 State Business License renewal (NRS 76.100), for a combined $350/year \u2014 one of the highest total state fee burdens in the country despite Nevada's 'no income tax' reputation. Late Annual List draws a $75 penalty; late Business License renewal adds $100. Continued default leads to charter revocation under NRS 86.274.",
+        "authority": "Nevada Secretary of State",
+        "source_url": "https://boostsuite.com/llc-annual-report/nevada/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "NEW HAMPSHIRE",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "New Hampshire Annual Report",
+        "due_date_rule": "January 1 - April 1 fixed annual window \u2014 same filing window as LLCs",
+        "applicable_to": "All New Hampshire corporations (domestic and foreign-registered)",
+        "description": "Same $100 fee and NH QuickStart portal as LLCs. The key difference is dissolution timing: for corporations, the Secretary of State may begin administrative dissolution proceedings after just 60 days late (RSA 293-A:14.20), versus the 2-consecutive-year runway LLCs get \u2014 a materially tighter deadline worth flagging for corporate clients.",
+        "authority": "New Hampshire Secretary of State, Corporations Division",
+        "source_url": "https://www.discern.com/resources/new-hampshire-annual-report",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "NEW HAMPSHIRE",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "New Hampshire Annual Report",
+        "due_date_rule": "January 1 - April 1 fixed annual window (not anniversary-based), per RSA 304-C:194; first report due the year after formation (LLCs formed Dec 1-Apr 1 skip to the following year)",
+        "applicable_to": "All New Hampshire LLCs (domestic and foreign-registered), except LLCs that file returns with the insurance commissioner",
+        "description": "Filed online via NH QuickStart. Fee is $100 (plus a small online processing fee). Late filing (after April 1) adds a $50 penalty and moves the LLC to 'Not in Good Standing.' Administrative dissolution requires 2 consecutive years of missed filings (RSA 304-C:136) \u2014 a longer runway than NH corporations get.",
+        "authority": "New Hampshire Secretary of State, Corporations Division",
+        "source_url": "https://www.discern.com/resources/new-hampshire-annual-report",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "NEW JERSEY",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "New Jersey Annual Report",
+        "due_date_rule": "Due by the last day of the corporation's anniversary month each year \u2014 same uniform system as LLCs",
+        "applicable_to": "All New Jersey corporations (domestic and foreign-registered)",
+        "description": "New Jersey uses one uniform anniversary-month Annual Report system across LLCs, corporations, and LPs \u2014 same $75 fee, same online-only filing, same 2-consecutive-year revocation trigger.",
+        "authority": "New Jersey Division of Revenue and Enterprise Services",
+        "source_url": "https://fileforms.com/new-jersey-annual-report-deadline",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "NEW JERSEY",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "New Jersey Annual Report",
+        "due_date_rule": "Due by the last day of the LLC's anniversary month each year; first report due the year after formation; can be filed up to 30 days early, no extensions",
+        "applicable_to": "All New Jersey LLCs (domestic and foreign-registered)",
+        "description": "Filed online only (no mail option) via njportal.com through the Division of Revenue & Enterprise Services. Fee is $75 (plus a small processing fee: ~$3 by card, ~$0.50 by eCheck). No per-year late fee, but missing 2 consecutive annual reports triggers administrative revocation, requiring reinstatement ($75) plus all delinquent report fees plus a $20 tax clearance certificate.",
+        "authority": "New Jersey Division of Revenue and Enterprise Services",
+        "source_url": "https://fileforms.com/new-jersey-annual-report-deadline",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "NEW MEXICO",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "New Mexico Corporate Report",
+        "due_date_rule": "Biennial (every 2 years) for domestic and foreign for-profit corporations, due by the 15th day of the 4th month following fiscal year end (April 15 for calendar-year filers); nonprofit corporations file annually instead",
+        "applicable_to": "All New Mexico for-profit corporations (domestic and foreign-registered)",
+        "description": "Filed with the Secretary of State, Corporations and Business Services Division. Fee is approximately $25. An initial report is also required within 30 days of registering. Late filing triggers a $200+ penalty and risks dissolution/revocation of authority to do business.",
+        "authority": "New Mexico Secretary of State",
+        "source_url": "https://fastfilings.com/how-to-file-a-new-mexico-annual-report/",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "NEW MEXICO",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Event-Based",
+        "compliance_name": "No Annual/Biennial Report Requirement (currently) \u2014 but a triennial requirement is rolling out",
+        "due_date_rule": "Not currently applicable under the traditional annual/biennial framework, but note below",
+        "applicable_to": "All New Mexico LLCs (domestic and foreign-registered)",
+        "description": "Historically, New Mexico LLCs have had no periodic report requirement at all \u2014 only corporations file. However, the Revised Uniform Limited Liability Company Act (enacted via HB0281, effective July 1, 2024) introduces a NEW triennial (every-3-year) report requirement for LLCs, due by the end of the third calendar month following the LLC's formation/registration anniversary, then every 3 years after. Implementation is described as still rolling out as of mid-2026 as the Secretary of State updates its portal and rules \u2014 this is a genuine open item and should be confirmed directly with the NM SOS Business Services Division before assuming either 'no report' or the new triennial rule applies to a given filing year.",
+        "authority": "New Mexico Secretary of State, Corporations and Business Services Division",
+        "source_url": "https://www.discern.com/resources/new-mexico-annual-report",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "NEW YORK",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "New York Biennial Statement",
+        "due_date_rule": "Filed every 2 years during the calendar month in which the Certificate of Incorporation was originally filed \u2014 same system as LLCs",
+        "applicable_to": "All New York business corporations (domestic and foreign-registered)",
+        "description": "Identical $9 fee, same e-Statement Filing Service, and same rules as the LLC filing \u2014 New York uses one uniform Biennial Statement system across corporations and LLCs.",
+        "authority": "New York Department of State, Division of Corporations",
+        "source_url": "https://dos.ny.gov/biennial-statements-business-corporations-and-limited-liability-companies",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "NEW YORK",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "New York Biennial Statement",
+        "due_date_rule": "Filed every 2 years during the calendar month in which the LLC's Articles of Organization (or Application for Authority) were originally filed; no grace period",
+        "applicable_to": "All New York LLCs (domestic and foreign-registered)",
+        "description": "Filed with the NY Department of State via the e-Statement Filing Service. Fee is a flat $9 \u2014 one of the lowest periodic compliance fees in the country. Confirms only a service-of-process address; does not update registered agent or member info directly. No automatic dissolution risk from a missed filing, but the entity is marked 'past due' in state records, which can complicate bank/lender verification. Late filing adds a small late fee (~$9 more).",
+        "authority": "New York Department of State, Division of Corporations",
+        "source_url": "https://dos.ny.gov/biennial-statements-business-corporations-and-limited-liability-companies",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "NORTH CAROLINA",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "North Carolina Annual Report",
+        "due_date_rule": "15th day of the 4th month after fiscal year end (April 15 for calendar-year filers) \u2014 a fundamentally different rule from the LLC's fixed April 15 date",
+        "applicable_to": "All North Carolina corporations (domestic and foreign-registered)",
+        "description": "Filed with the NC Secretary of State. Fee is far lower than the LLC fee: $25 by paper / $20 by ACH / $21 by credit card online. Fiscal-year-end corporations that don't run on a calendar year will have a different due date than April 15 \u2014 worth confirming per entity.",
+        "authority": "North Carolina Secretary of State, Business Registration Division",
+        "source_url": "https://www.discern.com/resources/north-carolina-annual-report",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "NORTH CAROLINA",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "North Carolina Annual Report",
+        "due_date_rule": "April 15 annually (fixed date, not anniversary-based), per N.C. Gen. Stat. \u00a7 57D-2-24; first report due the year after formation",
+        "applicable_to": "All North Carolina LLCs and L3Cs (domestic and foreign-registered)",
+        "description": "Filed with the NC Secretary of State, Business Registration Division. Fee is $200 by paper / $202 by ACH / $203 by credit card online \u2014 notably higher than the corporation fee. No separate monetary late fee, but the LLC falls out of 'good standing' immediately and can eventually receive a Notice of Grounds for Administrative Dissolution if unresolved.",
+        "authority": "North Carolina Secretary of State, Business Registration Division",
+        "source_url": "https://www.discern.com/resources/north-carolina-annual-report",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "NORTH DAKOTA",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "North Dakota Annual Report",
+        "due_date_rule": "August 1 annually for domestic corporations; May 15 annually for foreign corporations \u2014 both fixed dates, and both different from the LLC's November 15 date",
+        "applicable_to": "All North Dakota corporations (domestic and foreign-registered)",
+        "description": "Filed via FirstStop. Fee is $25 for domestic corporations filing by August 1; foreign corporations pay a tiered fee that increases the later they file ($25 before May 15, $45 between May 15-Aug 15, $85 after Aug 15). Three separate deadlines exist across LLCs, domestic corporations, and foreign corporations in North Dakota \u2014 worth double-checking entity type before quoting a date.",
+        "authority": "North Dakota Secretary of State",
+        "source_url": "https://www.zenbusiness.com/north-dakota-annual-report/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "NORTH DAKOTA",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "North Dakota Annual Report",
+        "due_date_rule": "November 15 annually (fixed date, not anniversary-based), per N.D.C.C. \u00a7 10-32.1-89; first report due the year after formation. Farm/Ranch LLCs use a separate April 15 deadline instead.",
+        "applicable_to": "All North Dakota LLCs (domestic and foreign-registered)",
+        "description": "Filed via the FirstStop portal. Fee is $50; filing after November 15 adds a $50 late penalty ($100 total), with a 6-month window to cure before the Secretary of State shuts the LLC down by law. Unusual mid-November deadline \u2014 flagged as the latest annual-report date of any state, easy to miss during year-end/holiday season.",
+        "authority": "North Dakota Secretary of State",
+        "source_url": "https://www.proofofgoodstanding.com/learn/nd-llc-annual-report-requirements-and-deadlines-2026",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "OHIO",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Event-Based",
+        "compliance_name": "No Annual/Biennial Report Requirement",
+        "due_date_rule": "Not Applicable",
+        "applicable_to": "Regular (for-profit, non-professional) Ohio corporations",
+        "description": "Ohio does NOT require regular for-profit corporations to file an annual or biennial report with the Secretary of State. (Professional corporations and nonprofits have separate periodic filing requirements \u2014 a Biennial Report for professional associations, a 5-year Statement of Continued Existence for nonprofits.)",
+        "authority": "Ohio Secretary of State",
+        "source_url": "https://suryapadhiea.com/ohio-annual-report/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "OHIO",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Event-Based",
+        "compliance_name": "No Annual/Biennial Report Requirement",
+        "due_date_rule": "Not Applicable",
+        "applicable_to": "Regular (non-professional) Ohio LLCs",
+        "description": "Ohio does NOT require regular for-profit LLCs to file any annual or biennial report with the Secretary of State \u2014 one of very few states with zero recurring report obligation. (Note: this differs from Professional LLCs/PLLCs under some readings \u2014 verify entity subtype if professional licensing is involved.)",
+        "authority": "Ohio Secretary of State",
+        "source_url": "https://www.statebusinesscompliance.com/blog/ohio-llc-annual-report-2026",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "Commercial Activity Tax (CAT)",
+        "due_date_rule": "Quarterly, due on the 10th day of the 2nd month following each calendar quarter",
+        "applicable_to": "LLCs with Ohio-taxable gross receipts exceeding the state's annual threshold",
+        "description": "A separate Ohio tax based on gross receipts, unrelated to the (nonexistent) annual report. Threshold amounts have changed in recent years and should be verified against current Ohio Department of Taxation guidance.",
+        "authority": "Ohio Department of Taxation",
+        "source_url": "https://llccompass.com/llc-annual-report-guide/",
+        "confidence": "low"
+      }
+    ]
+  },
+  {
+    "state": "OKLAHOMA",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Oklahoma Annual Certificate",
+        "due_date_rule": "July 1 annually (fixed date) \u2014 fundamentally different from the LLC's exact-anniversary-date system",
+        "applicable_to": "All Oklahoma corporations (domestic and foreign-registered)",
+        "description": "Filed with the Oklahoma Secretary of State. Oklahoma's corporate franchise tax was fully repealed effective tax year 2023 (SB 1075), so the Annual Certificate is now purely an informational filing for corporations, similar to the LLC filing but on a fixed calendar date rather than an anniversary date.",
+        "authority": "Oklahoma Secretary of State",
+        "source_url": "https://startup101.com/oklahoma-annual-certificate/",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "OKLAHOMA",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Oklahoma Annual Certificate",
+        "due_date_rule": "Exact anniversary date of formation/registration each year (the same month AND day, not just the month); can be filed up to 60 days early",
+        "applicable_to": "All Oklahoma LLCs (domestic and foreign-registered)",
+        "description": "Filed with the Oklahoma Secretary of State. Flat fee of $25, one of the cheapest in the country, regardless of online, mail, or in-person filing. The state emails a reminder ~60 days ahead (per Title 18 \u00a7 2055.2, with SB 1641 further reinforcing the electronic-notice requirement effective Nov 1, 2026) \u2014 but that reminder does not waive the deadline. Missing 60 days past due marks the LLC 'not in good standing'; 3 years past due moves it to 'Cancelled' status; the name becomes publicly available again after 6 years absent reinstatement.",
+        "authority": "Oklahoma Secretary of State",
+        "source_url": "https://www.llcuniversity.com/oklahoma-llc/annual-certificate/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "OREGON",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Oregon Annual Report",
+        "due_date_rule": "Exact anniversary date of incorporation/registration each year \u2014 same system as LLCs",
+        "applicable_to": "All Oregon corporations (domestic and foreign-registered)",
+        "description": "Same $100 fee, same 45-day filing window, and same 45-day post-deadline grace period before inactivation as LLCs. Oregon uses one uniform anniversary-date Annual Report system across LLCs, corporations, and LPs.",
+        "authority": "Oregon Secretary of State, Corporation Division",
+        "source_url": "https://fileforms.com/oregon-annual-report-filing/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "OREGON",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Oregon Annual Report",
+        "due_date_rule": "Exact anniversary date of formation/registration each year (ORS \u00a7 63.787); filing window opens 45 days before the anniversary date; first report due the year after formation",
+        "applicable_to": "All Oregon LLCs (domestic and foreign-registered)",
+        "description": "Filed online with the Oregon Secretary of State, Corporation Division. Fee is $100 for domestic LLCs, $275 for foreign LLCs (sources show some variation on the exact foreign figure \u2014 confirm at filing). No monetary late fee \u2014 instead, a 45-day grace period follows the anniversary date, after which the LLC becomes 'Inactive' (administratively dissolved). Reinstatement costs $100 and is available for up to 5 years after inactivation.",
+        "authority": "Oregon Secretary of State, Corporation Division",
+        "source_url": "https://fileforms.com/oregon-annual-report-filing/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "PENNSYLVANIA",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Pennsylvania Annual Report",
+        "due_date_rule": "June 30 annually (fixed date, not anniversary-based)",
+        "applicable_to": "All Pennsylvania corporations and nonprofits (domestic and foreign-registered)",
+        "description": "New requirement starting 2025. Fee is $7 for for-profit corporations. Note the corporation deadline (June 30) differs from the LLC deadline (September 30). Full enforcement begins with 2027 reports.",
+        "authority": "Pennsylvania Department of State",
+        "source_url": "https://filingservices.com/blog/pennsylvania-annual-report/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "PENNSYLVANIA",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Pennsylvania Annual Report",
+        "due_date_rule": "September 30 annually (fixed date, not anniversary-based)",
+        "applicable_to": "All Pennsylvania LLCs (domestic and foreign-registered)",
+        "description": "New requirement starting 2025 (Act 122 of 2022), replacing the old decennial report system. Fee is $7. Grace period: no dissolution penalties apply for 2025-2026 reports; full enforcement (including administrative dissolution risk) begins with 2027 reports.",
+        "authority": "Pennsylvania Department of State",
+        "source_url": "https://www.mystatellc.com/llc/pennsylvania-llc-annual-report",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "RHODE ISLAND",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Rhode Island Annual Report",
+        "due_date_rule": "January 1 - March 1 fixed annual window \u2014 a different window from LLCs (Feb 1-May 1) and from nonprofits (June 1-30)",
+        "applicable_to": "All Rhode Island corporations and PCs (domestic and foreign-registered)",
+        "description": "Filed with the RI Department of State, Business Services Division. Fee is $50 (nonprofits pay $20 on their own June 1-30 window). Rhode Island runs three separate filing windows by entity type \u2014 LLCs, corporations, and nonprofits each have a distinct 2-3 month period \u2014 a frequent source of confusion worth flagging clearly in any calendar tool.",
+        "authority": "Rhode Island Department of State, Business Services Division",
+        "source_url": "https://www.myusacorporation.com/rhode-island/annual-report/",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "RHODE ISLAND",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Rhode Island Annual Report",
+        "due_date_rule": "February 1 - May 1 fixed annual window (not anniversary-based); moved from the old Sep 1-Nov 1 window in 2022; first report due the year after formation",
+        "applicable_to": "All Rhode Island LLCs, L3Cs, and PLLCs (domestic and foreign-registered)",
+        "description": "Filed with the RI Department of State, Business Services Division, online or by mail. Fee is $50. Late filing (after May 1) adds a $25 penalty per year delinquent. Revocation proceedings begin roughly 60 days after the due date; a revoked LLC still owes annual reports plus a minimum $400/year to the Division of Taxation until formally dissolved.",
+        "authority": "Rhode Island Department of State, Business Services Division",
+        "source_url": "https://www.tailorbrands.com/llc-formation/rhode-island-llc/annual-report",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "SOUTH CAROLINA",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual Report (integrated into Corporate Income Tax Return)",
+        "due_date_rule": "15th day of the 4th month after the corporation's fiscal year end (April 15 for calendar-year filers), per SC1120-T",
+        "applicable_to": "All South Carolina corporations (domestic and foreign-registered) \u2014 always required, unlike LLCs",
+        "description": "South Carolina uses a unique dual-track system: rather than a standalone Secretary of State filing, the corporation's annual report is submitted as part of its Corporate Income Tax Return (Form SC 1120 for C-corps, SC 1120S for S-corps) to the Department of Revenue. Both a licensing fee ($15 plus 0.1% of capital, $25 minimum) and the 5% corporate income tax apply. This dual-track structure means verifying SC corporate compliance requires checking both SOS records and DOR filing status.",
+        "authority": "South Carolina Department of Revenue",
+        "source_url": "https://www.proofofgoodstanding.com/learn/sc-corporation-annual-report-compliance-2026",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "SOUTH CAROLINA",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Event-Based",
+        "compliance_name": "No Annual Report Requirement (standard tax treatment)",
+        "due_date_rule": "Not Applicable for LLCs taxed as sole proprietorships or partnerships (the default)",
+        "applicable_to": "South Carolina LLCs with default (disregarded entity or partnership) tax treatment",
+        "description": "South Carolina does not require a standalone annual report filing with the Secretary of State for LLCs, and default-taxed LLCs (sole proprietorship or partnership) file no separate annual report or corporate return at the entity level. This is unlike most states \u2014 SC ties its 'annual report' concept entirely to corporate income tax filing rather than a Secretary of State filing.",
+        "authority": "South Carolina Department of Revenue",
+        "source_url": "https://www.nolo.com/legal-encyclopedia/annual-report-tax-filing-requirements-south-carolina-llcs.html",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "Initial Report of Corporations (Form CL-1) + Annual Corporate Tax Return",
+        "due_date_rule": "Form CL-1 due within 60 days of electing corporate tax status; thereafter, corporate tax returns due the 15th day of the 4th month after fiscal year end (April 15 for calendar-year filers)",
+        "applicable_to": "South Carolina LLCs that elect C-corp or S-corp federal tax treatment (via IRS Form 8832 or 2553)",
+        "description": "Only LLCs that affirmatively elect corporate taxation take on SC's annual report obligation, which is folded into the corporate income tax return (Form SC 1120 for C-corps, SC 1120S for S-corps) filed with the SC Department of Revenue rather than the Secretary of State. Missing deadlines draws a 5%-per-month penalty and can lead to administrative dissolution.",
+        "authority": "South Carolina Department of Revenue",
+        "source_url": "https://www.upcounsel.com/south-carolina-annual-report",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "SOUTH DAKOTA",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "South Dakota Annual Report",
+        "due_date_rule": "1st day of the corporation's anniversary month, every year \u2014 same system as LLCs",
+        "applicable_to": "All South Dakota corporations (domestic and foreign-registered)",
+        "description": "Same $55 online / $70 paper fee, same 2-month delinquency trigger and $50 late fee, and same SOS portal as LLCs. South Dakota requires all corporations, LLCs, nonprofits, and LLPs to file under one uniform Annual Report system.",
+        "authority": "South Dakota Secretary of State",
+        "source_url": "https://sdsos.gov/business-services/corporations/contact.aspx",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "SOUTH DAKOTA",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "South Dakota Annual Report",
+        "due_date_rule": "1st day of the LLC's anniversary month, every year; filing window opens 2 months early",
+        "applicable_to": "All South Dakota LLCs (domestic and foreign-registered)",
+        "description": "Filed with the SD Secretary of State. Fee is $55 online / $70 by paper. LLC becomes 'delinquent' 2 months after the due date, at which point a $50 late fee attaches on top of the report fee; continued non-filing risks administrative dissolution. Foreign LLCs cannot be reinstated after revocation \u2014 they must reapply for a fresh Certificate of Authority instead.",
+        "authority": "South Dakota Secretary of State",
+        "source_url": "https://boostsuite.com/how-to-start-an-llc/cost/south-dakota/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "TENNESSEE",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Tennessee Annual Report",
+        "due_date_rule": "1st day of the 4th month after fiscal year end (April 1 for calendar-year filers)",
+        "applicable_to": "All Tennessee corporations (domestic and foreign-registered)",
+        "description": "Filed with the Secretary of State via TNCaB. Fee is $20 (much lower than the LLC fee).",
+        "authority": "Tennessee Secretary of State",
+        "source_url": "https://fileforms.com/tennessee-annual-report-filing/",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Franchise & Excise Tax (Form FAE170)",
+        "due_date_rule": "15th day of the 4th month after fiscal year end (April 15 for calendar-year filers)",
+        "applicable_to": "All Tennessee corporations",
+        "description": "Franchise tax is 0.25% of net worth (min $100); excise tax is 6.5% of net income. Filed separately with the Department of Revenue.",
+        "authority": "Tennessee Department of Revenue",
+        "source_url": "https://www.discern.com/resources/tennessee-franchise-tax-filing-information",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "TENNESSEE",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Tennessee Annual Report",
+        "due_date_rule": "1st day of the 4th month after fiscal year end (April 1 for calendar-year filers)",
+        "applicable_to": "All Tennessee LLCs (domestic and foreign-registered)",
+        "description": "Filed with the Secretary of State via TNCaB. Fee is $50 per member, $300 minimum, $3,000 maximum. This is separate from Franchise & Excise tax.",
+        "authority": "Tennessee Secretary of State",
+        "source_url": "https://fileforms.com/tennessee-annual-report-filing/",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "Franchise & Excise Tax (Form FAE170)",
+        "due_date_rule": "15th day of the 4th month after fiscal year end (April 15 for calendar-year filers)",
+        "applicable_to": "Multi-member LLCs and LLCs electing corporate taxation. Single-member LLCs owned by individuals are largely exempt.",
+        "description": "Franchise tax is 0.25% of net worth (min $100); excise tax is 6.5% of net income. Filed separately with the Department of Revenue (not the Secretary of State). A 7-month extension is available via Form FAE173, but payment is still due on the original date.",
+        "authority": "Tennessee Department of Revenue",
+        "source_url": "https://www.discern.com/resources/tennessee-franchise-tax-filing-information",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "TEXAS",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Franchise Tax + Public Information Report (PIR, Form 05-102)",
+        "due_date_rule": "May 15 annually (fixed date) \u2014 identical system and deadline to LLCs",
+        "applicable_to": "All Texas corporations (domestic and foreign-registered), regardless of revenue",
+        "description": "Same Comptroller filing system, same $2.65M no-tax-due threshold, and same $50 late penalty as LLCs. Texas applies one uniform Franchise Tax + PIR framework across corporations, LLCs, partnerships, and other taxable entities under Texas Tax Code \u00a7 171.251.",
+        "authority": "Texas Comptroller of Public Accounts",
+        "source_url": "https://ortholo.com/guides/texas-franchise-tax-due-date-2026",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "TEXAS",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Franchise Tax + Public Information Report (PIR, Form 05-102)",
+        "due_date_rule": "May 15 annually (fixed date, not anniversary-based); first PIR due May 15 of the year after the LLC's first full fiscal year",
+        "applicable_to": "All Texas LLCs (domestic and foreign-registered), regardless of revenue",
+        "description": "Texas has no separate 'annual report' \u2014 instead, every LLC files a Public Information Report alongside its Franchise Tax filing with the Comptroller of Public Accounts. For 2026, LLCs with annualized total revenue at or below $2,650,000 owe $0 franchise tax but must still file the PIR. Above that threshold, tax is calculated (typically 0.375% retail/wholesale or 0.75% other) via the EZ Computation or Long Form report. Missing May 15 triggers an immediate $50 penalty (plus 5%/10% surcharges on any tax owed, and interest starting day 61); the Comptroller can direct the Secretary of State to forfeit the LLC's right to transact business, exposing managers to personal liability.",
+        "authority": "Texas Comptroller of Public Accounts",
+        "source_url": "https://texasllcservice.com/blog/texas-llc-public-information-report/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "UTAH",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Utah Annual Renewal",
+        "due_date_rule": "Anniversary month of incorporation",
+        "applicable_to": "All Utah corporations (domestic and foreign-registered)",
+        "description": "Same rule and $18 fee as LLCs \u2014 Utah uses one uniform renewal system across entity types.",
+        "authority": "Utah Division of Corporations and Commercial Code",
+        "source_url": "https://ridgelineguides.com/compliance/utah-llc-annual-renewal/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "UTAH",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Utah Annual Renewal",
+        "due_date_rule": "Anniversary month of formation",
+        "applicable_to": "All Utah LLCs (domestic and foreign-registered)",
+        "description": "Filed with the Division of Corporations and Commercial Code. Fee is $18 (one of the lowest in the country). A 30-day grace period applies before any late fee.",
+        "authority": "Utah Division of Corporations and Commercial Code",
+        "source_url": "https://ridgelineguides.com/compliance/utah-llc-annual-renewal/",
+        "confidence": "high"
+      },
+      {
+        "category": "Event-Based",
+        "compliance_name": "Late Renewal Fee",
+        "due_date_rule": "As Triggered (after the 30-day grace period)",
+        "applicable_to": "LLCs that file after the grace period",
+        "description": "$10 late fee. Administrative dissolution proceedings can begin roughly 60 days past due.",
+        "authority": "Utah Division of Corporations and Commercial Code",
+        "source_url": "https://fileforms.com/utah-annual-report-deadline",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "VERMONT",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Vermont Annual Report",
+        "due_date_rule": "2.5 months after the close of the fiscal year (March 15 for calendar-year filers) \u2014 a slightly different window than the LLC's 3-month rule",
+        "applicable_to": "All Vermont corporations (domestic and foreign-registered)",
+        "description": "Filed via the Business Services Center. Fee is $45 for domestic corporations, $200 for foreign corporations (11A V.S.A. \u00a7 16.22). Same $25 late fee as LLCs, with dissolution risk for continued non-filing.",
+        "authority": "Vermont Secretary of State, Business Services Division",
+        "source_url": "https://www.myusacorporation.com/vermont/annual-report/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "VERMONT",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Vermont Annual Report",
+        "due_date_rule": "Within 3 months after the close of the LLC's fiscal year (January 1 - March 31 for calendar-year filers, per 11 V.S.A. \u00a7 4033); first report due the year after formation",
+        "applicable_to": "All Vermont LLCs (domestic and foreign-registered)",
+        "description": "Filed online via the Vermont Business Services Center. Fee is $45 for domestic LLCs, $170 for foreign LLCs (older sources citing $35 are outdated). A separate $250 minimum Business Entity Tax (BET) is owed to the Department of Taxes by pass-through LLCs (calendar filers typically by March 15), on top of the Annual Report fee \u2014 a distinct filing many owners miss. Late Annual Report filing draws a $25 penalty; continued non-filing risks involuntary termination under 11 V.S.A. \u00a7 4034.",
+        "authority": "Vermont Secretary of State, Business Services Division",
+        "source_url": "https://boostsuite.com/how-to-start-an-llc/cost/vermont/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "VIRGINIA",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual Report + Annual Registration Fee",
+        "due_date_rule": "Last day of the corporation's anniversary month, every year \u2014 same anniversary-month system as LLCs",
+        "applicable_to": "All Virginia corporations (domestic and foreign-registered)",
+        "description": "Unlike LLCs, corporations file both an Annual Report (no separate fee) AND pay an Annual Registration Fee to the SCC, calculated on authorized shares (stock corporations) rather than the LLC's flat $50. Late penalty for corporations is 10% of the fee or $10, whichever is higher \u2014 a different formula from the LLC's flat $25. Dissolution risk begins after 4 months delinquent (vs. 3 months for LLCs).",
+        "authority": "Virginia State Corporation Commission",
+        "source_url": "https://www.virginiaregisteredagent.com/annual-report/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "VIRGINIA",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual Registration Fee",
+        "due_date_rule": "Last day of the LLC's formation/registration anniversary month, every year (not required in the formation year itself)",
+        "applicable_to": "All Virginia LLCs (domestic and foreign-registered)",
+        "description": "Virginia LLCs do NOT file a traditional annual report \u2014 they pay a flat $50 Annual Registration Fee to the State Corporation Commission (SCC) instead, with no information form to complete. The SCC assesses the fee and mails a Notice of Assessment about 2 months before the due date, but payment is owed regardless of whether the notice arrives. Late payment adds a $25 penalty; the SCC can cancel the LLC after the third month following the due date.",
+        "authority": "Virginia State Corporation Commission",
+        "source_url": "https://www.statebusinesscompliance.com/blog/virginia-llc-annual-registration-2026",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "WASHINGTON",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Washington Annual Report",
+        "due_date_rule": "Last day of the corporation's anniversary (formation) month each year \u2014 same anniversary-month system as LLCs",
+        "applicable_to": "All Washington corporations (domestic and foreign-registered)",
+        "description": "Same $70 fee (recently codified via SHB 2248) and same filing system as LLCs; nonprofit corporations pay $10 instead. As of the March 2026 statutory change, the Secretary of State had not yet published reconciliation guidance for how the new fee interacts with certain legacy nonprofit fee structures \u2014 worth a quick confirmation for nonprofit corporation clients specifically.",
+        "authority": "Washington Secretary of State, Corporations & Charities Division",
+        "source_url": "https://www.discern.com/resources/washington-state-annual-report",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "WASHINGTON",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Washington Annual Report",
+        "due_date_rule": "Last day of the LLC's anniversary (formation) month each year; filing window opens 180 days early; an Initial Report is also due within 120 days of formation",
+        "applicable_to": "All Washington LLCs (domestic and foreign-registered)",
+        "description": "Filed with the WA Secretary of State, Corporations & Charities Division. Fee is $70, recently codified under SHB 2248 (enacted March 2026, RCW 23.95.515) \u2014 older sources citing $60 are now outdated. A $25 late fee applies once delinquent; the SOS can administratively dissolve or revoke the entity after roughly 120 days late, with a $180 reinstatement fee plus all outstanding amounts.",
+        "authority": "Washington Secretary of State, Corporations & Charities Division",
+        "source_url": "https://fileforms.com/washington-annual-report-deadline",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "WEST VIRGINIA",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "West Virginia Annual Report",
+        "due_date_rule": "June 30 annually (fixed date) \u2014 identical deadline to LLCs",
+        "applicable_to": "All West Virginia corporations (domestic and foreign-registered)",
+        "description": "West Virginia applies one uniform $25 fee and June 30 deadline across corporations, LLCs, LPs, LLPs, and nonprofits (nonprofits pay an additional $50 if late) \u2014 the simplest, most uniform structure of any state in this dataset.",
+        "authority": "West Virginia Secretary of State",
+        "source_url": "https://fileforms.com/west-virginia-annual-report-deadlines/",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "WEST VIRGINIA",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "West Virginia Annual Report",
+        "due_date_rule": "June 30 annually (fixed date, not anniversary-based), per W. Va. Code \u00a7 59-1-2a; filing window opens January 1; first report due the year after formation",
+        "applicable_to": "All West Virginia LLCs (domestic and foreign-registered)",
+        "description": "Filed via the WV One Stop Business Portal. Fee is $25 (plus a $1 online convenience fee). Missing June 30 triggers a $50-75 late penalty (sources describe it as either a flat $75 total or $50 added to the $25 base \u2014 confirm at filing), and 4 consecutive missed years leads to administrative dissolution (2-year reinstatement window). Note: HB 5227, a 2026 proposal to add a biennial reporting option for certain entities, should be checked against the current enrolled bill text before assuming it has taken effect.",
+        "authority": "West Virginia Secretary of State",
+        "source_url": "https://business4.wv.gov/operatemybusiness/Pages/Annual-Reporting.aspx",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "WISCONSIN",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Wisconsin Annual Report",
+        "due_date_rule": "Last day of the calendar quarter in which the corporation's formation anniversary falls \u2014 same quarterly system as LLCs",
+        "applicable_to": "All Wisconsin corporations (domestic and foreign-registered)",
+        "description": "Same DFI portal, same quarterly deadline structure, and same no-late-fee-but-3-year-dissolution rule as LLCs. Fee levels mirror the LLC tier ($25 domestic / higher for foreign entities) \u2014 confirm exact corporate figures at filing since a few sources show minor variation.",
+        "authority": "Wisconsin Department of Financial Institutions (DFI)",
+        "source_url": "https://www.proofofgoodstanding.com/learn/wisconsin-llc-annual-report-compliance-checklist-2026",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "WISCONSIN",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Wisconsin Annual Report",
+        "due_date_rule": "Last day of the calendar quarter in which the LLC's formation anniversary falls (quarterly deadlines: Mar 31, Jun 30, Sep 30, Dec 31); foreign LLCs always use the fixed March 31 deadline regardless of formation date; first report due the year after formation",
+        "applicable_to": "All Wisconsin LLCs (domestic and foreign-registered)",
+        "description": "Filed with the WI Department of Financial Institutions (DFI). Fee is $25 online / $40 by mail for domestic LLCs; $65 online / $80 by mail for foreign LLCs. Wisconsin charges NO monetary late fee for a missed deadline \u2014 but the entity is immediately marked delinquent and loses good standing, and after 3 consecutive missed years the DFI administratively dissolves the LLC (reinstatement: $100 plus $25 per missed report, by mail only).",
+        "authority": "Wisconsin Department of Financial Institutions (DFI)",
+        "source_url": "https://www.anchorfilings.com/blog/wisconsin-annual-report.html",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "WYOMING",
+    "entityType": "Corporation",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual Report License Tax",
+        "due_date_rule": "1st day of the corporation's formation anniversary month, every year \u2014 same anniversary-month system and asset-based formula as LLCs",
+        "applicable_to": "All Wyoming corporations (domestic and foreign-registered)",
+        "description": "Same $60-minimum, asset-based license tax formula and wyobiz portal as LLCs (W.S. \u00a7 17-16-1622 for corporations, mirroring the LLC statute). Wyoming applies one uniform anniversary-month, asset-based Annual Report system across both entity types \u2014 the fee formula, not the entity type, is what changes the amount owed.",
+        "authority": "Wyoming Secretary of State, Business Division",
+        "source_url": "https://boostsuite.com/llc-annual-report/wyoming/",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "WYOMING",
+    "entityType": "LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual Report License Tax",
+        "due_date_rule": "1st day of the LLC's formation anniversary month, every year (not the last day \u2014 a common point of confusion), per W.S. \u00a7 17-29-209; first report due the year after formation",
+        "applicable_to": "All Wyoming LLCs (domestic and foreign-registered)",
+        "description": "Filed online via the Wyoming Secretary of State's wyobiz portal. Unlike most states, the fee is NOT flat: it's the greater of $60 minimum or $0.0002 per dollar of Wyoming-located assets (W.S. \u00a7 17-29-210) \u2014 LLCs holding significant in-state real estate or equipment should run the calculation rather than assume $60. Filings above $500 (i.e., $2.5M+ in WY assets) cannot be submitted online and must be filed by mail. A $25 late fee applies after the deadline, with administrative dissolution risk starting around 60 days late.",
+        "authority": "Wyoming Secretary of State, Business Division",
+        "source_url": "https://boostsuite.com/llc-annual-report/wyoming/",
+        "confidence": "high"
+      }
+    ]
+  }
+]
