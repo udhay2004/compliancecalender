@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "seed:states": "node scripts/seedStates.js"
+    "seed:states": "node scripts/seedStates.js",
+    "load:states": "node scripts/loadPresearchedStates.js"
   },
   "engines": {
     "node": ">=18.0.0"
