@@ -122,7 +122,7 @@
       if (!res.ok) { location.href = '/login.html?next=/app.html'; return; }
       const { user } = await res.json();
       const el = document.getElementById('navUser');
-      el.innerHTML = `<span>${escapeHtml(user.email)}</span><button id="logoutBtn">Log out</button>`;
+      el.innerHTML = `<span>${escapeHtml(user.username)}</span><button id="logoutBtn">Log out</button>`;
       document.getElementById('logoutBtn').addEventListener('click', async () => {
         await fetch('/api/auth/logout', { method: 'POST' });
         location.href = '/login.html';
