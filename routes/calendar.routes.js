@@ -27,7 +27,7 @@ function isRateLimited(userId) {
 // Creates a new calendar in "pending_review" — it is NOT the source of
 // truth until a reviewer approves it.
 router.post("/generate", async (req, res) => {
-  if (isRateLimited(req.user.sub)) {
+  if (isRateLimited(req.user.username)) {
     return res.status(429).json({ error: "Rate limit reached. Try again later." });
   }
 
@@ -43,7 +43,7 @@ router.post("/generate", async (req, res) => {
     }
 
     const calendar = await Calendar.create({
-      createdBy: req.user.sub,
+      createdBy: req.user.username,
       profile,
       items,
       status: "pending_review",
@@ -59,34 +59,28 @@ router.post("/generate", async (req, res) => {
 
 // GET /api/calendars/mine — calendars the current user created
 router.get("/mine", async (req, res) => {
-  const calendars = await Calendar.find({ createdBy: req.user.sub })
-    .sort({ createdAt: -1 })
-    .populate("reviewedBy", "email name");
+  const calendars = await Calendar.find({ createdBy: req.user.username })
+    .sort({ createdAt: -1 });
   res.json({ calendars });
 });
 
 // GET /api/calendars/queue — everything pending review (any teammate can review)
 router.get("/queue", async (req, res) => {
   const calendars = await Calendar.find({ status: "pending_review" })
-    .sort({ createdAt: 1 })
-    .populate("createdBy", "email name");
+    .sort({ createdAt: 1 });
   res.json({ calendars });
 });
 
 // GET /api/calendars/approved — the trusted, approved library
 router.get("/approved", async (req, res) => {
   const calendars = await Calendar.find({ status: "approved" })
-    .sort({ reviewedAt: -1 })
-    .populate("createdBy", "email name")
-    .populate("reviewedBy", "email name");
+    .sort({ reviewedAt: -1 });
   res.json({ calendars });
 });
 
 // GET /api/calendars/:id
 router.get("/:id", async (req, res) => {
-  const calendar = await Calendar.findById(req.params.id)
-    .populate("createdBy", "email name")
-    .populate("reviewedBy", "email name");
+  const calendar = await Calendar.findById(req.params.id);
   if (!calendar) return res.status(404).json({ error: "Not found." });
   res.json({ calendar });
 });
@@ -131,7 +125,7 @@ router.post("/:id/approve", async (req, res) => {
     return res.status(400).json({ error: "Only pending_review calendars can be approved." });
   }
   calendar.status = "approved";
-  calendar.reviewedBy = req.user.sub;
+  calendar.reviewedBy = req.user.username;
   calendar.reviewedAt = new Date();
   calendar.reviewNotes = req.body?.notes || "";
   await calendar.save();
@@ -146,7 +140,7 @@ router.post("/:id/reject", async (req, res) => {
     return res.status(400).json({ error: "Only pending_review calendars can be rejected." });
   }
   calendar.status = "rejected";
-  calendar.reviewedBy = req.user.sub;
+  calendar.reviewedBy = req.user.username;
   calendar.reviewedAt = new Date();
   calendar.reviewNotes = req.body?.notes || "";
   await calendar.save();
