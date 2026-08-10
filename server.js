@@ -4,7 +4,8 @@
 //   config/db.js              - MongoDB connection
 //   models/                   - User, Calendar, StateCache
 //   middleware/auth.js        - JWT cookie auth (page + API variants)
-//   routes/auth.routes.js     - signup / login / logout / me
+//   routes/auth.routes.js     - shared login / logout / me (single team
+//                                username+password, no signup)
 //   routes/calendar.routes.js - generate / review queue / approve / reject / pdf
 //   lib/claude.js             - cache-first, live-fallback Claude calls
 //   lib/pdf.js                - PDF export
@@ -51,7 +52,7 @@ PROTECTED_PAGES.forEach((route) => {
 app.get("/", (req, res) => res.redirect("/app.html"));
 
 // ---------------------------------------------------------------------
-// Public static assets: login/signup pages, CSS/JS, etc.
+// Public static assets: login page, CSS/JS, etc.
 // ---------------------------------------------------------------------
 app.use(express.static(path.join(__dirname, "public"), { index: false }));
 
