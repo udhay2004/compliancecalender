@@ -1,25 +1,22 @@
 // middleware/auth.js
 //
-// Simple httpOnly-cookie JWT auth. No API key, no page in this app works
-// (including /api/generate, the thing that costs money) without a valid
-// session — that's what closes the "anyone with the link can spend your
-// API credits" hole.
+// Single shared-login gate. The whole team uses ONE username/password
+// (set in .env — see AUTH_USERNAME / AUTH_PASSWORD). No per-person
+// accounts, no signup, no database lookups here. Once someone logs in
+// they get a signed, httpOnly cookie and every page/route below trusts
+// it until it expires or they log out.
 
 const jwt = require("jsonwebtoken");
 
 const COOKIE_NAME = "cc_session";
 const TOKEN_TTL = "30d";
 
-function signToken(user) {
-  return jwt.sign(
-    { sub: user._id.toString(), email: user.email, role: user.role },
-    process.env.JWT_SECRET,
-    { expiresIn: TOKEN_TTL }
-  );
+function signToken(username) {
+  return jwt.sign({ username }, process.env.JWT_SECRET, { expiresIn: TOKEN_TTL });
 }
 
-function setSessionCookie(res, user) {
-  const token = signToken(user);
+function setSessionCookie(res, username) {
+  const token = signToken(username);
   res.cookie(COOKIE_NAME, token, {
     httpOnly: true,
     sameSite: "lax",
@@ -52,7 +49,7 @@ function requirePageAuth(req, res, next) {
     req.user = jwt.verify(token, process.env.JWT_SECRET);
     next();
   } catch (err) {
-    return res.redirect("/login.html");
+    return res.redirect("/login.html?reason=session_expired");
   }
 }
 
