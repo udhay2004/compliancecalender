@@ -32,7 +32,7 @@
       if (!res.ok) { location.href = '/login.html?next=' + encodeURIComponent(location.pathname + location.search); return; }
       const { user } = await res.json();
       const el = document.getElementById('navUser');
-      el.innerHTML = `<span>${escapeHtml(user.email)}</span><button id="logoutBtn">Log out</button>`;
+      el.innerHTML = `<span>${escapeHtml(user.username)}</span><button id="logoutBtn">Log out</button>`;
       document.getElementById('logoutBtn').addEventListener('click', async () => {
         await fetch('/api/auth/logout', { method: 'POST' });
         location.href = '/login.html';
@@ -149,7 +149,7 @@
     const reviewInfo = status !== 'pending_review'
       ? `<div class="review-panel">
           <h3>${status === 'approved' ? 'Approved' : 'Rejected'}</h3>
-          <p style="font-size:13.5px; color:var(--ink-soft);">By ${escapeHtml(reviewedBy?.email || '—')} on ${fmtDateTime(reviewedAt)}${reviewNotes ? ' — “' + escapeHtml(reviewNotes) + '”' : ''}</p>
+          <p style="font-size:13.5px; color:var(--ink-soft);">By ${escapeHtml(reviewedBy || '—')} on ${fmtDateTime(reviewedAt)}${reviewNotes ? ' — “' + escapeHtml(reviewNotes) + '”' : ''}</p>
         </div>`
       : `<div class="review-panel">
           <h3>Review this calendar</h3>
@@ -169,7 +169,7 @@
         <div class="case-header">
           <div>
             <div class="case-title">${escapeHtml(profile.companyName || 'Unnamed Company')}</div>
-            <div class="case-sub">${escapeHtml(profile.entityType)} (${escapeHtml(profile.taxStatus||'')}) · ${escapeHtml(profile.state)} · FY ${escapeHtml(profile.fyStart||'')}–${escapeHtml(profile.fyEnd||'')} · Generated ${fmtDateTime(createdAt)} by ${escapeHtml(createdBy?.email || '—')}</div>
+            <div class="case-sub">${escapeHtml(profile.entityType)} (${escapeHtml(profile.taxStatus||'')}) · ${escapeHtml(profile.state)} · FY ${escapeHtml(profile.fyStart||'')}–${escapeHtml(profile.fyEnd||'')} · Generated ${fmtDateTime(createdAt)} by ${escapeHtml(createdBy || '—')}</div>
           </div>
           <div class="case-summary">
             <span class="badge ${status}">${status.replace('_',' ')}</span>
