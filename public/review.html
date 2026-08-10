@@ -45,7 +45,7 @@
       if (!res.ok) { location.href = '/login.html?next=/review.html'; return; }
       const { user } = await res.json();
       const el = document.getElementById('navUser');
-      el.innerHTML = `<span>${escapeHtml(user.email)}</span><button id="logoutBtn">Log out</button>`;
+      el.innerHTML = `<span>${escapeHtml(user.username)}</span><button id="logoutBtn">Log out</button>`;
       document.getElementById('logoutBtn').addEventListener('click', async () => {
         await fetch('/api/auth/logout', { method: 'POST' });
         location.href = '/login.html';
@@ -72,8 +72,8 @@
         ? { label: 'Submitted', get: c => fmtDate(c.createdAt) }
         : { label: 'Approved', get: c => fmtDate(c.reviewedAt) };
       const byCol = currentTab === 'pending'
-        ? { label: 'Submitted By', get: c => c.createdBy?.email || '—' }
-        : { label: 'Reviewed By', get: c => c.reviewedBy?.email || '—' };
+        ? { label: 'Submitted By', get: c => c.createdBy || '—' }
+        : { label: 'Reviewed By', get: c => c.reviewedBy || '—' };
 
       slot.innerHTML = `<table class="list">
         <thead><tr><th>Company</th><th>State / Entity</th><th>${byCol.label}</th><th>${dateCol.label}</th><th></th></tr></thead>
