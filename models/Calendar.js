@@ -54,7 +54,9 @@ const profileSchema = new mongoose.Schema(
 
 const calendarSchema = new mongoose.Schema(
   {
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    // Plain username string, not a User ref — the app now has a single
+    // shared login for the whole team rather than per-person accounts.
+    createdBy: { type: String, required: true },
     profile: { type: profileSchema, required: true },
     items: { type: [itemSchema], default: [] },
 
@@ -64,7 +66,7 @@ const calendarSchema = new mongoose.Schema(
       default: "pending_review",
       index: true,
     },
-    reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+    reviewedBy: { type: String, default: null },
     reviewedAt: { type: Date, default: null },
     reviewNotes: { type: String, default: "" },
 
