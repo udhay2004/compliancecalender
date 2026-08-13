@@ -48,6 +48,22 @@ const profileSchema = new mongoose.Schema(
     hasForeignParent: Boolean,
     odiDone: String,
     odiInvestorType: String,
+    // States where the company has W-2 employees, OTHER than the state of
+    // incorporation. Payroll withholding, state unemployment insurance
+    // registration, and (in some states) paid-leave contributions are
+    // governed by the EMPLOYEE's work state, not the company's home
+    // state — a company incorporated in Texas with an employee working
+    // from North Dakota still has to register and withhold in North
+    // Dakota. Kept separate from `state` (state of incorporation) on
+    // purpose so the two are never conflated.
+    employeeStates: { type: [String], default: [] },
+    // Average gross receipts per quarter, used to determine whether
+    // certain state Gross Receipts Tax (GRT) filings are triggered.
+    // Below the relevant state's small-business exemption threshold, the
+    // company is generally exempt from the GRT FILING itself, but a
+    // local business license is typically still required regardless of
+    // revenue — see the GRT handling notes in lib/claude.js.
+    quarterlyGrossReceipts: Number,
   },
   { _id: false }
 );
