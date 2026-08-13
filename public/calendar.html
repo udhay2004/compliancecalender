@@ -170,6 +170,8 @@
           <div>
             <div class="case-title">${escapeHtml(profile.companyName || 'Unnamed Company')}</div>
             <div class="case-sub">${escapeHtml(profile.entityType)} (${escapeHtml(profile.taxStatus||'')}) · ${escapeHtml(profile.state)} · FY ${escapeHtml(profile.fyStart||'')}–${escapeHtml(profile.fyEnd||'')} · Generated ${fmtDateTime(createdAt)} by ${escapeHtml(createdBy || '—')}</div>
+            ${(profile.employeeStates && profile.employeeStates.length) ? `<div class="case-sub">Employees also in: ${escapeHtml(profile.employeeStates.join(', '))}</div>` : ''}
+            ${(profile.quarterlyGrossReceipts !== undefined && profile.quarterlyGrossReceipts !== null && profile.quarterlyGrossReceipts !== '') ? `<div class="case-sub">Avg. Quarterly Gross Receipts: $${escapeHtml(Number(profile.quarterlyGrossReceipts).toLocaleString('en-US'))}</div>` : ''}
           </div>
           <div class="case-summary">
             <span class="badge ${status}">${status.replace('_',' ')}</span>
