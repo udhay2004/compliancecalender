@@ -1,46 +1,60 @@
 // models/User.js
 //
-// Everyone who logs in can review/approve calendars (small trusted team
-// model, per spec) — so "role" here is currently just member/admin, where
-// admin is only used for account housekeeping (e.g. deactivating a user),
-// NOT for gating the review step. If the team grows and you want to
-// restrict reviewing later, add a `canReview` boolean and check it in
-// routes/calendar.routes.js instead of loosening this model.
+// Real per-person accounts, replacing the old single-shared-login design
+// (see the history of routes/auth.routes.js / middleware/auth.js — the
+// app used to just compare against one hardcoded AUTH_USERNAME/PASSWORD
+// pair in .env, with no roles at all). That doesn't work anymore now
+// that there are four genuinely different levels of access:
+//
+//   super_admin - the business owner ("great admin"). Full access,
+//                 INCLUDING managing other admins. There should only
+//                 ever be one or two of these.
+//   admin       - day-to-day operator ("tech admin"). Can manage staff
+//                 accounts and client orgs, generate/review calendars,
+//                 everything except managing other admins/super_admins.
+//   staff       - internal team members. Generate calendars, review
+//                 client uploads, upload certificates. Cannot manage
+//                 user accounts.
+//   client      - portal-only. Scoped to exactly ONE ClientOrg via
+//                 clientOrgId below — every query on the client-facing
+//                 routes must filter by this, never trust a client to
+//                 supply their own org id.
+//
+// ROLE_RANK below gives a simple ordering so route guards can express
+// "admin or higher" as one comparison instead of listing role strings
+// everywhere and risking a typo silently opening a hole.
 
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
-const crypto = require("crypto");
+
+const ROLES = ["client", "staff", "admin", "super_admin"];
+const ROLE_RANK = { client: 0, staff: 1, admin: 2, super_admin: 3 };
 
 const userSchema = new mongoose.Schema(
   {
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     passwordHash: { type: String, required: true },
     name: { type: String, trim: true, default: "" },
-    role: { type: String, enum: ["member", "admin"], default: "member" },
-    // IMPORTANT: default is "approved", NOT "pending". Mongoose applies
-    // schema defaults on hydration for any field missing from the stored
-    // document — so if this defaulted to "pending", every user created
-    // before this field existed would suddenly fail the login gate the
-    // next time they're read from the DB. routes/auth.routes.js sets
-    // status to "pending" explicitly at signup time instead, so only
-    // brand-new signups go through the approval gate; anyone already in
-    // the database is treated as already-approved.
-    status: { type: String, enum: ["pending", "approved", "rejected"], default: "approved" },
-    approvalToken: { type: String, default: null, select: false },
-    approvalTokenExpires: { type: Date, default: null, select: false },
+    role: { type: String, enum: ROLES, required: true },
+    // Required and ONLY meaningful for role "client" — every other role
+    // must leave this null. Enforced in the pre-validate hook below so
+    // it's impossible to accidentally create a staff/admin account that
+    // is also (incorrectly) scoped to a client org.
+    clientOrgId: { type: mongoose.Schema.Types.ObjectId, ref: "ClientOrg", default: null },
+    active: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
 
-// Generates a fresh, random, single-use token for the approve/reject email
-// links and sets it (with a 7-day expiry) on the document. Caller is
-// responsible for saving the document afterward.
-userSchema.methods.generateApprovalToken = function () {
-  const token = crypto.randomBytes(32).toString("hex");
-  this.approvalToken = token;
-  this.approvalTokenExpires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-  return token;
-};
+userSchema.pre("validate", function (next) {
+  if (this.role === "client" && !this.clientOrgId) {
+    return next(new Error("clientOrgId is required for role 'client'."));
+  }
+  if (this.role !== "client" && this.clientOrgId) {
+    return next(new Error("clientOrgId must be null for any role other than 'client'."));
+  }
+  next();
+});
 
 userSchema.methods.setPassword = async function (plainPassword) {
   this.passwordHash = await bcrypt.hash(plainPassword, 10);
@@ -51,7 +65,22 @@ userSchema.methods.checkPassword = function (plainPassword) {
 };
 
 userSchema.methods.toSafeJSON = function () {
-  return { id: this._id, email: this.email, name: this.name, role: this.role };
+  return {
+    id: this._id,
+    email: this.email,
+    name: this.name,
+    role: this.role,
+    clientOrgId: this.clientOrgId,
+    active: this.active,
+  };
+};
+
+userSchema.statics.ROLES = ROLES;
+userSchema.statics.ROLE_RANK = ROLE_RANK;
+// True if `role` is at least as senior as `minRole` — e.g.
+// User.hasAtLeast("admin", "staff") === true, User.hasAtLeast("staff", "admin") === false.
+userSchema.statics.hasAtLeast = function (role, minRole) {
+  return (ROLE_RANK[role] ?? -1) >= (ROLE_RANK[minRole] ?? Infinity);
 };
 
 module.exports = mongoose.model("User", userSchema);
