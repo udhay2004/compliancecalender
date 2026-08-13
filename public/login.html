@@ -68,7 +68,11 @@
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'Login failed.');
-      const dest = params.get('next') || '/app.html';
+      // Respect an explicit ?next= (e.g. bounced off a protected page),
+      // otherwise land clients in the portal and everyone else in the
+      // staff app — a client redirected to /app.html would just get
+      // bounced straight back out by requirePageRole anyway.
+      const dest = params.get('next') || (data.user.role === 'client' ? '/portal.html' : '/app.html');
       location.href = dest;
     } catch (err) {
       hint.textContent = err.message;
