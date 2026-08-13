@@ -96,6 +96,19 @@
         <span class="toggle-label">Company has a foreign parent or related-party (intercompany) transactions</span>
       </div>
 
+      <div class="divider-label">Employees in Other States</div>
+      <div class="field span2">
+        <label for="employeeStates">States (other than state of incorporation) where employees work — each is a separate withholding/unemployment-insurance registration</label>
+        <select id="employeeStates" multiple size="6"></select>
+      </div>
+
+      <div class="divider-label">Revenue (for Gross Receipts Tax check)</div>
+      <div class="field">
+        <label for="quarterlyGrossReceipts">Average Quarterly Gross Receipts ($)</label>
+        <input type="number" id="quarterlyGrossReceipts" min="0" step="1000" placeholder="e.g. 250000">
+        <span class="field-hint">At or below $300,000/quarter is generally exempt from GRT filing — a local business license is still required either way.</span>
+      </div>
+
       <div class="submit-row">
         <span class="hint" id="statusHint"></span>
         <button class="primary" id="submit">Generate Calendar →</button>
@@ -154,6 +167,17 @@
   fillSelect('fyStart', MONTHS, 0);
   fillSelect('fyEnd', MONTHS, 11);
 
+  // employeeStates is a plain multi-select (not fillSelect, since nothing
+  // should be pre-selected) — cmd/ctrl-click to pick more than one state.
+  (function fillEmployeeStates() {
+    const el = document.getElementById('employeeStates');
+    STATES.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v; opt.textContent = v;
+      el.appendChild(opt);
+    });
+  })();
+
   document.getElementById('odiDone').addEventListener('change', e => {
     const isYes = e.target.value === 'Yes';
     document.getElementById('odiBlock').classList.toggle('visible', isYes);
@@ -174,6 +198,10 @@
       hasForeignParent: document.getElementById('hasForeignParent').checked,
       odiDone: document.getElementById('odiDone').value,
       odiInvestorType: document.getElementById('odiInvestorType').value,
+      employeeStates: Array.from(document.getElementById('employeeStates').selectedOptions).map(o => o.value),
+      quarterlyGrossReceipts: document.getElementById('quarterlyGrossReceipts').value
+        ? Number(document.getElementById('quarterlyGrossReceipts').value)
+        : undefined,
     };
   }
 
