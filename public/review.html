@@ -11,7 +11,7 @@
 <body>
 <div class="topbar">
   <div class="brand"><a href="/app.html">Compliance Calendar <strong>Generator</strong></a></div>
-  <div class="nav-links">
+  <div class="nav-links" id="navLinks">
     <a href="/app.html">Generate</a>
     <a href="/review.html" class="active">Review Queue</a>
   </div>
@@ -46,6 +46,12 @@
       const { user } = await res.json();
       const el = document.getElementById('navUser');
       el.innerHTML = `<span>${escapeHtml(user.name || user.email)}</span><button id="logoutBtn">Log out</button>`;
+      if (user.role === 'admin' || user.role === 'super_admin') {
+        const navLinks = document.getElementById('navLinks');
+        if (navLinks && !navLinks.querySelector('a[href="/admin.html"]')) {
+          navLinks.insertAdjacentHTML('beforeend', '<a href="/admin.html">Admin</a>');
+        }
+      }
       document.getElementById('logoutBtn').addEventListener('click', async () => {
         await fetch('/api/auth/logout', { method: 'POST' });
         location.href = '/login.html';
