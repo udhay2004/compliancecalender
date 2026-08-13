@@ -20,6 +20,7 @@ const { connectDB } = require("./config/db");
 const { requirePageAuth } = require("./middleware/auth");
 const authRoutes = require("./routes/auth.routes");
 const calendarRoutes = require("./routes/calendar.routes");
+const adminRoutes = require("./routes/admin.routes");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -61,6 +62,7 @@ app.use(express.static(path.join(__dirname, "public"), { index: false }));
 // ---------------------------------------------------------------------
 app.use("/api/auth", authRoutes);
 app.use("/api/calendars", calendarRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.get("/healthz", (req, res) => res.json({ ok: true }));
 
