@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Compliance Calendar Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,72,400;0,72,500;0,72,600;1,72,400;1,72,500&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/shared.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><a href="/app.html">Compliance Calendar <strong>Generator</strong></a></div>
+  <div class="nav-links">
+    <a href="/app.html">Generate</a>
+    <a href="/review.html">Review Queue</a>
+    <a href="/admin.html" class="active">Admin</a>
+  </div>
+  <div class="nav-user" id="navUser"></div>
+</div>
+
+<div class="wrap">
+  <div class="card" style="margin-top:36px;">
+    <div class="card-head" style="padding-bottom:20px;">
+      <div class="card-eyebrow">Accounts &amp; Client Companies</div>
+      <h1>Admin</h1>
+      <p class="sub" id="permissionNote">Create staff, client, and (if you're a super admin) admin accounts, and set up the client companies calendars get linked to.</p>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" id="tabOrgs">Client Companies</button>
+    <button class="tab-btn" id="tabUsers">Accounts</button>
+  </div>
+
+  <div id="orgsPanel" style="margin-top:24px;">
+    <div class="card">
+      <div class="card-head" style="padding-bottom:12px;"><h2 style="margin:0;font-size:16px;">New client company</h2></div>
+      <div class="card-body">
+        <form id="orgForm">
+          <div class="grid full">
+            <div class="field"><label for="orgName">Company name</label><input type="text" id="orgName" required></div>
+            <div class="field"><label for="orgContactName">Primary contact name</label><input type="text" id="orgContactName"></div>
+            <div class="field"><label for="orgContactEmail">Primary contact email</label><input type="email" id="orgContactEmail"></div>
+          </div>
+          <div class="submit-row">
+            <span class="hint" id="orgHint"></span>
+            <button type="submit" class="primary">Create company</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div id="orgsList" style="margin-top:20px;"><div class="empty-state">Loading…</div></div>
+  </div>
+
+  <div id="usersPanel" style="margin-top:24px;display:none;">
+    <div class="card">
+      <div class="card-head" style="padding-bottom:12px;"><h2 style="margin:0;font-size:16px;">New account</h2></div>
+      <div class="card-body">
+        <form id="userForm">
+          <div class="grid full">
+            <div class="field"><label for="userEmail">Email</label><input type="email" id="userEmail" required></div>
+            <div class="field"><label for="userName">Name</label><input type="text" id="userName"></div>
+            <div class="field"><label for="userPassword">Temporary password</label><input type="text" id="userPassword" required></div>
+            <div class="field">
+              <label for="userRole">Role</label>
+              <select id="userRole"></select>
+            </div>
+            <div class="field" id="userOrgField" style="display:none;">
+              <label for="userOrgId">Client company</label>
+              <select id="userOrgId"></select>
+            </div>
+          </div>
+          <div class="submit-row">
+            <span class="hint" id="userHint"></span>
+            <button type="submit" class="primary">Create account</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div id="usersList" style="margin-top:20px;"><div class="empty-state">Loading…</div></div>
+  </div>
+</div>
+
+<script>
+  function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
+  let me = null;
+  let orgsCache = [];
+
+  async function loadUser() {
+    try {
+      const res = await fetch('/api/auth/me');
+      if (!res.ok) { location.href = '/login.html?next=/admin.html'; return; }
+      const { user } = await res.json();
+      me = user;
+      const el = document.getElementById('navUser');
+      el.innerHTML = `<span>${escapeHtml(user.name || user.email)} (${escapeHtml(user.role)})</span><button id="logoutBtn">Log out</button>`;
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await fetch('/api/auth/logout', { method: 'POST' });
+        location.href = '/login.html';
+      });
+
+      // Populate role dropdown based on what THIS admin is allowed to
+      // create — a plain admin can't grant admin/super_admin (the
+      // server enforces this too; this is just so the form doesn't
+      // offer an option that will just get rejected).
+      const roleSelect = document.getElementById('userRole');
+      const roles = user.role === 'super_admin'
+        ? ['client', 'staff', 'admin', 'super_admin']
+        : ['client', 'staff'];
+      roleSelect.innerHTML = roles.map(r => `<option value="${r}">${r}</option>`).join('');
+      roleSelect.addEventListener('change', () => {
+        document.getElementById('userOrgField').style.display = roleSelect.value === 'client' ? '' : 'none';
+      });
+      document.getElementById('userOrgField').style.display = roleSelect.value === 'client' ? '' : 'none';
+
+      if (user.role !== 'super_admin') {
+        document.getElementById('permissionNote').textContent =
+          "You can create staff and client accounts, and client companies. Only a super admin can create or edit other admin accounts.";
+      }
+    } catch (err) {
+      location.href = '/login.html';
+    }
+  }
+
+  // --- Client orgs ---
+  async function loadOrgs() {
+    const res = await fetch('/api/admin/client-orgs');
+    const data = await res.json().catch(() => ({}));
+    orgsCache = data.clientOrgs || [];
+    const el = document.getElementById('orgsList');
+    if (!orgsCache.length) { el.innerHTML = '<div class="empty-state">No client companies yet.</div>'; }
+    else {
+      el.innerHTML = orgsCache.map(o => `
+        <div class="card" style="margin-bottom:10px;">
+          <div class="card-body" style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-weight:500;">${escapeHtml(o.name)}</div>
+              <div class="ts" style="color:var(--ink-soft);font-size:13px;">${escapeHtml(o.primaryContactName || '')} ${o.primaryContactEmail ? '· ' + escapeHtml(o.primaryContactEmail) : ''}</div>
+            </div>
+          </div>
+        </div>`).join('');
+    }
+    // Also refresh the org dropdown on the accounts tab
+    const orgSelect = document.getElementById('userOrgId');
+    orgSelect.innerHTML = orgsCache.map(o => `<option value="${o._id}">${escapeHtml(o.name)}</option>`).join('');
+  }
+
+  document.getElementById('orgForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const hint = document.getElementById('orgHint');
+    hint.classList.remove('err'); hint.textContent = 'Creating…';
+    try {
+      const res = await fetch('/api/admin/client-orgs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: document.getElementById('orgName').value.trim(),
+          primaryContactName: document.getElementById('orgContactName').value.trim(),
+          primaryContactEmail: document.getElementById('orgContactEmail').value.trim(),
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Failed to create company.');
+      hint.textContent = 'Created.';
+      e.target.reset();
+      await loadOrgs();
+    } catch (err) {
+      hint.textContent = err.message; hint.classList.add('err');
+    }
+  });
+
+  // --- Users ---
+  async function loadUsers() {
+    const res = await fetch('/api/admin/users');
+    const data = await res.json().catch(() => ({}));
+    const users = data.users || [];
+    const el = document.getElementById('usersList');
+    if (!users.length) { el.innerHTML = '<div class="empty-state">No accounts yet.</div>'; return; }
+    el.innerHTML = users.map(u => {
+      const org = orgsCache.find(o => o._id === u.clientOrgId);
+      return `
+        <div class="card" style="margin-bottom:10px;">
+          <div class="card-body" style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-weight:500;">${escapeHtml(u.name || u.email)} <span class="ts" style="color:var(--ink-soft);">(${escapeHtml(u.role)})</span></div>
+              <div class="ts" style="color:var(--ink-soft);font-size:13px;">${escapeHtml(u.email)}${org ? ' · ' + escapeHtml(org.name) : ''} ${u.active ? '' : '· deactivated'}</div>
+            </div>
+            <button data-id="${u.id}" data-active="${u.active}" class="toggleActiveBtn">${u.active ? 'Deactivate' : 'Reactivate'}</button>
+          </div>
+        </div>`;
+    }).join('');
+    el.querySelectorAll('.toggleActiveBtn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const active = btn.dataset.active !== 'true';
+        await fetch(`/api/admin/users/${btn.dataset.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ active }),
+        });
+        await loadUsers();
+      });
+    });
+  }
+
+  document.getElementById('userForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const hint = document.getElementById('userHint');
+    hint.classList.remove('err'); hint.textContent = 'Creating…';
+    const role = document.getElementById('userRole').value;
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: document.getElementById('userEmail').value.trim(),
+          name: document.getElementById('userName').value.trim(),
+          password: document.getElementById('userPassword').value,
+          role,
+          clientOrgId: role === 'client' ? document.getElementById('userOrgId').value : undefined,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Failed to create account.');
+      hint.textContent = 'Created — share the temporary password with them securely.';
+      e.target.reset();
+      await loadUsers();
+    } catch (err) {
+      hint.textContent = err.message; hint.classList.add('err');
+    }
+  });
+
+  // --- Tabs ---
+  document.getElementById('tabOrgs').addEventListener('click', () => {
+    document.getElementById('tabOrgs').classList.add('active');
+    document.getElementById('tabUsers').classList.remove('active');
+    document.getElementById('orgsPanel').style.display = '';
+    document.getElementById('usersPanel').style.display = 'none';
+  });
+  document.getElementById('tabUsers').addEventListener('click', () => {
+    document.getElementById('tabUsers').classList.add('active');
+    document.getElementById('tabOrgs').classList.remove('active');
+    document.getElementById('usersPanel').style.display = '';
+    document.getElementById('orgsPanel').style.display = 'none';
+  });
+
+  (async () => {
+    await loadUser();
+    await loadOrgs();
+    await loadUsers();
+  })();
+</script>
+</body>
+</html>
