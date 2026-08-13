@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Client Portal — ComplyGlobally</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,72,400;0,72,500;0,72,600;1,72,400;1,72,500&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/shared.css">
+<style>
+  .status-pill { display:inline-block; padding:2px 10px; border-radius:999px; font-size:12px; font-weight:500; }
+  .status-Not-Started { background:var(--grey-bg); color:var(--grey-dot); }
+  .status-Awaiting-Documents { background:var(--seal-gold-bg); color:var(--seal-gold); }
+  .status-Under-Review { background:var(--teal-bg); color:var(--teal); }
+  .status-Filed { background:var(--teal-bg); color:var(--teal); }
+  .status-Overdue { background:var(--stamp-red-bg); color:var(--stamp-red); }
+  .item-row { border-bottom:1px solid var(--rule); padding:16px 0; }
+  .item-row:last-child { border-bottom:none; }
+  .doc-chip { display:inline-flex; align-items:center; gap:6px; font-size:13px; padding:4px 10px; border:1px solid var(--rule); border-radius:999px; margin:4px 6px 0 0; text-decoration:none; color:var(--ink); }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">ComplyGlobally <strong>Client Portal</strong></div>
+  <div class="nav-user" id="navUser"></div>
+</div>
+
+<div class="wrap">
+  <div class="card" style="margin-top:36px;">
+    <div class="card-head" style="padding-bottom:20px;">
+      <div class="card-eyebrow">Your Compliance Calendar</div>
+      <h1 id="calTitle">Loading…</h1>
+      <p class="sub" id="calSub"></p>
+    </div>
+  </div>
+
+  <div id="itemsList" style="margin-top:24px;"><div class="empty-state">Loading…</div></div>
+</div>
+
+<script>
+  function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
+  function statusClass(s) { return 'status-' + (s || '').replace(/\s+/g, '-'); }
+
+  let calendar = null;
+
+  async function loadUser() {
+    try {
+      const res = await fetch('/api/auth/me');
+      if (!res.ok) { location.href = '/login.html?next=/portal.html'; return; }
+      const { user } = await res.json();
+      if (user.role !== 'client') { location.href = '/app.html'; return; }
+      const el = document.getElementById('navUser');
+      el.innerHTML = `<span>${escapeHtml(user.name || user.email)}</span><button id="logoutBtn">Log out</button>`;
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await fetch('/api/auth/logout', { method: 'POST' });
+        location.href = '/login.html';
+      });
+    } catch (err) {
+      location.href = '/login.html';
+    }
+  }
+
+  async function loadCalendar() {
+    const res = await fetch('/api/portal/calendars');
+    const data = await res.json().catch(() => ({}));
+    const calendars = data.calendars || [];
+    if (!calendars.length) {
+      document.getElementById('calTitle').textContent = 'No calendar yet';
+      document.getElementById('calSub').textContent = 'Your compliance calendar will appear here once ComplyGlobally has generated and approved it.';
+      document.getElementById('itemsList').innerHTML = '';
+      return;
+    }
+    calendar = calendars[0]; // most recently approved
+    document.getElementById('calTitle').textContent = calendar.profile.companyName || 'Your compliance calendar';
+    document.getElementById('calSub').textContent =
+      `${calendar.profile.entityType || ''} · ${calendar.profile.state || ''} · FY ${calendar.profile.fyStart || ''}–${calendar.profile.fyEnd || ''}`;
+    renderItems();
+  }
+
+  function renderItems() {
+    const el = document.getElementById('itemsList');
+    if (!calendar.items.length) { el.innerHTML = '<div class="empty-state">No items on this calendar.</div>'; return; }
+    el.innerHTML = `<div class="card"><div class="card-body">` + calendar.items.map((item, idx) => {
+      const clientDocs = (item.documents || []).filter(d => d.type === 'client_upload');
+      const certs = (item.documents || []).filter(d => d.type === 'certificate');
+      return `
+        <div class="item-row">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+            <div>
+              <div style="font-weight:500;">${escapeHtml(item.compliance_name)}</div>
+              <div class="ts" style="color:var(--ink-soft);font-size:13px;margin-top:2px;">Due: ${escapeHtml(item.due_date)}</div>
+            </div>
+            <span class="status-pill ${statusClass(item.clientStatus)}">${escapeHtml(item.clientStatus)}</span>
+          </div>
+          <p style="font-size:14px;color:var(--ink-soft);margin:8px 0;">${escapeHtml(item.description)}</p>
+
+          ${certs.length ? `<div style="margin-top:8px;">
+            <div class="ts" style="font-size:12px;color:var(--ink-soft);">Certificate / acknowledgment</div>
+            ${certs.map((d, di) => `<a class="doc-chip" href="/api/portal/calendars/${calendar._id}/items/${idx}/documents/${item.documents.indexOf(d)}/download">${escapeHtml(d.fileName)} ↓</a>`).join('')}
+          </div>` : ''}
+
+          ${clientDocs.length ? `<div style="margin-top:8px;">
+            <div class="ts" style="font-size:12px;color:var(--ink-soft);">Your uploads</div>
+            ${clientDocs.map((d) => `<a class="doc-chip" href="/api/portal/calendars/${calendar._id}/items/${idx}/documents/${item.documents.indexOf(d)}/download">${escapeHtml(d.fileName)} ↓</a>`).join('')}
+          </div>` : ''}
+
+          <div style="margin-top:10px;">
+            <label class="upload-btn" style="cursor:pointer;font-size:13px;color:var(--teal);">
+              + Upload a document
+              <input type="file" data-idx="${idx}" style="display:none;" class="uploadInput">
+            </label>
+            <span class="hint" data-hint-idx="${idx}"></span>
+          </div>
+        </div>`;
+    }).join('') + `</div></div>`;
+
+    el.querySelectorAll('.uploadInput').forEach(input => {
+      input.addEventListener('change', async () => {
+        const idx = input.dataset.idx;
+        const hint = el.querySelector(`[data-hint-idx="${idx}"]`);
+        const file = input.files[0];
+        if (!file) return;
+        hint.textContent = 'Uploading…'; hint.classList.remove('err');
+        const formData = new FormData();
+        formData.append('file', file);
+        try {
+          const res = await fetch(`/api/portal/calendars/${calendar._id}/items/${idx}/upload`, { method: 'POST', body: formData });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || 'Upload failed.');
+          calendar = data.calendar;
+          renderItems();
+        } catch (err) {
+          hint.textContent = err.message; hint.classList.add('err');
+        }
+      });
+    });
+  }
+
+  (async () => {
+    await loadUser();
+    await loadCalendar();
+  })();
+</script>
+</body>
+</html>
