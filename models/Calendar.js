@@ -70,9 +70,15 @@ const profileSchema = new mongoose.Schema(
 
 const calendarSchema = new mongoose.Schema(
   {
-    // Plain username string, not a User ref — the app now has a single
-    // shared login for the whole team rather than per-person accounts.
+    // The staff/admin user's email who generated this calendar (accounts
+    // are real per-person now — see models/User.js).
     createdBy: { type: String, required: true },
+    // Which client company this calendar belongs to. Nullable so existing
+    // calendars generated before multi-tenancy don't break, and so staff
+    // can still generate an internal/test calendar with no client
+    // attached — but every /portal/* route MUST filter by this and treat
+    // a null clientOrgId as invisible to any client.
+    clientOrgId: { type: mongoose.Schema.Types.ObjectId, ref: "ClientOrg", default: null, index: true },
     profile: { type: profileSchema, required: true },
     items: { type: [itemSchema], default: [] },
 
