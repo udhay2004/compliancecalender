@@ -1,31 +1,35 @@
 // routes/auth.routes.js
 //
-// One shared login for the whole team — no signup, no per-person
-// accounts, no email/approval flow. Credentials live in .env as
-// AUTH_USERNAME / AUTH_PASSWORD (defaults below match what was
-// requested, but override them in .env for anything beyond local
-// testing — that file is gitignored and never committed).
+// Real per-person login against the User collection (models/User.js),
+// replacing the old single-shared-username/password design. There is
+// still no public signup route here on purpose — every account (staff,
+// admin, client) is created by an admin/super_admin via
+// routes/admin.routes.js, or by the bootstrap script
+// (scripts/createUser.js) for the very first super_admin.
 
 const express = require("express");
+const User = require("../models/User");
 const { setSessionCookie, clearSessionCookie, requireAuth } = require("../middleware/auth");
 
 const router = express.Router();
 
-const AUTH_USERNAME = process.env.AUTH_USERNAME || "complyglobglob";
-const AUTH_PASSWORD = process.env.AUTH_PASSWORD || "GGchil1999!";
-
-router.post("/login", (req, res) => {
-  const { username, password } = req.body || {};
-  if (!username || !password) {
-    return res.status(400).json({ error: "Username and password required." });
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body || {};
+  if (!email || !password) {
+    return res.status(400).json({ error: "Email and password required." });
   }
 
-  if (username.trim() !== AUTH_USERNAME || password !== AUTH_PASSWORD) {
-    return res.status(401).json({ error: "Invalid username or password." });
+  const user = await User.findOne({ email: email.trim().toLowerCase() });
+  if (!user || !user.active) {
+    return res.status(401).json({ error: "Invalid email or password." });
+  }
+  const ok = await user.checkPassword(password);
+  if (!ok) {
+    return res.status(401).json({ error: "Invalid email or password." });
   }
 
-  setSessionCookie(res, AUTH_USERNAME);
-  return res.json({ user: { username: AUTH_USERNAME } });
+  setSessionCookie(res, user);
+  return res.json({ user: user.toSafeJSON() });
 });
 
 router.post("/logout", (req, res) => {
@@ -34,7 +38,7 @@ router.post("/logout", (req, res) => {
 });
 
 router.get("/me", requireAuth, (req, res) => {
-  return res.json({ user: { username: req.user.username } });
+  return res.json({ user: req.user.toSafeJSON() });
 });
 
 module.exports = router;
