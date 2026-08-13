@@ -99,6 +99,16 @@ function requirePageRole(minRole) {
   };
 }
 
+// Portal pages need the exact role "client", not "at least client" —
+// requirePageRole would let staff/admin through too (they outrank
+// client), which is wrong for a client-only UI. Mirrors requireClientRole.
+function requirePageClientRole(req, res, next) {
+  if (!req.user || req.user.role !== "client") {
+    return res.redirect("/login.html?reason=not_authorized");
+  }
+  next();
+}
+
 module.exports = {
   COOKIE_NAME,
   setSessionCookie,
@@ -108,4 +118,5 @@ module.exports = {
   requireClientRole,
   requirePageAuth,
   requirePageRole,
+  requirePageClientRole,
 };
