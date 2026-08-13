@@ -5,6 +5,8 @@ const Calendar = require("../models/Calendar");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { generateCompanyCalendar } = require("../lib/claude");
 const { calendarToPdfBuffer } = require("../lib/pdf");
+const { upload } = require("../middleware/upload");
+const storage = require("../lib/storage");
 
 const router = express.Router();
 // Everything in this file is internal tooling (generate/review/approve/
@@ -154,6 +156,102 @@ router.post("/:id/reject", async (req, res) => {
   calendar.reviewNotes = req.body?.notes || "";
   await calendar.save();
   res.json({ calendar });
+});
+
+// PATCH /api/calendars/:id/items/:index/status — update the ongoing
+// client-facing status of ONE item. Deliberately separate from the
+// generic PATCH /items/:index above, which only works pre-approval —
+// this one works on APPROVED calendars too, since clientStatus keeps
+// changing long after a calendar has been approved (that's the whole
+// point of the client portal).
+router.patch("/:id/items/:index/status", async (req, res) => {
+  const calendar = await Calendar.findById(req.params.id);
+  if (!calendar) return res.status(404).json({ error: "Not found." });
+  const idx = parseInt(req.params.index, 10);
+  if (isNaN(idx) || idx < 0 || idx >= calendar.items.length) {
+    return res.status(400).json({ error: "Invalid item index." });
+  }
+
+  const { clientStatus, paymentStatus, dueDateActual } = req.body || {};
+  const item = calendar.items[idx];
+  if (clientStatus !== undefined) {
+    if (!Calendar.schema.path("items").schema.path("clientStatus").enumValues.includes(clientStatus)) {
+      return res.status(400).json({ error: "Invalid clientStatus value." });
+    }
+    item.clientStatus = clientStatus;
+  }
+  if (paymentStatus !== undefined) {
+    if (!Calendar.schema.path("items").schema.path("paymentStatus").enumValues.includes(paymentStatus)) {
+      return res.status(400).json({ error: "Invalid paymentStatus value." });
+    }
+    item.paymentStatus = paymentStatus;
+  }
+  if (dueDateActual !== undefined) {
+    const parsed = dueDateActual ? new Date(dueDateActual) : null;
+    if (dueDateActual && isNaN(parsed.getTime())) {
+      return res.status(400).json({ error: "dueDateActual must be a valid date." });
+    }
+    item.dueDateActual = parsed;
+  }
+
+  await calendar.save();
+  res.json({ calendar });
+});
+
+// POST /api/calendars/:id/items/:index/certificate — staff uploads the
+// filed certificate/acknowledgment for one item, which immediately
+// becomes visible to the client in the portal. This is the "status
+// shared with them" loop closing on the staff side.
+router.post("/:id/items/:index/certificate", upload.single("file"), async (req, res) => {
+  const calendar = await Calendar.findById(req.params.id);
+  if (!calendar) return res.status(404).json({ error: "Not found." });
+  const idx = parseInt(req.params.index, 10);
+  if (isNaN(idx) || idx < 0 || idx >= calendar.items.length) {
+    return res.status(400).json({ error: "Invalid item index." });
+  }
+  if (!req.file) return res.status(400).json({ error: "No file uploaded (field name must be 'file')." });
+
+  try {
+    const { fileKey, fileUrl } = await storage.saveFile({
+      buffer: req.file.buffer,
+      fileName: req.file.originalname,
+    });
+    calendar.items[idx].documents.push({
+      fileKey,
+      fileUrl,
+      fileName: req.file.originalname,
+      uploadedBy: req.user.email,
+      type: "certificate",
+    });
+    // Uploading the certificate is the natural "this is done" signal —
+    // auto-advance status, but staff can still override it manually via
+    // PATCH .../status if that's wrong for a given item.
+    calendar.items[idx].clientStatus = "Filed";
+    await calendar.save();
+    res.status(201).json({ calendar });
+  } catch (err) {
+    console.error("Certificate upload error:", err);
+    res.status(500).json({ error: "Could not save the uploaded file." });
+  }
+});
+
+// GET /api/calendars/:id/items/:index/documents/:docIndex/download — any
+// staff member can download any document on any calendar (internal
+// tooling, no per-client scoping needed here — that scoping lives in
+// routes/portal.routes.js instead, for client accounts).
+router.get("/:id/items/:index/documents/:docIndex/download", async (req, res) => {
+  const calendar = await Calendar.findById(req.params.id);
+  if (!calendar) return res.status(404).json({ error: "Not found." });
+  const idx = parseInt(req.params.index, 10);
+  const docIdx = parseInt(req.params.docIndex, 10);
+  const item = calendar.items[idx];
+  const doc = item && item.documents[docIdx];
+  if (!doc) return res.status(404).json({ error: "Document not found." });
+
+  const stream = storage.getFileStream(doc.fileKey);
+  if (!stream) return res.status(404).json({ error: "File is missing from storage." });
+  res.setHeader("Content-Disposition", `attachment; filename="${doc.fileName}"`);
+  stream.pipe(res);
 });
 
 // GET /api/calendars/:id/pdf — download, works for any status (draft PDFs
