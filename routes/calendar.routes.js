@@ -2,12 +2,16 @@
 
 const express = require("express");
 const Calendar = require("../models/Calendar");
-const { requireAuth } = require("../middleware/auth");
+const { requireAuth, requireRole } = require("../middleware/auth");
 const { generateCompanyCalendar } = require("../lib/claude");
 const { calendarToPdfBuffer } = require("../lib/pdf");
 
 const router = express.Router();
-router.use(requireAuth);
+// Everything in this file is internal tooling (generate/review/approve/
+// reject) — staff or more senior only. Client accounts have their own
+// separate, much narrower route file (routes/portal.routes.js) and must
+// never reach these endpoints even if they guess a URL.
+router.use(requireAuth, requireRole("staff"));
 
 // Extremely basic in-memory rate limit, kept from the original app —
 // still useful even with auth, so one account can't accidentally burn
@@ -27,7 +31,7 @@ function isRateLimited(userId) {
 // Creates a new calendar in "pending_review" — it is NOT the source of
 // truth until a reviewer approves it.
 router.post("/generate", async (req, res) => {
-  if (isRateLimited(req.user.username)) {
+  if (isRateLimited(req.user.email)) {
     return res.status(429).json({ error: "Rate limit reached. Try again later." });
   }
 
@@ -35,6 +39,10 @@ router.post("/generate", async (req, res) => {
   if (!profile || !profile.state || !profile.entityType) {
     return res.status(400).json({ error: "Missing required profile fields (state, entityType)." });
   }
+  // Optional — links this calendar to a client company (models/ClientOrg.js)
+  // so it can later appear in that client's portal once approved. Left
+  // null for internal/test calendars with no client attached yet.
+  const clientOrgId = req.body?.clientOrgId || null;
 
   try {
     const { items, sourceMode } = await generateCompanyCalendar(profile);
@@ -43,7 +51,8 @@ router.post("/generate", async (req, res) => {
     }
 
     const calendar = await Calendar.create({
-      createdBy: req.user.username,
+      createdBy: req.user.email,
+      clientOrgId,
       profile,
       items,
       status: "pending_review",
@@ -59,7 +68,7 @@ router.post("/generate", async (req, res) => {
 
 // GET /api/calendars/mine — calendars the current user created
 router.get("/mine", async (req, res) => {
-  const calendars = await Calendar.find({ createdBy: req.user.username })
+  const calendars = await Calendar.find({ createdBy: req.user.email })
     .sort({ createdAt: -1 });
   res.json({ calendars });
 });
@@ -125,7 +134,7 @@ router.post("/:id/approve", async (req, res) => {
     return res.status(400).json({ error: "Only pending_review calendars can be approved." });
   }
   calendar.status = "approved";
-  calendar.reviewedBy = req.user.username;
+  calendar.reviewedBy = req.user.email;
   calendar.reviewedAt = new Date();
   calendar.reviewNotes = req.body?.notes || "";
   await calendar.save();
@@ -140,7 +149,7 @@ router.post("/:id/reject", async (req, res) => {
     return res.status(400).json({ error: "Only pending_review calendars can be rejected." });
   }
   calendar.status = "rejected";
-  calendar.reviewedBy = req.user.username;
+  calendar.reviewedBy = req.user.email;
   calendar.reviewedAt = new Date();
   calendar.reviewNotes = req.body?.notes || "";
   await calendar.save();
