@@ -32,6 +32,57 @@ const itemSchema = new mongoose.Schema(
     // Set true once a reviewer edits this specific line item, so the diff
     // between "what Claude said" and "what a human corrected" isn't lost.
     editedByReviewer: { type: Boolean, default: false },
+
+    // --- Client-facing lifecycle (added for the portal) ---------------
+    // Independent from the calendar-level `status` above on purpose: the
+    // calendar-level status is "has a human verified this AI output at
+    // all" (pending_review/approved/rejected), a one-time gate. This is
+    // "where is THIS specific filing right now" — an ongoing, per-item
+    // state that keeps changing long after the calendar was approved.
+    clientStatus: {
+      type: String,
+      enum: ["Not Started", "Awaiting Documents", "Under Review", "Filed", "Overdue"],
+      default: "Not Started",
+    },
+    paymentStatus: {
+      type: String,
+      enum: ["Not Invoiced", "Invoiced", "Paid", "Overdue"],
+      default: "Not Invoiced",
+    },
+    // Both the client's uploaded proof AND the certificate/acknowledgment
+    // staff uploads back live here, distinguished by `type`. Files
+    // themselves are NOT stored in Mongo — only a reference returned by
+    // lib/storage.js (see that file for why: ephemeral hosting disks and
+    // Mongo document size limits both make storing bytes here a bad
+    // idea). `fileKey` is what lib/storage.js needs to actually fetch or
+    // delete the file later; `fileUrl` is only ever a display hint, never
+    // trusted for access control — every download goes through an
+    // authenticated route that re-checks the requester owns this item.
+    documents: {
+      type: [
+        {
+          fileKey: { type: String, required: true },
+          fileName: { type: String, required: true },
+          fileUrl: { type: String, default: "" },
+          uploadedBy: { type: String, required: true },
+          uploadedAt: { type: Date, default: Date.now },
+          type: { type: String, enum: ["client_upload", "certificate"], required: true },
+        },
+      ],
+      default: [],
+    },
+    // Set by the reminders job (lib/reminders.js) so it doesn't re-email
+    // the same person about the same item every single day.
+    lastReminderSentAt: { type: Date, default: null },
+    // Optional, staff-set actual calendar date this item is due. Kept
+    // separate from `due_date` (a human-readable STRING like "15th day
+    // of the 4th month after FY end (Annually)") on purpose — due_date
+    // is what Claude produces and a person reads, but it's free text,
+    // not something a reminders job can reliably compute "due in 7
+    // days" from. Until every item has this set, due-date reminders
+    // only cover items staff has dated; payment reminders (see
+    // lib/reminders.js) don't depend on this at all and work today.
+    dueDateActual: { type: Date, default: null },
   },
   { _id: false }
 );
