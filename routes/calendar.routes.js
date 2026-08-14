@@ -75,9 +75,14 @@ router.get("/mine", async (req, res) => {
   res.json({ calendars });
 });
 
-// GET /api/calendars/queue — everything pending review (any teammate can review)
+// GET /api/calendars/queue — everything pending review (any teammate can
+// review). Explicitly excludes source:"public" — free-tier preview
+// calendars (routes/public.routes.js) are also saved as pending_review
+// (nothing generated there has been human-verified either), but they
+// are NOT real client engagements and must never clutter this queue.
+// See GET /api/admin/leads for where those actually belong.
 router.get("/queue", async (req, res) => {
-  const calendars = await Calendar.find({ status: "pending_review" })
+  const calendars = await Calendar.find({ status: "pending_review", source: { $ne: "public" } })
     .sort({ createdAt: 1 });
   res.json({ calendars });
 });
