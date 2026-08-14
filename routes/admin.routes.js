@@ -17,6 +17,7 @@
 const express = require("express");
 const User = require("../models/User");
 const ClientOrg = require("../models/ClientOrg");
+const Calendar = require("../models/Calendar");
 const { requireAuth, requireRole } = require("../middleware/auth");
 
 const router = express.Router();
@@ -126,6 +127,38 @@ router.patch("/users/:id", async (req, res) => {
 
   await target.save();
   res.json({ user: target.toSafeJSON() });
+});
+
+// ---------------------------------------------------------------------
+// Public-tier leads (routes/public.routes.js) — visitors who used the
+// free calendar tool and left contact info to unlock the full result.
+// Read-only: converting a lead into a real client/ClientOrg is a manual
+// step (create the ClientOrg + client account via the routes above,
+// same as any other new client) rather than automated, since that
+// decision — and any sales conversation before it — should stay a human
+// one.
+// ---------------------------------------------------------------------
+
+// GET /api/admin/leads — most recent first, only calendars where a
+// visitor actually unlocked (leadContact set) — a generated-but-abandoned
+// preview is not a lead and isn't included.
+router.get("/leads", async (req, res) => {
+  const leads = await Calendar.find({ source: "public", leadContact: { $ne: null } })
+    .sort({ "leadContact.unlockedAt": -1 })
+    .select("profile leadContact createdAt itemCount items")
+    .lean();
+
+  res.json({
+    leads: leads.map((c) => ({
+      id: c._id,
+      companyName: c.profile?.companyName || "",
+      state: c.profile?.state,
+      entityType: c.profile?.entityType,
+      itemCount: (c.items || []).length,
+      leadContact: c.leadContact,
+      generatedAt: c.createdAt,
+    })),
+  });
 });
 
 module.exports = router;
