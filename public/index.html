@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Compliance Calendar Generator</title>
+<title>Free US Compliance Calendar — ComplyGlobally</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,72,400;0,72,500;0,72,600;1,72,400;1,72,500&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -31,7 +31,8 @@
   }
   .brand { font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); }
   .brand strong { color: var(--ink); font-weight: 600; }
-  .case-count { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); }
+  .staff-link { font-family: var(--mono); font-size: 11px; color: var(--ink-soft); text-decoration: none; letter-spacing: .06em; }
+  .staff-link:hover { color: var(--teal); text-decoration: underline; }
 
   /* ---- intake form ---- */
   .intake { margin-top: 36px; background: var(--card); border: 1px solid var(--rule); box-shadow: 0 1px 0 var(--rule); }
@@ -46,11 +47,11 @@
   .field { display: flex; flex-direction: column; }
   .field.span2 { grid-column: 1 / -1; }
   label { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 7px; }
-  input[type=text], input[type=date], select {
+  input[type=text], input[type=date], input[type=email], input[type=tel], select {
     font-family: var(--serif); font-size: 16px; color: var(--ink); background: transparent;
     border: none; border-bottom: 1px solid var(--rule); padding: 8px 2px 10px; outline: none; width: 100%;
   }
-  input[type=text]:focus, input[type=date]:focus, select:focus { border-bottom-color: var(--teal); }
+  input[type=text]:focus, input[type=date]:focus, input[type=email]:focus, input[type=tel]:focus, select:focus { border-bottom-color: var(--teal); }
   select { cursor: pointer; appearance: none; -webkit-appearance: none;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%233B4A6B'/></svg>");
     background-repeat: no-repeat; background-position: right 4px center; }
@@ -80,12 +81,12 @@
 
   .submit-row { margin-top: 26px; display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
   .hint { font-size: 12px; color: var(--grey-dot); margin-right: auto; max-width: 40ch; }
-  button#submit {
+  button#submit, button.unlock-btn, button.unlock-submit {
     font-family: var(--mono); font-size: 12.5px; letter-spacing: .06em; text-transform: uppercase; font-weight: 600;
     background: var(--ink); color: #fff; border: none; padding: 13px 24px; cursor: pointer; transition: background .12s;
   }
-  button#submit:hover:not(:disabled) { background: var(--teal); }
-  button#submit:disabled { background: #B7BCC0; cursor: wait; }
+  button#submit:hover:not(:disabled), button.unlock-btn:hover:not(:disabled), button.unlock-submit:hover:not(:disabled) { background: var(--teal); }
+  button#submit:disabled, button.unlock-btn:disabled, button.unlock-submit:disabled { background: #B7BCC0; cursor: wait; }
 
   /* ---- output: case files ---- */
   .cases { margin-top: 46px; }
@@ -118,6 +119,24 @@
   .src-link { font-size: 11px; color: var(--teal); text-decoration: none; display: block; margin-top: 3px; }
   .src-link:hover { text-decoration: underline; }
 
+  /* ---- locked state ---- */
+  .locked-cell { color: var(--grey-dot); font-family: var(--mono); font-size: 12px; }
+  .locked-cell .lock-icon { margin-right: 5px; }
+  tr.locked-row td { filter: blur(0.3px); }
+
+  .unlock-panel {
+    margin-top: 28px; padding: 24px 26px; background: var(--seal-gold-bg); border: 1px solid var(--seal-gold);
+  }
+  .unlock-panel h3 { font-family: var(--serif); font-weight: 600; font-size: 18px; margin: 0 0 6px; }
+  .unlock-panel p { font-size: 13px; color: var(--ink-soft); margin: 0 0 16px; line-height: 1.5; max-width: 56ch; }
+  .unlock-form { display: none; grid-template-columns: 1fr 1fr 1fr auto; gap: 14px; align-items: end; }
+  .unlock-form.visible { display: grid; }
+  .unlock-form .field { margin: 0; }
+  .unlock-form label { font-size: 10px; }
+  .unlock-cta-row { display: flex; align-items: center; gap: 14px; }
+  .unlock-error { color: var(--stamp-red); font-size: 12px; margin-top: 10px; font-family: var(--mono); }
+  .unlock-success { color: var(--teal); font-size: 12px; margin-top: 10px; font-family: var(--mono); }
+
   .legend { margin-top: 20px; font-family: var(--mono); font-size: 11px; color: var(--ink-soft); display: flex; gap: 18px; flex-wrap: wrap; }
   .legend span { display: inline-flex; align-items: center; }
 
@@ -140,22 +159,23 @@
     table.cal th:nth-child(3), table.cal td:nth-child(3) { display: none; }
     .wrap { padding: 0 14px 100px; }
     .topbar { padding: 14px 16px; }
+    .unlock-form { grid-template-columns: 1fr; }
   }
 </style>
 </head>
 <body>
 <div class="topbar">
-  <div class="brand">Compliance Calendar <strong>Generator</strong></div>
-  <div class="case-count" id="caseCount">0 calendars this session</div>
+  <div class="brand">Comply<strong>Globally</strong> · Free Compliance Calendar</div>
+  <a class="staff-link" href="/login.html">Staff Login →</a>
 </div>
 
 <div class="wrap">
 
   <div class="intake">
     <div class="intake-head">
-      <div class="intake-eyebrow">Internal Tool · Not Legal Advice</div>
-      <h1>Company Compliance Intake</h1>
-      <p class="sub">Fill in the company profile below. This researches live from official government sources and builds a compliance calendar — the same fields your Excel template uses, just typed once instead of maintained by hand.</p>
+      <div class="intake-eyebrow">Free Tool · Not Legal Advice</div>
+      <h1>What compliance does your US company actually owe?</h1>
+      <p class="sub">Fill in your company profile below and we'll research your obligations from official government sources. You'll see everything you owe — deadlines, required documents, and filing instructions unlock when you leave your contact info so our team can help you stay on top of them.</p>
     </div>
     <div class="intake-body">
 
@@ -227,13 +247,13 @@
 
       <div class="submit-row">
         <span class="hint" id="statusHint"></span>
-        <button id="submit">Generate Calendar →</button>
+        <button id="submit">Generate My Calendar →</button>
       </div>
     </div>
   </div>
 
   <div class="cases" id="cases">
-    <div class="empty-state" id="emptyState">No calendars generated yet this session.</div>
+    <div class="empty-state" id="emptyState">Your compliance calendar will appear here.</div>
   </div>
 
 </div>
@@ -266,23 +286,30 @@
     document.getElementById('foreignBlock').classList.toggle('visible', e.target.checked);
   });
 
-  let caseCount = 0;
-
-  // The prompt now lives server-side in server.js — this page just sends the
-  // profile to our own backend at /api/generate and gets back parsed JSON.
-  // No API key, no Anthropic prompt, and no model name are ever present in
-  // this file, so there's nothing sensitive to leak by viewing page source.
-  async function callServer(profile) {
-    const response = await fetch("/api/generate", {
+  // This page talks to the UNAUTHENTICATED public tier
+  // (routes/public.routes.js), not the staff /api/calendars routes —
+  // nothing here requires a login, and the response is redacted
+  // server-side until a visitor unlocks it with their contact info.
+  async function callGenerate(profile) {
+    const response = await fetch("/api/public/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ profile })
     });
     const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      throw new Error(data.error || `Server error ${response.status}`);
-    }
-    return data; // already { items: [...] }
+    if (!response.ok) throw new Error(data.error || `Server error ${response.status}`);
+    return data; // { calendarId, itemCount, items: [redacted...] }
+  }
+
+  async function callUnlock(calendarId, contact) {
+    const response = await fetch(`/api/public/${calendarId}/unlock`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(contact)
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || `Server error ${response.status}`);
+    return data; // { calendar } — full, unredacted
   }
 
   const CATEGORY_ORDER = ["Mandatory Annual","Conditional","Transfer Pricing","Foreign Reporting (ODI/FEMA)","Event-Based"];
@@ -301,57 +328,45 @@
     const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML;
   }
 
-  function renderCase(profile, items) {
-    caseCount++;
-    document.getElementById('caseCount').textContent = `${caseCount} calendar${caseCount===1?'':'s'} this session`;
-    document.getElementById('emptyState')?.remove();
+  // Renders one row. Locked items only ever have category/compliance_name/
+  // applicable_to available on the object at all — due_date/description/
+  // authority/source_url/confidence are simply absent from the API
+  // response until unlock, so there's nothing to accidentally leak here.
+  function renderRow(it) {
+    if (it.locked) {
+      return `
+        <tr class="locked-row">
+          <td class="locked-cell"><span class="lock-icon">🔒</span>Unlock to view</td>
+          <td class="name">${escapeHtml(it.compliance_name)}</td>
+          <td class="applies">${escapeHtml(it.applicable_to || '')}</td>
+          <td class="locked-cell"><span class="lock-icon">🔒</span>Details, required documents, and filing instructions available after unlock</td>
+        </tr>`;
+    }
+    return `
+      <tr>
+        <td class="due">${escapeHtml(it.due_date)}</td>
+        <td class="name"><span class="dot ${escapeHtml(it.confidence||'medium')}"></span>${escapeHtml(it.compliance_name)}</td>
+        <td class="applies">${escapeHtml(it.applicable_to)}</td>
+        <td>${escapeHtml(it.description)} — <span style="color:var(--ink-soft)">${escapeHtml(it.authority||'')}</span>
+          ${it.source_url ? `<a class="src-link" href="${escapeHtml(it.source_url)}" target="_blank" rel="noopener">${escapeHtml(it.source_url)}</a>` : ''}
+        </td>
+      </tr>`;
+  }
 
+  function renderTables(items) {
     const groups = groupByCategory(items);
-    const counts = { high: 0, medium: 0, low: 0 };
-    items.forEach(it => { if (counts[it.confidence] !== undefined) counts[it.confidence]++; });
-
-    const caseEl = document.createElement('div');
-    caseEl.className = 'case';
-
-    let catHtml = '';
+    let html = '';
     CATEGORY_ORDER.forEach(cat => {
       if (!groups[cat] || !groups[cat].length) return;
-      catHtml += `<div class="cat-block">
+      html += `<div class="cat-block">
         <div class="cat-title">${escapeHtml(cat)}</div>
         <table class="cal">
           <thead><tr><th>Due Date</th><th>Compliance</th><th>Applies To</th><th>Description &amp; Source</th></tr></thead>
-          <tbody>
-          ${groups[cat].map(it => `
-            <tr>
-              <td class="due">${escapeHtml(it.due_date)}</td>
-              <td class="name"><span class="dot ${escapeHtml(it.confidence||'medium')}"></span>${escapeHtml(it.compliance_name)}</td>
-              <td class="applies">${escapeHtml(it.applicable_to)}</td>
-              <td>${escapeHtml(it.description)} — <span style="color:var(--ink-soft)">${escapeHtml(it.authority||'')}</span>
-                ${it.source_url ? `<a class="src-link" href="${escapeHtml(it.source_url)}" target="_blank" rel="noopener">${escapeHtml(it.source_url)}</a>` : ''}
-              </td>
-            </tr>`).join('')}
-          </tbody>
+          <tbody>${groups[cat].map(renderRow).join('')}</tbody>
         </table>
       </div>`;
     });
-
-    caseEl.innerHTML = `
-      <div class="case-header">
-        <div>
-          <div class="case-title">${escapeHtml(profile.companyName || 'Unnamed Company')}</div>
-          <div class="case-sub">${escapeHtml(profile.entityType)} (${escapeHtml(profile.taxStatus)}) · ${escapeHtml(profile.state)} · FY ${escapeHtml(profile.fyStart)}–${escapeHtml(profile.fyEnd)} · Generated ${new Date().toLocaleString()}</div>
-        </div>
-        <div class="case-summary">${items.length} items<br>${counts.high} verified · ${counts.medium} review · ${counts.low} unverified</div>
-      </div>
-      ${catHtml}
-      <div class="legend">
-        <span><span class="dot high"></span> High confidence — clearly stated on an official source</span>
-        <span><span class="dot medium"></span> Medium — needs a quick human check</span>
-        <span><span class="dot low"></span> Low — could not fully verify, don't rely on this yet</span>
-      </div>
-      <div class="disclaimer">Research result — not yet a verified compliance rule. Confirm anything marked medium/low confidence with an official source or your CPA/registered agent before relying on it.</div>
-    `;
-    document.getElementById('cases').prepend(caseEl);
+    return html;
   }
 
   function readProfile() {
@@ -369,6 +384,95 @@
     };
   }
 
+  function wireUnlockPanel(caseEl, calendarId, profile) {
+    const ctaBtn = caseEl.querySelector('.unlock-cta-btn');
+    const form = caseEl.querySelector('.unlock-form');
+    const submitBtn = caseEl.querySelector('.unlock-submit');
+    const errorEl = caseEl.querySelector('.unlock-error');
+    const successEl = caseEl.querySelector('.unlock-success');
+
+    ctaBtn.addEventListener('click', () => {
+      form.classList.add('visible');
+      ctaBtn.style.display = 'none';
+    });
+
+    submitBtn.addEventListener('click', async () => {
+      const name = caseEl.querySelector('.unlock-name').value.trim();
+      const email = caseEl.querySelector('.unlock-email').value.trim();
+      const phone = caseEl.querySelector('.unlock-phone').value.trim();
+      errorEl.textContent = '';
+      if (!email || !email.includes('@')) {
+        errorEl.textContent = 'Please enter a valid email to unlock your calendar.';
+        return;
+      }
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Unlocking…';
+      try {
+        const data = await callUnlock(calendarId, { name, email, phone });
+        const items = data.calendar.items || [];
+        caseEl.querySelector('.tables-container').innerHTML = renderTables(items);
+        caseEl.querySelector('.unlock-panel').remove();
+        successEl.textContent = '';
+        const note = document.createElement('div');
+        note.className = 'unlock-success';
+        note.textContent = `Full calendar unlocked — sent a copy to ${email}. Our team may reach out to help with next steps.`;
+        caseEl.appendChild(note);
+      } catch (err) {
+        errorEl.textContent = err.message;
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Unlock Full Calendar';
+      }
+    });
+  }
+
+  let caseCount = 0;
+
+  function renderCase(profile, items, calendarId) {
+    caseCount++;
+    document.getElementById('emptyState')?.remove();
+
+    const hasLocked = items.some(it => it.locked);
+    const counts = { high: 0, medium: 0, low: 0 };
+    items.forEach(it => { if (counts[it.confidence] !== undefined) counts[it.confidence]++; });
+
+    const caseEl = document.createElement('div');
+    caseEl.className = 'case';
+
+    caseEl.innerHTML = `
+      <div class="case-header">
+        <div>
+          <div class="case-title">${escapeHtml(profile.companyName || 'Unnamed Company')}</div>
+          <div class="case-sub">${escapeHtml(profile.entityType)} (${escapeHtml(profile.taxStatus)}) · ${escapeHtml(profile.state)} · FY ${escapeHtml(profile.fyStart)}–${escapeHtml(profile.fyEnd)} · Generated ${new Date().toLocaleString()}</div>
+        </div>
+        <div class="case-summary">${items.length} obligation${items.length===1?'':'s'} found</div>
+      </div>
+      <div class="tables-container">${renderTables(items)}</div>
+      ${hasLocked ? `
+      <div class="unlock-panel">
+        <h3>Unlock your complete compliance calendar</h3>
+        <p>See every deadline, required document, and filing instruction — free. Leave your details and our team can also help you file directly.</p>
+        <div class="unlock-cta-row">
+          <button class="unlock-btn unlock-cta-btn" type="button">Unlock Full Calendar</button>
+        </div>
+        <div class="unlock-form">
+          <div class="field"><label>Name</label><input type="text" class="unlock-name" placeholder="Jane Doe"></div>
+          <div class="field"><label>Email *</label><input type="email" class="unlock-email" placeholder="jane@company.com"></div>
+          <div class="field"><label>Phone</label><input type="tel" class="unlock-phone" placeholder="Optional"></div>
+          <button class="unlock-submit unlock-btn" type="button">Unlock</button>
+        </div>
+        <div class="unlock-error"></div>
+      </div>` : ''}
+      <div class="legend">
+        <span><span class="dot high"></span> High confidence — clearly stated on an official source</span>
+        <span><span class="dot medium"></span> Medium — needs a quick human check</span>
+        <span><span class="dot low"></span> Low — could not fully verify, don't rely on this yet</span>
+      </div>
+      <div class="disclaimer">Research result — not yet a verified compliance rule. Confirm anything marked medium/low confidence with an official source, or unlock your calendar to have our team verify it for you.</div>
+    `;
+    document.getElementById('cases').prepend(caseEl);
+    if (hasLocked) wireUnlockPanel(caseEl, calendarId, profile);
+  }
+
   async function handleSubmit() {
     const profile = readProfile();
     if (!profile.state || !profile.entityType) return;
@@ -384,11 +488,11 @@
     document.getElementById('cases').prepend(loadingEl);
 
     try {
-      const parsed = await callServer(profile);
-      const items = Array.isArray(parsed.items) ? parsed.items : [];
+      const data = await callGenerate(profile);
+      const items = Array.isArray(data.items) ? data.items : [];
       if (!items.length) throw new Error('No calendar items returned — try again or refine the profile.');
       loadingEl.remove();
-      renderCase(profile, items);
+      renderCase(profile, items, data.calendarId);
     } catch (err) {
       loadingEl.remove();
       const errEl = document.createElement('div');
