@@ -18,15 +18,22 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const cron = require("node-cron");
 const { connectDB } = require("./config/db");
-const { requirePageAuth, requirePageRole, requirePageClientRole } = require("./middleware/auth");
+const { requirePageAuth, requirePageRole, requirePageClientRole, tryPageAuth } = require("./middleware/auth");
 const authRoutes = require("./routes/auth.routes");
 const calendarRoutes = require("./routes/calendar.routes");
 const adminRoutes = require("./routes/admin.routes");
 const portalRoutes = require("./routes/portal.routes");
+const publicRoutes = require("./routes/public.routes");
 const { runReminderSweep } = require("./lib/reminders");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Required for the new public rate limiter (routes/public.routes.js) to
+// see the real visitor IP instead of Railway/Render's proxy IP — without
+// this, express-rate-limit either throws on the X-Forwarded-For header
+// or (worse) silently rate-limits every visitor as one shared IP.
+app.set("trust proxy", 1);
 
 const REQUIRED_ENV = ["ANTHROPIC_API_KEY", "MONGODB_URI", "JWT_SECRET"];
 const missing = REQUIRED_ENV.filter((k) => !process.env[k]);
@@ -66,9 +73,14 @@ app.get("/portal.html", requirePageAuth, requirePageClientRole, (req, res) => {
 
 // "/" routes by role rather than always going to the staff app, since a
 // client hitting the root of the site should land in their portal, not
-// a staff tool they can't use.
-app.get("/", requirePageAuth, (req, res) => {
-  res.redirect(req.user.role === "client" ? "/portal.html" : "/app.html");
+// a staff tool they can't use. Logged-out visitors are NOT redirected to
+// login anymore — they get the public free-tier tool (public/index.html,
+// backed by routes/public.routes.js), which is the Phase 1 lead-gen path.
+app.get("/", tryPageAuth, (req, res) => {
+  if (req.user) {
+    return res.redirect(req.user.role === "client" ? "/portal.html" : "/app.html");
+  }
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 // ---------------------------------------------------------------------
@@ -83,6 +95,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/calendars", calendarRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/portal", portalRoutes);
+app.use("/api/public", publicRoutes);
 
 app.get("/healthz", (req, res) => res.json({ ok: true }));
 
