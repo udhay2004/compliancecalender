@@ -99,6 +99,20 @@ function requirePageRole(minRole) {
   };
 }
 
+// For pages that should work BOTH logged in and logged out (currently
+// just "/" — see server.js). Never redirects or blocks; sets req.user
+// if there's a valid session, leaves it undefined otherwise, and always
+// calls next(). Route handlers using this must handle the undefined
+// case themselves.
+function tryPageAuth(req, res, next) {
+  loadUserFromRequest(req)
+    .then((user) => {
+      req.user = user;
+      next();
+    })
+    .catch(() => next());
+}
+
 // Portal pages need the exact role "client", not "at least client" —
 // requirePageRole would let staff/admin through too (they outrank
 // client), which is wrong for a client-only UI. Mirrors requireClientRole.
@@ -119,4 +133,5 @@ module.exports = {
   requirePageAuth,
   requirePageRole,
   requirePageClientRole,
+  tryPageAuth,
 };
