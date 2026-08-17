@@ -8,12 +8,27 @@
 // (scripts/createUser.js) for the very first super_admin.
 
 const express = require("express");
+const rateLimit = require("express-rate-limit");
 const User = require("../models/User");
 const { setSessionCookie, clearSessionCookie, requireAuth } = require("../middleware/auth");
 
 const router = express.Router();
 
-router.post("/login", async (req, res) => {
+// Login has no other guard (no CAPTCHA, no MFA), so a per-IP throttle is
+// the only thing standing between this route and a password-guessing
+// script. 10 attempts / 15 min is generous for a real person who mistypes
+// a password a few times, tight for automated guessing. Keyed by IP, not
+// by email, so this can't be used to lock a specific person's account out
+// by repeatedly failing their email on purpose.
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many login attempts. Please wait a few minutes and try again." },
+});
+
+router.post("/login", loginLimiter, async (req, res) => {
   const { email, password } = req.body || {};
   if (!email || !password) {
     return res.status(400).json({ error: "Email and password required." });
