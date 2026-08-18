@@ -11,6 +11,7 @@ const express = require("express");
 const rateLimit = require("express-rate-limit");
 const crypto = require("crypto");
 const User = require("../models/User");
+const ClientOrg = require("../models/ClientOrg");
 const { setSessionCookie, clearSessionCookie, requireAuth } = require("../middleware/auth");
 const { getAuthUrl, verifyCodeAndGetProfile } = require("../lib/google");
 
@@ -64,17 +65,18 @@ router.get("/me", requireAuth, (req, res) => {
 // GET /google           — redirects the browser to Google's consent screen
 // GET /google/callback  — Google redirects back here with ?code=...&state=...
 //
-// This app has no public self-serve signup (see the note at the top of
-// this file) — every real role/clientOrgId assignment is deliberately
-// an admin action. So a Google sign-in with no matching existing user
-// does NOT get instant access: it creates a role:"pending" account
-// (see models/User.js) that can log in but can't reach any real route
-// (requireRole blocks it — "pending" ranks below every real role), and
-// shows up in GET /api/admin/pending-users for an admin to approve.
+// Instant access, no admin approval step — this app has no public
+// self-serve signup form otherwise, so Google sign-in IS the signup
+// flow. A brand-new Google email gets its own ClientOrg (company
+// workspace) created automatically and lands as role:"client" scoped
+// to it, same pattern as "sign up with Google" on Slack/Notion/etc:
+// each new person gets their own workspace, not shared access to
+// someone else's data.
 //
-// If the Google email DOES match an existing email/password account,
-// that account is linked (googleId gets set on it) rather than creating
-// a duplicate — same person, new login method.
+// If the Google email matches an EXISTING account (any role — client,
+// staff, admin), that account is linked (googleId set on it) rather
+// than creating a duplicate — same person, new login method, existing
+// role/permissions untouched.
 // ---------------------------------------------------------------------
 
 const GOOGLE_STATE_COOKIE = "cc_oauth_state";
@@ -117,7 +119,8 @@ router.get("/google/callback", async (req, res) => {
 
   if (!user) {
     // Not linked yet — check for an existing email/password account
-    // with the same email and link it, rather than creating a duplicate.
+    // with the same email and link it, rather than creating a duplicate
+    // or a second account for the same person.
     user = await User.findOne({ email: profile.email });
     if (user) {
       user.googleId = profile.googleId;
@@ -127,13 +130,27 @@ router.get("/google/callback", async (req, res) => {
   }
 
   if (!user) {
-    // Genuinely new person — create a powerless pending account for an
-    // admin to review and approve (see GET /api/admin/pending-users).
+    // Genuinely new person, instant signup: give them their own
+    // ClientOrg workspace and a client account scoped to it. Name the
+    // org from their email domain as a reasonable default — they can
+    // rename it later from the portal, same as any SaaS "workspace
+    // name" you're free to change after signup.
+    const domain = profile.email.split("@")[1] || "";
+    const orgName = profile.name ? `${profile.name}'s Company` : domain || profile.email;
+
+    const org = await ClientOrg.create({
+      name: orgName,
+      primaryContactEmail: profile.email,
+      primaryContactName: profile.name,
+      createdBy: "google-signup",
+    });
+
     user = await User.create({
       email: profile.email,
       name: profile.name,
       googleId: profile.googleId,
-      role: "pending",
+      role: "client",
+      clientOrgId: org._id,
     });
   }
 
@@ -142,11 +159,7 @@ router.get("/google/callback", async (req, res) => {
   }
 
   setSessionCookie(res, user);
-
-  if (user.role === "pending") {
-    return res.redirect("/login.html?reason=pending_approval");
-  }
-  return res.redirect("/");
+  res.redirect(user.role === "client" ? "/portal.html" : "/");
 });
 
 module.exports = router;
