@@ -59,59 +59,6 @@ router.get("/client-orgs", async (req, res) => {
 });
 
 // ---------------------------------------------------------------------
-// Pending Google sign-ins
-//
-// A Google sign-in with no matching existing account lands as
-// role:"pending" (see routes/auth.routes.js's /google/callback and the
-// comment in models/User.js). These two routes are how an admin turns
-// that into a real account, same spirit as approving a lead.
-// ---------------------------------------------------------------------
-
-// GET /api/admin/pending-users
-router.get("/pending-users", async (req, res) => {
-  const pending = await User.find({ role: "pending" }).sort({ createdAt: -1 });
-  res.json({ pendingUsers: pending.map((u) => u.toSafeJSON()) });
-});
-
-// POST /api/admin/pending-users/:id/approve  { role, clientOrgId? }
-router.post("/pending-users/:id/approve", async (req, res) => {
-  const { role, clientOrgId } = req.body || {};
-  if (!role || !User.ROLES.includes(role) || role === "pending") {
-    return res.status(400).json({ error: "role must be one of: client, staff, admin, super_admin" });
-  }
-  if (!canManageTargetRole(req.user.role, role)) {
-    return res.status(403).json({ error: "Only a super_admin can approve someone into admin or super_admin." });
-  }
-  if (role === "client" && !clientOrgId) {
-    return res.status(400).json({ error: "clientOrgId is required when approving into role 'client'." });
-  }
-
-  const user = await User.findById(req.params.id);
-  if (!user || user.role !== "pending") {
-    return res.status(404).json({ error: "No pending user found with that id." });
-  }
-
-  user.role = role;
-  user.clientOrgId = role === "client" ? clientOrgId : null;
-  try {
-    await user.save();
-    res.json({ user: user.toSafeJSON() });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-// DELETE /api/admin/pending-users/:id — reject a pending sign-in
-router.delete("/pending-users/:id", async (req, res) => {
-  const user = await User.findById(req.params.id);
-  if (!user || user.role !== "pending") {
-    return res.status(404).json({ error: "No pending user found with that id." });
-  }
-  await user.deleteOne();
-  res.json({ ok: true });
-});
-
-// ---------------------------------------------------------------------
 // Users (staff / admin / super_admin / client)
 // ---------------------------------------------------------------------
 
