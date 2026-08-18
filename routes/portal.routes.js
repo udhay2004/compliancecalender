@@ -95,7 +95,7 @@ router.get("/calendars/:id/items/:index/documents/:docIndex/download", async (re
   const doc = item && item.documents[docIdx];
   if (!doc) return res.status(404).json({ error: "Document not found." });
 
-  const stream = storage.getFileStream(doc.fileKey);
+  const stream = await storage.getFileStream(doc.fileKey);
   if (!stream) return res.status(404).json({ error: "File is missing from storage." });
   res.setHeader("Content-Disposition", `attachment; filename="${doc.fileName}"`);
   stream.pipe(res);
