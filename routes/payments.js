@@ -197,7 +197,7 @@ router.post('/bank-transfer', requireAuth, async (req, res) => {
  */
 router.post('/:id/verify-manual', requireAuth, async (req, res) => {
   try {
-    if (!['employee', 'admin', 'super_admin'].includes(req.user.role)) {
+    if (!['staff', 'admin', 'super_admin'].includes(req.user.role)) {
       return res.status(403).json({ error: 'Not authorized' });
     }
 
