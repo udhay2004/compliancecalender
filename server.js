@@ -45,6 +45,15 @@ if (missing.length) {
   process.exit(1);
 }
 
+// A single unhandled promise rejection anywhere in the app (e.g. a stale
+// document failing Mongoose validation on save, as happened with a
+// leftover role:"member" user doc) used to crash the ENTIRE server for
+// EVERY visitor. Log it loudly instead of dying, so one bad request or
+// one bad document can't take the whole site down.
+process.on("unhandledRejection", (reason) => {
+  console.error("[unhandled rejection]", reason);
+});
+
 app.use(express.json({ limit: "1mb" }));
 app.use(cookieParser());
 
