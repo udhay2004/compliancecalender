@@ -3,182 +3,206 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Free US Compliance Calendar — ComplyGlobally</title>
+<title>Free Compliance Calendar — ComplyGlobally</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,72,400;0,72,500;0,72,600;1,72,400;1,72,500&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --ink: #14213D; --ink-soft: #3B4A6B; --paper: #E7EAEA; --card: #FFFFFF;
-    --rule: #CBD0CC; --rule-soft: #DEE1DE;
-    --stamp-red: #A6332A; --stamp-red-bg: #FBEFEC;
-    --seal-gold: #8C6D2F; --seal-gold-bg: #F5EFE1;
+    --ink: #14213D; --ink-soft: #3B4A6B; --paper: #F5F6F4; --card: #FFFFFF;
+    --rule: #DDE1DD; --rule-soft: #ECEFEB;
+    --urgent: #A6332A; --urgent-bg: #FBEFEC;
+    --soon: #8C6D2F; --soon-bg: #F5EFE1;
+    --later: #2E5E55; --later-bg: #E6EEEC;
     --grey-dot: #9AA1A8; --grey-bg: #F0F1EF;
-    --teal: #2E5E55; --teal-bg: #E6EEEC;
     --mono: 'IBM Plex Mono', monospace; --sans: 'IBM Plex Sans', sans-serif; --serif: 'Newsreader', serif;
+    --shadow: 0 1px 2px rgba(20,33,61,0.04), 0 4px 16px rgba(20,33,61,0.05);
   }
   * { box-sizing: border-box; }
   body {
-    margin: 0; background: var(--paper);
-    background-image: linear-gradient(var(--rule-soft) 1px, transparent 1px);
-    background-size: 100% 42px;
-    color: var(--ink); font-family: var(--sans); min-height: 100vh;
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: var(--sans); min-height: 100vh; line-height: 1.5;
   }
-  .wrap { max-width: 880px; margin: 0 auto; padding: 0 24px 120px; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 20px 120px; }
   .topbar {
-    position: sticky; top: 0; z-index: 30; background: rgba(231,234,234,0.94); backdrop-filter: blur(6px);
-    border-bottom: 1px solid var(--rule); padding: 18px 24px;
-    display: flex; align-items: baseline; justify-content: space-between; max-width: 880px; margin: 0 auto;
+    position: sticky; top: 0; z-index: 30; background: rgba(245,246,244,0.92); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--rule); padding: 16px 20px;
+    display: flex; align-items: center; justify-content: space-between;
   }
-  .brand { font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); }
+  .topbar-inner { max-width: 760px; margin: 0 auto; width: 100%; display: flex; align-items: center; justify-content: space-between; }
+  .brand { font-family: var(--mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
   .brand strong { color: var(--ink); font-weight: 600; }
-  .staff-link { font-family: var(--mono); font-size: 11px; color: var(--ink-soft); text-decoration: none; letter-spacing: .06em; }
-  .staff-link:hover { color: var(--teal); text-decoration: underline; }
+  .staff-link { font-family: var(--mono); font-size: 11px; color: var(--ink-soft); text-decoration: none; }
+  .staff-link:hover { color: var(--later); }
 
-  /* ---- intake form ---- */
-  .intake { margin-top: 36px; background: var(--card); border: 1px solid var(--rule); box-shadow: 0 1px 0 var(--rule); }
-  .intake-head { padding: 24px 28px 6px; }
-  .intake-eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--seal-gold); margin-bottom: 8px; }
-  .intake h1 { font-family: var(--serif); font-weight: 500; font-size: 27px; margin: 0 0 6px; line-height: 1.25; }
-  .intake p.sub { font-size: 13.5px; color: var(--ink-soft); margin: 0 0 20px; line-height: 1.5; max-width: 64ch; }
-  .intake-body { padding: 4px 28px 26px; }
+  /* ---- intake ---- */
+  .intake { margin-top: 32px; background: var(--card); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
+  .intake-head { padding: 32px 32px 8px; }
+  .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--soon); margin-bottom: 10px; }
+  .intake h1 { font-family: var(--serif); font-weight: 500; font-size: 28px; margin: 0 0 8px; line-height: 1.25; }
+  .intake p.sub { font-size: 14px; color: var(--ink-soft); margin: 0 0 4px; max-width: 58ch; }
+  .intake-body { padding: 8px 32px 32px; }
 
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 22px; }
+  .section-label {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ink-soft); margin: 28px 0 14px; padding-top: 20px; border-top: 1px solid var(--rule-soft);
+  }
+  .section-label:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; }
   .grid.full { grid-template-columns: 1fr; }
   .field { display: flex; flex-direction: column; }
   .field.span2 { grid-column: 1 / -1; }
-  label { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 7px; }
+  label { font-size: 12.5px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+  label .req { color: var(--urgent); }
   input[type=text], input[type=date], input[type=email], input[type=tel], select {
-    font-family: var(--serif); font-size: 16px; color: var(--ink); background: transparent;
-    border: none; border-bottom: 1px solid var(--rule); padding: 8px 2px 10px; outline: none; width: 100%;
+    font-family: var(--sans); font-size: 14.5px; color: var(--ink); background: var(--grey-bg);
+    border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; outline: none; width: 100%;
+    transition: border-color .12s, background .12s;
   }
-  input[type=text]:focus, input[type=date]:focus, input[type=email]:focus, input[type=tel]:focus, select:focus { border-bottom-color: var(--teal); }
+  input:focus, select:focus { border-color: var(--later); background: #fff; }
   select { cursor: pointer; appearance: none; -webkit-appearance: none;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%233B4A6B'/></svg>");
-    background-repeat: no-repeat; background-position: right 4px center; }
-  select:disabled { color: var(--grey-dot); }
+    background-repeat: no-repeat; background-position: right 12px center; }
+  .field-hint { font-size: 11.5px; color: var(--ink-soft); margin-top: 5px; }
 
-  .toggle-row { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
-  .toggle-row .switch { position: relative; width: 40px; height: 22px; }
+  .toggle-row { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+  .toggle-row .switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
   .toggle-row .switch input { opacity: 0; width: 0; height: 0; }
-  .toggle-row .slider {
-    position: absolute; inset: 0; background: var(--rule); cursor: pointer; transition: .15s; border-radius: 11px;
-  }
-  .toggle-row .slider::before {
-    content: ''; position: absolute; height: 16px; width: 16px; left: 3px; top: 3px; background: #fff;
-    transition: .15s; border-radius: 50%;
-  }
-  .toggle-row input:checked + .slider { background: var(--teal); }
+  .toggle-row .slider { position: absolute; inset: 0; background: var(--rule); cursor: pointer; transition: .15s; border-radius: 11px; }
+  .toggle-row .slider::before { content: ''; position: absolute; height: 16px; width: 16px; left: 3px; top: 3px; background: #fff; transition: .15s; border-radius: 50%; }
+  .toggle-row input:checked + .slider { background: var(--later); }
   .toggle-row input:checked + .slider::before { transform: translateX(18px); }
-  .toggle-label { font-size: 13.5px; color: var(--ink); }
+  .toggle-label { font-size: 13.5px; }
 
-  .conditional-block { margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--rule-soft); display: none; }
-  .conditional-block.visible { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 22px; }
+  .conditional-block { margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--rule); display: none; }
+  .conditional-block.visible { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; }
 
-  .divider-label {
-    font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase;
-    color: var(--ink-soft); margin: 22px 0 4px; padding-top: 16px; border-top: 1px solid var(--rule-soft);
-  }
-
-  .submit-row { margin-top: 26px; display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
+  .submit-row { margin-top: 30px; display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
   .hint { font-size: 12px; color: var(--grey-dot); margin-right: auto; max-width: 40ch; }
-  button#submit, button.unlock-btn, button.unlock-submit {
-    font-family: var(--mono); font-size: 12.5px; letter-spacing: .06em; text-transform: uppercase; font-weight: 600;
-    background: var(--ink); color: #fff; border: none; padding: 13px 24px; cursor: pointer; transition: background .12s;
+  button#submit, .btn-primary, .btn-secondary {
+    font-family: var(--sans); font-size: 14px; font-weight: 600;
+    border: none; border-radius: 9px; padding: 12px 22px; cursor: pointer; transition: transform .08s, opacity .12s;
   }
-  button#submit:hover:not(:disabled), button.unlock-btn:hover:not(:disabled), button.unlock-submit:hover:not(:disabled) { background: var(--teal); }
-  button#submit:disabled, button.unlock-btn:disabled, button.unlock-submit:disabled { background: #B7BCC0; cursor: wait; }
+  button#submit, .btn-primary { background: var(--ink); color: #fff; }
+  button#submit:hover:not(:disabled), .btn-primary:hover:not(:disabled) { opacity: .9; }
+  button#submit:disabled, .btn-primary:disabled { background: #B7BCC0; cursor: wait; }
+  .btn-secondary { background: var(--grey-bg); color: var(--ink); }
+  .btn-secondary:hover { background: var(--rule); }
 
-  /* ---- output: case files ---- */
-  .cases { margin-top: 46px; }
-  .empty-state { padding: 40px 0; text-align: center; color: var(--ink-soft); font-family: var(--serif); font-style: italic; font-size: 16px; border-top: 1px dashed var(--rule); }
+  /* ---- results ---- */
+  .cases { margin-top: 40px; }
+  .empty-state { padding: 48px 0; text-align: center; color: var(--ink-soft); font-family: var(--serif); font-style: italic; font-size: 16px; }
 
-  .case { border-top: 2px solid var(--ink); padding: 30px 0 40px; }
-  .case-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 4px; }
-  .case-title { font-family: var(--serif); font-weight: 600; font-size: 24px; }
-  .case-sub { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); margin-top: 4px; }
-  .case-summary { font-family: var(--mono); font-size: 11px; color: var(--ink-soft); text-align: right; white-space: nowrap; }
+  .case { background: var(--card); border-radius: 14px; box-shadow: var(--shadow); padding: 28px 28px 32px; margin-bottom: 24px; }
+  .case-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+  .case-title { font-family: var(--serif); font-weight: 600; font-size: 22px; }
+  .case-sub { font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft); margin-top: 4px; }
 
-  .cat-block { margin-top: 26px; }
-  .cat-title {
-    font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
-    color: var(--teal); background: var(--teal-bg); display: inline-block; padding: 4px 10px; margin-bottom: 10px;
+  /* filter chips */
+  .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .filter-chip {
+    font-family: var(--sans); font-size: 12.5px; font-weight: 600; color: var(--ink-soft);
+    background: var(--grey-bg); border: 1px solid transparent; border-radius: 999px; padding: 7px 14px;
+    cursor: pointer; transition: all .1s;
   }
-  table.cal { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-  table.cal th {
-    font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
-    color: var(--ink-soft); text-align: left; padding: 6px 10px 8px; border-bottom: 1px solid var(--rule);
-  }
-  table.cal td { padding: 10px 10px; border-bottom: 1px solid var(--rule-soft); vertical-align: top; line-height: 1.5; }
-  table.cal td.due { font-family: var(--mono); font-size: 12.5px; white-space: nowrap; color: var(--ink); }
-  table.cal td.name { font-weight: 600; }
-  table.cal td.applies { font-size: 12px; color: var(--ink-soft); white-space: nowrap; }
-  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 7px; position: relative; top: -1px; }
-  .dot.high { background: var(--seal-gold); }
-  .dot.medium { background: var(--grey-dot); }
-  .dot.low { background: var(--stamp-red); }
-  .src-link { font-size: 11px; color: var(--teal); text-decoration: none; display: block; margin-top: 3px; }
-  .src-link:hover { text-decoration: underline; }
+  .filter-chip:hover { background: var(--rule); }
+  .filter-chip.active { background: var(--ink); color: #fff; }
 
-  /* ---- locked state ---- */
-  .locked-cell { color: var(--grey-dot); font-family: var(--mono); font-size: 12px; }
-  .locked-cell .lock-icon { margin-right: 5px; }
-  tr.locked-row td { filter: blur(0.3px); }
-
-  .unlock-panel {
-    margin-top: 28px; padding: 24px 26px; background: var(--seal-gold-bg); border: 1px solid var(--seal-gold);
+  /* deadline cards */
+  .deadline-card {
+    display: flex; align-items: flex-start; gap: 14px; padding: 16px 4px;
+    border-bottom: 1px solid var(--rule-soft);
   }
-  .unlock-panel h3 { font-family: var(--serif); font-weight: 600; font-size: 18px; margin: 0 0 6px; }
-  .unlock-panel p { font-size: 13px; color: var(--ink-soft); margin: 0 0 16px; line-height: 1.5; max-width: 56ch; }
-  .unlock-form { display: none; grid-template-columns: 1fr 1fr 1fr auto; gap: 14px; align-items: end; }
-  .unlock-form.visible { display: grid; }
-  .unlock-form .field { margin: 0; }
-  .unlock-form label { font-size: 10px; }
-  .unlock-cta-row { display: flex; align-items: center; gap: 14px; }
-  .unlock-error { color: var(--stamp-red); font-size: 12px; margin-top: 10px; font-family: var(--mono); }
-  .unlock-success { color: var(--teal); font-size: 12px; margin-top: 10px; font-family: var(--mono); }
+  .deadline-card:last-of-type { border-bottom: none; }
+  .days-pill {
+    flex-shrink: 0; font-family: var(--mono); font-size: 11px; font-weight: 600;
+    border-radius: 8px; padding: 6px 10px; text-align: center; min-width: 64px; line-height: 1.3;
+  }
+  .days-pill.urgent { background: var(--urgent-bg); color: var(--urgent); }
+  .days-pill.soon { background: var(--soon-bg); color: var(--soon); }
+  .days-pill.later { background: var(--later-bg); color: var(--later); }
+  .days-pill.unknown { background: var(--grey-bg); color: var(--grey-dot); }
+  .days-pill .num { display: block; font-size: 15px; }
+
+  .deadline-body { flex: 1; min-width: 0; }
+  .deadline-name { font-weight: 600; font-size: 15px; margin-bottom: 3px; }
+  .deadline-cat {
+    display: inline-block; font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--later); background: var(--later-bg); border-radius: 5px; padding: 2px 7px; margin-bottom: 6px;
+  }
+  .deadline-desc { font-size: 13px; color: var(--ink-soft); }
+  .deadline-meta { font-size: 12px; color: var(--grey-dot); margin-top: 4px; }
+  .deadline-meta a { color: var(--later); text-decoration: none; }
+  .deadline-meta a:hover { text-decoration: underline; }
+
+  .no-match { padding: 20px 4px; color: var(--ink-soft); font-size: 13.5px; font-style: italic; }
+
+  /* locked summary */
+  .locked-summary {
+    margin-top: 22px; padding: 22px 24px; background: var(--grey-bg); border-radius: 12px;
+    border: 1px solid var(--rule);
+  }
+  .locked-summary-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .locked-summary-head .lock-icon { font-size: 18px; }
+  .locked-summary h3 { font-family: var(--serif); font-weight: 600; font-size: 17px; margin: 0; }
+  .locked-summary p { font-size: 13px; color: var(--ink-soft); margin: 0 0 16px; max-width: 54ch; }
+  .locked-cats { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .locked-cat-tag {
+    font-family: var(--mono); font-size: 11px; color: var(--ink-soft); background: #fff;
+    border: 1px solid var(--rule); border-radius: 999px; padding: 5px 11px;
+  }
+  .review-status { font-size: 12.5px; color: var(--later); font-family: var(--mono); margin-top: 12px; }
 
   .legend { margin-top: 20px; font-family: var(--mono); font-size: 11px; color: var(--ink-soft); display: flex; gap: 18px; flex-wrap: wrap; }
-  .legend span { display: inline-flex; align-items: center; }
+  .disclaimer { margin-top: 18px; font-size: 12px; color: var(--ink-soft); font-style: italic; }
 
-  .disclaimer {
-    margin-top: 22px; padding-top: 14px; border-top: 1px dashed var(--rule-soft);
-    font-size: 12px; color: var(--ink-soft); font-style: italic; font-family: var(--serif);
-  }
-
-  .loading-case { border-top: 2px solid var(--ink); padding: 30px 0; font-family: var(--mono); font-size: 12px; color: var(--ink-soft); }
+  .loading-case { background: var(--card); border-radius: 14px; box-shadow: var(--shadow); padding: 28px; font-family: var(--mono); font-size: 12.5px; color: var(--ink-soft); margin-bottom: 24px; }
   .loading-case .dots::after { content: ''; animation: dots 1.2s steps(4,end) infinite; }
   @keyframes dots { 0%{content:''} 25%{content:'.'} 50%{content:'..'} 75%{content:'...'} 100%{content:''} }
-  @media (prefers-reduced-motion: reduce) { .loading-case .dots::after { animation: none; content: '...'; } }
 
-  .error-case { border-top: 2px solid var(--stamp-red); padding: 20px 0; color: var(--stamp-red); font-size: 13.5px; font-family: var(--mono); }
+  .error-case { background: var(--urgent-bg); border-radius: 12px; padding: 18px 20px; color: var(--urgent); font-size: 13.5px; margin-bottom: 24px; }
 
-  @media (max-width: 720px) {
+  @media (max-width: 640px) {
     .grid, .conditional-block.visible { grid-template-columns: 1fr; }
-    .intake h1 { font-size: 22px; }
-    table.cal { font-size: 12.5px; }
-    table.cal th:nth-child(3), table.cal td:nth-child(3) { display: none; }
-    .wrap { padding: 0 14px 100px; }
-    .topbar { padding: 14px 16px; }
-    .unlock-form { grid-template-columns: 1fr; }
+    .intake-head, .intake-body { padding-left: 20px; padding-right: 20px; }
+    .case { padding: 22px 18px 26px; }
+    .intake h1 { font-size: 23px; }
   }
 </style>
 </head>
 <body>
-<div class="topbar">
+<div class="topbar"><div class="topbar-inner">
   <div class="brand">Comply<strong>Globally</strong> · Free Compliance Calendar</div>
   <a class="staff-link" href="/login.html">Staff Login →</a>
-</div>
+</div></div>
 
 <div class="wrap">
 
   <div class="intake">
     <div class="intake-head">
-      <div class="intake-eyebrow">Free Tool · Not Legal Advice</div>
-      <h1>What compliance does your US company actually owe?</h1>
-      <p class="sub">Fill in your company profile below and we'll research your obligations from official government sources. You'll see everything you owe — deadlines, required documents, and filing instructions unlock when you leave your contact info so our team can help you stay on top of them.</p>
+      <div class="eyebrow">Free Tool · Not Legal Advice</div>
+      <h1>What compliance does your company actually owe?</h1>
+      <p class="sub">Tell us a bit about your company and where you'd like us to send your calendar — then we'll research your obligations from official sources.</p>
     </div>
     <div class="intake-body">
 
+      <div class="section-label">Your Contact Info</div>
+      <div class="grid">
+        <div class="field">
+          <label for="contactName">Your Name</label>
+          <input type="text" id="contactName" placeholder="Jane Doe">
+        </div>
+        <div class="field">
+          <label for="contactEmail">Email <span class="req">*</span></label>
+          <input type="email" id="contactEmail" placeholder="jane@company.com" required>
+        </div>
+        <div class="field span2">
+          <label for="contactPhone">Phone</label>
+          <input type="tel" id="contactPhone" placeholder="Optional, but helps us reach you faster">
+        </div>
+      </div>
+
+      <div class="section-label">Company Details</div>
       <div class="grid">
         <div class="field span2">
           <label for="companyName">Company Name</label>
@@ -186,9 +210,15 @@
         </div>
 
         <div class="field">
-          <label for="state">State of Incorporation</label>
-          <select id="state"></select>
+          <label for="country">Country</label>
+          <select id="country"></select>
         </div>
+        <div class="field">
+          <label for="state" id="stateLabel">State of Incorporation</label>
+          <select id="state"></select>
+          <div class="field-hint" id="stateHint" style="display:none;">We're still building our verified database for this country — your calendar will be researched live and may take a little longer.</div>
+        </div>
+
         <div class="field">
           <label for="entityType">Entity Type</label>
           <select id="entityType">
@@ -198,15 +228,16 @@
             <option value="Disregarded Entity">Disregarded Entity</option>
           </select>
         </div>
-
         <div class="field">
           <label for="taxStatus">Tax Status</label>
           <select id="taxStatus"></select>
         </div>
+
         <div class="field">
           <label for="incorpDate">Date of Incorporation</label>
           <input type="date" id="incorpDate">
         </div>
+        <div class="field"></div>
 
         <div class="field">
           <label for="fyStart">Financial Year Start</label>
@@ -218,7 +249,7 @@
         </div>
       </div>
 
-      <div class="divider-label">Foreign / Related-Party Ownership</div>
+      <div class="section-label">Foreign / Related-Party Ownership</div>
       <div class="toggle-row">
         <label class="switch">
           <input type="checkbox" id="hasForeignParent">
@@ -259,7 +290,8 @@
 </div>
 
 <script>
-  const STATES = ["Delaware","California","Texas","Florida","Wyoming","New York","Illinois","Washington","Massachusetts",
+  const COUNTRIES = ["United States", "Singapore", "United Arab Emirates", "United Kingdom", "Germany", "Other"];
+  const US_STATES = ["Delaware","California","Texas","Florida","Wyoming","New York","Illinois","Washington","Massachusetts",
     "Alabama","Alaska","Arizona","Arkansas","Colorado","Connecticut","Georgia","Hawaii","Idaho","Indiana","Iowa","Kansas",
     "Kentucky","Louisiana","Maine","Maryland","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada",
     "New Hampshire","New Jersey","New Mexico","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania",
@@ -270,6 +302,7 @@
 
   function fillSelect(id, values, selectedIndex) {
     const el = document.getElementById(id);
+    el.innerHTML = '';
     values.forEach((v,i) => {
       const opt = document.createElement('option');
       opt.value = v; opt.textContent = v;
@@ -277,101 +310,160 @@
       el.appendChild(opt);
     });
   }
-  fillSelect('state', STATES, 0);
+  fillSelect('country', COUNTRIES, 0);
   fillSelect('taxStatus', TAX_STATUSES, 0);
   fillSelect('fyStart', MONTHS, 0);
   fillSelect('fyEnd', MONTHS, 11);
+
+  // Countries without a US-style "State of Incorporation" concept get a
+  // free-text field instead, and a hint that this path isn't cached yet
+  // (see routes/public.routes.js — only US state/entityType combos are
+  // pre-researched right now).
+  function refreshStateField() {
+    const country = document.getElementById('country').value;
+    const stateLabel = document.getElementById('stateLabel');
+    const stateHint = document.getElementById('stateHint');
+    const stateSelectContainer = document.getElementById('state').parentElement;
+
+    if (country === "United States") {
+      stateLabel.textContent = "State of Incorporation";
+      stateHint.style.display = 'none';
+      const select = document.createElement('select');
+      select.id = 'state';
+      fillSelectInto(select, US_STATES, 0);
+      document.getElementById('state').replaceWith(select);
+    } else {
+      stateLabel.textContent = "State / Province / Region";
+      stateHint.style.display = 'block';
+      const input = document.createElement('input');
+      input.type = 'text'; input.id = 'state';
+      input.placeholder = 'e.g. Dubai, DIFC, or leave blank if not applicable';
+      document.getElementById('state').replaceWith(input);
+    }
+  }
+  function fillSelectInto(el, values, selectedIndex) {
+    values.forEach((v,i) => {
+      const opt = document.createElement('option');
+      opt.value = v; opt.textContent = v;
+      if (i === selectedIndex) opt.selected = true;
+      el.appendChild(opt);
+    });
+  }
+  fillSelect('state', US_STATES, 0); // initial render before refreshStateField wires the swap
+  document.getElementById('country').addEventListener('change', refreshStateField);
 
   document.getElementById('hasForeignParent').addEventListener('change', e => {
     document.getElementById('foreignBlock').classList.toggle('visible', e.target.checked);
   });
 
-  // This page talks to the UNAUTHENTICATED public tier
-  // (routes/public.routes.js), not the staff /api/calendars routes —
-  // nothing here requires a login, and the response is redacted
-  // server-side until a visitor unlocks it with their contact info.
-  async function callGenerate(profile) {
+  // This page talks to the UNAUTHENTICATED public tier (routes/public.routes.js).
+  // Contact info is sent WITH the generate call now — see that file for why.
+  async function callGenerate(profile, contact) {
     const response = await fetch("/api/public/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ profile })
+      body: JSON.stringify({ profile, contact })
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || `Server error ${response.status}`);
-    return data; // { calendarId, itemCount, items: [redacted...] }
+    return data; // { calendarId, itemCount, items: [ {locked:false, ...full} | {locked:true, category, daysUntil} ] }
   }
 
-  async function callUnlock(calendarId, contact) {
-    const response = await fetch(`/api/public/${calendarId}/unlock`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(contact)
-    });
+  async function callRequestReview(calendarId) {
+    const response = await fetch(`/api/public/${calendarId}/request-review`, { method: "POST" });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || `Server error ${response.status}`);
-    return data; // { calendar } — full, unredacted
+    return data;
   }
 
-  const CATEGORY_ORDER = ["Mandatory Annual","Conditional","Transfer Pricing","Foreign Reporting (ODI/FEMA)","Event-Based"];
+  function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
 
-  function groupByCategory(items) {
-    const groups = {};
-    items.forEach(it => {
-      const cat = it.category || "Other";
-      if (!groups[cat]) groups[cat] = [];
-      groups[cat].push(it);
-    });
-    return groups;
+  function pillClass(daysUntil) {
+    if (daysUntil === null || daysUntil === undefined) return 'unknown';
+    if (daysUntil <= 15) return 'urgent';
+    if (daysUntil <= 60) return 'soon';
+    return 'later';
+  }
+  function pillLabel(daysUntil) {
+    if (daysUntil === null || daysUntil === undefined) return 'TBD';
+    if (daysUntil < 0) return 'Overdue';
+    if (daysUntil === 0) return 'Today';
+    return `${daysUntil}d`;
   }
 
-  function escapeHtml(s) {
-    const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML;
+  const FILTERS = [
+    { key: '15', label: 'Next 15 days', max: 15 },
+    { key: '30', label: 'Next 30 days', max: 30 },
+    { key: '60', label: 'Next 60 days', max: 60 },
+    { key: '365', label: 'Next year', max: 365 },
+    { key: 'all', label: 'All', max: Infinity },
+  ];
+
+  function withinFilter(daysUntil, filterKey) {
+    if (filterKey === 'all') return true;
+    if (daysUntil === null || daysUntil === undefined) return filterKey === 'all';
+    const f = FILTERS.find(f => f.key === filterKey);
+    return daysUntil >= 0 && daysUntil <= f.max;
   }
 
-  // Renders one row. Locked items only ever have category/compliance_name/
-  // applicable_to available on the object at all — due_date/description/
-  // authority/source_url/confidence are simply absent from the API
-  // response until unlock, so there's nothing to accidentally leak here.
-  function renderRow(it) {
-    if (it.locked) {
-      return `
-        <tr class="locked-row">
-          <td class="locked-cell"><span class="lock-icon">🔒</span>Unlock to view</td>
-          <td class="name">${escapeHtml(it.compliance_name)}</td>
-          <td class="applies">${escapeHtml(it.applicable_to || '')}</td>
-          <td class="locked-cell"><span class="lock-icon">🔒</span>Details, required documents, and filing instructions available after unlock</td>
-        </tr>`;
-    }
+  function renderDeadlineCard(it) {
+    const cls = pillClass(it.daysUntil);
     return `
-      <tr>
-        <td class="due">${escapeHtml(it.due_date)}</td>
-        <td class="name"><span class="dot ${escapeHtml(it.confidence||'medium')}"></span>${escapeHtml(it.compliance_name)}</td>
-        <td class="applies">${escapeHtml(it.applicable_to)}</td>
-        <td>${escapeHtml(it.description)} — <span style="color:var(--ink-soft)">${escapeHtml(it.authority||'')}</span>
-          ${it.source_url ? `<a class="src-link" href="${escapeHtml(it.source_url)}" target="_blank" rel="noopener">${escapeHtml(it.source_url)}</a>` : ''}
-        </td>
-      </tr>`;
+      <div class="deadline-card">
+        <div class="days-pill ${cls}"><span class="num">${escapeHtml(pillLabel(it.daysUntil))}</span>due</div>
+        <div class="deadline-body">
+          <div class="deadline-cat">${escapeHtml(it.category)}</div>
+          <div class="deadline-name">${escapeHtml(it.compliance_name)}</div>
+          <div class="deadline-desc">${escapeHtml(it.description)}${it.authority ? ` — <span style="color:var(--grey-dot)">${escapeHtml(it.authority)}</span>` : ''}</div>
+          <div class="deadline-meta">
+            Applies to: ${escapeHtml(it.applicable_to || '—')}
+            ${it.source_url ? ` · <a href="${escapeHtml(it.source_url)}" target="_blank" rel="noopener">Source</a>` : ''}
+          </div>
+        </div>
+      </div>`;
   }
 
-  function renderTables(items) {
-    const groups = groupByCategory(items);
-    let html = '';
-    CATEGORY_ORDER.forEach(cat => {
-      if (!groups[cat] || !groups[cat].length) return;
-      html += `<div class="cat-block">
-        <div class="cat-title">${escapeHtml(cat)}</div>
-        <table class="cal">
-          <thead><tr><th>Due Date</th><th>Compliance</th><th>Applies To</th><th>Description &amp; Source</th></tr></thead>
-          <tbody>${groups[cat].map(renderRow).join('')}</tbody>
-        </table>
+  function renderLockedSummary(lockedItems, calendarId) {
+    if (!lockedItems.length) return '';
+    const catCounts = {};
+    lockedItems.forEach(it => { catCounts[it.category] = (catCounts[it.category] || 0) + 1; });
+    const catTags = Object.entries(catCounts).map(([cat, n]) =>
+      `<span class="locked-cat-tag">${escapeHtml(cat)} · ${n}</span>`).join('');
+
+    return `
+      <div class="locked-summary" data-calendar-id="${calendarId}">
+        <div class="locked-summary-head"><span class="lock-icon">🔒</span><h3>+${lockedItems.length} more compliance obligation${lockedItems.length===1?'':'s'}</h3></div>
+        <p>We've shown your two nearest deadlines in full. The rest of your calendar — exact dates, required documents, and filing instructions — is ready. Talk to our team and we'll walk through it with you.</p>
+        <div class="locked-cats">${catTags}</div>
+        <button class="btn-primary request-review-btn" type="button">Talk to ComplyGlobally →</button>
+        <div class="review-status"></div>
       </div>`;
+  }
+
+  function wireRequestReview(caseEl, calendarId) {
+    const btn = caseEl.querySelector('.request-review-btn');
+    if (!btn) return;
+    const statusEl = caseEl.querySelector('.review-status');
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+      try {
+        await callRequestReview(calendarId);
+        statusEl.textContent = "Thanks — our team has your details and will reach out shortly.";
+        btn.style.display = 'none';
+      } catch (err) {
+        statusEl.textContent = err.message;
+        statusEl.style.color = 'var(--urgent)';
+        btn.disabled = false;
+        btn.textContent = 'Talk to ComplyGlobally →';
+      }
     });
-    return html;
   }
 
   function readProfile() {
     return {
       companyName: document.getElementById('companyName').value.trim(),
+      country: document.getElementById('country').value,
       state: document.getElementById('state').value,
       entityType: document.getElementById('entityType').value,
       taxStatus: document.getElementById('taxStatus').value,
@@ -384,98 +476,85 @@
     };
   }
 
-  function wireUnlockPanel(caseEl, calendarId, profile) {
-    const ctaBtn = caseEl.querySelector('.unlock-cta-btn');
-    const form = caseEl.querySelector('.unlock-form');
-    const submitBtn = caseEl.querySelector('.unlock-submit');
-    const errorEl = caseEl.querySelector('.unlock-error');
-    const successEl = caseEl.querySelector('.unlock-success');
-
-    ctaBtn.addEventListener('click', () => {
-      form.classList.add('visible');
-      ctaBtn.style.display = 'none';
-    });
-
-    submitBtn.addEventListener('click', async () => {
-      const name = caseEl.querySelector('.unlock-name').value.trim();
-      const email = caseEl.querySelector('.unlock-email').value.trim();
-      const phone = caseEl.querySelector('.unlock-phone').value.trim();
-      errorEl.textContent = '';
-      if (!email || !email.includes('@')) {
-        errorEl.textContent = 'Please enter a valid email to unlock your calendar.';
-        return;
-      }
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Unlocking…';
-      try {
-        const data = await callUnlock(calendarId, { name, email, phone });
-        const items = data.calendar.items || [];
-        caseEl.querySelector('.tables-container').innerHTML = renderTables(items);
-        caseEl.querySelector('.unlock-panel').remove();
-        successEl.textContent = '';
-        const note = document.createElement('div');
-        note.className = 'unlock-success';
-        note.textContent = `Full calendar unlocked — sent a copy to ${email}. Our team may reach out to help with next steps.`;
-        caseEl.appendChild(note);
-      } catch (err) {
-        errorEl.textContent = err.message;
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Unlock Full Calendar';
-      }
-    });
+  function readContact() {
+    return {
+      name: document.getElementById('contactName').value.trim(),
+      email: document.getElementById('contactEmail').value.trim(),
+      phone: document.getElementById('contactPhone').value.trim(),
+    };
   }
 
   let caseCount = 0;
 
-  function renderCase(profile, items, calendarId) {
+  function renderCase(profile, allItems, calendarId) {
     caseCount++;
     document.getElementById('emptyState')?.remove();
 
-    const hasLocked = items.some(it => it.locked);
-    const counts = { high: 0, medium: 0, low: 0 };
-    items.forEach(it => { if (counts[it.confidence] !== undefined) counts[it.confidence]++; });
-
     const caseEl = document.createElement('div');
     caseEl.className = 'case';
+    const caseId = `case-${caseCount}`;
 
     caseEl.innerHTML = `
       <div class="case-header">
         <div>
           <div class="case-title">${escapeHtml(profile.companyName || 'Unnamed Company')}</div>
-          <div class="case-sub">${escapeHtml(profile.entityType)} (${escapeHtml(profile.taxStatus)}) · ${escapeHtml(profile.state)} · FY ${escapeHtml(profile.fyStart)}–${escapeHtml(profile.fyEnd)} · Generated ${new Date().toLocaleString()}</div>
+          <div class="case-sub">${escapeHtml(profile.entityType)} · ${escapeHtml(profile.state || profile.country)} · ${escapeHtml(profile.country)} · Generated ${new Date().toLocaleString()}</div>
         </div>
-        <div class="case-summary">${items.length} obligation${items.length===1?'':'s'} found</div>
       </div>
-      <div class="tables-container">${renderTables(items)}</div>
-      ${hasLocked ? `
-      <div class="unlock-panel">
-        <h3>Unlock your complete compliance calendar</h3>
-        <p>See every deadline, required document, and filing instruction — free. Leave your details and our team can also help you file directly.</p>
-        <div class="unlock-cta-row">
-          <button class="unlock-btn unlock-cta-btn" type="button">Unlock Full Calendar</button>
-        </div>
-        <div class="unlock-form">
-          <div class="field"><label>Name</label><input type="text" class="unlock-name" placeholder="Jane Doe"></div>
-          <div class="field"><label>Email *</label><input type="email" class="unlock-email" placeholder="jane@company.com"></div>
-          <div class="field"><label>Phone</label><input type="tel" class="unlock-phone" placeholder="Optional"></div>
-          <button class="unlock-submit unlock-btn" type="button">Unlock</button>
-        </div>
-        <div class="unlock-error"></div>
-      </div>` : ''}
+      <div class="filter-bar" id="${caseId}-filters"></div>
+      <div class="deadlines-container" id="${caseId}-deadlines"></div>
       <div class="legend">
-        <span><span class="dot high"></span> High confidence — clearly stated on an official source</span>
-        <span><span class="dot medium"></span> Medium — needs a quick human check</span>
-        <span><span class="dot low"></span> Low — could not fully verify, don't rely on this yet</span>
+        <span>🔴 Due within 15 days</span><span>🟡 Due within 60 days</span><span>🟢 Further out</span>
       </div>
-      <div class="disclaimer">Research result — not yet a verified compliance rule. Confirm anything marked medium/low confidence with an official source, or unlock your calendar to have our team verify it for you.</div>
+      <div class="disclaimer">Research result — not yet a verified compliance rule. Confirm dates with an official source, or talk to our team to have it verified for you.</div>
     `;
     document.getElementById('cases').prepend(caseEl);
-    if (hasLocked) wireUnlockPanel(caseEl, calendarId, profile);
+
+    const filterBar = caseEl.querySelector(`#${caseId}-filters`);
+    const deadlinesContainer = caseEl.querySelector(`#${caseId}-deadlines`);
+
+    let activeFilter = 'all';
+
+    function renderFiltered() {
+      const visibleUnlocked = allItems.filter(it => !it.locked && withinFilter(it.daysUntil, activeFilter));
+      const visibleLocked = allItems.filter(it => it.locked && withinFilter(it.daysUntil, activeFilter));
+
+      let html = '';
+      if (visibleUnlocked.length) {
+        html += visibleUnlocked.map(renderDeadlineCard).join('');
+      } else {
+        html += `<div class="no-match">No unlocked deadlines in this window.</div>`;
+      }
+      html += renderLockedSummary(visibleLocked, calendarId);
+      deadlinesContainer.innerHTML = html;
+      wireRequestReview(caseEl, calendarId);
+    }
+
+    filterBar.innerHTML = FILTERS.map(f =>
+      `<button class="filter-chip${f.key==='all' ? ' active' : ''}" data-filter="${f.key}" type="button">${f.label}</button>`
+    ).join('');
+    filterBar.querySelectorAll('.filter-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        filterBar.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        activeFilter = chip.dataset.filter;
+        renderFiltered();
+      });
+    });
+
+    renderFiltered();
   }
 
   async function handleSubmit() {
     const profile = readProfile();
+    const contact = readContact();
     if (!profile.state || !profile.entityType) return;
+    if (!contact.email || !contact.email.includes('@')) {
+      document.getElementById('statusHint').textContent = 'Please enter a valid email so we can send you your calendar.';
+      document.getElementById('contactEmail').focus();
+      return;
+    }
+
     const btn = document.getElementById('submit');
     const statusHint = document.getElementById('statusHint');
     btn.disabled = true;
@@ -483,12 +562,12 @@
 
     const loadingEl = document.createElement('div');
     loadingEl.className = 'loading-case';
-    loadingEl.innerHTML = `Building calendar for ${escapeHtml(profile.companyName || profile.state)}<span class="dots"></span>`;
+    loadingEl.innerHTML = `Building calendar for ${escapeHtml(profile.companyName || profile.state || profile.country)}<span class="dots"></span>`;
     document.getElementById('emptyState')?.remove();
     document.getElementById('cases').prepend(loadingEl);
 
     try {
-      const data = await callGenerate(profile);
+      const data = await callGenerate(profile, contact);
       const items = Array.isArray(data.items) ? data.items : [];
       if (!items.length) throw new Error('No calendar items returned — try again or refine the profile.');
       loadingEl.remove();
