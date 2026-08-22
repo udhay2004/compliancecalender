@@ -90,6 +90,13 @@ const itemSchema = new mongoose.Schema(
 const profileSchema = new mongoose.Schema(
   {
     companyName: String,
+    // Defaults to United States for every calendar generated before this
+    // field existed. Non-US countries are NOT backed by StateCache yet —
+    // they always take the live-research path in lib/claude.js (which
+    // still needs a prompt update to stop assuming a US company; see
+    // FRONTEND_BACKEND_NOTES.md) and are simply never cache-hits until a
+    // presearched dataset is built for them the same way US states were.
+    country: { type: String, default: "United States" },
     state: String,
     entityType: String,
     taxStatus: String,
