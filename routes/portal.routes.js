@@ -40,6 +40,23 @@ router.get("/calendars", async (req, res) => {
   res.json({ calendars });
 });
 
+// GET /api/portal/calendars/pending — READ-ONLY. A client whose calendar
+// was just linked to their account (e.g. via the "Start Filing" Google
+// login flow in routes/auth.routes.js) needs SOME signal that something
+// is happening, rather than an empty portal that looks broken. This
+// deliberately does NOT support upload/document routes — those still
+// only work on approved calendars via findOwnApprovedCalendar below —
+// so the staff-review gate stays exactly as strict as it was before.
+router.get("/calendars/pending", async (req, res) => {
+  const calendars = await Calendar.find({
+    clientOrgId: req.user.clientOrgId,
+    status: "pending_review",
+  })
+    .select("profile createdAt items")
+    .sort({ createdAt: -1 });
+  res.json({ calendars });
+});
+
 // GET /api/portal/calendars/:id
 router.get("/calendars/:id", async (req, res) => {
   const calendar = await findOwnApprovedCalendar(req, req.params.id);
