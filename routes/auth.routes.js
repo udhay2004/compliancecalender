@@ -12,6 +12,7 @@ const rateLimit = require("express-rate-limit");
 const crypto = require("crypto");
 const User = require("../models/User");
 const ClientOrg = require("../models/ClientOrg");
+const Calendar = require("../models/Calendar");
 const { setSessionCookie, clearSessionCookie, requireAuth } = require("../middleware/auth");
 const { getAuthUrl, verifyCodeAndGetProfile } = require("../lib/google");
 
@@ -80,6 +81,7 @@ router.get("/me", requireAuth, (req, res) => {
 // ---------------------------------------------------------------------
 
 const GOOGLE_STATE_COOKIE = "cc_oauth_state";
+const PENDING_CALENDAR_COOKIE = "cc_pending_calendar";
 
 router.get("/google", (req, res) => {
   // Random per-attempt state, checked on callback, to stop a
@@ -92,13 +94,29 @@ router.get("/google", (req, res) => {
     secure: process.env.NODE_ENV === "production",
     maxAge: 10 * 60 * 1000, // only needs to survive the round trip to Google and back
   });
+
+  // "Start Filing" links here as /auth/google?calendarId=<id>&flow=start_filing
+  // so the calendar they just generated anonymously can be attached to
+  // the account they're about to create/log into, on the other side of
+  // the OAuth round trip.
+  if (req.query.calendarId) {
+    res.cookie(PENDING_CALENDAR_COOKIE, String(req.query.calendarId), {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 10 * 60 * 1000,
+    });
+  }
+
   res.redirect(getAuthUrl(state));
 });
 
 router.get("/google/callback", async (req, res) => {
   const { code, state, error } = req.query;
   const expectedState = req.cookies?.[GOOGLE_STATE_COOKIE];
+  const pendingCalendarId = req.cookies?.[PENDING_CALENDAR_COOKIE];
   res.clearCookie(GOOGLE_STATE_COOKIE);
+  res.clearCookie(PENDING_CALENDAR_COOKIE);
 
   if (error) {
     return res.redirect("/login.html?reason=google_denied");
@@ -159,7 +177,31 @@ router.get("/google/callback", async (req, res) => {
   }
 
   setSessionCookie(res, user);
-  res.redirect(user.role === "client" ? "/portal.html" : "/");
+
+  // Link the calendar they generated anonymously (before this login) to
+  // the account they just created/signed into. Only ever touches a
+  // calendar that's still unclaimed public data (source:"public",
+  // clientOrgId: null) — never overwrites a calendar that already
+  // belongs to someone. Status stays "pending_review" on purpose: a
+  // staff member still needs to approve it (see portal.routes.js) before
+  // it's visible for document upload — this just removes the manual
+  // "attach this lead to this client" step for staff.
+  let linkedCalendarId = null;
+  if (pendingCalendarId && user.role === "client" && user.clientOrgId) {
+    try {
+      const linked = await Calendar.findOneAndUpdate(
+        { _id: pendingCalendarId, source: "public", clientOrgId: null },
+        { $set: { clientOrgId: user.clientOrgId } },
+        { new: true }
+      );
+      if (linked) linkedCalendarId = linked._id.toString();
+    } catch (err) {
+      console.error("[google-callback] Failed to link pending calendar (non-fatal):", err.message);
+    }
+  }
+
+  const portalUrl = linkedCalendarId ? `/portal.html?pending=${linkedCalendarId}` : "/portal.html";
+  res.redirect(user.role === "client" ? portalUrl : "/");
 });
 
 module.exports = router;
