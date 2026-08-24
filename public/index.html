@@ -144,17 +144,18 @@
 
   /* locked summary */
   .locked-summary {
-    margin-top: 22px; padding: 22px 24px; background: var(--grey-bg); border-radius: 12px;
-    border: 1px solid var(--rule);
+    margin-top: 22px; padding: 22px 24px; background: var(--urgent-bg); border-radius: 12px;
+    border: 1px solid var(--urgent);
   }
   .locked-summary-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
   .locked-summary-head .lock-icon { font-size: 18px; }
-  .locked-summary h3 { font-family: var(--serif); font-weight: 600; font-size: 17px; margin: 0; }
+  .locked-summary h3 { font-family: var(--serif); font-weight: 600; font-size: 17px; margin: 0; color: var(--urgent); }
+  .locked-urgent-line { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--urgent); margin-bottom: 10px; }
   .locked-summary p { font-size: 13px; color: var(--ink-soft); margin: 0 0 16px; max-width: 54ch; }
-  .locked-cats { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .locked-cats { display: flex; gap: 8px; flex-wrap: wrap; }
   .locked-cat-tag {
-    font-family: var(--mono); font-size: 11px; color: var(--ink-soft); background: #fff;
-    border: 1px solid var(--rule); border-radius: 999px; padding: 5px 11px;
+    font-family: var(--mono); font-size: 11px; color: var(--urgent); background: #fff;
+    border: 1px solid var(--urgent); border-radius: 999px; padding: 5px 11px;
   }
   .review-status { font-size: 12.5px; color: var(--later); font-family: var(--mono); margin-top: 12px; }
 
@@ -423,7 +424,6 @@
           <div class="deadline-desc">${escapeHtml(it.description)}${it.authority ? ` — <span style="color:var(--grey-dot)">${escapeHtml(it.authority)}</span>` : ''}</div>
           <div class="deadline-meta">
             Applies to: ${escapeHtml(it.applicable_to || '—')}
-            ${it.source_url ? ` · <a href="${escapeHtml(it.source_url)}" target="_blank" rel="noopener">Source</a>` : ''}
           </div>
         </div>
       </div>`;
@@ -436,10 +436,16 @@
     const catTags = Object.entries(catCounts).map(([cat, n]) =>
       `<span class="locked-cat-tag">${escapeHtml(cat)} · ${n}</span>`).join('');
 
+    const urgentCount = lockedItems.filter(it => it.daysUntil !== null && it.daysUntil <= 60).length;
+    const urgentLine = urgentCount > 0
+      ? `<div class="locked-urgent-line">⚠ ${urgentCount} of these fall due within the next 60 days.</div>`
+      : '';
+
     return `
       <div class="locked-summary" data-calendar-id="${calendarId}">
-        <div class="locked-summary-head"><span class="lock-icon">🔒</span><h3>+${lockedItems.length} more compliance obligation${lockedItems.length===1?'':'s'}</h3></div>
-        <p>Everything past your nearest deadlines — exact dates, required documents, filing instructions — is ready. Start filing to see it all, or talk to our team first.</p>
+        <div class="locked-summary-head"><span class="lock-icon">⚠️</span><h3>${lockedItems.length} more obligation${lockedItems.length===1?'':'s'} still unaddressed</h3></div>
+        ${urgentLine}
+        <p>Missed compliance deadlines can mean penalties, interest, or loss of good standing with the state — and these get harder to track the more of them there are. Our compliance team can take this off your plate entirely.</p>
         <div class="locked-cats">${catTags}</div>
       </div>`;
   }
