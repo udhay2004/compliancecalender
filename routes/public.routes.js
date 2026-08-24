@@ -50,38 +50,59 @@ const reviewLimiter = rateLimit({
 // on its own, with a real reason to talk to your team for the rest.
 const UNLOCK_RATIO = 0.7;
 
-// Best-effort date parse. Returns null for anything unparseable, so a
-// vague due_date never gets mistaken for something urgent or overdue.
-//
-// IMPORTANT FIX: many compliance items are annual/recurring (e.g. "Form
-// 940 due 31 January of the following year"). If the date Claude/the
-// cache returns doesn't carry a year that's actually in the future, a
-// naive `new Date(dueDateStr)` parses it as a past date and the item
-// shows as "Overdue" even though the real next occurrence hasn't
-// happened yet. Rolling forward by whole years until non-negative fixes
-// this for the common recurring case. This is a display-layer patch —
-// the real fix belongs in lib/claude.js's date generation so due_date
-// carries the correct year to begin with; flagging that as a follow-up.
+const MONTH_NAMES = [
+  "january", "february", "march", "april", "may", "june",
+  "july", "august", "september", "october", "november", "december",
+];
+
+// due_date here is NEVER a real parseable date string — it's a
+// human-readable rule from lib/claude.js, e.g. "31 January (Annually)",
+// "15th day of 4th month after FY end (15 July for this company)", or
+// "As Triggered" for event-based items. Using JS's `new Date(...)`
+// directly on these is wrong: tested directly, `new Date("31 January
+// (Annually)")` silently defaults the missing year to 2001, which is
+// why every recurring item was showing as wildly "Overdue" and no
+// filter window ever matched anything. This extracts an actual day+
+// month from the text ourselves and anchors it to the correct year.
+function extractMonthDay(text) {
+  if (!text) return null;
+  const re =
+    /\b(\d{1,2})(?:st|nd|rd|th)?\s+(january|february|march|april|may|june|july|august|september|october|november|december)\b|\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2})(?:st|nd|rd|th)?\b/i;
+  const m = text.match(re);
+  if (!m) return null;
+  const day = m[1] ? parseInt(m[1], 10) : parseInt(m[4], 10);
+  const monthName = (m[2] || m[3]).toLowerCase();
+  const month = MONTH_NAMES.indexOf(monthName);
+  if (month === -1 || !day || day < 1 || day > 31) return null;
+  return { month, day };
+}
+
 function daysUntilOf(dueDateStr) {
-  const d = new Date(dueDateStr);
-  if (isNaN(d.getTime())) return null;
+  if (!dueDateStr) return null;
 
-  let ms = d.getTime() - Date.now();
-  let days = Math.ceil(ms / (1000 * 60 * 60 * 24));
-
-  // Roll forward by whole years while it's meaningfully in the past
-  // (more than a week ago — small negative values are left alone, since
-  // that's more likely a genuinely overdue one-time item than a
-  // recurring date needing a year bump).
-  let guardYears = 0;
-  while (days < -7 && guardYears < 5) {
-    d.setFullYear(d.getFullYear() + 1);
-    ms = d.getTime() - Date.now();
-    days = Math.ceil(ms / (1000 * 60 * 60 * 24));
-    guardYears++;
+  const lower = dueDateStr.toLowerCase();
+  if (lower.includes("as triggered") || lower.includes("per service agreement")) {
+    return null; // genuinely event-based, no calendar date to compute
   }
 
-  return days;
+  // Prefer a date embedded in parentheses — that's the already
+  // company-specific computed date (e.g. "...(15 July for this
+  // company)"), more precise than the general rule text before it.
+  const parenMatch = dueDateStr.match(/\(([^)]+)\)/);
+  const parsed = (parenMatch && extractMonthDay(parenMatch[1])) || extractMonthDay(dueDateStr);
+  if (!parsed) return null; // e.g. "anniversary of incorporation date" — can't compute without more context
+
+  const now = new Date();
+  let candidate = new Date(now.getFullYear(), parsed.month, parsed.day);
+  const diff = Math.ceil((candidate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+  // Already passed this year (beyond a couple of days, to avoid "due
+  // today" edge cases flipping early) — a recurring obligation's NEXT
+  // occurrence is next year, not "overdue by 8 months".
+  if (diff < -2) {
+    candidate = new Date(now.getFullYear() + 1, parsed.month, parsed.day);
+  }
+  return Math.ceil((candidate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 }
 
 // Sorts nearest-due first, unlocks the nearest UNLOCK_RATIO of items in
