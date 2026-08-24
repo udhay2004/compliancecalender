@@ -43,31 +43,59 @@ const reviewLimiter = rateLimit({
   message: { error: "Too many requests. Please try again later." },
 });
 
-// How many of the nearest-due items come back fully detailed. Everything
-// past this index is redacted to category + daysUntil only.
-const UNLOCKED_ITEM_COUNT = 2;
+// How much of the calendar comes back fully detailed. You said "hide
+// roughly 30%, not everything" — so this locks the FARTHEST-OUT ~30% of
+// items (by due date) rather than a fixed count. With a 28-item
+// calendar that's ~20 shown, ~8 locked — enough to be genuinely useful
+// on its own, with a real reason to talk to your team for the rest.
+const UNLOCK_RATIO = 0.7;
 
-// Best-effort date parse. Returns null (not NaN, not Infinity — those
-// don't survive JSON) for anything unparseable, so an item with a vague
-// due_date like "Annually, 15th day of the 4th month after FY end" never
-// gets mistaken for something urgent or due "today".
+// Best-effort date parse. Returns null for anything unparseable, so a
+// vague due_date never gets mistaken for something urgent or overdue.
+//
+// IMPORTANT FIX: many compliance items are annual/recurring (e.g. "Form
+// 940 due 31 January of the following year"). If the date Claude/the
+// cache returns doesn't carry a year that's actually in the future, a
+// naive `new Date(dueDateStr)` parses it as a past date and the item
+// shows as "Overdue" even though the real next occurrence hasn't
+// happened yet. Rolling forward by whole years until non-negative fixes
+// this for the common recurring case. This is a display-layer patch —
+// the real fix belongs in lib/claude.js's date generation so due_date
+// carries the correct year to begin with; flagging that as a follow-up.
 function daysUntilOf(dueDateStr) {
   const d = new Date(dueDateStr);
   if (isNaN(d.getTime())) return null;
-  return Math.ceil((d.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+
+  let ms = d.getTime() - Date.now();
+  let days = Math.ceil(ms / (1000 * 60 * 60 * 24));
+
+  // Roll forward by whole years while it's meaningfully in the past
+  // (more than a week ago — small negative values are left alone, since
+  // that's more likely a genuinely overdue one-time item than a
+  // recurring date needing a year bump).
+  let guardYears = 0;
+  while (days < -7 && guardYears < 5) {
+    d.setFullYear(d.getFullYear() + 1);
+    ms = d.getTime() - Date.now();
+    days = Math.ceil(ms / (1000 * 60 * 60 * 24));
+    guardYears++;
+  }
+
+  return days;
 }
 
-// Sorts nearest-due first (unparseable dates sort last), returns the
-// first UNLOCKED_ITEM_COUNT items in full, and reduces every other item
-// to { locked, category, daysUntil } — no name, no description, nothing
-// that would let someone piece together their obligations for free.
+// Sorts nearest-due first, unlocks the nearest UNLOCK_RATIO of items in
+// full, and reduces the farthest-out remainder to { locked, category,
+// daysUntil } — no name, no description.
 function applyRevealPolicy(items) {
   const withDays = items
     .map((it) => ({ ...it, daysUntil: daysUntilOf(it.due_date) }))
     .sort((a, b) => (a.daysUntil ?? Infinity) - (b.daysUntil ?? Infinity));
 
+  const unlockedCount = Math.max(2, Math.round(withDays.length * UNLOCK_RATIO));
+
   return withDays.map((it, idx) => {
-    if (idx < UNLOCKED_ITEM_COUNT) {
+    if (idx < unlockedCount) {
       return { ...it, locked: false };
     }
     return {
