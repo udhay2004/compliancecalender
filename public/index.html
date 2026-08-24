@@ -126,6 +126,7 @@
 
   .deadline-body { flex: 1; min-width: 0; }
   .deadline-name { font-weight: 600; font-size: 15px; margin-bottom: 3px; }
+  .deadline-due-date { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); margin-bottom: 6px; }
   .deadline-cat {
     display: inline-block; font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
     color: var(--later); background: var(--later-bg); border-radius: 5px; padding: 2px 7px; margin-bottom: 6px;
@@ -418,6 +419,7 @@
         <div class="deadline-body">
           <div class="deadline-cat">${escapeHtml(it.category)}</div>
           <div class="deadline-name">${escapeHtml(it.compliance_name)}</div>
+          <div class="deadline-due-date">Due: ${escapeHtml(it.due_date || 'Not specified')}</div>
           <div class="deadline-desc">${escapeHtml(it.description)}${it.authority ? ` — <span style="color:var(--grey-dot)">${escapeHtml(it.authority)}</span>` : ''}</div>
           <div class="deadline-meta">
             Applies to: ${escapeHtml(it.applicable_to || '—')}
@@ -453,7 +455,7 @@
   function renderActionBar(calendarId) {
     return `
       <div class="action-bar">
-        <a class="btn-primary" href="/auth/google?calendarId=${encodeURIComponent(calendarId)}">Start Filing — Log in with Google →</a>
+        <a class="btn-primary" href="/api/auth/google?calendarId=${encodeURIComponent(calendarId)}">Start Filing — Log in with Google →</a>
         <button class="btn-secondary request-review-btn" type="button" data-calendar-id="${calendarId}">Talk to an Expert First</button>
         <div class="review-status"></div>
       </div>`;
