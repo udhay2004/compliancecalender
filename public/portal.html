@@ -64,7 +64,30 @@
     const res = await fetch('/api/portal/calendars');
     const data = await res.json().catch(() => ({}));
     const calendars = data.calendars || [];
+
     if (!calendars.length) {
+      // No approved calendar yet — check for one still under review
+      // before assuming there's genuinely nothing (e.g. a client who
+      // just signed in via "Start Filing" from the public calendar).
+      const pendingRes = await fetch('/api/portal/calendars/pending');
+      const pendingData = await pendingRes.json().catch(() => ({}));
+      const pending = (pendingData.calendars || [])[0];
+
+      if (pending) {
+        document.getElementById('calTitle').textContent = pending.profile.companyName || 'Your compliance calendar';
+        document.getElementById('calSub').textContent =
+          `${pending.profile.entityType || ''} · ${pending.profile.state || ''} · Submitted ${new Date(pending.createdAt).toLocaleDateString()}`;
+        document.getElementById('itemsList').innerHTML = `
+          <div class="card"><div class="card-body" style="padding:28px;">
+            <div style="font-weight:600;margin-bottom:6px;">⏳ Under review by our compliance team</div>
+            <p style="font-size:14px;color:var(--ink-soft);margin:0;">
+              We received your ${escapeHtml(String(pending.items?.length || ''))}-item compliance calendar and our team
+              is verifying it before document upload opens. This is usually quick — we'll notify you the moment it's ready.
+            </p>
+          </div></div>`;
+        return;
+      }
+
       document.getElementById('calTitle').textContent = 'No calendar yet';
       document.getElementById('calSub').textContent = 'Your compliance calendar will appear here once ComplyGlobally has generated and approved it.';
       document.getElementById('itemsList').innerHTML = '';
