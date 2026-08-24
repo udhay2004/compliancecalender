@@ -137,6 +137,10 @@
 
   .no-match { padding: 20px 4px; color: var(--ink-soft); font-size: 13.5px; font-style: italic; }
 
+  .action-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 22px 0 4px; padding-top: 18px; border-top: 1px solid var(--rule-soft); }
+  .action-bar .btn-primary { text-decoration: none; display: inline-block; }
+  .action-bar .review-status { flex-basis: 100%; font-size: 12.5px; color: var(--later); font-family: var(--mono); }
+
   /* locked summary */
   .locked-summary {
     margin-top: 22px; padding: 22px 24px; background: var(--grey-bg); border-radius: 12px;
@@ -433,9 +437,24 @@
     return `
       <div class="locked-summary" data-calendar-id="${calendarId}">
         <div class="locked-summary-head"><span class="lock-icon">🔒</span><h3>+${lockedItems.length} more compliance obligation${lockedItems.length===1?'':'s'}</h3></div>
-        <p>We've shown your two nearest deadlines in full. The rest of your calendar — exact dates, required documents, and filing instructions — is ready. Talk to our team and we'll walk through it with you.</p>
+        <p>Everything past your nearest deadlines — exact dates, required documents, filing instructions — is ready. Start filing to see it all, or talk to our team first.</p>
         <div class="locked-cats">${catTags}</div>
-        <button class="btn-primary request-review-btn" type="button">Talk to ComplyGlobally →</button>
+      </div>`;
+  }
+
+  // Shown on EVERY generated calendar, locked items or not — this is the
+  // actual "get this filed" entry point, not just something buried in
+  // the locked-items summary. Clicking Start Filing sends the browser to
+  // Google sign-in (routes/auth.routes.js), carrying this calendarId so
+  // the callback can attach it to whichever account they log into/create.
+  // After sign-in they land on the portal; a staff member still needs to
+  // approve the calendar before document upload unlocks there (see
+  // portal.routes.js — that gate is intentional, not a bug).
+  function renderActionBar(calendarId) {
+    return `
+      <div class="action-bar">
+        <a class="btn-primary" href="/auth/google?calendarId=${encodeURIComponent(calendarId)}">Start Filing — Log in with Google →</a>
+        <button class="btn-secondary request-review-btn" type="button" data-calendar-id="${calendarId}">Talk to an Expert First</button>
         <div class="review-status"></div>
       </div>`;
   }
@@ -455,7 +474,7 @@
         statusEl.textContent = err.message;
         statusEl.style.color = 'var(--urgent)';
         btn.disabled = false;
-        btn.textContent = 'Talk to ComplyGlobally →';
+        btn.textContent = 'Talk to an Expert First';
       }
     });
   }
@@ -503,12 +522,16 @@
       </div>
       <div class="filter-bar" id="${caseId}-filters"></div>
       <div class="deadlines-container" id="${caseId}-deadlines"></div>
+      <div class="action-bar-slot" id="${caseId}-actions"></div>
       <div class="legend">
         <span>🔴 Due within 15 days</span><span>🟡 Due within 60 days</span><span>🟢 Further out</span>
       </div>
       <div class="disclaimer">Research result — not yet a verified compliance rule. Confirm dates with an official source, or talk to our team to have it verified for you.</div>
     `;
     document.getElementById('cases').prepend(caseEl);
+
+    caseEl.querySelector(`#${caseId}-actions`).innerHTML = renderActionBar(calendarId);
+    wireRequestReview(caseEl, calendarId);
 
     const filterBar = caseEl.querySelector(`#${caseId}-filters`);
     const deadlinesContainer = caseEl.querySelector(`#${caseId}-deadlines`);
@@ -527,7 +550,6 @@
       }
       html += renderLockedSummary(visibleLocked, calendarId);
       deadlinesContainer.innerHTML = html;
-      wireRequestReview(caseEl, calendarId);
     }
 
     filterBar.innerHTML = FILTERS.map(f =>
