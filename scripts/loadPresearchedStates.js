@@ -36,6 +36,10 @@ const VALID_ENTITY_TYPES = new Set([
   // Canada — see data/presearched-canada.json. "Sole Proprietorship" is
   // shared with Singapore above, not re-declared here.
   "Federal Corporation (CBCA)", "General Partnership",
+  // United Kingdom — see data/presearched-uk.json. This was missing
+  // entirely until now, which meant presearched-uk.json could never be
+  // loaded through this script despite having real researched data.
+  "Private Limited Company (Ltd)", "Public Limited Company (PLC)", "Sole Trader",
 ]);
 
 function parseArgs() {
