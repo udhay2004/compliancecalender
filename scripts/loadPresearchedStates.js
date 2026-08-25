@@ -23,7 +23,11 @@ const StateCache = require("../models/StateCache");
 
 const VALID_CATEGORIES = new Set(["Mandatory Annual", "Conditional", "Transfer Pricing", "Event-Based"]);
 const VALID_CONFIDENCE = new Set(["high", "medium", "low"]);
-const VALID_ENTITY_TYPES = new Set(["Corporation", "LLC", "Partnership", "Disregarded Entity"]);
+const VALID_ENTITY_TYPES = new Set([
+  "Corporation", "LLC", "Partnership", "Disregarded Entity",
+  // Germany — see data/presearched-germany.json
+  "GmbH", "UG (haftungsbeschränkt)", "AG",
+]);
 
 function parseArgs() {
   const args = process.argv.slice(2);
