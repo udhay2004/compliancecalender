@@ -321,15 +321,23 @@
   fillSelect('fyStart', MONTHS, 0);
   fillSelect('fyEnd', MONTHS, 11);
 
+  const ENTITY_TYPES_BY_COUNTRY = {
+    "United States": ["Corporation", "LLC", "Partnership", "Disregarded Entity"],
+    "Germany": ["GmbH", "UG (haftungsbeschränkt)", "AG"],
+    // Other countries fall back to this generic list until their own
+    // data is researched — see NOTES from the Germany rollout for the
+    // pattern to follow for the next country.
+    "__default__": ["Corporation", "LLC", "Partnership", "Other"],
+  };
+
   // Countries without a US-style "State of Incorporation" concept get a
-  // free-text field instead, and a hint that this path isn't cached yet
-  // (see routes/public.routes.js — only US state/entityType combos are
-  // pre-researched right now).
+  // free-text field instead. Germany specifically has real pre-researched
+  // data (data/presearched-germany.json) keyed by country, so it skips
+  // the "still building" hint that every other non-US country still gets.
   function refreshStateField() {
     const country = document.getElementById('country').value;
     const stateLabel = document.getElementById('stateLabel');
     const stateHint = document.getElementById('stateHint');
-    const stateSelectContainer = document.getElementById('state').parentElement;
 
     if (country === "United States") {
       stateLabel.textContent = "State of Incorporation";
@@ -340,12 +348,23 @@
       document.getElementById('state').replaceWith(select);
     } else {
       stateLabel.textContent = "State / Province / Region";
-      stateHint.style.display = 'block';
+      if (country === "Germany") {
+        stateHint.style.display = 'none'; // Germany's compliance rules are national, not region-specific — this field is just informational for Germany
+      } else {
+        stateHint.style.display = 'block';
+        stateHint.textContent = "We're still building our verified database for this country — your calendar will be researched live and may take a little longer.";
+      }
       const input = document.createElement('input');
       input.type = 'text'; input.id = 'state';
-      input.placeholder = 'e.g. Dubai, DIFC, or leave blank if not applicable';
+      input.placeholder = country === 'Germany' ? 'e.g. Berlin (optional — compliance rules are national)' : 'e.g. Dubai, DIFC, or leave blank if not applicable';
       document.getElementById('state').replaceWith(input);
     }
+
+    const entityTypes = ENTITY_TYPES_BY_COUNTRY[country] || ENTITY_TYPES_BY_COUNTRY.__default__;
+    const entitySelect = document.createElement('select');
+    entitySelect.id = 'entityType';
+    fillSelectInto(entitySelect, entityTypes, 0);
+    document.getElementById('entityType').replaceWith(entitySelect);
   }
   function fillSelectInto(el, values, selectedIndex) {
     values.forEach((v,i) => {
