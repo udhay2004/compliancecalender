@@ -324,6 +324,9 @@
   const ENTITY_TYPES_BY_COUNTRY = {
     "United States": ["Corporation", "LLC", "Partnership", "Disregarded Entity"],
     "Germany": ["GmbH", "UG (haftungsbeschränkt)", "AG"],
+    // UAE — see data/presearched-uae.json. Values must match entityType
+    // exactly (case-sensitive) or the cache lookup in lib/claude.js misses.
+    "United Arab Emirates": ["Mainland LLC", "Free Zone Company (FZE/FZCO)", "Branch of Foreign Company", "Civil Company"],
     // Other countries fall back to this generic list until their own
     // data is researched — see NOTES from the Germany rollout for the
     // pattern to follow for the next country.
@@ -348,15 +351,24 @@
       document.getElementById('state').replaceWith(select);
     } else {
       stateLabel.textContent = "State / Province / Region";
-      if (country === "Germany") {
-        stateHint.style.display = 'none'; // Germany's compliance rules are national, not region-specific — this field is just informational for Germany
+      // Germany's rules are purely national; UAE's are keyed on the
+      // country too (see data/presearched-uae.json) since entityType
+      // — mainland vs. free zone vs. branch vs. civil company — is what
+      // actually drives which rules apply, not the specific emirate or
+      // free zone. This field is informational only for both.
+      if (country === "Germany" || country === "United Arab Emirates") {
+        stateHint.style.display = 'none';
       } else {
         stateHint.style.display = 'block';
         stateHint.textContent = "We're still building our verified database for this country — your calendar will be researched live and may take a little longer.";
       }
       const input = document.createElement('input');
       input.type = 'text'; input.id = 'state';
-      input.placeholder = country === 'Germany' ? 'e.g. Berlin (optional — compliance rules are national)' : 'e.g. Dubai, DIFC, or leave blank if not applicable';
+      input.placeholder = country === 'Germany'
+        ? 'e.g. Berlin (optional — compliance rules are national)'
+        : country === 'United Arab Emirates'
+          ? 'e.g. Dubai, DIFC, or leave blank (informational — entity type drives the rules)'
+          : 'e.g. Dubai, DIFC, or leave blank if not applicable';
       document.getElementById('state').replaceWith(input);
     }
 
