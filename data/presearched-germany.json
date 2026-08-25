@@ -1,0 +1,200 @@
+[
+  {
+    "state": "GERMANY",
+    "entityType": "GmbH",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual Financial Statements Filing (Jahresabschluss – Bundesanzeiger)",
+        "due_date_rule": "12 months after financial year end for small companies (Annually)",
+        "applicable_to": "All GmbH entities, regardless of revenue or employee count",
+        "description": "Annual financial statements (Bilanz, and GuV/notes depending on size class) must be prepared under HGB and submitted electronically via the Unternehmensregister, published through the Bundesanzeiger. Missing the deadline triggers an automatic fine (roughly €500–€25,000, repeatable) under HGB §335, and the managing director can be held personally liable.",
+        "authority": "Bundesamt für Justiz (BfJ) / Bundesanzeiger, under HGB §325 and §335",
+        "source_url": "https://norman.finance/de/en/blog/gmbh-annual-accounts-filing-germany",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Corporate Income Tax Return (Körperschaftsteuererklärung)",
+        "due_date_rule": "31 July of the following year without a tax adviser; substantially extended if filed by a licensed Steuerberater (Annually)",
+        "applicable_to": "All GmbH entities",
+        "description": "Annual corporate income tax return covering the prior fiscal year. The Finanzamt can still issue an early filing notice (Vorabanforderung) in individual cases that overrides an adviser's extension.",
+        "authority": "Finanzamt (local tax office)",
+        "source_url": "https://calculatorwallah.com/articles/germany-tax-deadlines-2026-federal-state-municipal",
+        "confidence": "medium"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Trade Tax Return (Gewerbesteuererklärung)",
+        "due_date_rule": "31 July of the following year, same schedule as the corporate income tax return (Annually)",
+        "applicable_to": "All GmbH entities with a registered trade (Gewerbe)",
+        "description": "Annual municipal trade tax return, filed alongside the corporate income tax return. The tax owed depends on the local municipality's Hebesatz (multiplier), so the amount varies by location even though the filing deadline doesn't.",
+        "authority": "Finanzamt / local municipality",
+        "source_url": "https://calculatorwallah.com/articles/germany-tax-deadlines-2026-federal-state-municipal",
+        "confidence": "medium"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "VAT Annual Return (Umsatzsteuerjahreserklärung)",
+        "due_date_rule": "31 July of the following year (Annually)",
+        "applicable_to": "All VAT-registered GmbH entities",
+        "description": "Reconciles the full year's periodic VAT advance returns into one annual summary confirming total VAT collected and paid.",
+        "authority": "Finanzamt",
+        "source_url": "https://www.commenda.io/germany/annual-compliance-for-businesses",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "VAT Advance Returns (Umsatzsteuer-Voranmeldung)",
+        "due_date_rule": "10th day of the month following the reporting period — monthly if prior-year VAT exceeded €9,000, quarterly if between €2,000–€9,000 (Recurring)",
+        "applicable_to": "VAT-registered companies above the small-business threshold; newly formed companies typically file monthly for their first two years regardless of turnover",
+        "description": "Periodic advance VAT filings required throughout the year, in addition to the annual return above. Filing frequency is set by the Finanzamt based on the company's actual or expected turnover.",
+        "authority": "Finanzamt",
+        "source_url": "https://www.taxenlight.com/en/vat-declarations-in-germany/",
+        "confidence": "medium"
+      },
+      {
+        "category": "Event-Based",
+        "compliance_name": "Beneficial Ownership Registration (Transparenzregister)",
+        "due_date_rule": "Immediately upon Handelsregister entry, and without delay after any change in beneficial ownership (As Triggered)",
+        "applicable_to": "All GmbH entities, including dormant companies",
+        "description": "Ultimate beneficial owners must be reported to Germany's central Transparenzregister. Non-compliance is treated as an administrative offence and can carry fines of up to €150,000 for negligent violations and up to €1,000,000 (or twice the economic benefit) for serious or repeated ones.",
+        "authority": "Transparenzregister, under the Geldwäschegesetz (GwG) / TraFinG",
+        "source_url": "https://www.commenda.io/germany/ubo-filing",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "GERMANY",
+    "entityType": "UG (haftungsbeschränkt)",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual Financial Statements Filing (Jahresabschluss – Bundesanzeiger)",
+        "due_date_rule": "12 months after financial year end for small companies (Annually)",
+        "applicable_to": "All UG (haftungsbeschränkt) entities, regardless of revenue or employee count",
+        "description": "Same publication obligation as a GmbH — UGs are a variant of the GmbH form under HGB §325 and file annual financial statements via the Unternehmensregister/Bundesanzeiger. Missing the deadline triggers an automatic fine under §335 HGB.",
+        "authority": "Bundesamt für Justiz (BfJ) / Bundesanzeiger, under HGB §325 and §335",
+        "source_url": "https://www.nrmn.co/de/en/blog/gmbh-annual-accounts-filing-germany",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Corporate Income Tax Return (Körperschaftsteuererklärung)",
+        "due_date_rule": "31 July of the following year without a tax adviser; substantially extended if filed by a licensed Steuerberater (Annually)",
+        "applicable_to": "All UG (haftungsbeschränkt) entities",
+        "description": "Annual corporate income tax return covering the prior fiscal year, on the same basis as a GmbH.",
+        "authority": "Finanzamt (local tax office)",
+        "source_url": "https://calculatorwallah.com/articles/germany-tax-deadlines-2026-federal-state-municipal",
+        "confidence": "medium"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Trade Tax Return (Gewerbesteuererklärung)",
+        "due_date_rule": "31 July of the following year, same schedule as the corporate income tax return (Annually)",
+        "applicable_to": "All UG (haftungsbeschränkt) entities with a registered trade (Gewerbe)",
+        "description": "Annual municipal trade tax return; the amount owed depends on the local municipality's Hebesatz (multiplier).",
+        "authority": "Finanzamt / local municipality",
+        "source_url": "https://calculatorwallah.com/articles/germany-tax-deadlines-2026-federal-state-municipal",
+        "confidence": "medium"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "VAT Annual Return (Umsatzsteuerjahreserklärung)",
+        "due_date_rule": "31 July of the following year (Annually)",
+        "applicable_to": "All VAT-registered UG (haftungsbeschränkt) entities",
+        "description": "Reconciles the full year's periodic VAT advance returns into one annual summary.",
+        "authority": "Finanzamt",
+        "source_url": "https://www.commenda.io/germany/annual-compliance-for-businesses",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "VAT Advance Returns (Umsatzsteuer-Voranmeldung)",
+        "due_date_rule": "10th day of the month following the reporting period — monthly if prior-year VAT exceeded €9,000, quarterly if between €2,000–€9,000 (Recurring)",
+        "applicable_to": "VAT-registered companies above the small-business threshold; newly formed companies typically file monthly for their first two years regardless of turnover",
+        "description": "Periodic advance VAT filings required throughout the year, frequency set by the Finanzamt based on actual or expected turnover.",
+        "authority": "Finanzamt",
+        "source_url": "https://www.taxenlight.com/en/vat-declarations-in-germany/",
+        "confidence": "medium"
+      },
+      {
+        "category": "Event-Based",
+        "compliance_name": "Beneficial Ownership Registration (Transparenzregister)",
+        "due_date_rule": "Immediately upon Handelsregister entry, and without delay after any change in beneficial ownership (As Triggered)",
+        "applicable_to": "All UG (haftungsbeschränkt) entities, including dormant companies",
+        "description": "Ultimate beneficial owners must be reported to Germany's central Transparenzregister. Non-compliance can carry fines of up to €150,000 for negligent violations and up to €1,000,000 for serious or repeated ones.",
+        "authority": "Transparenzregister, under the Geldwäschegesetz (GwG) / TraFinG",
+        "source_url": "https://www.commenda.io/germany/ubo-filing",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "GERMANY",
+    "entityType": "AG",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual Financial Statements Filing (Jahresabschluss – Bundesanzeiger)",
+        "due_date_rule": "4 months after financial year end for medium/large companies, 12 months for small ones (Annually)",
+        "applicable_to": "All AG entities; larger AGs also face mandatory external audit (Wirtschaftsprüfer) requirements that GmbHs of the same size may not",
+        "description": "AGs face a shorter publication window than small GmbHs once they cross the medium-size threshold, and are more likely to require a statutory audit before publication. Filed via the Unternehmensregister/Bundesanzeiger under HGB §325.",
+        "authority": "Bundesamt für Justiz (BfJ) / Bundesanzeiger, under HGB §325 and §335",
+        "source_url": "https://germancompanyformation.com/guides/german-annual-accounts-jahresabschluss",
+        "confidence": "medium"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Corporate Income Tax Return (Körperschaftsteuererklärung)",
+        "due_date_rule": "31 July of the following year without a tax adviser; substantially extended if filed by a licensed Steuerberater (Annually)",
+        "applicable_to": "All AG entities",
+        "description": "Annual corporate income tax return covering the prior fiscal year, on the same statutory basis as a GmbH.",
+        "authority": "Finanzamt (local tax office)",
+        "source_url": "https://calculatorwallah.com/articles/germany-tax-deadlines-2026-federal-state-municipal",
+        "confidence": "medium"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Trade Tax Return (Gewerbesteuererklärung)",
+        "due_date_rule": "31 July of the following year, same schedule as the corporate income tax return (Annually)",
+        "applicable_to": "All AG entities with a registered trade (Gewerbe)",
+        "description": "Annual municipal trade tax return; the amount owed depends on the local municipality's Hebesatz (multiplier).",
+        "authority": "Finanzamt / local municipality",
+        "source_url": "https://calculatorwallah.com/articles/germany-tax-deadlines-2026-federal-state-municipal",
+        "confidence": "medium"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "VAT Annual Return (Umsatzsteuerjahreserklärung)",
+        "due_date_rule": "31 July of the following year (Annually)",
+        "applicable_to": "All VAT-registered AG entities",
+        "description": "Reconciles the full year's periodic VAT advance returns into one annual summary.",
+        "authority": "Finanzamt",
+        "source_url": "https://www.commenda.io/germany/annual-compliance-for-businesses",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "VAT Advance Returns (Umsatzsteuer-Voranmeldung)",
+        "due_date_rule": "10th day of the month following the reporting period — monthly if prior-year VAT exceeded €9,000, quarterly if between €2,000–€9,000 (Recurring)",
+        "applicable_to": "VAT-registered companies above the small-business threshold",
+        "description": "Periodic advance VAT filings required throughout the year, frequency set by the Finanzamt based on actual or expected turnover.",
+        "authority": "Finanzamt",
+        "source_url": "https://www.taxenlight.com/en/vat-declarations-in-germany/",
+        "confidence": "medium"
+      },
+      {
+        "category": "Event-Based",
+        "compliance_name": "Beneficial Ownership Registration (Transparenzregister)",
+        "due_date_rule": "Immediately upon Handelsregister entry, and without delay after any change in beneficial ownership (As Triggered)",
+        "applicable_to": "All AG entities, including dormant companies",
+        "description": "Ultimate beneficial owners must be reported to Germany's central Transparenzregister. Non-compliance can carry fines of up to €150,000 for negligent violations and up to €1,000,000 for serious or repeated ones.",
+        "authority": "Transparenzregister, under the Geldwäschegesetz (GwG) / TraFinG",
+        "source_url": "https://www.commenda.io/germany/ubo-filing",
+        "confidence": "high"
+      }
+    ]
+  }
+]
