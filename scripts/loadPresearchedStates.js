@@ -29,6 +29,13 @@ const VALID_ENTITY_TYPES = new Set([
   "GmbH", "UG (haftungsbeschränkt)", "AG",
   // UAE — see data/presearched-uae.json
   "Mainland LLC", "Free Zone Company (FZE/FZCO)", "Branch of Foreign Company", "Civil Company",
+  // Singapore — see data/presearched-singapore.json. Was previously missing
+  // from this list entirely, which meant loadPresearchedStates.js would have
+  // rejected the Singapore file outright; fixed alongside the Canada rollout.
+  "Private Limited Company (Pte Ltd)", "Limited Liability Partnership (LLP)", "Sole Proprietorship", "Branch Office of Foreign Company",
+  // Canada — see data/presearched-canada.json. "Sole Proprietorship" is
+  // shared with Singapore above, not re-declared here.
+  "Federal Corporation (CBCA)", "General Partnership",
 ]);
 
 function parseArgs() {
