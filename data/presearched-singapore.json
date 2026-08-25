@@ -1,0 +1,306 @@
+[
+  {
+    "state": "SINGAPORE",
+    "entityType": "Private Limited Company (Pte Ltd)",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual General Meeting (AGM)",
+        "due_date_rule": "Within 6 months of financial year end (Annually), unless dispensed with under the Companies Act (e.g. sending financial statements to members within 5 months of FYE instead)",
+        "applicable_to": "All private limited companies not otherwise exempt",
+        "description": "Directors must present the company's financial statements to shareholders at an AGM within six months of the financial year end, unless the company has validly dispensed with AGMs under the Companies Act concessions for private companies.",
+        "authority": "ACRA, under the Companies Act (Cap. 50)",
+        "source_url": "https://anliangroup.com/insights/acra-agm-annual-return-deadlines-2026",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual Return Filing with ACRA",
+        "due_date_rule": "Within 7 months of financial year end (Annually) for non-listed companies; within 5 months for listed companies",
+        "applicable_to": "All private limited companies, including dormant companies",
+        "description": "Every locally incorporated company must file an Annual Return via BizFile+ confirming its registered particulars (directors, secretary, registered office, share capital, members) remain current, whether or not it traded during the year.",
+        "authority": "ACRA, under Section 197 of the Companies Act",
+        "source_url": "https://arnifi.com/blog/acra-annual-filing-singapore-guide-2026/",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "XBRL Financial Statements Filing",
+        "due_date_rule": "Filed together with the Annual Return, within 7 months of financial year end (Annually)",
+        "applicable_to": "Companies not exempt under the small-company or exempt-private-company solvency-declaration concessions",
+        "description": "Most companies must submit their financial statements in XBRL format as part of the Annual Return. Small companies that are exempt private companies may instead file a director-signed solvency declaration in place of full financial statements, provided revenue does not exceed S$5 million.",
+        "authority": "ACRA",
+        "source_url": "https://www.singaporesecretaryservices.com/annual-return-filing-singapore-2026-acra-guide-deadlines-fees/",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Estimated Chargeable Income (ECI) Filing",
+        "due_date_rule": "Within 3 months of financial year end (Annually), unless exempt",
+        "applicable_to": "All companies, except those qualifying for the waiver: annual revenue of S$5 million or below AND ECI is nil",
+        "description": "Companies must file a preliminary estimate of their taxable income for the year with IRAS via myTax Portal within three months of the financial year end. This is separate from, and does not replace, the later Form C-S/C filing.",
+        "authority": "Inland Revenue Authority of Singapore (IRAS)",
+        "source_url": "https://marginwheeler.com/blog/singapore-corporate-tax-deadline",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Corporate Income Tax Return (Form C-S / C-S Lite / C)",
+        "due_date_rule": "30 November (Annually), regardless of financial year end",
+        "applicable_to": "All companies, including dormant and loss-making companies (unless IRAS has granted a specific waiver)",
+        "description": "The final Corporate Income Tax Return, declaring actual chargeable income for the preceding financial year, is due on 30 November every year via IRAS myTax Portal — the same fixed date applies no matter when the company's financial year ends.",
+        "authority": "Inland Revenue Authority of Singapore (IRAS)",
+        "source_url": "https://assemblyworks.co/singapore-corporate-tax-filing-ya2026/",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "GST Return Filing",
+        "due_date_rule": "Within 1 month after the end of each accounting period (Quarterly for most GST-registered businesses; Monthly if assigned by IRAS)",
+        "applicable_to": "If GST-registered (compulsory once annual taxable turnover exceeds S$1 million, or voluntary below that)",
+        "description": "GST-registered companies must file Form F5 and pay any net GST due within one month of each quarterly (or monthly, if assigned) accounting period end, even if there is no GST payable for that period.",
+        "authority": "Inland Revenue Authority of Singapore (IRAS)",
+        "source_url": "https://rafflescorporateservices.com/singapore-company-compliance-calendar-every-filing-deadline-you-need/",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Register of Registrable Controllers (RORC) Annual Confirmation",
+        "due_date_rule": "Annual notice sent to every registrable controller to confirm particulars, even if unchanged (Annually)",
+        "applicable_to": "All companies not specifically exempt (e.g. Singapore-listed public companies, regulated financial institutions)",
+        "description": "Companies must maintain a private RORC identifying every individual with more than 25% ownership or control, and send an annual notice to each controller to reconfirm their particulars are still accurate, even where nothing has changed.",
+        "authority": "ACRA, under Part XIA of the Companies Act",
+        "source_url": "https://www.acra.gov.sg/how-to-guides/setting-up-and-maintaining-register-of-registrable-controllers-(rorc)",
+        "confidence": "high"
+      },
+      {
+        "category": "Event-Based",
+        "compliance_name": "RORC Update on Change of Controller",
+        "due_date_rule": "As Triggered — lodge the change with ACRA's central register within 2 business days of updating the private register",
+        "applicable_to": "Any change in a registrable controller's particulars, or a new/departing controller",
+        "description": "Once the company's private RORC is updated to reflect a change, that change must be lodged with ACRA's central register within two business days.",
+        "authority": "ACRA, under Part XIA of the Companies Act",
+        "source_url": "https://rafflescorporateservices.com/register-of-registrable-controllers-rorc-singapore-2026/",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "CPF Contributions",
+        "due_date_rule": "Monthly, by the 14th of the following month (Ongoing)",
+        "applicable_to": "If the company employs Singapore Citizens or Permanent Residents",
+        "description": "Employers must contribute to the Central Provident Fund for every eligible employee each month; late or missed contributions attract interest and can trigger CPF Board enforcement action.",
+        "authority": "Central Provident Fund (CPF) Board",
+        "source_url": "",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "SINGAPORE",
+    "entityType": "Limited Liability Partnership (LLP)",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual Declaration of Solvency/Insolvency",
+        "due_date_rule": "First declaration within 15 months of registration; subsequently at intervals not exceeding 15 months, at least once every calendar year",
+        "applicable_to": "All LLPs",
+        "description": "A manager must lodge a declaration with ACRA stating whether the LLP is able to pay its debts as they fall due in the normal course of business. Unlike a company, the LLP does not file full annual returns or financial statements with ACRA — this declaration is the core recurring filing.",
+        "authority": "ACRA, under Section 30 of the Limited Liability Partnerships Act 2005",
+        "source_url": "https://www.acra.gov.sg/how-to-guides/common-offences-for-limited-liability-partnerships",
+        "confidence": "high"
+      },
+      {
+        "category": "Event-Based",
+        "compliance_name": "Notify ACRA of Change in Registered Particulars",
+        "due_date_rule": "As Triggered — within 14 days of the change",
+        "applicable_to": "Any change to managers, partners, or the registered office address",
+        "description": "The LLP must inform ACRA of any change to its registered particulars — including a change of manager or registered office — within 14 days, to keep the public register accurate.",
+        "authority": "ACRA, under the Limited Liability Partnerships Act 2005",
+        "source_url": "https://www.acra.gov.sg/how-to-guides/updating-information-of-limited-liability-partnerships",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Partnership Income Tax Return (Form P)",
+        "due_date_rule": "15 April (paper) or 18 April (e-filing) each year (Annually)",
+        "applicable_to": "All LLPs (LLPs are tax-transparent; the LLP itself pays no corporate tax, but must still report income allocated to each partner)",
+        "description": "The precedent partner must file Form P declaring the LLP's income and how it is allocated among the partners. Each partner then separately declares their share on their own individual income tax return.",
+        "authority": "Inland Revenue Authority of Singapore (IRAS)",
+        "source_url": "https://www.iras.gov.sg/taxes/individual-income-tax/self-employed-and-partnerships/tax-obligations-of-partnerships/responsibilities-of-precedent-partners",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "GST Return Filing",
+        "due_date_rule": "Within 1 month after the end of each accounting period (Quarterly for most GST-registered businesses; Monthly if assigned by IRAS)",
+        "applicable_to": "If GST-registered",
+        "description": "A GST-registered LLP files Form F5 and pays any net GST due within one month of each accounting period end, on the standard national schedule.",
+        "authority": "Inland Revenue Authority of Singapore (IRAS)",
+        "source_url": "https://rafflescorporateservices.com/singapore-company-compliance-calendar-every-filing-deadline-you-need/",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Register of Registrable Controllers (RORC) Annual Confirmation",
+        "due_date_rule": "Annual notice sent to every registrable controller to confirm particulars, even if unchanged (Annually)",
+        "applicable_to": "All LLPs not specifically exempt",
+        "description": "LLPs, like companies, must maintain a private RORC identifying individuals with significant interest or control and confirm those particulars annually, even where nothing has changed.",
+        "authority": "ACRA, under the Limited Liability Partnerships Act 2005",
+        "source_url": "https://www.acra.gov.sg/how-to-guides/setting-up-and-maintaining-register-of-registrable-controllers-(rorc)",
+        "confidence": "medium"
+      },
+      {
+        "category": "Event-Based",
+        "compliance_name": "RORC Update on Change of Controller",
+        "due_date_rule": "As Triggered — lodge the change with ACRA's central register within 2 business days of updating the private register",
+        "applicable_to": "Any change in a registrable controller's particulars, or a new/departing controller",
+        "description": "Once the LLP's private RORC is updated, the change must be lodged with ACRA's central register within two business days.",
+        "authority": "ACRA, under the Limited Liability Partnerships Act 2005",
+        "source_url": "https://rafflescorporateservices.com/register-of-registrable-controllers-rorc-singapore-2026/",
+        "confidence": "medium"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "CPF Contributions",
+        "due_date_rule": "Monthly, by the 14th of the following month (Ongoing)",
+        "applicable_to": "If the LLP employs Singapore Citizens or Permanent Residents",
+        "description": "The LLP must contribute to CPF for every eligible employee each month, on the same schedule as any other Singapore employer.",
+        "authority": "Central Provident Fund (CPF) Board",
+        "source_url": "",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "SINGAPORE",
+    "entityType": "Sole Proprietorship",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Business Registration Renewal",
+        "due_date_rule": "Every 1 or 3 years per the chosen renewal cycle, renewable up to 60 days before expiry",
+        "applicable_to": "All sole proprietorships",
+        "description": "Unlike a Pte Ltd, a sole proprietorship's ACRA registration expires and must be actively renewed for a further one or three years via BizFile+ before the expiry date, or the business registration lapses automatically. The three-year option requires MediSave contributions to be current or on an active instalment plan.",
+        "authority": "ACRA",
+        "source_url": "https://www.acra.gov.sg/manage/sole-proprietorship-partnerships/key-requirements-common-offences/renewing-your-registration/",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Personal Income Tax Filing (Form B)",
+        "due_date_rule": "E-filing window 1 March to 18 April (paper filing due 15 April) each year (Annually)",
+        "applicable_to": "The sole proprietor",
+        "description": "A sole proprietorship has no separate corporate tax filing — the owner reports business income and expenses as self-employed income within their own personal Form B Income Tax Return, taxed at individual rates.",
+        "authority": "Inland Revenue Authority of Singapore (IRAS)",
+        "source_url": "https://www.iras.gov.sg/taxes/individual-income-tax/self-employed-and-partnerships/tax-obligations-of-self-employed-persons/basic-guide-for-self-employed-persons",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "MediSave Contribution",
+        "due_date_rule": "Assessed annually after tax filing; must be paid, or kept on an active instalment plan, to remain eligible for business registration renewal",
+        "applicable_to": "If net trade income for the year exceeds S$6,000",
+        "description": "The CPF Board issues a MediSave payment notice after the sole proprietor's tax return is assessed. Outstanding MediSave contributions can block the annual/triennial business registration renewal.",
+        "authority": "Central Provident Fund (CPF) Board",
+        "source_url": "https://statrys.com/sg/guides/company-formation/sole-proprietorship",
+        "confidence": "medium"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "GST Return Filing",
+        "due_date_rule": "Within 1 month after the end of each accounting period (Quarterly for most GST-registered businesses; Monthly if assigned by IRAS)",
+        "applicable_to": "If GST-registered (compulsory once annual taxable turnover exceeds S$1 million, or voluntary below that)",
+        "description": "A GST-registered sole proprietorship files Form F5 and pays any net GST due within one month of each accounting period end, on the same national schedule as companies.",
+        "authority": "Inland Revenue Authority of Singapore (IRAS)",
+        "source_url": "https://rafflescorporateservices.com/singapore-company-compliance-calendar-every-filing-deadline-you-need/",
+        "confidence": "medium"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "CPF Contributions",
+        "due_date_rule": "Monthly, by the 14th of the following month (Ongoing)",
+        "applicable_to": "If the sole proprietorship employs Singapore Citizens or Permanent Residents",
+        "description": "If the sole proprietor hires staff, CPF contributions for those employees must be made monthly, in addition to the owner's own MediSave obligation as a self-employed person.",
+        "authority": "Central Provident Fund (CPF) Board",
+        "source_url": "",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "SINGAPORE",
+    "entityType": "Branch Office of Foreign Company",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual Filing of Head Office & Branch Financial Statements",
+        "due_date_rule": "Within 60 days of the foreign company's AGM; where no AGM is required under the parent's home law, ACRA may grant a one-off extension of up to 2 months",
+        "applicable_to": "All Singapore branches of foreign companies",
+        "description": "Each year the branch must lodge with ACRA a copy of the foreign parent's head-office financial statements plus separately audited financial statements for the Singapore branch operations (dormant branches may lodge unaudited accounts, or apply for a filing waiver in limited cases).",
+        "authority": "ACRA, under the Companies Act (Cap. 50)",
+        "source_url": "https://rafflescorporateservices.com/foreign-company-branch-annual-filing-singapore-2026/",
+        "confidence": "high"
+      },
+      {
+        "category": "Event-Based",
+        "compliance_name": "Notification of Change in Directors",
+        "due_date_rule": "As Triggered — within 30 days of the change",
+        "applicable_to": "Any change to the foreign parent's list of directors lodged with ACRA",
+        "description": "The branch's authorised representative must notify ACRA within 30 days of any change to the foreign company's directors, keeping the Singapore register aligned with the parent's actual board.",
+        "authority": "ACRA, under the Companies Act (Cap. 50)",
+        "source_url": "https://www.allenandgledhill.com/sg/publication/articles/17875/acra-updates-practice-on-1-annual-filing-for-foreign-companies-and-2-applications-for-reliefs-under-the-companies-act-for-local-and-foreign-companies",
+        "confidence": "medium"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Estimated Chargeable Income (ECI) Filing",
+        "due_date_rule": "Within 3 months of financial year end (Annually), unless exempt",
+        "applicable_to": "Branches with Singapore-sourced or Singapore-attributable income, except those qualifying for the waiver (revenue ≤ S$5 million and ECI nil)",
+        "description": "A Singapore branch is assessed on income attributable to its Singapore operations and must file an ECI with IRAS within three months of the financial year end, on the same basis as a locally incorporated company.",
+        "authority": "Inland Revenue Authority of Singapore (IRAS)",
+        "source_url": "https://marginwheeler.com/blog/singapore-corporate-tax-deadline",
+        "confidence": "medium"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Corporate Income Tax Return (Form C-S / C-S Lite / C)",
+        "due_date_rule": "30 November (Annually), regardless of financial year end",
+        "applicable_to": "All Singapore branches of foreign companies",
+        "description": "The branch's actual Singapore-attributable chargeable income for the preceding financial year is declared to IRAS by 30 November each year, via the same fixed national deadline that applies to locally incorporated companies.",
+        "authority": "Inland Revenue Authority of Singapore (IRAS)",
+        "source_url": "https://assemblyworks.co/singapore-corporate-tax-filing-ya2026/",
+        "confidence": "medium"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "GST Return Filing",
+        "due_date_rule": "Within 1 month after the end of each accounting period (Quarterly for most GST-registered businesses; Monthly if assigned by IRAS)",
+        "applicable_to": "If GST-registered",
+        "description": "A GST-registered branch files Form F5 and pays any net GST due within one month of each accounting period end.",
+        "authority": "Inland Revenue Authority of Singapore (IRAS)",
+        "source_url": "https://rafflescorporateservices.com/singapore-company-compliance-calendar-every-filing-deadline-you-need/",
+        "confidence": "medium"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Register of Registrable Controllers (RORC) Annual Confirmation",
+        "due_date_rule": "Annual notice sent to every registrable controller to confirm particulars, even if unchanged (Annually)",
+        "applicable_to": "All Singapore branches of foreign companies not specifically exempt",
+        "description": "Foreign companies with a Singapore branch must also maintain a RORC for individuals with significant interest or control over the foreign company, and reconfirm those particulars annually.",
+        "authority": "ACRA, under Part XIA of the Companies Act",
+        "source_url": "https://www.acra.gov.sg/how-to-guides/setting-up-and-maintaining-register-of-registrable-controllers-(rorc)",
+        "confidence": "medium"
+      },
+      {
+        "category": "Event-Based",
+        "compliance_name": "RORC Update on Change of Controller",
+        "due_date_rule": "As Triggered — lodge the change with ACRA's central register within 2 business days of updating the private register",
+        "applicable_to": "Any change in a registrable controller's particulars, or a new/departing controller",
+        "description": "Once the branch's private RORC is updated to reflect a change, that change must be lodged with ACRA's central register within two business days.",
+        "authority": "ACRA, under Part XIA of the Companies Act",
+        "source_url": "https://rafflescorporateservices.com/register-of-registrable-controllers-rorc-singapore-2026/",
+        "confidence": "medium"
+      }
+    ]
+  }
+]
