@@ -296,7 +296,7 @@
 </div>
 
 <script>
-  const COUNTRIES = ["United States", "Singapore", "United Arab Emirates", "United Kingdom", "Germany", "Other"];
+  const COUNTRIES = ["United States", "Canada", "Singapore", "United Arab Emirates", "United Kingdom", "Germany", "Other"];
   const US_STATES = ["Delaware","California","Texas","Florida","Wyoming","New York","Illinois","Washington","Massachusetts",
     "Alabama","Alaska","Arizona","Arkansas","Colorado","Connecticut","Georgia","Hawaii","Idaho","Indiana","Iowa","Kansas",
     "Kentucky","Louisiana","Maine","Maryland","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada",
@@ -330,6 +330,12 @@
     // Singapore — see data/presearched-singapore.json. Same case-sensitive
     // matching requirement as above.
     "Singapore": ["Private Limited Company (Pte Ltd)", "Limited Liability Partnership (LLP)", "Sole Proprietorship", "Branch Office of Foreign Company"],
+    // Canada — see data/presearched-canada.json. Deliberately federal-level
+    // only for now (Corporations Canada / CBCA), not split by province, to
+    // match the "keyed on country, not region" pattern used above. A
+    // provincial-incorporation entity type (e.g. Ontario OBCA) is a
+    // reasonable next addition but wasn't in scope for this pass.
+    "Canada": ["Federal Corporation (CBCA)", "Sole Proprietorship", "General Partnership"],
     // Other countries fall back to this generic list until their own
     // data is researched — see NOTES from the Germany rollout for the
     // pattern to follow for the next country.
@@ -354,11 +360,13 @@
       document.getElementById('state').replaceWith(select);
     } else {
       stateLabel.textContent = "State / Province / Region";
-      // Germany, UAE, and Singapore are all keyed on the country itself
-      // (see data/presearched-*.json) since entity type is what actually
-      // drives which rules apply, not the specific region. This field is
-      // informational only for all three.
-      if (country === "Germany" || country === "United Arab Emirates" || country === "Singapore") {
+      // Germany, UAE, Singapore, and Canada are all keyed on the country
+      // itself (see data/presearched-*.json) since entity type is what
+      // actually drives which rules apply, not the specific region. This
+      // field is informational only for all four — for Canada specifically,
+      // it does NOT select a province's own compliance regime (see note in
+      // ENTITY_TYPES_BY_COUNTRY above); it's just a free-text note field.
+      if (country === "Germany" || country === "United Arab Emirates" || country === "Singapore" || country === "Canada") {
         stateHint.style.display = 'none';
       } else {
         stateHint.style.display = 'block';
@@ -372,7 +380,9 @@
           ? 'e.g. Dubai, DIFC, or leave blank (informational — entity type drives the rules)'
           : country === 'Singapore'
             ? 'Optional — Singapore compliance rules are national, not region-specific'
-            : 'e.g. Dubai, DIFC, or leave blank if not applicable';
+            : country === 'Canada'
+              ? 'e.g. Ontario (optional — federal rules apply nationally; provincial items like QC/AB tax are called out separately)'
+              : 'e.g. Dubai, DIFC, or leave blank if not applicable';
       document.getElementById('state').replaceWith(input);
     }
 
