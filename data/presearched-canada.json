@@ -1,0 +1,220 @@
+[
+  {
+    "state": "CANADA",
+    "entityType": "Federal Corporation (CBCA)",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "T2 Corporation Income Tax Return",
+        "due_date_rule": "Within 6 months after fiscal year-end — same numerical day of the 6th month, or the last day of the 6th month if year-end falls on a month-end. The balance of tax owing is due earlier: 2 months after year-end for most corporations, or 3 months for eligible Canadian-controlled private corporations (CCPCs). (Annually)",
+        "applicable_to": "Every corporation resident in Canada, including inactive or nil-income corporations — there is no exemption based on size or activity level",
+        "description": "The federal corporate income tax return, filed electronically in almost all cases. Filing on time avoids the late-filing penalty (5% of unpaid tax plus 1% per additional month, up to 12 months) even if the balance itself was paid on time — filing and payment are two separate deadlines.",
+        "authority": "Canada Revenue Agency (CRA), Income Tax Act",
+        "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/corporations/corporation-income-tax-return.html",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual Return & Individuals with Significant Control (ISC) Update",
+        "due_date_rule": "Within 60 days after the corporation's anniversary date (the date of incorporation, amalgamation, or continuance under the CBCA) — no filing is due in the year of incorporation itself. (Annually)",
+        "applicable_to": "Every corporation whose legal status with Corporations Canada is \"active\"",
+        "description": "Filed with Corporations Canada (ISED), not the CRA — this is a corporate-law filing entirely separate from the income tax return, and is easy to confuse with it. Since 22 January 2024, corporations must file updated information on individuals with significant control (ISCs) at the same time. Missing it risks the corporation being marked overdue and, eventually, administratively dissolved.",
+        "authority": "Corporations Canada (Innovation, Science and Economic Development Canada), Canada Business Corporations Act",
+        "source_url": "https://ised-isde.canada.ca/site/corporations-canada/en/keep-your-corporation-good-shape/annual-return",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "GST/HST Return",
+        "due_date_rule": "Annual filers (most common, under $1.5M in taxable revenue): return due 3 months after fiscal year-end, with quarterly instalments also required if the prior year's net tax owing was $3,000 or more. Quarterly filers ($1.5M–$6M): 1 month after each quarter-end. Monthly filers (over $6M): 1 month after each month-end. (Recurring per assigned frequency)",
+        "applicable_to": "Corporations registered for GST/HST — registration becomes mandatory once taxable revenue exceeds $30,000 in a single calendar quarter or over four consecutive quarters",
+        "description": "The federal 5% GST, or the combined GST/HST in the participating provinces (Ontario and the four Atlantic provinces), collected on taxable supplies and remitted net of input tax credits. CRA assigns the filing frequency based on revenue; a business can elect to file more often than required but not less.",
+        "authority": "Canada Revenue Agency (CRA), Excise Tax Act",
+        "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/when-register-charge.html",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "Corporate Tax Instalments",
+        "due_date_rule": "Monthly (quarterly for eligible small CCPCs), spread across the fiscal year, rather than a single due date (Recurring)",
+        "applicable_to": "Corporations whose Part I federal tax owing exceeds $3,000 in the current tax year or either of the two preceding tax years",
+        "description": "Estimated tax paid throughout the year rather than in one lump sum at filing time — this runs in parallel with, not instead of, the T2 filing and balance-due deadlines. Underpaying instalments triggers instalment interest even if the year-end balance is eventually paid in full.",
+        "authority": "Canada Revenue Agency (CRA)",
+        "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/corporations/paying-instalments.html",
+        "confidence": "medium"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "Payroll Source Deductions Remittance",
+        "due_date_rule": "Regular remitters (average monthly withholding under $25,000): by the 15th of the month following the month deductions were withheld. Higher-withholding employers are assigned accelerated (twice-monthly or up-to-4x-monthly) schedules by the CRA. (Monthly, or per CRA-assigned frequency)",
+        "applicable_to": "If the corporation has employees on payroll",
+        "description": "Combines CPP/CPP2 contributions, EI premiums, and federal/provincial income tax withheld into a single remittance under the corporation's payroll account number. CRA assigns the remitter type based on the prior two years' average monthly withholding — a business cannot simply choose a slower schedule.",
+        "authority": "Canada Revenue Agency (CRA)",
+        "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/payroll/remitting-source-deductions/how-when-remit-due-dates.html",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "T4 Summary and Slips",
+        "due_date_rule": "On or before the last day of February following the calendar year in which the remuneration was paid (Annually)",
+        "applicable_to": "If the corporation has employees",
+        "description": "Reports each employee's income and deductions for the calendar year to both the employee and the CRA. Late filing carries a per-slip penalty (roughly $10/day per slip, higher for larger employers), independent of any payroll remittance penalties.",
+        "authority": "Canada Revenue Agency (CRA)",
+        "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/payroll/payroll-tax-slips-information-returns/t4.html",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "Quebec or Alberta Provincial Corporate Tax Return",
+        "due_date_rule": "Generally aligned with the T2: 6 months after fiscal year-end (Annually)",
+        "applicable_to": "Corporations with a permanent establishment in Quebec (Revenu Québec's CO-17) or Alberta (Alberta Corporate Income Tax Return, AT1) — every other province and territory has its corporate tax collected federally alongside the T2, so no separate provincial return is needed there",
+        "description": "Quebec and Alberta are the two provinces that administer their own corporate income tax separately from the CRA, rather than having it collected as part of the federal T2. A corporation with a permanent establishment in either province files a second, largely parallel return on top of the T2.",
+        "authority": "Revenu Québec / Tax and Revenue Administration (Alberta)",
+        "source_url": "https://en.wikipedia.org/wiki/T2_Corporation_Income_Tax_Return",
+        "confidence": "medium"
+      },
+      {
+        "category": "Event-Based",
+        "compliance_name": "Notify Corporations Canada of Director or Registered Office Changes",
+        "due_date_rule": "Within 15 days of the change (As Triggered)",
+        "applicable_to": "Whenever a director is added/removed or the registered office address changes",
+        "description": "A same-year, event-driven filing distinct from the Annual Return — Corporations Canada's public record is expected to stay current between annual filings, not just be corrected once a year.",
+        "authority": "Corporations Canada, Canada Business Corporations Act",
+        "source_url": "https://ised-isde.canada.ca/site/corporations-canada/en/business-corporations/changes-your-corporation",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "CANADA",
+    "entityType": "Sole Proprietorship",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "T1 Income Tax and Benefit Return (with Form T2125)",
+        "due_date_rule": "File by 15 June of the following year (the self-employment filing extension applies to the proprietor and their spouse/common-law partner); any balance owing is still due by 30 April regardless of the extended filing date. (Annually)",
+        "applicable_to": "The proprietor personally — business income and expenses are reported on Form T2125 (Statement of Business or Professional Activities), attached to their personal T1",
+        "description": "A sole proprietorship isn't a separate taxpayer — its results flow directly onto the owner's personal return. The June 15 date only extends when the paperwork is due; interest starts accruing on any unpaid balance from May 1 regardless.",
+        "authority": "Canada Revenue Agency (CRA)",
+        "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/about-your-tax-return/tax-return/completing-a-tax-return/personal-income/business-professional-income.html",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "GST/HST Return",
+        "due_date_rule": "Most sole proprietors are annual filers: return due 15 June, matching the T1, but any amount owing is still due 30 April. Quarterly/monthly filers instead owe 1 month after each period ends. (Recurring per assigned frequency)",
+        "applicable_to": "Once taxable revenue exceeds $30,000 in a single calendar quarter or over four consecutive quarters, registration and filing become mandatory; voluntary registration is available below that threshold",
+        "description": "The same national GST/HST regime that applies to corporations, but for an unincorporated business the filing deadline is tied to the owner's personal tax dates rather than a separate fiscal year-end.",
+        "authority": "Canada Revenue Agency (CRA)",
+        "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/when-register-charge.html",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "Business Name Registration Renewal",
+        "due_date_rule": "Every 5 years from the registration date, in provinces that require registration of an operating name — e.g. Ontario's Business Names Act registration, renewable up to 6 months before expiry with a 60-day grace period after. Exact renewal cycles and fees vary by province. (Recurring)",
+        "applicable_to": "If operating under a name other than the proprietor's own legal name",
+        "description": "This is a provincial name registration, not a business license and not a corporate filing — it exists purely so the public can look up who's behind a trade name. Letting it lapse doesn't dissolve anything, but the name becomes available for someone else to register.",
+        "authority": "Provincial business registry (e.g. Ontario Business Registry / ServiceOntario)",
+        "source_url": "https://www.ontario.ca/page/registering-your-business-name",
+        "confidence": "medium"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "Payroll Source Deductions Remittance",
+        "due_date_rule": "Regular remitters: by the 15th of the month following the month deductions were withheld (Monthly, or per CRA-assigned frequency)",
+        "applicable_to": "If the proprietorship has employees",
+        "description": "Same CRA rules as for a corporation — CPP, EI, and income tax withheld are combined into one remittance under the proprietorship's payroll account.",
+        "authority": "Canada Revenue Agency (CRA)",
+        "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/payroll/remitting-source-deductions/how-when-remit-due-dates.html",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "T4 Summary and Slips",
+        "due_date_rule": "On or before the last day of February following the calendar year (Annually)",
+        "applicable_to": "If the proprietorship has employees",
+        "description": "Same T4 requirement as for corporations — one slip per employee, filed with the CRA and issued to each employee.",
+        "authority": "Canada Revenue Agency (CRA)",
+        "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/payroll/payroll-tax-slips-information-returns/t4.html",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "Personal Income Tax Instalments",
+        "due_date_rule": "Quarterly — 15 March, 15 June, 15 September, 15 December (Recurring)",
+        "applicable_to": "If net tax owing exceeds $3,000 ($1,800 for Quebec residents) in the current year and in either of the two preceding years",
+        "description": "Because a sole proprietor's business income has no employer withholding it, the CRA requires estimated quarterly instalments once the owner's tax bill is consistently large enough — separate from, and in addition to, the annual T1 filing.",
+        "authority": "Canada Revenue Agency (CRA)",
+        "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/about-your-tax-return/paying-your-taxes/tax-instalments.html",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "CANADA",
+    "entityType": "General Partnership",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "T5013 Partnership Information Return",
+        "due_date_rule": "31 March of the following year if all partners are individuals throughout the fiscal period; within 5 months of the partnership's fiscal period end if any partner is a corporation, trust, or another partnership — whichever is earlier applies to mixed partnerships. (Annually)",
+        "applicable_to": "Partnerships that, at any point in the fiscal period, have more than 5 members, have a corporate/trust/partnership partner, or exceed $2 million in combined absolute revenue and expenses, or $5 million in worldwide assets (per CRA's T4068 guide)",
+        "description": "An information return, not a tax bill — the partnership itself doesn't pay income tax; this return tells the CRA how the year's income and deductions are allocated among partners via individual T5013 slips, which each partner then reports on their own T1 or T2.",
+        "authority": "Canada Revenue Agency (CRA)",
+        "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/sole-proprietorships-partnerships/t5013-partnership-information-return-filing-requirements/filing-t5013-partnership-information-return.html",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Each Partner's T1 or T2 Return",
+        "due_date_rule": "Follows the partner's own filing deadline — 15 June for individual partners (self-employment extension), or 6 months after fiscal year-end for corporate partners (Annually)",
+        "applicable_to": "Every partner, reporting their allocated share of partnership income from their T5013 slip on their own personal or corporate return",
+        "description": "Partnership income is flow-through — there is no partnership-level tax payment, only the reporting obligation above, so each partner's own return is where the actual tax gets calculated and paid.",
+        "authority": "Canada Revenue Agency (CRA)",
+        "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/sole-proprietorships-partnerships/completing-your-return.html",
+        "confidence": "medium"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "GST/HST Return",
+        "due_date_rule": "Per assigned filing frequency — most small partnerships with individual partners file annually (3 months after fiscal year-end, payment due within the equivalent of the individual-filer schedule); quarterly/monthly filers owe 1 month after each period ends. (Recurring)",
+        "applicable_to": "Once taxable revenue exceeds $30,000 in a single calendar quarter or over four consecutive quarters",
+        "description": "GST/HST registration and filing are the same national regime that applies to sole proprietors and corporations, applied at the partnership level.",
+        "authority": "Canada Revenue Agency (CRA)",
+        "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/when-register-charge.html",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "Business Name Registration Renewal",
+        "due_date_rule": "Every 5 years, in provinces that require registration of a partnership/operating name — e.g. Ontario, renewable up to 6 months before expiry with a 60-day grace period. Cycles and fees vary by province. (Recurring)",
+        "applicable_to": "If operating under a name other than the partners' own legal names",
+        "description": "The same provincial name-registration requirement that applies to sole proprietorships, extended to the partnership as a whole.",
+        "authority": "Provincial business registry (e.g. Ontario Business Registry / ServiceOntario)",
+        "source_url": "https://www.ontario.ca/page/registering-your-business-name",
+        "confidence": "medium"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "Payroll Source Deductions Remittance",
+        "due_date_rule": "Regular remitters: by the 15th of the month following the month deductions were withheld (Monthly, or per CRA-assigned frequency)",
+        "applicable_to": "If the partnership has employees",
+        "description": "Same CRA payroll remittance rules that apply to any employer in Canada, filed under the partnership's own payroll account number.",
+        "authority": "Canada Revenue Agency (CRA)",
+        "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/payroll/remitting-source-deductions/how-when-remit-due-dates.html",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "T4 Summary and Slips",
+        "due_date_rule": "On or before the last day of February following the calendar year (Annually)",
+        "applicable_to": "If the partnership has employees",
+        "description": "Same T4 slip requirement as any other employer, filed under the partnership's payroll account.",
+        "authority": "Canada Revenue Agency (CRA)",
+        "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/payroll/payroll-tax-slips-information-returns/t4.html",
+        "confidence": "high"
+      }
+    ]
+  }
+]
