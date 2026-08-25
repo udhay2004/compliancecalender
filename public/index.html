@@ -336,6 +336,13 @@
     // provincial-incorporation entity type (e.g. Ontario OBCA) is a
     // reasonable next addition but wasn't in scope for this pass.
     "Canada": ["Federal Corporation (CBCA)", "Sole Proprietorship", "General Partnership"],
+    // United Kingdom — see data/presearched-uk.json. This entry was
+    // missing entirely, which meant selecting "United Kingdom" fell back
+    // to __default__ below (Corporation/LLC/Partnership/Other) — none of
+    // which match the real entityType strings in the UK data file, so the
+    // cache lookup in lib/claude.js could never hit and every UK calendar
+    // was silently going live despite fully-researched data existing.
+    "United Kingdom": ["Private Limited Company (Ltd)", "Limited Liability Partnership (LLP)", "Public Limited Company (PLC)", "Sole Trader"],
     // Other countries fall back to this generic list until their own
     // data is researched — see NOTES from the Germany rollout for the
     // pattern to follow for the next country.
@@ -360,13 +367,14 @@
       document.getElementById('state').replaceWith(select);
     } else {
       stateLabel.textContent = "State / Province / Region";
-      // Germany, UAE, Singapore, and Canada are all keyed on the country
-      // itself (see data/presearched-*.json) since entity type is what
-      // actually drives which rules apply, not the specific region. This
-      // field is informational only for all four — for Canada specifically,
-      // it does NOT select a province's own compliance regime (see note in
-      // ENTITY_TYPES_BY_COUNTRY above); it's just a free-text note field.
-      if (country === "Germany" || country === "United Arab Emirates" || country === "Singapore" || country === "Canada") {
+      // Germany, UAE, Singapore, Canada, and the UK are all keyed on the
+      // country itself (see data/presearched-*.json) since entity type is
+      // what actually drives which rules apply, not the specific region.
+      // This field is informational only for all five — for Canada
+      // specifically, it does NOT select a province's own compliance
+      // regime (see note in ENTITY_TYPES_BY_COUNTRY above); it's just a
+      // free-text note field.
+      if (country === "Germany" || country === "United Arab Emirates" || country === "Singapore" || country === "Canada" || country === "United Kingdom") {
         stateHint.style.display = 'none';
       } else {
         stateHint.style.display = 'block';
@@ -382,7 +390,9 @@
             ? 'Optional — Singapore compliance rules are national, not region-specific'
             : country === 'Canada'
               ? 'e.g. Ontario (optional — federal rules apply nationally; provincial items like QC/AB tax are called out separately)'
-              : 'e.g. Dubai, DIFC, or leave blank if not applicable';
+              : country === 'United Kingdom'
+                ? 'Optional — UK compliance rules are national (Companies House / HMRC), not region-specific'
+                : 'e.g. Dubai, DIFC, or leave blank if not applicable';
       document.getElementById('state').replaceWith(input);
     }
 
