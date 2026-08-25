@@ -1,0 +1,346 @@
+[
+  {
+    "state": "UNITED KINGDOM",
+    "entityType": "Private Limited Company (Ltd)",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Confirmation Statement (CS01)",
+        "due_date_rule": "Within 14 days after the end of the 12-month review period (Annually)",
+        "applicable_to": "All private limited companies, including dormant and non-trading ones — no exemptions",
+        "description": "Confirms the information Companies House holds (registered office, directors, PSC/shareholder details, SIC code) is accurate as of the review date, even if nothing has changed. Filed online for £34 (paper £62 — Companies House fees are due to change from Feb 2026, so check the current fee before filing). Persistent failure to file can lead to the company being struck off, and directors risk prosecution.",
+        "authority": "Companies House, under Companies Act 2006 s.853A",
+        "source_url": "https://www.gov.uk/guidance/filing-your-companys-confirmation-statement",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual Accounts Filing (Companies House)",
+        "due_date_rule": "9 months after the accounting reference date; first accounts are due 21 months after the date of incorporation (Annually)",
+        "applicable_to": "All private limited companies, including dormant companies (which can file simplified dormant accounts)",
+        "description": "Statutory accounts (balance sheet, and profit & loss/notes depending on the company's size band — micro-entity, small, medium, or large) must be delivered to Companies House and are placed on the public register. Late filing triggers an automatic, escalating civil penalty starting at £150 and rising to £1,500 for accounts more than 6 months late.",
+        "authority": "Companies House, under Companies Act 2006 Part 15",
+        "source_url": "https://companieshouse.blog.gov.uk/2021/09/07/when-and-how-to-file-your-annual-accounts-with-companies-house/",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Corporation Tax Payment",
+        "due_date_rule": "9 months and 1 day after the end of the accounting period (Annually)",
+        "applicable_to": "All companies with taxable profits under £1.5 million; companies above that threshold pay in quarterly instalments instead, starting in month 7 of the accounting period",
+        "description": "Corporation Tax must be paid before the Company Tax Return is even filed — the payment deadline falls three months earlier than the CT600 filing deadline. Payment is due even if the return has not been finalised; the company must estimate and pay based on its own calculation.",
+        "authority": "HM Revenue & Customs (HMRC)",
+        "source_url": "https://www.gov.uk/pay-corporation-tax",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Company Tax Return (CT600)",
+        "due_date_rule": "12 months after the end of the accounting period (Annually)",
+        "applicable_to": "All companies liable to Corporation Tax, including those with no tax to pay or a loss",
+        "description": "The CT600 form, supported by the statutory accounts and tax computations, formally reports the figures behind the Corporation Tax already paid. Filing one day late triggers an automatic £100 penalty, rising with further delay, and three consecutive late filings raise the flat penalty to £500 each.",
+        "authority": "HM Revenue & Customs (HMRC)",
+        "source_url": "https://www.gov.uk/company-tax-returns",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "VAT Return and Payment",
+        "due_date_rule": "1 calendar month and 7 days after the end of each VAT accounting period (Quarterly by default; monthly or annual schemes available)",
+        "applicable_to": "If VAT-registered — mandatory once taxable turnover exceeds £90,000 in a rolling 12-month period, or voluntary below that",
+        "description": "VAT-registered companies must submit returns and pay any VAT owed through Making Tax Digital (MTD)-compatible software; manual/paper filing is not permitted for MTD-mandated businesses. Late submissions accrue penalty points under HMRC's points-based system — hitting 4 points (quarterly filers) triggers a £200 penalty, repeated for each further late return.",
+        "authority": "HM Revenue & Customs (HMRC)",
+        "source_url": "https://www.gov.uk/vat-returns",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "PAYE Full Payment Submission (FPS)",
+        "due_date_rule": "On or before each payday (Ongoing, every pay run)",
+        "applicable_to": "If the company has any employees, including director-only payrolls where the director takes a salary",
+        "description": "Reports pay, tax, and National Insurance deducted for each employee in real time via payroll software (RTI). Late or missing FPS submissions can trigger automatic penalties ranging from £100/month (1–9 employees) to £400/month (250+ employees) per PAYE scheme.",
+        "authority": "HM Revenue & Customs (HMRC)",
+        "source_url": "https://www.gov.uk/paye-for-employers",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "PAYE and National Insurance Payment",
+        "due_date_rule": "22nd of the following tax month if paid electronically (19th if by cheque); quarterly payment available if average monthly liability is below £1,500 (Monthly, or Quarterly)",
+        "applicable_to": "If the company operates PAYE — same trigger as the FPS above",
+        "description": "The employer pays HMRC the Income Tax, employee/employer National Insurance, and any Student Loan or Apprenticeship Levy amounts collected through payroll for the preceding tax month (tax months run 6th–5th). HMRC charges daily interest on late payments.",
+        "authority": "HM Revenue & Customs (HMRC)",
+        "source_url": "https://www.gov.uk/pay-paye-tax",
+        "confidence": "high"
+      },
+      {
+        "category": "Event-Based",
+        "compliance_name": "Register for Corporation Tax",
+        "due_date_rule": "Within 3 months of starting to trade or otherwise becoming active (trading, advertising, buying stock, employing staff, renting premises) (As Triggered)",
+        "applicable_to": "All newly incorporated companies once they become active — this is separate from, and in addition to, Companies House incorporation",
+        "description": "Companies House incorporation does not itself register the company for Corporation Tax. The company must separately notify HMRC of its trading start date (historically via form CT41G, now normally online), which sets the accounting period and downstream filing/payment deadlines. Late registration can result in a failure-to-notify penalty.",
+        "authority": "HM Revenue & Customs (HMRC)",
+        "source_url": "https://www.gov.uk/first-company-accounts-and-return",
+        "confidence": "high"
+      },
+      {
+        "category": "Event-Based",
+        "compliance_name": "Notify Companies House of Company Changes",
+        "due_date_rule": "Within 14 days of the change taking effect for most changes (e.g. registered office, director appointments/resignations, PSC changes) (As Triggered)",
+        "applicable_to": "All private limited companies whenever a relevant change occurs between confirmation statements",
+        "description": "Changes to registered office address, officers, People with Significant Control (PSC), or statement of capital must be notified to Companies House as they happen, rather than waiting for the next confirmation statement. Exact statutory windows vary slightly by change type (e.g. some PSC changes have a 14-day 'confirm' plus a further 14-day 'notify Companies House' window), so the specific form's guidance should be checked.",
+        "authority": "Companies House, under Companies Act 2006",
+        "source_url": "https://www.gov.uk/running-a-limited-company/company-changes-you-must-report",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "UNITED KINGDOM",
+    "entityType": "Limited Liability Partnership (LLP)",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Confirmation Statement (LLP)",
+        "due_date_rule": "Within 14 days after the end of the 12-month review period (Annually)",
+        "applicable_to": "All LLPs registered at Companies House, regardless of trading status",
+        "description": "Confirms the information Companies House holds about the LLP — registered office, designated/ordinary members, PSC register — is accurate. It is a criminal offence for designated members not to file within the 14-day window, and persistent failure can lead to the LLP being struck off.",
+        "authority": "Companies House, under Companies Act 2006 s.853A (as applied to LLPs)",
+        "source_url": "https://www.gov.uk/government/publications/confirmation-statement-guidance-for-llps/confirmation-statement-for-llps",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "LLP Annual Accounts Filing",
+        "due_date_rule": "9 months after the accounting reference date (Annually)",
+        "applicable_to": "All LLPs, prepared under the same accounts regime (Companies Act 2006, as modified for LLPs) as a private limited company",
+        "description": "Designated members must prepare, sign, and deliver annual accounts to Companies House showing the LLP's financial position for the year, following UK GAAP (e.g. FRS 102) or, for larger LLPs, requiring audit.",
+        "authority": "Companies House, under the LLP (Accounts and Audit) (Application of Companies Act 2006) Regulations 2008",
+        "source_url": "https://www.gov.uk/guidance/set-up-and-run-a-limited-liability-partnership-llp",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Partnership Tax Return (SA800)",
+        "due_date_rule": "31 January following the end of the tax year for online filing (31 October for paper) (Annually)",
+        "applicable_to": "The LLP itself, as the nominated/designated member's responsibility, covering the LLP's total income and each member's profit share",
+        "description": "LLPs are tax-transparent — the LLP is not itself liable to Income Tax or Corporation Tax on trading profits — but it must still file an SA800 declaring total income and expenses and each member's allocated share, which individual members then report on their own returns.",
+        "authority": "HM Revenue & Customs (HMRC)",
+        "source_url": "https://www.gov.uk/self-assessment-tax-returns/deadlines",
+        "confidence": "medium"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Individual Members' Self Assessment (SA100 + SA104)",
+        "due_date_rule": "31 January following the end of the tax year for online filing; balancing payment due the same date (Annually)",
+        "applicable_to": "Every individual member of the LLP, registered separately for Self Assessment, reporting their own share of LLP profit",
+        "description": "Each member (not the LLP) is personally liable for Income Tax and Class 2/4 National Insurance on their share of profits, reported via their own SA100 main return plus the SA104 partnership pages.",
+        "authority": "HM Revenue & Customs (HMRC)",
+        "source_url": "https://www.gov.uk/self-assessment-tax-returns/deadlines",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "Members' Payments on Account",
+        "due_date_rule": "31 January (balancing payment + first payment on account) and 31 July (second payment on account) (Annually)",
+        "applicable_to": "Any member whose prior year's Self Assessment bill exceeded £1,000 and less than 80% of tax was collected at source",
+        "description": "Members with a tax bill above the threshold must make advance instalments toward the following year's liability, each equal to half of the prior year's bill, in addition to any balancing payment due.",
+        "authority": "HM Revenue & Customs (HMRC)",
+        "source_url": "https://www.gov.uk/pay-self-assessment-tax-bill",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "VAT Return and Payment",
+        "due_date_rule": "1 calendar month and 7 days after the end of each VAT accounting period (Quarterly by default)",
+        "applicable_to": "If the LLP is VAT-registered — mandatory once taxable turnover exceeds £90,000",
+        "description": "Registering for VAT is the designated members' responsibility. Returns are filed and VAT paid through Making Tax Digital-compatible software, same rules as apply to a limited company.",
+        "authority": "HM Revenue & Customs (HMRC)",
+        "source_url": "https://www.gov.uk/vat-returns",
+        "confidence": "high"
+      },
+      {
+        "category": "Event-Based",
+        "compliance_name": "Register Each New Member for Self Assessment",
+        "due_date_rule": "By 5 October following the end of the tax year in which the individual became a member (As Triggered)",
+        "applicable_to": "Any individual joining the LLP as a member for the first time",
+        "description": "Every LLP member, as a self-employed partner for tax purposes, must independently register for Self Assessment with HMRC; this is separate from the LLP's own SA800 registration.",
+        "authority": "HM Revenue & Customs (HMRC)",
+        "source_url": "https://www.gov.uk/register-for-self-assessment",
+        "confidence": "medium"
+      },
+      {
+        "category": "Event-Based",
+        "compliance_name": "Notify Companies House of Member or Registered Office Changes",
+        "due_date_rule": "Within 14 days of the change taking effect (As Triggered)",
+        "applicable_to": "All LLPs whenever a designated/ordinary member joins, leaves, or registered details change",
+        "description": "Designated members must tell Companies House about changes to the LLP's registered name, address, or membership as they happen, rather than waiting for the next confirmation statement.",
+        "authority": "Companies House, under Companies Act 2006 (as applied to LLPs)",
+        "source_url": "https://www.gov.uk/guidance/set-up-and-run-a-limited-liability-partnership-llp",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "UNITED KINGDOM",
+    "entityType": "Public Limited Company (PLC)",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Confirmation Statement (CS01)",
+        "due_date_rule": "Within 14 days after the end of the 12-month review period (Annually)",
+        "applicable_to": "All PLCs registered at Companies House",
+        "description": "Same statutory confirmation-statement obligation as a private company — confirms registered office, directors, PSC/major shareholder information, and share capital details are up to date.",
+        "authority": "Companies House, under Companies Act 2006 s.853A",
+        "source_url": "https://www.gov.uk/guidance/filing-your-companys-confirmation-statement",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual Accounts Filing (Companies House)",
+        "due_date_rule": "6 months after the accounting reference date (Annually) — shorter than the 9-month private-company deadline",
+        "applicable_to": "All public limited companies, whether listed/traded or not",
+        "description": "PLC accounts must generally be audited and are subject to more extensive disclosure requirements than a private company's, reflecting the wider public interest in a company that can offer shares to the public.",
+        "authority": "Companies House, under Companies Act 2006 Part 15",
+        "source_url": "https://www.gov.uk/annual-accounts",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual General Meeting (AGM)",
+        "due_date_rule": "Within 6 months beginning with the day following the accounting reference date (Annually)",
+        "applicable_to": "Every public company — unlike private companies, PLCs cannot opt out of holding an AGM",
+        "description": "The company must hold a general meeting as its AGM to lay the annual accounts, directors' report, and (where applicable) auditor's report before shareholders, and to handle matters such as director re-election and auditor appointment. Minimum notice period is 21 days unless the articles require longer.",
+        "authority": "Companies Act 2006 s.336",
+        "source_url": "https://www.legislation.gov.uk/ukpga/2006/46/section/336",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Corporation Tax Payment",
+        "due_date_rule": "9 months and 1 day after the end of the accounting period for companies under the £1.5m profit threshold; quarterly instalments starting in month 7 of the accounting period for larger companies (Annually, or Quarterly for large companies)",
+        "applicable_to": "All PLCs — many PLCs exceed the £1.5m 'large company' profit threshold and so pay by instalment",
+        "description": "As with private companies, tax must be paid ahead of the CT600 filing deadline; large companies (and 'very large' companies with profits over £20m, which pay even earlier) follow a quarterly instalment schedule instead of a single payment.",
+        "authority": "HM Revenue & Customs (HMRC)",
+        "source_url": "https://www.gov.uk/pay-corporation-tax",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Company Tax Return (CT600)",
+        "due_date_rule": "12 months after the end of the accounting period (Annually)",
+        "applicable_to": "All PLCs liable to Corporation Tax",
+        "description": "Same filing rule as a private company: the CT600, supported by statutory accounts and tax computations, is due 12 months after the accounting period ends, three months after the payment deadline.",
+        "authority": "HM Revenue & Customs (HMRC)",
+        "source_url": "https://www.gov.uk/company-tax-returns",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "VAT Return and Payment",
+        "due_date_rule": "1 calendar month and 7 days after the end of each VAT accounting period (Quarterly by default; monthly common for larger businesses)",
+        "applicable_to": "If VAT-registered — mandatory once taxable turnover exceeds £90,000",
+        "description": "Filed and paid through Making Tax Digital-compatible software, same mechanics as for a private company, though large PLCs are often assigned monthly filing by HMRC.",
+        "authority": "HM Revenue & Customs (HMRC)",
+        "source_url": "https://www.gov.uk/vat-returns",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "PAYE Full Payment Submission and Payment",
+        "due_date_rule": "FPS on or before each payday; PAYE/NIC payment by the 22nd of the following tax month if electronic (Ongoing / Monthly)",
+        "applicable_to": "If the company has employees",
+        "description": "Same real-time payroll reporting and monthly remittance obligations as a private company, typically at larger scale for a PLC.",
+        "authority": "HM Revenue & Customs (HMRC)",
+        "source_url": "https://www.gov.uk/paye-for-employers",
+        "confidence": "high"
+      },
+      {
+        "category": "Event-Based",
+        "compliance_name": "Trading Certificate (Section 761 Companies Act 2006)",
+        "due_date_rule": "Before commencing business or exercising borrowing powers, one-time (As Triggered — before first trading)",
+        "applicable_to": "Every newly incorporated or re-registered PLC, before it starts trading",
+        "description": "A PLC cannot lawfully do business or borrow until Companies House issues a trading certificate (via form SH50) confirming the company has allotted share capital of at least £50,000 (the 'authorised minimum'), with at least 25% (£12,500) plus any share premium paid up. Trading beforehand is a criminal offence for the company and its directors.",
+        "authority": "Companies House, under Companies Act 2006 s.761–762",
+        "source_url": "https://www.legislation.gov.uk/ukpga/2006/46/section/761",
+        "confidence": "high"
+      },
+      {
+        "category": "Event-Based",
+        "compliance_name": "Register for Corporation Tax",
+        "due_date_rule": "Within 3 months of starting to trade or otherwise becoming active (As Triggered)",
+        "applicable_to": "All newly incorporated PLCs once active",
+        "description": "As with a private company, incorporation does not itself register the company for Corporation Tax — this is a separate notification to HMRC once trading begins.",
+        "authority": "HM Revenue & Customs (HMRC)",
+        "source_url": "https://www.gov.uk/first-company-accounts-and-return",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "state": "UNITED KINGDOM",
+    "entityType": "Sole Trader",
+    "items": [
+      {
+        "category": "Event-Based",
+        "compliance_name": "Register as Self-Employed with HMRC",
+        "due_date_rule": "By 5 October following the end of the tax year in which self-employment began (As Triggered)",
+        "applicable_to": "Anyone starting to trade as a sole trader for the first time",
+        "description": "Registering for Self Assessment (and Class 2 National Insurance) establishes the Unique Taxpayer Reference (UTR) needed to file returns. Missing the 5 October deadline can result in a failure-to-notify penalty even if the eventual tax return itself is filed on time.",
+        "authority": "HM Revenue & Customs (HMRC)",
+        "source_url": "https://www.gov.uk/register-for-self-assessment",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Self Assessment Tax Return",
+        "due_date_rule": "31 January following the end of the tax year for online filing (31 October for paper) (Annually)",
+        "applicable_to": "Every registered sole trader, each tax year they trade",
+        "description": "Reports business income and expenses (and any other income) for the tax year (6 April to 5 April). Missing the deadline triggers an automatic £100 penalty even if no tax is owed, with further penalties accruing the longer it remains outstanding.",
+        "authority": "HM Revenue & Customs (HMRC)",
+        "source_url": "https://www.gov.uk/self-assessment-tax-returns/deadlines",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Balancing Payment and Class 2/4 National Insurance",
+        "due_date_rule": "31 January following the end of the tax year (Annually)",
+        "applicable_to": "Every sole trader with Income Tax and/or National Insurance due for the year",
+        "description": "Any Income Tax and Class 4 National Insurance owed for the year (Class 2 is generally collected the same way) is due by the same 31 January deadline as the return itself. HMRC charges interest from 1 February on anything unpaid.",
+        "authority": "HM Revenue & Customs (HMRC)",
+        "source_url": "https://www.gov.uk/pay-self-assessment-tax-bill",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "Payments on Account",
+        "due_date_rule": "31 January and 31 July (Twice yearly)",
+        "applicable_to": "Sole traders whose prior year's Self Assessment bill exceeded £1,000 and less than 80% of tax was collected at source",
+        "description": "Two advance instalments, each 50% of the prior year's tax bill, are paid toward the current year's expected liability, then reconciled against the actual bill once the return for that year is filed.",
+        "authority": "HM Revenue & Customs (HMRC)",
+        "source_url": "https://www.gov.uk/understand-self-assessment-bill/payments-on-account",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "VAT Return and Payment",
+        "due_date_rule": "1 calendar month and 7 days after the end of each VAT accounting period (Quarterly by default)",
+        "applicable_to": "If VAT-registered — mandatory once taxable turnover exceeds £90,000 in a rolling 12-month period",
+        "description": "A VAT-registered sole trader must file and pay through Making Tax Digital-compatible software, same rules as apply to a limited company.",
+        "authority": "HM Revenue & Customs (HMRC)",
+        "source_url": "https://www.gov.uk/vat-returns",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "PAYE Full Payment Submission and Payment",
+        "due_date_rule": "FPS on or before each payday; PAYE/NIC payment by the 22nd of the following tax month if electronic (Ongoing / Monthly)",
+        "applicable_to": "If the sole trader employs any staff",
+        "description": "Once a sole trader takes on employees, the same real-time PAYE reporting and monthly remittance obligations apply as for any other UK employer.",
+        "authority": "HM Revenue & Customs (HMRC)",
+        "source_url": "https://www.gov.uk/paye-for-employers",
+        "confidence": "high"
+      }
+    ]
+  }
+]
