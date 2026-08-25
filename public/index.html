@@ -327,6 +327,9 @@
     // UAE — see data/presearched-uae.json. Values must match entityType
     // exactly (case-sensitive) or the cache lookup in lib/claude.js misses.
     "United Arab Emirates": ["Mainland LLC", "Free Zone Company (FZE/FZCO)", "Branch of Foreign Company", "Civil Company"],
+    // Singapore — see data/presearched-singapore.json. Same case-sensitive
+    // matching requirement as above.
+    "Singapore": ["Private Limited Company (Pte Ltd)", "Limited Liability Partnership (LLP)", "Sole Proprietorship", "Branch Office of Foreign Company"],
     // Other countries fall back to this generic list until their own
     // data is researched — see NOTES from the Germany rollout for the
     // pattern to follow for the next country.
@@ -351,12 +354,11 @@
       document.getElementById('state').replaceWith(select);
     } else {
       stateLabel.textContent = "State / Province / Region";
-      // Germany's rules are purely national; UAE's are keyed on the
-      // country too (see data/presearched-uae.json) since entityType
-      // — mainland vs. free zone vs. branch vs. civil company — is what
-      // actually drives which rules apply, not the specific emirate or
-      // free zone. This field is informational only for both.
-      if (country === "Germany" || country === "United Arab Emirates") {
+      // Germany, UAE, and Singapore are all keyed on the country itself
+      // (see data/presearched-*.json) since entity type is what actually
+      // drives which rules apply, not the specific region. This field is
+      // informational only for all three.
+      if (country === "Germany" || country === "United Arab Emirates" || country === "Singapore") {
         stateHint.style.display = 'none';
       } else {
         stateHint.style.display = 'block';
@@ -368,7 +370,9 @@
         ? 'e.g. Berlin (optional — compliance rules are national)'
         : country === 'United Arab Emirates'
           ? 'e.g. Dubai, DIFC, or leave blank (informational — entity type drives the rules)'
-          : 'e.g. Dubai, DIFC, or leave blank if not applicable';
+          : country === 'Singapore'
+            ? 'Optional — Singapore compliance rules are national, not region-specific'
+            : 'e.g. Dubai, DIFC, or leave blank if not applicable';
       document.getElementById('state').replaceWith(input);
     }
 
