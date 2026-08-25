@@ -27,6 +27,8 @@ const VALID_ENTITY_TYPES = new Set([
   "Corporation", "LLC", "Partnership", "Disregarded Entity",
   // Germany — see data/presearched-germany.json
   "GmbH", "UG (haftungsbeschränkt)", "AG",
+  // UAE — see data/presearched-uae.json
+  "Mainland LLC", "Free Zone Company (FZE/FZCO)", "Branch of Foreign Company", "Civil Company",
 ]);
 
 function parseArgs() {
