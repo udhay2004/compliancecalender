@@ -1,0 +1,346 @@
+[
+  {
+    "state": "UNITED ARAB EMIRATES",
+    "entityType": "Mainland LLC",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Corporate Tax Return Filing",
+        "due_date_rule": "9 months after financial year end (Annually)",
+        "applicable_to": "All mainland LLCs, including those with taxable income below AED 375,000 (0% bracket) or claiming Small Business Relief",
+        "description": "Every taxable person, resident or with a UAE permanent establishment, must file a Corporate Tax return with the Federal Tax Authority via EmaraTax within nine months of the tax period end, and pay any tax due by the same date. Filing is mandatory even where no tax is owed.",
+        "authority": "Federal Tax Authority (FTA), under Federal Decree-Law No. 47 of 2022",
+        "source_url": "https://gflolaw.com/en/uae-corporate-tax-filing-deadline-2026/",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "VAT Return Filing",
+        "due_date_rule": "28 days after the end of each tax period (Monthly or Quarterly, as assigned by the FTA)",
+        "applicable_to": "If VAT-registered. Most businesses file quarterly; the FTA assigns monthly filing to businesses with annual taxable supplies above AED 150 million or in higher-risk categories",
+        "description": "VAT-registered mainland companies must submit their VAT return and pay any VAT due through EmaraTax within 28 days of the tax period end, regardless of whether any VAT is payable for that period.",
+        "authority": "Federal Tax Authority (FTA), under Federal Decree-Law No. 8 of 2017",
+        "source_url": "https://thevatconsultant.com/blog/uae-vat-filing-deadlines",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Trade License Renewal",
+        "due_date_rule": "Annually, on or before the license expiry date",
+        "applicable_to": "All mainland LLCs",
+        "description": "The commercial license issued by the emirate-level Department of Economy (e.g. Dubai's DET) is valid for one year and must be renewed annually. A registered Ejari tenancy is normally required before renewal, and unpaid government fines can block the renewal until cleared. Grace periods and late penalties vary by emirate.",
+        "authority": "Department of Economic Development / Department of Economy and Tourism (emirate-level)",
+        "source_url": "https://www.henryclub.ae/business-setup/dubai-trade-license-renewal-2026/",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "Ejari Tenancy Contract Registration / Renewal",
+        "due_date_rule": "Annually, before trade license renewal — the registered tenancy should run at least 3 months beyond the new license period",
+        "applicable_to": "Mainland companies with a physical office or leased premises (Dubai; other emirates have equivalent tenancy-registration systems)",
+        "description": "A valid, registered tenancy contract is a prerequisite most emirates require before a mainland trade license can be renewed. Flexi-desk or business-centre packages use the workspace agreement in place of a standalone Ejari.",
+        "authority": "Dubai Land Department (Ejari system) / equivalent emirate rental registration authority",
+        "source_url": "https://www.henryclub.ae/business-setup/dubai-trade-license-renewal-2026/",
+        "confidence": "medium"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual Audited Financial Statements & AGM Presentation",
+        "due_date_rule": "Financial statements, including the auditor's report, presented to shareholders within 3 months of financial year end (Annually)",
+        "applicable_to": "All mainland LLCs",
+        "description": "Directors must prepare audited financial statements and present them to shareholders at the annual general meeting within three months of the financial year end, under the UAE Commercial Companies Law. The audited accounts also underpin the Corporate Tax return.",
+        "authority": "Federal Law No. 32 of 2021 on Commercial Companies",
+        "source_url": "https://gsl.org/en/offers/preparing-and-filing-financial-statements-and-tax-returns-of-and-conducting-an-audit-for-a-united-arab-emirates-uae-company/",
+        "confidence": "medium"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "UBO Register Confirmation",
+        "due_date_rule": "Confirmed at each annual trade license renewal (new entities must file within 60 days of registration)",
+        "applicable_to": "All mainland LLCs",
+        "description": "Companies must maintain a Register of Beneficial Owners identifying every natural person who ultimately owns or controls 25% or more of the company, and confirm this data with the licensing authority — most authorities require this confirmation as part of annual license renewal.",
+        "authority": "Ministry of Economy / DED Registrar, under Cabinet Decision No. 109 of 2023",
+        "source_url": "https://diac.ae/blog/uae-ubo-registration/",
+        "confidence": "high"
+      },
+      {
+        "category": "Event-Based",
+        "compliance_name": "UBO Register Update on Change of Ownership",
+        "due_date_rule": "As Triggered",
+        "applicable_to": "Any change in beneficial ownership, shareholding, or control",
+        "description": "Any change to beneficial ownership, shareholding, or control arrangements — including a UBO's passport renewal or change of residence — must be reported to the Registrar within 15 business days.",
+        "authority": "Ministry of Economy / DED Registrar, under Cabinet Decision No. 109 of 2023",
+        "source_url": "https://diac.ae/blog/uae-ubo-registration/",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "Emiratisation (Nafis) Quota Compliance",
+        "due_date_rule": "Measured semi-annually — interim milestone 30 June, full-year target 31 December (Annually)",
+        "applicable_to": "Mainland companies with 50+ employees (10% of skilled roles must be UAE nationals by end of 2026), or 20–49 employees in one of the 14 MOHRE-targeted sectors",
+        "description": "Private-sector employers meeting the size threshold must raise Emirati representation in skilled roles toward the mandated target, checked at semi-annual milestones. Shortfalls trigger an ongoing monthly per-position penalty until filled; a grace period applies after an Emirati employee's resignation.",
+        "authority": "Ministry of Human Resources and Emiratisation (MOHRE) / Nafis programme",
+        "source_url": "https://uppersetup.com/en/article/emiratisation-2026-the-complete-employer-guide-quotas",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "Wage Protection System (WPS) Salary Transfer",
+        "due_date_rule": "Monthly, within the payment window set by MOHRE after each salary due date (Ongoing)",
+        "applicable_to": "If the company has employees on a UAE labour contract",
+        "description": "Employee salaries must be paid through the MOHRE-mandated Wage Protection System each pay cycle; missed or late WPS transfers can trigger fines and restrict the company's ability to process new work permits.",
+        "authority": "Ministry of Human Resources and Emiratisation (MOHRE)",
+        "source_url": "",
+        "confidence": "medium"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "AML/CFT Registration & goAML Reporting",
+        "due_date_rule": "One-time registration before commencing the relevant activity, then ongoing suspicious-transaction monitoring/reporting",
+        "applicable_to": "If the company's licensed activity qualifies as a Designated Non-Financial Business or Profession (DNFBP) — e.g. real estate brokers, dealers in precious metals/stones, corporate service providers, auditors, independent legal/accounting professionals",
+        "description": "DNFBP-designated businesses must register on the UAE Financial Intelligence Unit's goAML platform, appoint a compliance officer, and maintain ongoing AML/CFT controls including suspicious transaction reporting, under the federal anti-money-laundering framework.",
+        "authority": "Ministry of Economy / UAE Financial Intelligence Unit (goAML), under Federal Decree-Law No. 20 of 2018 (as updated by Federal Decree-Law No. 10 of 2025)",
+        "source_url": "https://amluae.com/the-complete-guide-to-the-ultimate-beneficial-owner-verification/",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "UNITED ARAB EMIRATES",
+    "entityType": "Free Zone Company (FZE/FZCO)",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Corporate Tax Return Filing",
+        "due_date_rule": "9 months after financial year end (Annually)",
+        "applicable_to": "All free zone entities, including those claiming the 0% Qualifying Free Zone Person (QFZP) rate on qualifying income",
+        "description": "Free zone companies must file a Corporate Tax return with the FTA whether or not they qualify for the 0% QFZP rate — filing is what allows the FTA to confirm eligibility for the free zone incentive in the first place.",
+        "authority": "Federal Tax Authority (FTA), under Federal Decree-Law No. 47 of 2022",
+        "source_url": "https://taxready.ae/corporate-tax-filing-deadlines-uae/",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "VAT Return Filing",
+        "due_date_rule": "28 days after the end of each tax period (Monthly or Quarterly, as assigned by the FTA)",
+        "applicable_to": "If VAT-registered",
+        "description": "VAT-registered free zone companies file and pay through EmaraTax within 28 days of the tax period end, on the same schedule as mainland companies. Designated Zone status affects how certain supplies are treated but not the filing deadline itself.",
+        "authority": "Federal Tax Authority (FTA), under Federal Decree-Law No. 8 of 2017",
+        "source_url": "https://thevatconsultant.com/blog/uae-vat-filing-deadlines",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Free Zone License Renewal",
+        "due_date_rule": "Annually, on or before license expiry (exact grace period set by the individual free zone authority)",
+        "applicable_to": "All free zone entities",
+        "description": "Each free zone authority (DMCC, JAFZA, DAFZA, IFZA, RAKEZ, DIFC, ADGM, Meydan, and others) runs its own renewal portal, fee schedule, and grace period — some, like DMCC, apply no grace period at all, so the exact cutoff must be confirmed with the specific zone.",
+        "authority": "Relevant Free Zone Authority",
+        "source_url": "https://growacross.com/insights/dubai-trade-license-renewal",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Annual Audited Financial Statements Submission",
+        "due_date_rule": "Typically within 90 days of financial year end (DMCC/JAFZA/Dubai South: ~90 days; DAFZA: 3 months; DIFC: ~4 months; ADGM: ~9 months) — confirm the exact deadline with your specific free zone authority",
+        "applicable_to": "All free zone entities, including dormant or zero-revenue companies in most zones",
+        "description": "Nearly every UAE free zone requires annual audited financial statements from a zone-approved auditor as a condition of continued good standing and license renewal; the submission window differs meaningfully between free zones, so this rule must be checked per zone.",
+        "authority": "Free Zone Authority (zone-specific Implementing Regulations)",
+        "source_url": "https://www.jaxaauditors.com/blog/jafza-audit-report-submission-2026",
+        "confidence": "medium"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Qualifying Free Zone Person (QFZP) Substance & Income Review",
+        "due_date_rule": "Reviewed annually alongside the Corporate Tax filing (Annually)",
+        "applicable_to": "Free zone entities claiming the 0% Corporate Tax rate as a Qualifying Free Zone Person",
+        "description": "To keep the 0% rate on qualifying income, a QFZP must annually re-confirm adequate economic substance in the UAE (staff, premises, core income-generating activity) and that its income is correctly classified as qualifying under the current Ministerial Decision — this substance test replaced the old standalone Economic Substance Regulations regime, which was abolished for financial years starting on or after 1 January 2023.",
+        "authority": "Federal Tax Authority (FTA), under Ministerial Decision No. 229 of 2025",
+        "source_url": "https://taxnews.ae/economic-substance-regulations-in-uae-2026/",
+        "confidence": "medium"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "UBO Register Confirmation",
+        "due_date_rule": "Confirmed at each annual license renewal (new entities must file within 60 days of registration)",
+        "applicable_to": "All free zone entities (non-financial free zones)",
+        "description": "Free zone companies must maintain and confirm their Register of Beneficial Owners with the relevant free zone registrar, identifying every natural person ultimately owning or controlling 25% or more of the company.",
+        "authority": "Relevant Free Zone Registrar, under Cabinet Decision No. 109 of 2023",
+        "source_url": "https://diac.ae/blog/uae-ubo-registration/",
+        "confidence": "high"
+      },
+      {
+        "category": "Event-Based",
+        "compliance_name": "UBO Register Update on Change of Ownership",
+        "due_date_rule": "As Triggered",
+        "applicable_to": "Any change in beneficial ownership, shareholding, or control",
+        "description": "Any change to beneficial ownership, shareholding, or control must be reported to the free zone registrar within 15 business days.",
+        "authority": "Relevant Free Zone Registrar, under Cabinet Decision No. 109 of 2023",
+        "source_url": "https://diac.ae/blog/uae-ubo-registration/",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "AML/CFT Registration & goAML Reporting",
+        "due_date_rule": "One-time registration before commencing the relevant activity, then ongoing suspicious-transaction monitoring/reporting",
+        "applicable_to": "If the company's licensed activity qualifies as a DNFBP — e.g. corporate service providers, precious metals/stones dealers, real estate brokers operating in the free zone",
+        "description": "Free zone entities carrying out a DNFBP-designated activity are subject to the same federal AML/CFT registration and reporting obligations on the goAML platform as their mainland counterparts.",
+        "authority": "Ministry of Economy / UAE Financial Intelligence Unit (goAML), under Federal Decree-Law No. 20 of 2018 (as updated by Federal Decree-Law No. 10 of 2025)",
+        "source_url": "https://amluae.com/the-complete-guide-to-the-ultimate-beneficial-owner-verification/",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "UNITED ARAB EMIRATES",
+    "entityType": "Branch of Foreign Company",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Ministry of Economy Branch Registration Renewal",
+        "due_date_rule": "Annually, submitted before the registration certificate's expiry date",
+        "applicable_to": "All UAE branches/representative offices of foreign companies",
+        "description": "A branch's federal registration certificate is valid for one year and must be renewed with the Ministry of Economy before expiry, via its online platform. The 2024 rules removed the AED 50,000 bank guarantee and mandatory local service-agent requirements that previously applied.",
+        "authority": "UAE Ministry of Economy, under Ministerial Resolution No. 138 of 2024",
+        "source_url": "https://www.kayrouzandassociates.com/insights/foreign-company-branch-registration-uae-2026",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Local Trade License Renewal",
+        "due_date_rule": "Annually, alongside the Ministry of Economy registration renewal",
+        "applicable_to": "All UAE branches of foreign companies",
+        "description": "In addition to the federal Ministry of Economy registration, the branch's local trade license — issued by the relevant emirate Department of Economy or free zone authority — must also be renewed annually.",
+        "authority": "Department of Economic Development / Department of Economy and Tourism, or relevant Free Zone Authority",
+        "source_url": "https://www.kayrouzandassociates.com/insights/foreign-company-branch-registration-uae-2026",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Audited Financial Accounts Submission",
+        "due_date_rule": "Submitted with each annual Ministry of Economy registration renewal application (Annually)",
+        "applicable_to": "All UAE branches of foreign companies",
+        "description": "At each annual renewal, the branch must submit its audited financial accounts alongside a certificate of incumbency/commercial register extract for the foreign parent. The branch's auditor is appointed for one-year terms, renewable up to six consecutive financial years.",
+        "authority": "UAE Ministry of Economy, under Ministerial Resolution No. 138 of 2024",
+        "source_url": "https://www.lexology.com/library/detail.aspx?g=cb9313cd-2b14-4502-a4ea-4aa6d9f9bc2f",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "Parent Company Good-Standing / Incorporation Certificate Renewal",
+        "due_date_rule": "An updated official certificate from the parent's home-country authority is required every 3 years, or whenever requested at renewal",
+        "applicable_to": "All UAE branches of foreign companies",
+        "description": "The Ministry periodically requires a fresh certificate or extract from the foreign parent's home-country commercial registry to confirm the parent company remains validly incorporated and in good standing.",
+        "authority": "UAE Ministry of Economy",
+        "source_url": "https://www.moet.gov.ae/en/w/foreign-company-branch-renewal",
+        "confidence": "medium"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Corporate Tax Return Filing",
+        "due_date_rule": "9 months after financial year end (Annually)",
+        "applicable_to": "Branches with a UAE permanent establishment",
+        "description": "A branch that constitutes a taxable person with a UAE permanent establishment must file a Corporate Tax return with the FTA within nine months of the tax period end, on the same basis as locally incorporated entities.",
+        "authority": "Federal Tax Authority (FTA), under Federal Decree-Law No. 47 of 2022",
+        "source_url": "https://gflolaw.com/en/uae-corporate-tax-filing-deadline-2026/",
+        "confidence": "medium"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "VAT Return Filing",
+        "due_date_rule": "28 days after the end of each tax period (Monthly or Quarterly, as assigned by the FTA)",
+        "applicable_to": "If VAT-registered",
+        "description": "A VAT-registered branch files and pays through EmaraTax within 28 days of the tax period end, on the standard federal schedule.",
+        "authority": "Federal Tax Authority (FTA), under Federal Decree-Law No. 8 of 2017",
+        "source_url": "https://thevatconsultant.com/blog/uae-vat-filing-deadlines",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "UBO Register Confirmation",
+        "due_date_rule": "Confirmed at each annual registration/license renewal",
+        "applicable_to": "All UAE branches of foreign companies",
+        "description": "Branches are explicitly included among the entity types required to maintain and confirm a UBO Register with their licensing authority, identifying the natural persons who ultimately control the foreign parent to the extent applicable.",
+        "authority": "Ministry of Economy Registrar, under Cabinet Decision No. 109 of 2023",
+        "source_url": "https://diac.ae/blog/uae-ubo-registration/",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "state": "UNITED ARAB EMIRATES",
+    "entityType": "Civil Company",
+    "items": [
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Civil Company License Renewal",
+        "due_date_rule": "Annually, on or before the license expiry date",
+        "applicable_to": "All civil companies (professional partnerships — e.g. consultancies, law, accounting, medical, and engineering practices)",
+        "description": "The professional/civil-works license issued by the emirate Department of Economy is valid for one year and follows the same annual renewal cycle, tenancy proof, and outstanding-fines checks as a standard mainland commercial license.",
+        "authority": "Department of Economic Development / Department of Economy and Tourism (emirate-level)",
+        "source_url": "https://www.henryclub.ae/business-setup/dubai-trade-license-renewal-2026/",
+        "confidence": "medium"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "Professional Practice Permit / Sectoral Regulator Approval Renewal",
+        "due_date_rule": "Annually, alongside license renewal, if the activity requires sector-regulator approval",
+        "applicable_to": "Regulated professions — e.g. legal practice (emirate Legal Affairs Department), medical practice (Ministry of Health / emirate health authority), engineering consultancy (municipality)",
+        "description": "Beyond the civil-works license itself, many regulated professions require an additional practising permit from their sector regulator, renewed on a parallel annual cycle and tied to individual practitioners' credentials, not just the entity.",
+        "authority": "Relevant sectoral regulator",
+        "source_url": "",
+        "confidence": "low"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "Ejari Tenancy Contract Registration / Renewal",
+        "due_date_rule": "Annually, before license renewal — the registered tenancy should run at least 3 months beyond the new license period",
+        "applicable_to": "Civil companies with a physical office (Dubai; other emirates have equivalent tenancy-registration systems)",
+        "description": "As with mainland commercial licenses, most emirates require a valid registered tenancy contract before the civil company's professional license can be renewed.",
+        "authority": "Dubai Land Department (Ejari system) / equivalent emirate rental registration authority",
+        "source_url": "https://www.henryclub.ae/business-setup/dubai-trade-license-renewal-2026/",
+        "confidence": "medium"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "Corporate Tax Return Filing",
+        "due_date_rule": "9 months after financial year end (Annually)",
+        "applicable_to": "All civil companies, including those below the AED 375,000 0% threshold",
+        "description": "Civil companies are taxable persons under the Corporate Tax Law like any other UAE entity and must file with the FTA within nine months of their tax period end, even where no tax is due.",
+        "authority": "Federal Tax Authority (FTA), under Federal Decree-Law No. 47 of 2022",
+        "source_url": "https://gflolaw.com/en/uae-corporate-tax-filing-deadline-2026/",
+        "confidence": "high"
+      },
+      {
+        "category": "Conditional",
+        "compliance_name": "VAT Return Filing",
+        "due_date_rule": "28 days after the end of each tax period (Monthly or Quarterly, as assigned by the FTA)",
+        "applicable_to": "If VAT-registered",
+        "description": "A VAT-registered civil company files and pays through EmaraTax within 28 days of the tax period end.",
+        "authority": "Federal Tax Authority (FTA), under Federal Decree-Law No. 8 of 2017",
+        "source_url": "https://thevatconsultant.com/blog/uae-vat-filing-deadlines",
+        "confidence": "high"
+      },
+      {
+        "category": "Mandatory Annual",
+        "compliance_name": "UBO Register Confirmation",
+        "due_date_rule": "Confirmed at each annual license renewal (new entities must file within 60 days of registration)",
+        "applicable_to": "All civil companies",
+        "description": "Civil companies must maintain and confirm a Register of Beneficial Owners with the licensing DED, identifying every natural-person partner or controller holding 25% or more.",
+        "authority": "Ministry of Economy / DED Registrar, under Cabinet Decision No. 109 of 2023",
+        "source_url": "https://diac.ae/blog/uae-ubo-registration/",
+        "confidence": "high"
+      },
+      {
+        "category": "Event-Based",
+        "compliance_name": "UBO Register Update on Change of Ownership",
+        "due_date_rule": "As Triggered",
+        "applicable_to": "Any change in partners' ownership or control",
+        "description": "Any change in beneficial ownership or control among the civil company's partners must be reported to the Registrar within 15 business days.",
+        "authority": "Ministry of Economy / DED Registrar, under Cabinet Decision No. 109 of 2023",
+        "source_url": "https://diac.ae/blog/uae-ubo-registration/",
+        "confidence": "high"
+      }
+    ]
+  }
+]
