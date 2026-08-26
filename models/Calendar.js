@@ -49,6 +49,28 @@ const itemSchema = new mongoose.Schema(
       enum: ["Not Invoiced", "Invoiced", "Paid", "Overdue"],
       default: "Not Invoiced",
     },
+    // Fee for THIS item, set by staff (see PATCH /:id/items/:index/status
+    // in calendar.routes.js) when they move paymentStatus to "Invoiced".
+    // In paise, matching Razorpay's own unit. The client-facing payment
+    // routes (routes/payments.routes.js) ALWAYS read the amount to
+    // charge from here — never from anything the browser sends.
+    feeAmountPaise: { type: Number, default: null },
+    // Razorpay order/payment identifiers for the CURRENT payment attempt.
+    razorpayOrderId: { type: String, default: null },
+    razorpayPaymentId: { type: String, default: null },
+    paidAt: { type: Date, default: null },
+    // Append-only audit trail for support/dispute investigation.
+    paymentEvents: {
+      type: [
+        {
+          event: { type: String, required: true }, // "order_created" | "verify_ok" | "webhook_captured" | "webhook_failed"
+          razorpayOrderId: String,
+          razorpayPaymentId: String,
+          at: { type: Date, default: Date.now },
+        },
+      ],
+      default: [],
+    },
     // Both the client's uploaded proof AND the certificate/acknowledgment
     // staff uploads back live here, distinguished by `type`. Files
     // themselves are NOT stored in Mongo — only a reference returned by
