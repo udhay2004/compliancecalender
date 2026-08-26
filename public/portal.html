@@ -17,7 +17,12 @@
   .item-row { border-bottom:1px solid var(--rule); padding:16px 0; }
   .item-row:last-child { border-bottom:none; }
   .doc-chip { display:inline-flex; align-items:center; gap:6px; font-size:13px; padding:4px 10px; border:1px solid var(--rule); border-radius:999px; margin:4px 6px 0 0; text-decoration:none; color:var(--ink); }
+  .pay-btn { display:inline-block; padding:8px 16px; border-radius:6px; background:var(--teal); color:#fff; font-size:13px; font-weight:600; border:none; cursor:pointer; }
+  .pay-btn:disabled { opacity:0.6; cursor:default; }
+  .pay-note { font-size:12px; color:var(--ink-soft); margin-top:6px; }
+  .upload-locked { font-size:13px; color:var(--ink-soft); }
 </style>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
 <div class="topbar">
@@ -100,12 +105,78 @@
     renderItems();
   }
 
+  // Cookie-based auth (see middleware/auth.js) — no Authorization header
+  // needed, fetch() sends the session cookie automatically same-origin.
+  async function payForItem(idx, btn) {
+    const el = document.getElementById('itemsList');
+    const hint = el.querySelector(`[data-hint-idx="${idx}"]`);
+    btn.disabled = true;
+    hint.textContent = ''; hint.classList.remove('err');
+    try {
+      const orderRes = await fetch(`/api/portal/payments/calendars/${calendar._id}/items/${idx}/create-order`, { method: 'POST' });
+      const order = await orderRes.json();
+      if (!orderRes.ok) throw new Error(order.error || 'Could not start payment.');
+
+      const options = {
+        key: order.keyId,
+        amount: order.amount,
+        currency: order.currency,
+        name: 'ComplyGlobally',
+        description: 'Compliance filing fee',
+        order_id: order.orderId,
+        handler: async function (response) {
+          hint.textContent = 'Confirming payment…';
+          try {
+            const verifyRes = await fetch(`/api/portal/payments/calendars/${calendar._id}/items/${idx}/verify`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(response),
+            });
+            const result = await verifyRes.json();
+            if (!verifyRes.ok) throw new Error(result.error || 'Payment verification failed.');
+            calendar = result.calendar;
+            renderItems();
+          } catch (err) {
+            hint.textContent = `${err.message} — if you were charged, contact support.`;
+            hint.classList.add('err');
+            btn.disabled = false;
+          }
+        },
+        modal: {
+          // If the client closes the Razorpay popup without paying,
+          // re-enable the button rather than leaving it stuck disabled.
+          ondismiss: function () { btn.disabled = false; },
+        },
+        theme: { color: '#0f172a' },
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.on('payment.failed', function (response) {
+        hint.textContent = `Payment failed: ${response.error.description}`;
+        hint.classList.add('err');
+        btn.disabled = false;
+      });
+      rzp.open();
+    } catch (err) {
+      hint.textContent = err.message; hint.classList.add('err');
+      btn.disabled = false;
+    }
+  }
+
   function renderItems() {
     const el = document.getElementById('itemsList');
     if (!calendar.items.length) { el.innerHTML = '<div class="empty-state">No items on this calendar.</div>'; return; }
     el.innerHTML = `<div class="card"><div class="card-body">` + calendar.items.map((item, idx) => {
       const clientDocs = (item.documents || []).filter(d => d.type === 'client_upload');
       const certs = (item.documents || []).filter(d => d.type === 'certificate');
+      // Payment gates document upload: an item that's been invoiced but
+      // not yet paid shows a Pay button instead of the upload control.
+      // An item that was never invoiced (paymentStatus stays "Not
+      // Invoiced" — the default) needs no payment at all and behaves
+      // exactly as before, upload always available.
+      const needsPayment = item.paymentStatus === 'Invoiced' || item.paymentStatus === 'Overdue';
+      const rupees = item.feeAmountPaise ? (item.feeAmountPaise / 100).toLocaleString('en-IN') : null;
+
       return `
         <div class="item-row">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
@@ -113,7 +184,10 @@
               <div style="font-weight:500;">${escapeHtml(item.compliance_name)}</div>
               <div class="ts" style="color:var(--ink-soft);font-size:13px;margin-top:2px;">Due: ${escapeHtml(item.due_date)}</div>
             </div>
-            <span class="status-pill ${statusClass(item.clientStatus)}">${escapeHtml(item.clientStatus)}</span>
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+              ${item.paymentStatus !== 'Not Invoiced' ? `<span class="status-pill ${item.paymentStatus === 'Paid' ? 'status-Filed' : 'status-Overdue'}">${escapeHtml(item.paymentStatus)}</span>` : ''}
+              <span class="status-pill ${statusClass(item.clientStatus)}">${escapeHtml(item.clientStatus)}</span>
+            </div>
           </div>
           <p style="font-size:14px;color:var(--ink-soft);margin:8px 0;">${escapeHtml(item.description)}</p>
 
@@ -128,14 +202,23 @@
           </div>` : ''}
 
           <div style="margin-top:10px;">
-            <label class="upload-btn" style="cursor:pointer;font-size:13px;color:var(--teal);">
-              + Upload a document
-              <input type="file" data-idx="${idx}" style="display:none;" class="uploadInput">
-            </label>
+            ${needsPayment ? `
+              <button class="pay-btn" data-idx="${idx}" data-amount="${item.feeAmountPaise}">Proceed & pay ₹${rupees}</button>
+              <div class="pay-note">Document upload opens once payment is confirmed.</div>
+            ` : `
+              <label class="upload-btn" style="cursor:pointer;font-size:13px;color:var(--teal);">
+                + Upload a document
+                <input type="file" data-idx="${idx}" style="display:none;" class="uploadInput">
+              </label>
+            `}
             <span class="hint" data-hint-idx="${idx}"></span>
           </div>
         </div>`;
     }).join('') + `</div></div>`;
+
+    el.querySelectorAll('.pay-btn').forEach(btn => {
+      btn.addEventListener('click', () => payForItem(btn.dataset.idx, btn));
+    });
 
     el.querySelectorAll('.uploadInput').forEach(input => {
       input.addEventListener('change', async () => {
