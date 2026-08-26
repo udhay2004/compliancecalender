@@ -24,6 +24,7 @@ const calendarRoutes = require("./routes/calendar.routes");
 const adminRoutes = require("./routes/admin.routes");
 const portalRoutes = require("./routes/portal.routes");
 const publicRoutes = require("./routes/public.routes");
+const paymentsRoutes = require("./routes/payments.routes");
 const { runReminderSweep } = require("./lib/reminders");
 
 const app = express();
@@ -44,6 +45,13 @@ if (missing.length) {
   );
   process.exit(1);
 }
+if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET || !process.env.RAZORPAY_WEBHOOK_SECRET) {
+  console.warn(
+    "\n[startup warning] RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET / RAZORPAY_WEBHOOK_SECRET " +
+    "not fully set — payment routes will fail and the webhook will reject everything. " +
+    "See .env.example.\n"
+  );
+}
 
 // A single unhandled promise rejection anywhere in the app (e.g. a stale
 // document failing Mongoose validation on save, as happened with a
@@ -53,6 +61,17 @@ if (missing.length) {
 process.on("unhandledRejection", (reason) => {
   console.error("[unhandled rejection]", reason);
 });
+
+// MUST be registered before app.use(express.json()) below: Razorpay
+// signs the webhook over the exact raw bytes it sent, so this one path
+// needs express.raw() instead of JSON parsing. Every other route in the
+// app (including the rest of routes/payments.routes.js) is fine with
+// the global JSON parser.
+app.post(
+  "/api/webhooks/razorpay",
+  express.raw({ type: "application/json" }),
+  paymentsRoutes.razorpayWebhookHandler
+);
 
 app.use(express.json({ limit: "1mb" }));
 app.use(cookieParser());
@@ -104,6 +123,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/calendars", calendarRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/portal", portalRoutes);
+app.use("/api/portal/payments", paymentsRoutes);
 app.use("/api/public", publicRoutes);
 
 app.get("/healthz", (req, res) => res.json({ ok: true }));
