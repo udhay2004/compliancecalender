@@ -177,7 +177,7 @@ router.patch("/:id/items/:index/status", async (req, res) => {
     return res.status(400).json({ error: "Invalid item index." });
   }
 
-  const { clientStatus, paymentStatus, dueDateActual } = req.body || {};
+  const { clientStatus, paymentStatus, dueDateActual, feeAmountRupees } = req.body || {};
   const item = calendar.items[idx];
   if (clientStatus !== undefined) {
     if (!Calendar.schema.path("items").schema.path("clientStatus").enumValues.includes(clientStatus)) {
@@ -189,7 +189,20 @@ router.patch("/:id/items/:index/status", async (req, res) => {
     if (!Calendar.schema.path("items").schema.path("paymentStatus").enumValues.includes(paymentStatus)) {
       return res.status(400).json({ error: "Invalid paymentStatus value." });
     }
+    // Moving TO "Invoiced" without ever having set a fee would let a
+    // client hit "Pay" against a ₹0 order — require the amount in the
+    // same request instead of allowing that state.
+    if (paymentStatus === "Invoiced" && feeAmountRupees === undefined && !item.feeAmountPaise) {
+      return res.status(400).json({ error: "feeAmountRupees is required when setting paymentStatus to Invoiced." });
+    }
     item.paymentStatus = paymentStatus;
+  }
+  if (feeAmountRupees !== undefined) {
+    const rupees = Number(feeAmountRupees);
+    if (isNaN(rupees) || rupees <= 0) {
+      return res.status(400).json({ error: "feeAmountRupees must be a positive number." });
+    }
+    item.feeAmountPaise = Math.round(rupees * 100);
   }
   if (dueDateActual !== undefined) {
     const parsed = dueDateActual ? new Date(dueDateActual) : null;
