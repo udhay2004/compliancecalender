@@ -182,16 +182,22 @@ router.get("/google/callback", async (req, res) => {
   // the account they just created/signed into. Only ever touches a
   // calendar that's still unclaimed public data (source:"public",
   // clientOrgId: null) — never overwrites a calendar that already
-  // belongs to someone. Status stays "pending_review" on purpose: a
-  // staff member still needs to approve it (see portal.routes.js) before
-  // it's visible for document upload — this just removes the manual
-  // "attach this lead to this client" step for staff.
+  // belongs to someone. Auto-approved on link: no staff review step
+  // here, it goes straight from "generated" to "visible in the portal"
+  // the moment the lead logs in.
   let linkedCalendarId = null;
   if (pendingCalendarId && user.role === "client" && user.clientOrgId) {
     try {
       const linked = await Calendar.findOneAndUpdate(
         { _id: pendingCalendarId, source: "public", clientOrgId: null },
-        { $set: { clientOrgId: user.clientOrgId } },
+        {
+          $set: {
+            clientOrgId: user.clientOrgId,
+            status: "approved",
+            reviewedBy: "auto",
+            reviewedAt: new Date(),
+          },
+        },
         { new: true }
       );
       if (linked) linkedCalendarId = linked._id.toString();
@@ -200,7 +206,7 @@ router.get("/google/callback", async (req, res) => {
     }
   }
 
-  const portalUrl = linkedCalendarId ? `/portal.html?pending=${linkedCalendarId}` : "/portal.html";
+  const portalUrl = linkedCalendarId ? `/portal.html?calendar=${linkedCalendarId}` : "/portal.html";
   res.redirect(user.role === "client" ? portalUrl : "/");
 });
 
