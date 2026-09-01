@@ -159,6 +159,14 @@
   }
   .review-status { font-size: 12.5px; color: var(--later); font-family: var(--mono); margin-top: 12px; }
 
+  /* urgency / call-to-action banner, above the login button */
+  .urgency-banner {
+    margin-top: 22px; padding: 22px 24px; background: #f0fdf4; border-radius: 12px;
+    border: 1px solid #16a34a;
+  }
+  .urgency-banner-head { font-family: var(--serif); font-weight: 600; font-size: 17px; margin-bottom: 8px; color: #15803d; }
+  .urgency-banner p { font-size: 13px; color: var(--ink-soft); margin: 0; max-width: 62ch; }
+
   .legend { margin-top: 20px; font-family: var(--mono); font-size: 11px; color: var(--ink-soft); display: flex; gap: 18px; flex-wrap: wrap; }
   .disclaimer { margin-top: 18px; font-size: 12px; color: var(--ink-soft); font-style: italic; }
 
@@ -510,13 +518,28 @@
   // the locked-items summary. Clicking Start Filing sends the browser to
   // Google sign-in (routes/auth.routes.js), carrying this calendarId so
   // the callback can attach it to whichever account they log into/create.
-  // After sign-in they land on the portal; a staff member still needs to
-  // approve the calendar before document upload unlocks there (see
-  // portal.routes.js — that gate is intentional, not a bug).
+  // After sign-in they land straight on the portal — the calendar is
+  // auto-approved on link (see auth.routes.js), so there's no "wait for
+  // staff to approve" delay between logging in and being able to upload
+  // documents anymore.
+  function renderUrgencyBanner() {
+    return `
+      <div class="urgency-banner">
+        <div class="urgency-banner-head">✅ Your calendar is ready — don't let it sit unfiled</div>
+        <p>
+          Every deadline above is real, and every one you miss risks a penalty, interest, or losing good standing
+          with the state. You don't have to track or file any of it yourself — our compliance team handles the
+          entire filing for you, at some of the best rates in the market. Log in below, upload your documents,
+          and we take it from there.
+        </p>
+      </div>`;
+  }
+
   function renderActionBar(calendarId) {
     return `
+      ${renderUrgencyBanner()}
       <div class="action-bar">
-        <a class="btn-primary" href="/api/auth/google?calendarId=${encodeURIComponent(calendarId)}">Start Filing — Log in with Google →</a>
+        <a class="btn-primary" href="/api/auth/google?calendarId=${encodeURIComponent(calendarId)}">Log In & Let Us File This For You →</a>
         <button class="btn-secondary request-review-btn" type="button" data-calendar-id="${calendarId}">Talk to an Expert First</button>
         <div class="review-status"></div>
       </div>`;
