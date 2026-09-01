@@ -20,6 +20,21 @@ const crypto = require("crypto");
 const razorpay = require("../config/razorpay");
 const Calendar = require("../models/Calendar");
 const { requireAuth, requireClientRole } = require("../middleware/auth");
+const { getRequiredDocuments } = require("../lib/requiredDocuments");
+
+// True once every required document (see lib/requiredDocuments.js) for
+// this item has at least one matching client_upload. Checked here — not
+// just in the portal UI — so a client can't force a payment through by
+// calling this endpoint directly while skipping the upload step; the UI
+// gate is only a courtesy, this is the real one.
+function hasAllRequiredDocuments(item) {
+  const required = getRequiredDocuments(item);
+  if (!required.length) return true;
+  const uploadedLabels = new Set(
+    (item.documents || []).filter((d) => d.type === "client_upload").map((d) => d.requirementLabel)
+  );
+  return required.every((label) => uploadedLabels.has(label));
+}
 
 const router = express.Router();
 router.use(requireAuth, requireClientRole);
@@ -60,6 +75,9 @@ router.post("/calendars/:id/items/:index/create-order", async (req, res) => {
     if (item.paymentStatus === "Paid") {
       return res.status(400).json({ error: "This item is already paid." });
     }
+    if (!hasAllRequiredDocuments(item)) {
+      return res.status(400).json({ error: "Please upload all required documents for this item before paying." });
+    }
 
     const order = await razorpay.orders.create({
       amount: item.feeAmountPaise,
@@ -92,7 +110,7 @@ router.post("/calendars/:id/items/:index/create-order", async (req, res) => {
 // Called by the frontend immediately after Razorpay Checkout succeeds.
 // Flips paymentStatus to "Paid" right away for a responsive UI — the
 // webhook (server.js) re-confirms this independently and is what you'd
-// trust in a dispute, but making the client wait for a webhook rounp-trip
+// trust in a dispute, but making the client wait for a webhook round-trip
 // before unlocking uploads would be a noticeably worse experience for the
 // common case where nothing goes wrong.
 router.post("/calendars/:id/items/:index/verify", async (req, res) => {
