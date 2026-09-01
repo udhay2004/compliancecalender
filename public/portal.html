@@ -177,6 +177,33 @@
       const needsPayment = item.paymentStatus === 'Invoiced' || item.paymentStatus === 'Overdue';
       const rupees = item.feeAmountPaise ? (item.feeAmountPaise / 100).toLocaleString('en-IN') : null;
 
+      // Checklist: which of this item's required documents already have
+      // a matching client upload (tick), and which are still outstanding.
+      const required = item.requiredDocuments || [];
+      const uploadedLabels = new Set(clientDocs.map(d => d.requirementLabel));
+      const allDocsUploaded = required.every(r => uploadedLabels.has(r));
+
+      const checklistHtml = required.length ? `
+        <div style="margin-top:10px;border:1px solid var(--border,#e5e7eb);border-radius:8px;padding:10px 12px;">
+          <div class="ts" style="font-size:12px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;">Documents needed</div>
+          ${required.map(label => {
+            const done = uploadedLabels.has(label);
+            return `
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 0;">
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+                  <span style="display:inline-flex;width:18px;height:18px;border-radius:50%;align-items:center;justify-content:center;font-size:12px;
+                    background:${done ? '#16a34a' : '#e5e7eb'};color:${done ? '#fff' : 'var(--ink-soft)'};">${done ? '✓' : ''}</span>
+                  <span style="${done ? 'color:var(--ink-soft);text-decoration:line-through;' : ''}">${escapeHtml(label)}</span>
+                </div>
+                ${done ? '' : `
+                  <label class="upload-btn" style="cursor:pointer;font-size:12px;color:var(--teal);white-space:nowrap;">
+                    Upload
+                    <input type="file" data-idx="${idx}" data-label="${escapeHtml(label)}" style="display:none;" class="uploadInput">
+                  </label>`}
+              </div>`;
+          }).join('')}
+        </div>` : '';
+
       return `
         <div class="item-row">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
@@ -201,16 +228,15 @@
             ${clientDocs.map((d) => `<a class="doc-chip" href="/api/portal/calendars/${calendar._id}/items/${idx}/documents/${item.documents.indexOf(d)}/download">${escapeHtml(d.fileName)} ↓</a>`).join('')}
           </div>` : ''}
 
+          ${checklistHtml}
+
           <div style="margin-top:10px;">
-            ${needsPayment ? `
-              <button class="pay-btn" data-idx="${idx}" data-amount="${item.feeAmountPaise}">Proceed & pay ₹${rupees}</button>
-              <div class="pay-note">Document upload opens once payment is confirmed.</div>
-            ` : `
-              <label class="upload-btn" style="cursor:pointer;font-size:13px;color:var(--teal);">
-                + Upload a document
-                <input type="file" data-idx="${idx}" style="display:none;" class="uploadInput">
-              </label>
-            `}
+            ${needsPayment ? (
+              allDocsUploaded
+                ? `<button class="pay-btn" data-idx="${idx}" data-amount="${item.feeAmountPaise}">Proceed & pay ₹${rupees}</button>`
+                : `<button class="pay-btn" disabled style="opacity:0.5;cursor:not-allowed;">Proceed & pay ₹${rupees}</button>
+                   <div class="pay-note">Upload all the documents above to unlock payment.</div>`
+            ) : ``}
             <span class="hint" data-hint-idx="${idx}"></span>
           </div>
         </div>`;
@@ -229,6 +255,7 @@
         hint.textContent = 'Uploading…'; hint.classList.remove('err');
         const formData = new FormData();
         formData.append('file', file);
+        if (input.dataset.label) formData.append('requirementLabel', input.dataset.label);
         try {
           const res = await fetch(`/api/portal/calendars/${calendar._id}/items/${idx}/upload`, { method: 'POST', body: formData });
           const data = await res.json().catch(() => ({}));
