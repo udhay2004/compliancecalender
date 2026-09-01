@@ -89,6 +89,14 @@ const itemSchema = new mongoose.Schema(
           uploadedBy: { type: String, required: true },
           uploadedAt: { type: Date, default: Date.now },
           type: { type: String, enum: ["client_upload", "certificate"], required: true },
+          // Which entry of getRequiredDocuments() (see lib/requiredDocuments.js)
+          // this upload is satisfying, e.g. "Registered Agent Consent Letter".
+          // Only meaningful for type:"client_upload" — left "" for staff-
+          // uploaded certificates, which aren't matched against a checklist.
+          // Free text, not an enum: the requirement list is a lookup table
+          // that can grow over time, and a document uploaded before a label
+          // existed shouldn't become invalid.
+          requirementLabel: { type: String, default: "" },
         },
       ],
       default: [],
