@@ -13,9 +13,26 @@ const Calendar = require("../models/Calendar");
 const { requireAuth, requireClientRole } = require("../middleware/auth");
 const { upload } = require("../middleware/upload");
 const storage = require("../lib/storage");
+const { getRequiredDocuments } = require("../lib/requiredDocuments");
 
 const router = express.Router();
 router.use(requireAuth, requireClientRole);
+
+// Attaches a `requiredDocuments` array to every item before a calendar
+// goes out over the API, computed fresh from lib/requiredDocuments.js
+// rather than stored on the item. This means the checklist definitions
+// can be corrected/expanded at any time and every calendar — including
+// ones generated months ago — picks up the update immediately, with no
+// migration script needed. `.toObject()` first because Mongoose
+// subdocuments don't allow adding arbitrary fields directly.
+function withRequiredDocuments(calendar) {
+  const obj = calendar.toObject ? calendar.toObject() : calendar;
+  obj.items = (obj.items || []).map((item) => ({
+    ...item,
+    requiredDocuments: getRequiredDocuments(item),
+  }));
+  return obj;
+}
 
 // Every route below finds the calendar via this helper, which builds the
 // ownership check directly into the query — so a route can never
@@ -37,7 +54,7 @@ router.get("/calendars", async (req, res) => {
     clientOrgId: req.user.clientOrgId,
     status: "approved",
   }).sort({ reviewedAt: -1 });
-  res.json({ calendars });
+  res.json({ calendars: calendars.map(withRequiredDocuments) });
 });
 
 // GET /api/portal/calendars/pending — READ-ONLY. A client whose calendar
@@ -61,7 +78,7 @@ router.get("/calendars/pending", async (req, res) => {
 router.get("/calendars/:id", async (req, res) => {
   const calendar = await findOwnApprovedCalendar(req, req.params.id);
   if (!calendar) return res.status(404).json({ error: "Not found." });
-  res.json({ calendar });
+  res.json({ calendar: withRequiredDocuments(calendar) });
 });
 
 // POST /api/portal/calendars/:id/items/:index/upload — client uploads a
@@ -81,12 +98,21 @@ router.post("/calendars/:id/items/:index/upload", upload.single("file"), async (
       fileName: req.file.originalname,
     });
     const item = calendar.items[idx];
+    // requirementLabel is set by the portal UI to say WHICH checklist row
+    // this upload satisfies (e.g. "Registered Agent Consent Letter" — see
+    // lib/requiredDocuments.js). Not required/validated against the
+    // lookup table server-side: it's a display/checklist-matching hint,
+    // not an access-control value, so a stale or unrecognized label just
+    // means that one row won't show a tick — it never blocks the upload
+    // itself from succeeding.
+    const requirementLabel = typeof req.body.requirementLabel === "string" ? req.body.requirementLabel.slice(0, 200) : "";
     item.documents.push({
       fileKey,
       fileUrl,
       fileName: req.file.originalname,
       uploadedBy: req.user.email,
       type: "client_upload",
+      requirementLabel,
     });
     // Client uploading something is the "I've given you what you asked
     // for" signal — moves the item into staff's queue for review. Staff
@@ -95,7 +121,7 @@ router.post("/calendars/:id/items/:index/upload", upload.single("file"), async (
       item.clientStatus = "Under Review";
     }
     await calendar.save();
-    res.status(201).json({ calendar });
+    res.status(201).json({ calendar: withRequiredDocuments(calendar) });
   } catch (err) {
     console.error("Client upload error:", err);
     res.status(500).json({ error: "Could not save the uploaded file." });
