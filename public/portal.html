@@ -47,6 +47,7 @@
   function statusClass(s) { return 'status-' + (s || '').replace(/\s+/g, '-'); }
 
   let calendar = null;
+  const expandedItems = new Set(); // idx of items currently expanded — persists across re-renders
 
   async function loadUser() {
     try {
@@ -166,87 +167,113 @@
   function renderItems() {
     const el = document.getElementById('itemsList');
     if (!calendar.items.length) { el.innerHTML = '<div class="empty-state">No items on this calendar.</div>'; return; }
+    const sharedDocumentIndex = calendar.sharedDocumentIndex || {};
+
     el.innerHTML = `<div class="card"><div class="card-body">` + calendar.items.map((item, idx) => {
       const clientDocs = (item.documents || []).filter(d => d.type === 'client_upload');
       const certs = (item.documents || []).filter(d => d.type === 'certificate');
-      // Payment gates document upload: an item that's been invoiced but
-      // not yet paid shows a Pay button instead of the upload control.
-      // An item that was never invoiced (paymentStatus stays "Not
-      // Invoiced" — the default) needs no payment at all and behaves
-      // exactly as before, upload always available.
       const needsPayment = item.paymentStatus === 'Invoiced' || item.paymentStatus === 'Overdue';
       const rupees = item.feeAmountPaise ? (item.feeAmountPaise / 100).toLocaleString('en-IN') : null;
+      const isOpen = expandedItems.has(idx);
 
-      // Checklist: which of this item's required documents already have
-      // a matching client upload (tick), and which are still outstanding.
+      // For each required doc: is it uploaded on THIS item, uploaded on
+      // a DIFFERENT item already (reuse), or missing entirely.
       const required = item.requiredDocuments || [];
-      const uploadedLabels = new Set(clientDocs.map(d => d.requirementLabel));
-      const allDocsUploaded = required.every(r => uploadedLabels.has(r));
+      const ownLabels = new Set(clientDocs.map(d => d.requirementLabel));
+      const rows = required.map(label => {
+        if (ownLabels.has(label)) return { label, state: 'own' };
+        const shared = sharedDocumentIndex[label];
+        if (shared) return { label, state: 'reused', shared };
+        return { label, state: 'missing' };
+      });
+      const allDocsUploaded = rows.every(r => r.state !== 'missing');
+      const doneCount = rows.filter(r => r.state !== 'missing').length;
 
       const checklistHtml = required.length ? `
         <div style="margin-top:10px;border:1px solid var(--border,#e5e7eb);border-radius:8px;padding:10px 12px;">
           <div class="ts" style="font-size:12px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;">Documents needed</div>
-          ${required.map(label => {
-            const done = uploadedLabels.has(label);
+          ${rows.map(r => {
+            const done = r.state !== 'missing';
+            const reuseNote = r.state === 'reused'
+              ? `<div style="font-size:11px;color:var(--teal);margin-left:26px;">Reused from "${escapeHtml(r.shared.compliance_name)}" — no need to upload again</div>`
+              : '';
             return `
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 0;">
-                <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
-                  <span style="display:inline-flex;width:18px;height:18px;border-radius:50%;align-items:center;justify-content:center;font-size:12px;
-                    background:${done ? '#16a34a' : '#e5e7eb'};color:${done ? '#fff' : 'var(--ink-soft)'};">${done ? '✓' : ''}</span>
-                  <span style="${done ? 'color:var(--ink-soft);text-decoration:line-through;' : ''}">${escapeHtml(label)}</span>
+              <div style="padding:4px 0;">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                  <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+                    <span style="display:inline-flex;width:18px;height:18px;border-radius:50%;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;
+                      background:${done ? '#16a34a' : '#e5e7eb'};color:${done ? '#fff' : 'var(--ink-soft)'};">${done ? '✓' : ''}</span>
+                    <span style="${done ? 'color:var(--ink-soft);text-decoration:line-through;' : ''}">${escapeHtml(r.label)}</span>
+                  </div>
+                  ${done ? '' : `
+                    <label class="upload-btn" style="cursor:pointer;font-size:12px;color:var(--teal);white-space:nowrap;">
+                      Upload
+                      <input type="file" data-idx="${idx}" data-label="${escapeHtml(r.label)}" style="display:none;" class="uploadInput">
+                    </label>`}
                 </div>
-                ${done ? '' : `
-                  <label class="upload-btn" style="cursor:pointer;font-size:12px;color:var(--teal);white-space:nowrap;">
-                    Upload
-                    <input type="file" data-idx="${idx}" data-label="${escapeHtml(label)}" style="display:none;" class="uploadInput">
-                  </label>`}
+                ${reuseNote}
               </div>`;
           }).join('')}
         </div>` : '';
 
+      const progressLabel = required.length ? `${doneCount}/${required.length} documents ready` : '';
+
       return `
         <div class="item-row">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+          <div class="item-header" data-toggle-idx="${idx}" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;cursor:pointer;">
             <div>
               <div style="font-weight:500;">${escapeHtml(item.compliance_name)}</div>
-              <div class="ts" style="color:var(--ink-soft);font-size:13px;margin-top:2px;">Due: ${escapeHtml(item.due_date)}</div>
+              <div class="ts" style="color:var(--ink-soft);font-size:13px;margin-top:2px;">Due: ${escapeHtml(item.due_date)}${progressLabel ? ` · ${progressLabel}` : ''}</div>
             </div>
             <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
               ${item.paymentStatus !== 'Not Invoiced' ? `<span class="status-pill ${item.paymentStatus === 'Paid' ? 'status-Filed' : 'status-Overdue'}">${escapeHtml(item.paymentStatus)}</span>` : ''}
               <span class="status-pill ${statusClass(item.clientStatus)}">${escapeHtml(item.clientStatus)}</span>
+              <span style="font-size:12px;color:var(--ink-soft);">${isOpen ? '▲ Hide' : '▼ View & upload'}</span>
             </div>
           </div>
-          <p style="font-size:14px;color:var(--ink-soft);margin:8px 0;">${escapeHtml(item.description)}</p>
 
-          ${certs.length ? `<div style="margin-top:8px;">
-            <div class="ts" style="font-size:12px;color:var(--ink-soft);">Certificate / acknowledgment</div>
-            ${certs.map((d, di) => `<a class="doc-chip" href="/api/portal/calendars/${calendar._id}/items/${idx}/documents/${item.documents.indexOf(d)}/download">${escapeHtml(d.fileName)} ↓</a>`).join('')}
-          </div>` : ''}
+          <div class="item-body" style="${isOpen ? '' : 'display:none;'}margin-top:10px;">
+            <p style="font-size:14px;color:var(--ink-soft);margin:8px 0;">${escapeHtml(item.description)}</p>
 
-          ${clientDocs.length ? `<div style="margin-top:8px;">
-            <div class="ts" style="font-size:12px;color:var(--ink-soft);">Your uploads</div>
-            ${clientDocs.map((d) => `<a class="doc-chip" href="/api/portal/calendars/${calendar._id}/items/${idx}/documents/${item.documents.indexOf(d)}/download">${escapeHtml(d.fileName)} ↓</a>`).join('')}
-          </div>` : ''}
+            ${certs.length ? `<div style="margin-top:8px;">
+              <div class="ts" style="font-size:12px;color:var(--ink-soft);">Certificate / acknowledgment</div>
+              ${certs.map((d, di) => `<a class="doc-chip" href="/api/portal/calendars/${calendar._id}/items/${idx}/documents/${item.documents.indexOf(d)}/download">${escapeHtml(d.fileName)} ↓</a>`).join('')}
+            </div>` : ''}
 
-          ${checklistHtml}
+            ${clientDocs.length ? `<div style="margin-top:8px;">
+              <div class="ts" style="font-size:12px;color:var(--ink-soft);">Your uploads</div>
+              ${clientDocs.map((d) => `<a class="doc-chip" href="/api/portal/calendars/${calendar._id}/items/${idx}/documents/${item.documents.indexOf(d)}/download">${escapeHtml(d.fileName)} ↓</a>`).join('')}
+            </div>` : ''}
 
-          <div style="margin-top:10px;">
-            ${needsPayment ? (
-              allDocsUploaded
-                ? `<button class="pay-btn" data-idx="${idx}" data-amount="${item.feeAmountPaise}">Proceed & pay ₹${rupees}</button>`
-                : `<button class="pay-btn" disabled style="opacity:0.5;cursor:not-allowed;">Proceed & pay ₹${rupees}</button>
-                   <div class="pay-note">Upload all the documents above to unlock payment.</div>`
-            ) : ``}
-            <span class="hint" data-hint-idx="${idx}"></span>
+            ${checklistHtml}
+
+            <div style="margin-top:10px;">
+              ${needsPayment ? (
+                allDocsUploaded
+                  ? `<button class="pay-btn" data-idx="${idx}" data-amount="${item.feeAmountPaise}">Proceed & pay ₹${rupees}</button>`
+                  : `<button class="pay-btn" disabled style="opacity:0.5;cursor:not-allowed;">Proceed & pay ₹${rupees}</button>
+                     <div class="pay-note">Upload all the documents above to unlock payment.</div>`
+              ) : ``}
+              <span class="hint" data-hint-idx="${idx}"></span>
+            </div>
           </div>
         </div>`;
     }).join('') + `</div></div>`;
 
+    el.querySelectorAll('[data-toggle-idx]').forEach(header => {
+      header.addEventListener('click', () => {
+        const idx = parseInt(header.dataset.toggleIdx, 10);
+        if (expandedItems.has(idx)) expandedItems.delete(idx); else expandedItems.add(idx);
+        renderItems();
+      });
+    });
+
     el.querySelectorAll('.pay-btn').forEach(btn => {
-      btn.addEventListener('click', () => payForItem(btn.dataset.idx, btn));
+      btn.addEventListener('click', (e) => { e.stopPropagation(); payForItem(btn.dataset.idx, btn); });
     });
 
     el.querySelectorAll('.uploadInput').forEach(input => {
+      input.addEventListener('click', (e) => e.stopPropagation());
       input.addEventListener('change', async () => {
         const idx = input.dataset.idx;
         const hint = el.querySelector(`[data-hint-idx="${idx}"]`);
