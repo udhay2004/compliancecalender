@@ -23,16 +23,24 @@ const { requireAuth, requireClientRole } = require("../middleware/auth");
 const { getRequiredDocuments } = require("../lib/requiredDocuments");
 
 // True once every required document (see lib/requiredDocuments.js) for
-// this item has at least one matching client_upload. Checked here — not
-// just in the portal UI — so a client can't force a payment through by
-// calling this endpoint directly while skipping the upload step; the UI
-// gate is only a courtesy, this is the real one.
-function hasAllRequiredDocuments(item) {
+// this item has at least one matching client_upload SOMEWHERE in the
+// calendar — not necessarily on this item. A document uploaded while
+// filing a different item counts here too (see sharedDocumentIndex in
+// portal.routes.js for the client-facing version of this same idea),
+// so a client is never asked to upload the same document twice just
+// because two filings both need it. Checked here — not just in the
+// portal UI — so a client can't force a payment through by calling this
+// endpoint directly while skipping the upload step; the UI gate is only
+// a courtesy, this is the real one.
+function hasAllRequiredDocuments(item, calendar) {
   const required = getRequiredDocuments(item);
   if (!required.length) return true;
-  const uploadedLabels = new Set(
-    (item.documents || []).filter((d) => d.type === "client_upload").map((d) => d.requirementLabel)
-  );
+  const uploadedLabels = new Set();
+  (calendar.items || []).forEach((it) => {
+    (it.documents || []).forEach((d) => {
+      if (d.type === "client_upload" && d.requirementLabel) uploadedLabels.add(d.requirementLabel);
+    });
+  });
   return required.every((label) => uploadedLabels.has(label));
 }
 
@@ -75,7 +83,7 @@ router.post("/calendars/:id/items/:index/create-order", async (req, res) => {
     if (item.paymentStatus === "Paid") {
       return res.status(400).json({ error: "This item is already paid." });
     }
-    if (!hasAllRequiredDocuments(item)) {
+    if (!hasAllRequiredDocuments(item, calendar)) {
       return res.status(400).json({ error: "Please upload all required documents for this item before paying." });
     }
 
@@ -110,7 +118,7 @@ router.post("/calendars/:id/items/:index/create-order", async (req, res) => {
 // Called by the frontend immediately after Razorpay Checkout succeeds.
 // Flips paymentStatus to "Paid" right away for a responsive UI — the
 // webhook (server.js) re-confirms this independently and is what you'd
-// trust in a dispute, but making the client wait for a webhook round-trip
+// trust in a dispute, but making the client wait for a webhook rounp-trip
 // before unlocking uploads would be a noticeably worse experience for the
 // common case where nothing goes wrong.
 router.post("/calendars/:id/items/:index/verify", async (req, res) => {
