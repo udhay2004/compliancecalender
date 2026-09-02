@@ -18,19 +18,38 @@ const { getRequiredDocuments } = require("../lib/requiredDocuments");
 const router = express.Router();
 router.use(requireAuth, requireClientRole);
 
-// Attaches a `requiredDocuments` array to every item before a calendar
-// goes out over the API, computed fresh from lib/requiredDocuments.js
-// rather than stored on the item. This means the checklist definitions
-// can be corrected/expanded at any time and every calendar — including
-// ones generated months ago — picks up the update immediately, with no
-// migration script needed. `.toObject()` first because Mongoose
-// subdocuments don't allow adding arbitrary fields directly.
+// Attaches a `requiredDocuments` array to every item, PLUS a calendar-
+// level `sharedDocumentIndex` (label -> where a matching upload already
+// exists anywhere in this calendar). This is what makes reuse work: a
+// document uploaded against "Franchise Tax" that happens to also satisfy
+// "Annual Report" (both need "EIN Confirmation Letter", say) shows up as
+// already-done on Annual Report's checklist too, without the client
+// uploading it twice. Matching is purely by label text — same reasoning
+// as requirementLabel itself (see models/Calendar.js): a stable, human-
+// readable string, not a foreign key, so it's easy to reason about and
+// easy to extend.
 function withRequiredDocuments(calendar) {
   const obj = calendar.toObject ? calendar.toObject() : calendar;
+
+  const sharedDocumentIndex = {};
+  (obj.items || []).forEach((item, itemIndex) => {
+    (item.documents || []).forEach((doc, docIndex) => {
+      if (doc.type === "client_upload" && doc.requirementLabel && !sharedDocumentIndex[doc.requirementLabel]) {
+        sharedDocumentIndex[doc.requirementLabel] = {
+          itemIndex,
+          docIndex,
+          fileName: doc.fileName,
+          compliance_name: item.compliance_name,
+        };
+      }
+    });
+  });
+
   obj.items = (obj.items || []).map((item) => ({
     ...item,
     requiredDocuments: getRequiredDocuments(item),
   }));
+  obj.sharedDocumentIndex = sharedDocumentIndex;
   return obj;
 }
 
