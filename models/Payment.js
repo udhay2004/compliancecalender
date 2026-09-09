@@ -12,8 +12,8 @@ const paymentSchema = new mongoose.Schema(
     razorpayPaymentId: { type: String },
     razorpaySignature: { type: String },
 
-    amountPaise: { type: Number, required: true }, // Razorpay works in paise, not rupees
-    currency: { type: String, default: 'INR' },
+    amountCents: { type: Number, required: true }, // Razorpay works in the smallest currency unit (cents for USD)
+    currency: { type: String, default: 'USD' },
 
     method: { type: String, enum: ['razorpay', 'bank_transfer'], default: 'razorpay' },
 
