@@ -51,10 +51,12 @@ const itemSchema = new mongoose.Schema(
     },
     // Fee for THIS item, set by staff (see PATCH /:id/items/:index/status
     // in calendar.routes.js) when they move paymentStatus to "Invoiced".
-    // In paise, matching Razorpay's own unit. The client-facing payment
-    // routes (routes/payments.routes.js) ALWAYS read the amount to
-    // charge from here — never from anything the browser sends.
-    feeAmountPaise: { type: Number, default: null },
+    // In cents (USD), matching Razorpay's smallest-unit convention. See
+    // lib/complianceFees.js for the price-list lookup staff use as a
+    // starting point — it never writes here directly. The client-facing
+    // payment routes (routes/payments.routes.js) ALWAYS read the amount
+    // to charge from here — never from anything the browser sends.
+    feeAmountCents: { type: Number, default: null },
     // Razorpay order/payment identifiers for the CURRENT payment attempt.
     razorpayOrderId: { type: String, default: null },
     razorpayPaymentId: { type: String, default: null },
