@@ -173,7 +173,7 @@
       const clientDocs = (item.documents || []).filter(d => d.type === 'client_upload');
       const certs = (item.documents || []).filter(d => d.type === 'certificate');
       const needsPayment = item.paymentStatus === 'Invoiced' || item.paymentStatus === 'Overdue';
-      const rupees = item.feeAmountPaise ? (item.feeAmountPaise / 100).toLocaleString('en-IN') : null;
+      const dollars = item.feeAmountCents ? (item.feeAmountCents / 100).toLocaleString('en-US') : null;
       const isOpen = expandedItems.has(idx);
 
       // For each required doc: is it uploaded on THIS item, uploaded on
@@ -250,8 +250,8 @@
             <div style="margin-top:10px;">
               ${needsPayment ? (
                 allDocsUploaded
-                  ? `<button class="pay-btn" data-idx="${idx}" data-amount="${item.feeAmountPaise}">Proceed & pay ₹${rupees}</button>`
-                  : `<button class="pay-btn" disabled style="opacity:0.5;cursor:not-allowed;">Proceed & pay ₹${rupees}</button>
+                  ? `<button class="pay-btn" data-idx="${idx}" data-amount="${item.feeAmountCents}">Proceed & pay $${dollars}</button>`
+                  : `<button class="pay-btn" disabled style="opacity:0.5;cursor:not-allowed;">Proceed & pay $${dollars}</button>
                      <div class="pay-note">Upload all the documents above to unlock payment.</div>`
               ) : ``}
               <span class="hint" data-hint-idx="${idx}"></span>
