@@ -66,7 +66,7 @@ function getItemOr404(res, calendar, indexParam) {
 
 // POST /api/portal/payments/calendars/:id/items/:index/create-order
 // No amount in the request body on purpose — the amount charged is
-// ALWAYS item.feeAmountPaise, set by staff via
+// ALWAYS item.feeAmountCents, set by staff via
 // PATCH /api/calendars/:id/items/:index/status. A client sending their
 // own amount here would let them pay whatever they want for a filing.
 router.post("/calendars/:id/items/:index/create-order", async (req, res) => {
@@ -77,7 +77,7 @@ router.post("/calendars/:id/items/:index/create-order", async (req, res) => {
     if (!found) return;
     const { idx, item } = found;
 
-    if (!item.feeAmountPaise || item.feeAmountPaise <= 0) {
+    if (!item.feeAmountCents || item.feeAmountCents <= 0) {
       return res.status(400).json({ error: "This item hasn't been invoiced yet." });
     }
     if (item.paymentStatus === "Paid") {
@@ -87,9 +87,14 @@ router.post("/calendars/:id/items/:index/create-order", async (req, res) => {
       return res.status(400).json({ error: "Please upload all required documents for this item before paying." });
     }
 
+    // NOTE: Razorpay accounts are INR-by-default; charging in USD requires
+    // "International Payments" to be enabled on your Razorpay dashboard
+    // (Account & Settings > International Payments) and KYC for it approved
+    // — orders.create below will fail with a Razorpay API error until that's
+    // turned on. See README for a note on this.
     const order = await razorpay.orders.create({
-      amount: item.feeAmountPaise,
-      currency: "INR",
+      amount: item.feeAmountCents,
+      currency: "USD",
       receipt: `cal_${calendar._id}_item_${idx}_${Date.now()}`.slice(0, 40), // Razorpay caps receipt at 40 chars
       notes: {
         calendarId: String(calendar._id),
