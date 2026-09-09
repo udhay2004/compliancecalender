@@ -7,6 +7,7 @@ const { generateCompanyCalendar } = require("../lib/claude");
 const { calendarToPdfBuffer } = require("../lib/pdf");
 const { upload } = require("../middleware/upload");
 const storage = require("../lib/storage");
+const { getSuggestedFee } = require("../lib/complianceFees");
 
 const router = express.Router();
 // Everything in this file is internal tooling (generate/review/approve/
@@ -95,10 +96,20 @@ router.get("/approved", async (req, res) => {
 });
 
 // GET /api/calendars/:id
+// Attaches suggestedFee (from the lib/complianceFees.js price list) to
+// each item that hasn't been invoiced yet, purely as a read-only hint
+// for staff filling in the "set fee" dialog — it is NEVER written to
+// the item or trusted by anything payment-related. Items already
+// invoiced/paid don't get a suggestion; the real number is already set.
 router.get("/:id", async (req, res) => {
   const calendar = await Calendar.findById(req.params.id);
   if (!calendar) return res.status(404).json({ error: "Not found." });
-  res.json({ calendar });
+  const payload = calendar.toObject();
+  payload.items = payload.items.map((item) => {
+    if (item.feeAmountCents) return item;
+    return { ...item, suggestedFee: getSuggestedFee(item) };
+  });
+  res.json({ calendar: payload });
 });
 
 // PATCH /api/calendars/:id/items/:index — reviewer edits one line item
@@ -177,7 +188,7 @@ router.patch("/:id/items/:index/status", async (req, res) => {
     return res.status(400).json({ error: "Invalid item index." });
   }
 
-  const { clientStatus, paymentStatus, dueDateActual, feeAmountRupees } = req.body || {};
+  const { clientStatus, paymentStatus, dueDateActual, feeAmountUSD } = req.body || {};
   const item = calendar.items[idx];
   if (clientStatus !== undefined) {
     if (!Calendar.schema.path("items").schema.path("clientStatus").enumValues.includes(clientStatus)) {
@@ -190,19 +201,26 @@ router.patch("/:id/items/:index/status", async (req, res) => {
       return res.status(400).json({ error: "Invalid paymentStatus value." });
     }
     // Moving TO "Invoiced" without ever having set a fee would let a
-    // client hit "Pay" against a ₹0 order — require the amount in the
-    // same request instead of allowing that state.
-    if (paymentStatus === "Invoiced" && feeAmountRupees === undefined && !item.feeAmountPaise) {
-      return res.status(400).json({ error: "feeAmountRupees is required when setting paymentStatus to Invoiced." });
+    // client hit "Pay" against a $0 order — require the amount in the
+    // same request instead of allowing that state. If the price list
+    // (lib/complianceFees.js) has a fixed suggestion for this item,
+    // surface it in the error so staff doesn't have to go look it up —
+    // it's still never applied automatically.
+    if (paymentStatus === "Invoiced" && feeAmountUSD === undefined && !item.feeAmountCents) {
+      const suggestion = getSuggestedFee(item);
+      return res.status(400).json({
+        error: "feeAmountUSD is required when setting paymentStatus to Invoiced.",
+        suggestedFee: suggestion,
+      });
     }
     item.paymentStatus = paymentStatus;
   }
-  if (feeAmountRupees !== undefined) {
-    const rupees = Number(feeAmountRupees);
-    if (isNaN(rupees) || rupees <= 0) {
-      return res.status(400).json({ error: "feeAmountRupees must be a positive number." });
+  if (feeAmountUSD !== undefined) {
+    const dollars = Number(feeAmountUSD);
+    if (isNaN(dollars) || dollars <= 0) {
+      return res.status(400).json({ error: "feeAmountUSD must be a positive number." });
     }
-    item.feeAmountPaise = Math.round(rupees * 100);
+    item.feeAmountCents = Math.round(dollars * 100);
   }
   if (dueDateActual !== undefined) {
     const parsed = dueDateActual ? new Date(dueDateActual) : null;
