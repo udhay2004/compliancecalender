@@ -36,13 +36,14 @@ function canManageTargetRole(actingRole, targetRole) {
 
 // POST /api/admin/client-orgs
 router.post("/client-orgs", async (req, res) => {
-  const { name, primaryContactEmail, primaryContactName, notes } = req.body || {};
+  const { name, primaryContactEmail, primaryContactName, primaryContactPhone, notes } = req.body || {};
   if (!name) return res.status(400).json({ error: "name is required." });
   try {
     const org = await ClientOrg.create({
       name,
       primaryContactEmail,
       primaryContactName,
+      primaryContactPhone,
       notes,
       createdBy: req.user.email,
     });
@@ -54,8 +55,35 @@ router.post("/client-orgs", async (req, res) => {
 
 // GET /api/admin/client-orgs
 router.get("/client-orgs", async (req, res) => {
-  const orgs = await ClientOrg.find().sort({ name: 1 });
+  const orgs = await ClientOrg.find().sort({ name: 1 }).populate("assignedStaff", "name email");
   res.json({ clientOrgs: orgs });
+});
+
+// PATCH /api/admin/client-orgs/:id — edit contact details and/or set
+// which staff member is this client's point of contact (shown to the
+// client in the portal — see routes/portal.routes.js's GET /contact).
+router.patch("/client-orgs/:id", async (req, res) => {
+  const org = await ClientOrg.findById(req.params.id);
+  if (!org) return res.status(404).json({ error: "Not found." });
+
+  const { primaryContactName, primaryContactEmail, primaryContactPhone, notes, assignedStaff } = req.body || {};
+  if (primaryContactName !== undefined) org.primaryContactName = primaryContactName;
+  if (primaryContactEmail !== undefined) org.primaryContactEmail = primaryContactEmail;
+  if (primaryContactPhone !== undefined) org.primaryContactPhone = primaryContactPhone;
+  if (notes !== undefined) org.notes = notes;
+  if (assignedStaff !== undefined) {
+    if (assignedStaff) {
+      const staffUser = await User.findById(assignedStaff);
+      if (!staffUser || !User.hasAtLeast(staffUser.role, "staff")) {
+        return res.status(400).json({ error: "assignedStaff must be an existing staff, admin, or super_admin account." });
+      }
+    }
+    org.assignedStaff = assignedStaff || null;
+  }
+
+  await org.save();
+  await org.populate("assignedStaff", "name email");
+  res.json({ clientOrg: org });
 });
 
 // ---------------------------------------------------------------------
