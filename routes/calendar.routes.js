@@ -2,6 +2,7 @@
 
 const express = require("express");
 const Calendar = require("../models/Calendar");
+const ClientOrg = require("../models/ClientOrg");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { generateCompanyCalendar } = require("../lib/claude");
 const { calendarToPdfBuffer } = require("../lib/pdf");
@@ -288,6 +289,20 @@ router.get("/:id/items/:index/documents/:docIndex/download", async (req, res) =>
   if (!stream) return res.status(404).json({ error: "File is missing from storage." });
   res.setHeader("Content-Disposition", `attachment; filename="${doc.fileName}"`);
   stream.pipe(res);
+});
+
+// GET /api/calendars/:id/client-contact — the client org's contact
+// details and assigned staff member, for the "who's this for and who
+// owns it" panel in calendar.html. Any staff/admin/super_admin may
+// view — internal tooling, no per-client scoping needed here (the
+// client-side equivalent, scoped to the caller's own org, is
+// GET /api/portal/contact in routes/portal.routes.js).
+router.get("/:id/client-contact", async (req, res) => {
+  const calendar = await Calendar.findById(req.params.id).select("clientOrgId");
+  if (!calendar) return res.status(404).json({ error: "Not found." });
+  if (!calendar.clientOrgId) return res.json({ clientOrg: null });
+  const org = await ClientOrg.findById(calendar.clientOrgId).populate("assignedStaff", "name email");
+  res.json({ clientOrg: org });
 });
 
 // GET /api/calendars/:id/pdf — download, works for any status (draft PDFs
