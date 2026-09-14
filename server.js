@@ -25,6 +25,7 @@ const adminRoutes = require("./routes/admin.routes");
 const portalRoutes = require("./routes/portal.routes");
 const publicRoutes = require("./routes/public.routes");
 const paymentsRoutes = require("./routes/payments.routes");
+const messagesRoutes = require("./routes/messages.routes");
 const { runReminderSweep } = require("./lib/reminders");
 
 const app = express();
@@ -125,6 +126,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/portal", portalRoutes);
 app.use("/api/portal/payments", paymentsRoutes);
 app.use("/api/public", publicRoutes);
+app.use("/api/messages", messagesRoutes);
 
 app.get("/healthz", (req, res) => res.json({ ok: true }));
 
