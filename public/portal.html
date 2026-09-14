@@ -39,7 +39,11 @@
     </div>
   </div>
 
+  <div id="contactPanel"></div>
+
   <div id="itemsList" style="margin-top:24px;"><div class="empty-state">Loading…</div></div>
+
+  <div id="chatPanel"></div>
 </div>
 
 <script>
@@ -47,6 +51,7 @@
   function statusClass(s) { return 'status-' + (s || '').replace(/\s+/g, '-'); }
 
   let calendar = null;
+  let me = null;
   const expandedItems = new Set(); // idx of items currently expanded — persists across re-renders
 
   async function loadUser() {
@@ -55,6 +60,7 @@
       if (!res.ok) { location.href = '/login.html?next=/portal.html'; return; }
       const { user } = await res.json();
       if (user.role !== 'client') { location.href = '/app.html'; return; }
+      me = user;
       const el = document.getElementById('navUser');
       el.innerHTML = `<span>${escapeHtml(user.name || user.email)}</span><button id="logoutBtn">Log out</button>`;
       document.getElementById('logoutBtn').addEventListener('click', async () => {
@@ -63,6 +69,101 @@
       });
     } catch (err) {
       location.href = '/login.html';
+    }
+  }
+
+  // ---- Contact: who to reach at ComplyGlobally ----
+  async function loadContact() {
+    const el = document.getElementById('contactPanel');
+    try {
+      const res = await fetch('/api/portal/contact');
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { el.innerHTML = ''; return; }
+      const person = data.yourContact;
+      const company = data.company || {};
+      el.innerHTML = `
+        <div class="list-section" style="margin-top:32px;">
+          <div class="section-title">Your contact at ComplyGlobally</div>
+          <div class="contact-grid">
+            <div class="contact-card">
+              <div class="contact-card-label">${person ? 'Your account contact' : 'General support'}</div>
+              <div class="contact-card-row">${escapeHtml(person ? (person.name || person.email) : company.name || 'ComplyGlobally')}</div>
+              <div class="contact-card-row">${(person ? person.email : company.email) ? `<a href="mailto:${escapeHtml(person ? person.email : company.email)}">${escapeHtml(person ? person.email : company.email)}</a>` : '—'}</div>
+              ${!person && company.phone ? `<div class="contact-card-row">${escapeHtml(company.phone)}</div>` : ''}
+            </div>
+          </div>
+        </div>`;
+    } catch (err) {
+      el.innerHTML = '';
+    }
+  }
+
+  // ---- Chat: message the ComplyGlobally team directly ----
+  async function loadChat() {
+    const el = document.getElementById('chatPanel');
+    if (!el || !me || !me.clientOrgId) return;
+    el.innerHTML = `
+      <div class="list-section" style="margin-top:32px;">
+        <div class="section-title">Messages</div>
+        <div class="section-sub">Questions about a filing, a document, or anything else — send them here instead of email so everything stays in one place.</div>
+        <div class="chat-box">
+          <div class="chat-thread" id="chatThread"><div class="empty-state">Loading…</div></div>
+          <div class="chat-compose">
+            <textarea id="chatInput" placeholder="Write a message…"></textarea>
+            <button class="primary" id="chatSendBtn">Send</button>
+          </div>
+          <span class="hint" id="chatHint" style="display:block;padding:0 18px 12px;"></span>
+        </div>
+      </div>`;
+    document.getElementById('chatSendBtn').addEventListener('click', sendChatMessage);
+    document.getElementById('chatInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) sendChatMessage();
+    });
+    await refreshChatThread();
+  }
+
+  async function refreshChatThread() {
+    const thread = document.getElementById('chatThread');
+    if (!thread) return;
+    try {
+      const res = await fetch(`/api/messages/${me.clientOrgId}`);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Could not load messages.');
+      const messages = data.messages || [];
+      if (!messages.length) {
+        thread.innerHTML = '<div class="empty-state">No messages yet — send the first one.</div>';
+        return;
+      }
+      thread.innerHTML = messages.map(m => `
+        <div class="chat-msg ${m.senderRole === 'client' ? 'from-client' : 'from-staff'}">
+          <div class="chat-msg-meta">${escapeHtml(m.senderName)} · ${new Date(m.createdAt).toLocaleString()}${m.itemLabel ? ` · <span class="chat-tag">${escapeHtml(m.itemLabel)}</span>` : ''}</div>
+          <div class="chat-msg-body">${escapeHtml(m.body)}</div>
+        </div>`).join('');
+      thread.scrollTop = thread.scrollHeight;
+    } catch (err) {
+      thread.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
+    }
+  }
+
+  async function sendChatMessage() {
+    const input = document.getElementById('chatInput');
+    const hint = document.getElementById('chatHint');
+    const text = input.value.trim();
+    if (!text) return;
+    hint.textContent = 'Sending…'; hint.classList.remove('err');
+    try {
+      const res = await fetch(`/api/messages/${me.clientOrgId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ body: text }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Could not send.');
+      input.value = '';
+      hint.textContent = '';
+      await refreshChatThread();
+    } catch (err) {
+      hint.textContent = err.message; hint.classList.add('err');
     }
   }
 
@@ -299,6 +400,8 @@
   (async () => {
     await loadUser();
     await loadCalendar();
+    await loadContact();
+    await loadChat();
   })();
 </script>
 </body>
