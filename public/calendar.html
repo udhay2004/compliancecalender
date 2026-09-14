@@ -50,6 +50,8 @@
   const CATEGORY_ORDER = ["Mandatory Annual","Conditional","Transfer Pricing","Foreign Reporting (ODI/FEMA)","Event-Based"];
   const CATEGORIES = CATEGORY_ORDER;
   const SOURCE_LABEL = { cache: 'From cached state data', live: 'Freshly researched', mixed: 'Cache + live research' };
+  const CLIENT_STATUS_OPTIONS = ["Not Started","Awaiting Documents","Under Review","Filed","Overdue"];
+  const PAYMENT_STATUS_OPTIONS = ["Not Invoiced","Invoiced","Paid","Overdue"];
 
   const id = new URLSearchParams(location.search).get('id');
   if (!id) {
@@ -197,7 +199,10 @@
         </div>
         <div class="disclaimer">${status === 'approved' ? 'Reviewed and approved — treat as the current source of truth, subject to periodic re-check of medium/low confidence items.' : 'Research result — not yet a verified compliance rule. Confirm anything marked medium/low confidence before relying on it.'}</div>
         ${reviewInfo}
+        <div id="clientWorkspaceHost"></div>
       </div>`;
+
+    renderClientWorkspace();
   }
 
   window.openEdit = function (idx) {
@@ -245,6 +250,247 @@
       alert(err.message);
     }
   };
+
+  // -----------------------------------------------------------------
+  // Client workspace: contact panel + (once approved) per-item document
+  // review / status controls, plus a staff↔client chat thread. Only
+  // rendered when this calendar is actually linked to a client company
+  // (calendar.clientOrgId) — an internal/test calendar generated with no
+  // client attached shows none of this.
+  // -----------------------------------------------------------------
+  function renderClientWorkspace() {
+    const host = document.getElementById('clientWorkspaceHost');
+    if (!host) return;
+    if (!calendar.clientOrgId) { host.innerHTML = ''; return; }
+
+    host.innerHTML = `
+      <div id="contactPanel"></div>
+      ${calendar.status === 'approved' ? `
+        <div class="list-section">
+          <div class="section-title">Client Filing &amp; Documents</div>
+          <div class="section-sub">What ${escapeHtml(calendar.profile.companyName || 'the client')} has uploaded, and where each item stands. Set status, invoice a fee, or upload the filed certificate back to them.</div>
+          <div id="clientItemsList"><div class="empty-state">Loading…</div></div>
+        </div>` : ''}
+      <div id="chatPanel"></div>
+    `;
+
+    loadContact();
+    if (calendar.status === 'approved') renderClientItems();
+    loadChat();
+  }
+
+  async function loadContact() {
+    const el = document.getElementById('contactPanel');
+    if (!el) return;
+    try {
+      const res = await fetch(`/api/calendars/${id}/client-contact`);
+      const data = await res.json().catch(() => ({}));
+      const org = data.clientOrg;
+      if (!org) { el.innerHTML = ''; return; }
+      el.innerHTML = `
+        <div class="list-section">
+          <div class="section-title">Contact</div>
+          <div class="contact-grid">
+            <div class="contact-card">
+              <div class="contact-card-label">Client — ${escapeHtml(org.name)}</div>
+              <div class="contact-card-row">${escapeHtml(org.primaryContactName || '—')}</div>
+              <div class="contact-card-row">${org.primaryContactEmail ? `<a href="mailto:${escapeHtml(org.primaryContactEmail)}">${escapeHtml(org.primaryContactEmail)}</a>` : '—'}</div>
+              <div class="contact-card-row">${escapeHtml(org.primaryContactPhone || '—')}</div>
+            </div>
+            <div class="contact-card">
+              <div class="contact-card-label">Assigned to</div>
+              ${org.assignedStaff
+                ? `<div class="contact-card-row">${escapeHtml(org.assignedStaff.name || org.assignedStaff.email)}</div>
+                   <div class="contact-card-row"><a href="mailto:${escapeHtml(org.assignedStaff.email)}">${escapeHtml(org.assignedStaff.email)}</a></div>`
+                : `<div class="contact-card-row" style="color:var(--ink-soft);">Nobody assigned yet — set this from Admin → Client Companies.</div>`}
+            </div>
+          </div>
+        </div>`;
+    } catch (err) {
+      el.innerHTML = '';
+    }
+  }
+
+  async function renderClientItems() {
+    const el = document.getElementById('clientItemsList');
+    if (!el) return;
+    const items = calendar.items;
+    if (!items.length) { el.innerHTML = '<div class="empty-state">No items on this calendar.</div>'; return; }
+
+    el.innerHTML = items.map((item, idx) => {
+      const clientDocs = (item.documents || []).filter(d => d.type === 'client_upload');
+      const certs = (item.documents || []).filter(d => d.type === 'certificate');
+      return `
+        <div class="card" style="margin-bottom:14px;">
+          <div class="card-body">
+            <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:flex-start;">
+              <div>
+                <div style="font-weight:600;">${escapeHtml(item.compliance_name)}</div>
+                <div class="ts" style="color:var(--ink-soft);font-size:12.5px;">Due: ${escapeHtml(item.due_date)}</div>
+              </div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <span class="status-pill-cw">${escapeHtml(item.clientStatus)}</span>
+                <span class="status-pill-cw">${escapeHtml(item.paymentStatus)}</span>
+              </div>
+            </div>
+
+            <div style="margin-top:12px;">
+              <div class="ts" style="font-size:11px;color:var(--ink-soft);text-transform:uppercase;">Client uploads (${clientDocs.length})</div>
+              ${clientDocs.length ? clientDocs.map(d => `<a class="doc-chip" href="/api/calendars/${id}/items/${idx}/documents/${item.documents.indexOf(d)}/download">${escapeHtml(d.fileName)} ↓</a>`).join('') : `<div style="font-size:12.5px;color:var(--ink-soft);">Nothing uploaded yet.</div>`}
+            </div>
+
+            <div style="margin-top:10px;">
+              <div class="ts" style="font-size:11px;color:var(--ink-soft);text-transform:uppercase;">Certificate on file (${certs.length})</div>
+              ${certs.length ? certs.map(d => `<a class="doc-chip" href="/api/calendars/${id}/items/${idx}/documents/${item.documents.indexOf(d)}/download">${escapeHtml(d.fileName)} ↓</a>`).join('') : ''}
+              <label class="upload-btn" style="cursor:pointer;display:inline-block;margin-top:4px;">
+                Upload certificate ↑
+                <input type="file" data-idx="${idx}" class="certInput" style="display:none;">
+              </label>
+              <span class="hint" data-cert-hint="${idx}" style="display:block;"></span>
+            </div>
+
+            <div class="edit-grid" style="margin-top:14px;">
+              <div class="field">
+                <label>Client status</label>
+                <select data-idx="${idx}" class="clientStatusSelect">
+                  ${CLIENT_STATUS_OPTIONS.map(s => `<option value="${s}" ${s===item.clientStatus?'selected':''}>${s}</option>`).join('')}
+                </select>
+              </div>
+              <div class="field">
+                <label>Payment status</label>
+                <select data-idx="${idx}" class="paymentStatusSelect">
+                  ${PAYMENT_STATUS_OPTIONS.map(s => `<option value="${s}" ${s===item.paymentStatus?'selected':''}>${s}</option>`).join('')}
+                </select>
+              </div>
+              <div class="field">
+                <label>Fee (USD)</label>
+                <input type="number" min="0" step="1" class="feeInput" data-idx="${idx}" value="${item.feeAmountCents ? (item.feeAmountCents/100) : ''}">
+              </div>
+            </div>
+            <div class="submit-row" style="margin-top:10px;">
+              <span class="hint" data-status-hint="${idx}"></span>
+              <button class="ghost" data-idx="${idx}" data-action="saveStatus">Save status</button>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+
+    el.querySelectorAll('.certInput').forEach(input => {
+      input.addEventListener('change', async () => {
+        const idx = input.dataset.idx;
+        const hint = el.querySelector(`[data-cert-hint="${idx}"]`);
+        const file = input.files[0];
+        if (!file) return;
+        hint.textContent = 'Uploading…'; hint.classList.remove('err');
+        const formData = new FormData();
+        formData.append('file', file);
+        try {
+          const res = await fetch(`/api/calendars/${id}/items/${idx}/certificate`, { method: 'POST', body: formData });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || 'Upload failed.');
+          calendar = data.calendar;
+          renderClientItems();
+        } catch (err) {
+          hint.textContent = err.message; hint.classList.add('err');
+        }
+      });
+    });
+
+    el.querySelectorAll('[data-action="saveStatus"]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = btn.dataset.idx;
+        const hint = el.querySelector(`[data-status-hint="${idx}"]`);
+        const clientStatus = el.querySelector(`.clientStatusSelect[data-idx="${idx}"]`).value;
+        const paymentStatus = el.querySelector(`.paymentStatusSelect[data-idx="${idx}"]`).value;
+        const feeVal = el.querySelector(`.feeInput[data-idx="${idx}"]`).value;
+        const body = { clientStatus, paymentStatus };
+        if (feeVal !== '') body.feeAmountUSD = Number(feeVal);
+        hint.textContent = 'Saving…'; hint.classList.remove('err');
+        try {
+          const res = await fetch(`/api/calendars/${id}/items/${idx}/status`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || 'Could not save.');
+          calendar = data.calendar;
+          renderClientItems();
+        } catch (err) {
+          hint.textContent = err.message; hint.classList.add('err');
+        }
+      });
+    });
+  }
+
+  // ---- Chat ----
+  async function loadChat() {
+    const el = document.getElementById('chatPanel');
+    if (!el || !calendar.clientOrgId) return;
+    el.innerHTML = `
+      <div class="list-section">
+        <div class="section-title">Messages</div>
+        <div class="section-sub">Talk directly with ${escapeHtml(calendar.profile.companyName || 'the client')} about this engagement.</div>
+        <div class="chat-box">
+          <div class="chat-thread" id="chatThread"><div class="empty-state">Loading…</div></div>
+          <div class="chat-compose">
+            <textarea id="chatInput" placeholder="Write a message…"></textarea>
+            <button class="primary" id="chatSendBtn">Send</button>
+          </div>
+          <span class="hint" id="chatHint" style="display:block;padding:0 18px 12px;"></span>
+        </div>
+      </div>`;
+    document.getElementById('chatSendBtn').addEventListener('click', sendChatMessage);
+    document.getElementById('chatInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) sendChatMessage();
+    });
+    await refreshChatThread();
+  }
+
+  async function refreshChatThread() {
+    const thread = document.getElementById('chatThread');
+    if (!thread) return;
+    try {
+      const res = await fetch(`/api/messages/${calendar.clientOrgId}`);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Could not load messages.');
+      const messages = data.messages || [];
+      if (!messages.length) {
+        thread.innerHTML = '<div class="empty-state">No messages yet — say hello.</div>';
+        return;
+      }
+      thread.innerHTML = messages.map(m => `
+        <div class="chat-msg ${m.senderRole === 'client' ? 'from-client' : 'from-staff'}">
+          <div class="chat-msg-meta">${escapeHtml(m.senderName)} · ${fmtDateTime(m.createdAt)}${m.itemLabel ? ` · <span class="chat-tag">${escapeHtml(m.itemLabel)}</span>` : ''}</div>
+          <div class="chat-msg-body">${escapeHtml(m.body)}</div>
+        </div>`).join('');
+      thread.scrollTop = thread.scrollHeight;
+    } catch (err) {
+      thread.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
+    }
+  }
+
+  async function sendChatMessage() {
+    const input = document.getElementById('chatInput');
+    const hint = document.getElementById('chatHint');
+    const text = input.value.trim();
+    if (!text) return;
+    hint.textContent = 'Sending…'; hint.classList.remove('err');
+    try {
+      const res = await fetch(`/api/messages/${calendar.clientOrgId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ body: text }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Could not send.');
+      input.value = '';
+      hint.textContent = '';
+      await refreshChatThread();
+    } catch (err) {
+      hint.textContent = err.message; hint.classList.add('err');
+    }
+  }
 
   async function load() {
     try {
