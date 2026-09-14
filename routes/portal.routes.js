@@ -10,6 +10,7 @@
 
 const express = require("express");
 const Calendar = require("../models/Calendar");
+const ClientOrg = require("../models/ClientOrg");
 const { requireAuth, requireClientRole } = require("../middleware/auth");
 const { upload } = require("../middleware/upload");
 const storage = require("../lib/storage");
@@ -161,6 +162,23 @@ router.get("/calendars/:id/items/:index/documents/:docIndex/download", async (re
   if (!stream) return res.status(404).json({ error: "File is missing from storage." });
   res.setHeader("Content-Disposition", `attachment; filename="${doc.fileName}"`);
   stream.pipe(res);
+});
+
+// GET /api/portal/contact — who to reach for help: the staff member
+// assigned to this client's org (see ClientOrg.assignedStaff), if any,
+// plus ComplyGlobally's general contact details as an always-available
+// fallback. Configure the fallback via SUPPORT_EMAIL / SUPPORT_PHONE in
+// .env — see .env.example.
+router.get("/contact", async (req, res) => {
+  const org = await ClientOrg.findById(req.user.clientOrgId).populate("assignedStaff", "name email");
+  res.json({
+    yourContact: org?.assignedStaff ? { name: org.assignedStaff.name, email: org.assignedStaff.email } : null,
+    company: {
+      name: "ComplyGlobally",
+      email: process.env.SUPPORT_EMAIL || "support@complyglobally.com",
+      phone: process.env.SUPPORT_PHONE || "",
+    },
+  });
 });
 
 module.exports = router;
