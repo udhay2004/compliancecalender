@@ -5,8 +5,7 @@
 // per-calendar). This single router serves BOTH sides — client accounts
 // and staff/admin/super_admin accounts — because the access rule is
 // symmetric ("can you see this org's thread?"), just checked
-// differently per role, the same pattern documents.js/payments.js in
-// this repo were reaching for before they were abandoned mid-build.
+// differently per role.
 //
 // Mounted at /api/messages in server.js.
 
@@ -14,7 +13,9 @@ const express = require("express");
 const mongoose = require("mongoose");
 const Message = require("../models/Message");
 const ClientOrg = require("../models/ClientOrg");
+const Calendar = require("../models/Calendar");
 const { requireAuth } = require("../middleware/auth");
+const { sendEmail } = require("../lib/mailer");
 
 const router = express.Router();
 router.use(requireAuth);
@@ -121,10 +122,51 @@ router.post("/:clientOrgId", async (req, res) => {
       readByStaff: !isClient,
     });
     res.status(201).json({ message });
+    notifyOtherSide(org, req.user, text, isClient).catch((err) =>
+      console.error("[messages] notification failed (non-fatal):", err.message)
+    );
   } catch (err) {
     console.error("[messages] send error:", err);
     res.status(500).json({ error: "Could not send message." });
   }
 });
+
+// Best-effort email to whoever DIDN'T just send this message — a chat
+// message with nobody watching for it is just a diary entry. Never
+// awaited by the route above: a slow or failing SMTP send must never
+// delay or break message delivery itself.
+async function notifyOtherSide(org, sender, text, isFromClient) {
+  const preview = text.length > 300 ? text.slice(0, 300) + "…" : text;
+
+  if (isFromClient) {
+    const populated = await org.populate("assignedStaff", "email");
+    const to = populated.assignedStaff?.email || process.env.ADMIN_EMAIL;
+    if (!to) return;
+    // Link into whichever approved calendar this client has, if any —
+    // that's where the chat panel actually lives on the staff side (see
+    // public/calendar.html). Falls back to a generic mention if there
+    // isn't one yet (e.g. a calendar still pending review).
+    const calendar = await Calendar.findOne({ clientOrgId: org._id, status: "approved" })
+      .select("_id")
+      .sort({ reviewedAt: -1 });
+    const link = calendar
+      ? `${process.env.APP_URL || ""}/calendar.html?id=${calendar._id}`
+      : `${process.env.APP_URL || ""}/admin.html`;
+    await sendEmail({
+      to,
+      subject: `New message from ${org.name}`,
+      text: `${sender.name || sender.email} wrote:\n\n"${preview}"\n\nReply here: ${link}`,
+      logPrefix: "[messages]",
+    });
+  } else {
+    if (!org.primaryContactEmail) return;
+    await sendEmail({
+      to: org.primaryContactEmail,
+      subject: `New message from ComplyGlobally`,
+      text: `${sender.name || sender.email} wrote:\n\n"${preview}"\n\nReply here: ${process.env.APP_URL || ""}/portal.html`,
+      logPrefix: "[messages]",
+    });
+  }
+}
 
 module.exports = router;
