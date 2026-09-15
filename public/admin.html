@@ -31,6 +31,7 @@
   <div class="tabs">
     <button class="tab-btn active" id="tabOrgs">Client Companies</button>
     <button class="tab-btn" id="tabUsers">Accounts</button>
+    <button class="tab-btn" id="tabActivity">Activity</button>
   </div>
 
   <div id="orgsPanel" style="margin-top:24px;">
@@ -80,6 +81,12 @@
       </div>
     </div>
     <div id="usersList" style="margin-top:20px;"><div class="empty-state">Loading…</div></div>
+  </div>
+
+  <div id="activityPanel" style="margin-top:24px;display:none;">
+    <div class="section-title">Recent activity</div>
+    <div class="section-sub">Calendar approvals/rejections, document reviews, payments, and account access changes — most recent first.</div>
+    <div id="activityList" style="margin-top:16px;"><div class="empty-state">Loading…</div></div>
   </div>
 </div>
 
@@ -318,18 +325,52 @@
   });
 
   // --- Tabs ---
-  document.getElementById('tabOrgs').addEventListener('click', () => {
-    document.getElementById('tabOrgs').classList.add('active');
-    document.getElementById('tabUsers').classList.remove('active');
-    document.getElementById('orgsPanel').style.display = '';
-    document.getElementById('usersPanel').style.display = 'none';
-  });
-  document.getElementById('tabUsers').addEventListener('click', () => {
-    document.getElementById('tabUsers').classList.add('active');
-    document.getElementById('tabOrgs').classList.remove('active');
-    document.getElementById('usersPanel').style.display = '';
-    document.getElementById('orgsPanel').style.display = 'none';
-  });
+  const tabButtons = { orgs: 'tabOrgs', users: 'tabUsers', activity: 'tabActivity' };
+  const tabPanels = { orgs: 'orgsPanel', users: 'usersPanel', activity: 'activityPanel' };
+  function showTab(name) {
+    Object.keys(tabButtons).forEach(key => {
+      document.getElementById(tabButtons[key]).classList.toggle('active', key === name);
+      document.getElementById(tabPanels[key]).style.display = key === name ? '' : 'none';
+    });
+    if (name === 'activity') loadActivity();
+  }
+  document.getElementById('tabOrgs').addEventListener('click', () => showTab('orgs'));
+  document.getElementById('tabUsers').addEventListener('click', () => showTab('users'));
+  document.getElementById('tabActivity').addEventListener('click', () => showTab('activity'));
+
+  const ACTIVITY_LABELS = {
+    calendar_approved: '✓ Approved',
+    calendar_rejected: '✕ Rejected',
+    document_accepted: '✓ Document accepted',
+    document_rejected: '✕ Document rejected',
+    payment_captured: '$ Payment received',
+    payment_failed: '$ Payment failed',
+    user_deactivated: 'Account deactivated',
+    user_reactivated: 'Account reactivated',
+  };
+
+  async function loadActivity() {
+    const el = document.getElementById('activityList');
+    el.innerHTML = '<div class="empty-state">Loading…</div>';
+    try {
+      const res = await fetch('/api/admin/activity');
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Could not load activity.');
+      const entries = data.entries || [];
+      if (!entries.length) { el.innerHTML = '<div class="empty-state">Nothing logged yet.</div>'; return; }
+      el.innerHTML = entries.map(e => `
+        <div class="card" style="margin-bottom:8px;">
+          <div class="card-body" style="padding:14px 18px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;">
+            <div>
+              <div style="font-size:13.5px;">${escapeHtml(e.summary)}</div>
+              <div class="ts" style="font-size:12px;color:var(--ink-soft);margin-top:2px;">${escapeHtml(ACTIVITY_LABELS[e.action] || e.action)} · ${escapeHtml(e.actorName)} · ${new Date(e.createdAt).toLocaleString()}</div>
+            </div>
+          </div>
+        </div>`).join('');
+    } catch (err) {
+      el.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
+    }
+  }
 
   (async () => {
     await loadUser();
