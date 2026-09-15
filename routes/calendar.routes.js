@@ -3,7 +3,9 @@
 const express = require("express");
 const Calendar = require("../models/Calendar");
 const ClientOrg = require("../models/ClientOrg");
+const Message = require("../models/Message");
 const { requireAuth, requireRole } = require("../middleware/auth");
+const { sendEmail } = require("../lib/mailer");
 const { generateCompanyCalendar } = require("../lib/claude");
 const { calendarToPdfBuffer } = require("../lib/pdf");
 const { upload } = require("../middleware/upload");
@@ -270,6 +272,91 @@ router.post("/:id/items/:index/certificate", upload.single("file"), async (req, 
     console.error("Certificate upload error:", err);
     res.status(500).json({ error: "Could not save the uploaded file." });
   }
+});
+
+// PATCH /api/calendars/:id/items/:index/documents/:docIndex/review —
+// staff accepts or rejects a client's uploaded document. Rejection is
+// the "these aren't valid, we're telling them" step: it (a) knocks the
+// item back to "Awaiting Documents" so the checklist shows it as
+// outstanding again, (b) drops a message into that client's chat thread
+// so the reason is visible in the same place they'll look for any other
+// update, and (c) emails the client's primary contact directly, since a
+// chat message alone is easy to miss. Only ever applies to
+// type:"client_upload" — a staff-uploaded certificate has nothing to
+// "review".
+router.patch("/:id/items/:index/documents/:docIndex/review", async (req, res) => {
+  const calendar = await Calendar.findById(req.params.id);
+  if (!calendar) return res.status(404).json({ error: "Not found." });
+  const idx = parseInt(req.params.index, 10);
+  const docIdx = parseInt(req.params.docIndex, 10);
+  if (isNaN(idx) || idx < 0 || idx >= calendar.items.length) {
+    return res.status(400).json({ error: "Invalid item index." });
+  }
+  const item = calendar.items[idx];
+  const doc = item.documents[docIdx];
+  if (!doc) return res.status(404).json({ error: "Document not found." });
+  if (doc.type !== "client_upload") {
+    return res.status(400).json({ error: "Only a client's own upload can be reviewed." });
+  }
+
+  const { reviewStatus, note } = req.body || {};
+  if (!["accepted", "rejected"].includes(reviewStatus)) {
+    return res.status(400).json({ error: "reviewStatus must be 'accepted' or 'rejected'." });
+  }
+  if (reviewStatus === "rejected" && !note?.trim()) {
+    return res.status(400).json({ error: "A note explaining why is required when rejecting a document." });
+  }
+
+  doc.reviewStatus = reviewStatus;
+  doc.reviewNote = reviewStatus === "rejected" ? note.trim() : "";
+  doc.reviewedBy = req.user.email;
+  doc.reviewedAt = new Date();
+
+  if (reviewStatus === "rejected") {
+    // Reopens the checklist row for this document's requirementLabel —
+    // see the sharedDocumentIndex / requiredDocuments logic in
+    // routes/portal.routes.js, which now skips rejected uploads.
+    item.clientStatus = "Awaiting Documents";
+  }
+
+  await calendar.save();
+
+  // Best-effort side effects below — a failure here should never block
+  // the review itself from having been saved.
+  if (reviewStatus === "rejected" && calendar.clientOrgId) {
+    const messageText = `"${doc.fileName}" for ${item.compliance_name} needs to be re-uploaded: ${doc.reviewNote}`;
+    Message.create({
+      clientOrgId: calendar.clientOrgId,
+      senderId: req.user._id,
+      senderName: req.user.name || req.user.email,
+      senderRole: req.user.role,
+      body: messageText,
+      calendarId: calendar._id,
+      itemIndex: idx,
+      itemLabel: item.compliance_name,
+      readByStaff: true,
+      readByClient: false,
+    }).catch((err) => console.error("[document review] chat message failed (non-fatal):", err.message));
+
+    ClientOrg.findById(calendar.clientOrgId)
+      .then((org) => {
+        if (!org?.primaryContactEmail) return;
+        return sendEmail({
+          to: org.primaryContactEmail,
+          subject: `Action needed: a document for ${item.compliance_name} was not accepted`,
+          text:
+            `Hi ${org.primaryContactName || ""},\n\n` +
+            `We reviewed "${doc.fileName}" that was uploaded for ${item.compliance_name} and it needs to be re-uploaded.\n\n` +
+            `Reason: ${doc.reviewNote}\n\n` +
+            `Please log in to your portal to upload a corrected file: ${process.env.APP_URL || ""}/portal.html\n\n` +
+            `— ComplyGlobally`,
+          logPrefix: "[document review]",
+        });
+      })
+      .catch((err) => console.error("[document review] client email failed (non-fatal):", err.message));
+  }
+
+  res.json({ calendar });
 });
 
 // GET /api/calendars/:id/items/:index/documents/:docIndex/download — any
