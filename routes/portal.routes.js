@@ -15,6 +15,7 @@ const { requireAuth, requireClientRole } = require("../middleware/auth");
 const { upload } = require("../middleware/upload");
 const storage = require("../lib/storage");
 const { getRequiredDocuments } = require("../lib/requiredDocuments");
+const { sendEmail } = require("../lib/mailer");
 
 const router = express.Router();
 router.use(requireAuth, requireClientRole);
@@ -29,13 +30,31 @@ router.use(requireAuth, requireClientRole);
 // as requirementLabel itself (see models/Calendar.js): a stable, human-
 // readable string, not a foreign key, so it's easy to reason about and
 // easy to extend.
+// Attaches a `requiredDocuments` array to every item, PLUS a calendar-
+// level `sharedDocumentIndex` (label -> where a matching upload already
+// exists anywhere in this calendar). This is what makes reuse work: a
+// document uploaded against "Franchise Tax" that happens to also satisfy
+// "Annual Report" (both need "EIN Confirmation Letter", say) shows up as
+// already-done on Annual Report's checklist too, without the client
+// uploading it twice. Matching is purely by label text — same reasoning
+// as requirementLabel itself (see models/Calendar.js): a stable, human-
+// readable string, not a foreign key, so it's easy to reason about and
+// easy to extend. A REJECTED upload (see reviewStatus on the document
+// sub-schema) is deliberately excluded here — staff said "this isn't
+// valid", so it must not silently keep satisfying the checklist, on
+// this item or any other one it happened to be shared with.
 function withRequiredDocuments(calendar) {
   const obj = calendar.toObject ? calendar.toObject() : calendar;
 
   const sharedDocumentIndex = {};
   (obj.items || []).forEach((item, itemIndex) => {
     (item.documents || []).forEach((doc, docIndex) => {
-      if (doc.type === "client_upload" && doc.requirementLabel && !sharedDocumentIndex[doc.requirementLabel]) {
+      if (
+        doc.type === "client_upload" &&
+        doc.requirementLabel &&
+        doc.reviewStatus !== "rejected" &&
+        !sharedDocumentIndex[doc.requirementLabel]
+      ) {
         sharedDocumentIndex[doc.requirementLabel] = {
           itemIndex,
           docIndex,
@@ -142,6 +161,28 @@ router.post("/calendars/:id/items/:index/upload", upload.single("file"), async (
     }
     await calendar.save();
     res.status(201).json({ calendar: withRequiredDocuments(calendar) });
+
+    // Best-effort — never block the upload response on this. Tells
+    // whoever is this client's point of contact (or the general ops
+    // inbox if nobody's assigned yet) that something showed up to
+    // review, the same "new lead" notification pattern already used in
+    // routes/public.routes.js, just pointed at a different event.
+    ClientOrg.findById(req.user.clientOrgId)
+      .populate("assignedStaff", "email name")
+      .then((org) => {
+        const to = org?.assignedStaff?.email || process.env.ADMIN_EMAIL;
+        if (!to) return;
+        return sendEmail({
+          to,
+          subject: `New document uploaded: ${org?.name || "a client"} — ${item.compliance_name}`,
+          text:
+            `${req.user.name || req.user.email} uploaded "${req.file.originalname}" for ${item.compliance_name}` +
+            (requirementLabel ? ` (${requirementLabel})` : "") +
+            `.\n\nReview it here: ${process.env.APP_URL || ""}/calendar.html?id=${calendar._id}`,
+          logPrefix: "[client upload]",
+        });
+      })
+      .catch((err) => console.error("[client upload] staff notification failed (non-fatal):", err.message));
   } catch (err) {
     console.error("Client upload error:", err);
     res.status(500).json({ error: "Could not save the uploaded file." });
