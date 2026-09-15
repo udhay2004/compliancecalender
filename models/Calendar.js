@@ -99,6 +99,22 @@ const itemSchema = new mongoose.Schema(
           // that can grow over time, and a document uploaded before a label
           // existed shouldn't become invalid.
           requirementLabel: { type: String, default: "" },
+          // --- Staff validation of a client's upload -----------------
+          // Only meaningful for type:"client_upload" — a staff-uploaded
+          // certificate has no reviewStatus, it just IS the deliverable.
+          // "pending" until a staff member explicitly accepts or rejects
+          // it (see PATCH /:id/items/:index/documents/:docIndex/review
+          // in routes/calendar.routes.js) — uploading is not the same as
+          // it being correct, which is the whole point of a human check.
+          // A rejected document is excluded from the checklist-satisfied
+          // and shared-reuse logic in routes/portal.routes.js, so the
+          // client sees that requirement as still outstanding.
+          reviewStatus: { type: String, enum: ["pending", "accepted", "rejected"], default: "pending" },
+          // Why it was rejected, shown to the client so they know what to
+          // fix. Required by the route when rejecting; blank otherwise.
+          reviewNote: { type: String, default: "" },
+          reviewedBy: { type: String, default: null },
+          reviewedAt: { type: Date, default: null },
         },
       ],
       default: [],
