@@ -38,7 +38,7 @@ function hasAllRequiredDocuments(item, calendar) {
   const uploadedLabels = new Set();
   (calendar.items || []).forEach((it) => {
     (it.documents || []).forEach((d) => {
-      if (d.type === "client_upload" && d.requirementLabel) uploadedLabels.add(d.requirementLabel);
+      if (d.type === "client_upload" && d.requirementLabel && d.reviewStatus !== "rejected") uploadedLabels.add(d.requirementLabel);
     });
   });
   return required.every((label) => uploadedLabels.has(label));
