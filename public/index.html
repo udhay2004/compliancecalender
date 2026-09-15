@@ -8,14 +8,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,72,400;0,72,500;0,72,600;1,72,400;1,72,500&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --ink: #14213D; --ink-soft: #3B4A6B; --paper: #F5F6F4; --card: #FFFFFF;
-    --rule: #DDE1DD; --rule-soft: #ECEFEB;
+    --ink: #14213D; --ink-soft: #435067; --paper: #F1F6F5; --card: #FFFFFF;
+    --rule: #D6E2E0; --rule-soft: #E6EEED;
     --urgent: #A6332A; --urgent-bg: #FBEFEC;
-    --soon: #8C6D2F; --soon-bg: #F5EFE1;
-    --later: #2E5E55; --later-bg: #E6EEEC;
-    --grey-dot: #9AA1A8; --grey-bg: #F0F1EF;
+    --soon: #B0792A; --soon-bg: #FBF2E3;
+    --later: #34A9A1; --later-dark: #257972; --later-bg: #E2F4F2;
+    --grey-dot: #8B96A0; --grey-bg: #F0F3F2;
     --mono: 'IBM Plex Mono', monospace; --sans: 'IBM Plex Sans', sans-serif; --serif: 'Newsreader', serif;
-    --shadow: 0 1px 2px rgba(20,33,61,0.04), 0 4px 16px rgba(20,33,61,0.05);
+    --shadow: 0 1px 2px rgba(20,33,61,0.04), 0 8px 22px rgba(20,33,61,0.06);
   }
   * { box-sizing: border-box; }
   body {
@@ -32,7 +32,7 @@
   .brand { font-family: var(--mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
   .brand strong { color: var(--ink); font-weight: 600; }
   .staff-link { font-family: var(--mono); font-size: 11px; color: var(--ink-soft); text-decoration: none; }
-  .staff-link:hover { color: var(--later); }
+  .staff-link:hover { color: var(--later-dark); }
 
   /* ---- intake ---- */
   .intake { margin-top: 32px; background: var(--card); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
@@ -120,7 +120,7 @@
   }
   .days-pill.urgent { background: var(--urgent-bg); color: var(--urgent); }
   .days-pill.soon { background: var(--soon-bg); color: var(--soon); }
-  .days-pill.later { background: var(--later-bg); color: var(--later); }
+  .days-pill.later { background: var(--later-bg); color: var(--later-dark); }
   .days-pill.unknown { background: var(--grey-bg); color: var(--grey-dot); }
   .days-pill .num { display: block; font-size: 15px; }
 
@@ -129,18 +129,18 @@
   .deadline-due-date { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); margin-bottom: 6px; }
   .deadline-cat {
     display: inline-block; font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
-    color: var(--later); background: var(--later-bg); border-radius: 5px; padding: 2px 7px; margin-bottom: 6px;
+    color: var(--later-dark); background: var(--later-bg); border-radius: 5px; padding: 2px 7px; margin-bottom: 6px;
   }
   .deadline-desc { font-size: 13px; color: var(--ink-soft); }
   .deadline-meta { font-size: 12px; color: var(--grey-dot); margin-top: 4px; }
-  .deadline-meta a { color: var(--later); text-decoration: none; }
+  .deadline-meta a { color: var(--later-dark); text-decoration: none; }
   .deadline-meta a:hover { text-decoration: underline; }
 
   .no-match { padding: 20px 4px; color: var(--ink-soft); font-size: 13.5px; font-style: italic; }
 
   .action-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 22px 0 4px; padding-top: 18px; border-top: 1px solid var(--rule-soft); }
   .action-bar .btn-primary { text-decoration: none; display: inline-block; }
-  .action-bar .review-status { flex-basis: 100%; font-size: 12.5px; color: var(--later); font-family: var(--mono); }
+  .action-bar .review-status { flex-basis: 100%; font-size: 12.5px; color: var(--later-dark); font-family: var(--mono); }
 
   /* locked summary */
   .locked-summary {
@@ -157,7 +157,7 @@
     font-family: var(--mono); font-size: 11px; color: var(--urgent); background: #fff;
     border: 1px solid var(--urgent); border-radius: 999px; padding: 5px 11px;
   }
-  .review-status { font-size: 12.5px; color: var(--later); font-family: var(--mono); margin-top: 12px; }
+  .review-status { font-size: 12.5px; color: var(--later-dark); font-family: var(--mono); margin-top: 12px; }
 
   /* urgency / call-to-action banner, above the login button */
   .urgency-banner {
