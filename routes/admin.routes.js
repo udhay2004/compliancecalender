@@ -18,6 +18,8 @@ const express = require("express");
 const User = require("../models/User");
 const ClientOrg = require("../models/ClientOrg");
 const Calendar = require("../models/Calendar");
+const AuditLog = require("../models/AuditLog");
+const { logActivity } = require("../lib/auditLog");
 const { requireAuth, requireRole } = require("../middleware/auth");
 
 const router = express.Router();
@@ -143,6 +145,7 @@ router.patch("/users/:id", async (req, res) => {
   }
 
   const { name, active, password, role } = req.body || {};
+  const activeChanged = active !== undefined && !!active !== target.active;
   if (name !== undefined) target.name = name;
   if (active !== undefined) target.active = !!active;
   if (role !== undefined) {
@@ -154,6 +157,16 @@ router.patch("/users/:id", async (req, res) => {
   if (password) await target.setPassword(password);
 
   await target.save();
+
+  if (activeChanged) {
+    logActivity({
+      action: target.active ? "user_reactivated" : "user_deactivated",
+      actor: req.user,
+      summary: `${target.active ? "Reactivated" : "Deactivated"} the account for ${target.name || target.email} (${target.role}).`,
+      meta: { targetUserId: String(target._id), targetEmail: target.email },
+    });
+  }
+
   res.json({ user: target.toSafeJSON() });
 });
 
@@ -187,6 +200,22 @@ router.get("/leads", async (req, res) => {
       generatedAt: c.createdAt,
     })),
   });
+});
+
+// ---------------------------------------------------------------------
+// Activity log (models/AuditLog.js) — approvals, rejections, document
+// reviews, payment events, account access changes. See lib/auditLog.js
+// for what's deliberately NOT logged (every field edit would be noise).
+// ---------------------------------------------------------------------
+
+// GET /api/admin/activity — most recent first. Optional ?clientOrgId=
+// filters to one client's history (used from calendar.html eventually;
+// today the admin.html activity tab shows the unfiltered global feed).
+router.get("/activity", async (req, res) => {
+  const filter = {};
+  if (req.query.clientOrgId) filter.clientOrgId = req.query.clientOrgId;
+  const entries = await AuditLog.find(filter).sort({ createdAt: -1 }).limit(200);
+  res.json({ entries });
 });
 
 module.exports = router;
