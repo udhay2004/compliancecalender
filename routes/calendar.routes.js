@@ -11,6 +11,7 @@ const { calendarToPdfBuffer } = require("../lib/pdf");
 const { upload } = require("../middleware/upload");
 const storage = require("../lib/storage");
 const { getSuggestedFee } = require("../lib/complianceFees");
+const { logActivity } = require("../lib/auditLog");
 
 const router = express.Router();
 // Everything in this file is internal tooling (generate/review/approve/
@@ -159,6 +160,14 @@ router.post("/:id/approve", async (req, res) => {
   calendar.reviewedAt = new Date();
   calendar.reviewNotes = req.body?.notes || "";
   await calendar.save();
+  logActivity({
+    action: "calendar_approved",
+    actor: req.user,
+    clientOrgId: calendar.clientOrgId,
+    calendarId: calendar._id,
+    summary: `Approved the compliance calendar for ${calendar.profile?.companyName || "a company"}.`,
+    meta: { notes: calendar.reviewNotes },
+  });
   res.json({ calendar });
 });
 
@@ -174,6 +183,14 @@ router.post("/:id/reject", async (req, res) => {
   calendar.reviewedAt = new Date();
   calendar.reviewNotes = req.body?.notes || "";
   await calendar.save();
+  logActivity({
+    action: "calendar_rejected",
+    actor: req.user,
+    clientOrgId: calendar.clientOrgId,
+    calendarId: calendar._id,
+    summary: `Rejected the compliance calendar for ${calendar.profile?.companyName || "a company"}.`,
+    meta: { notes: calendar.reviewNotes },
+  });
   res.json({ calendar });
 });
 
@@ -320,6 +337,19 @@ router.patch("/:id/items/:index/documents/:docIndex/review", async (req, res) =>
   }
 
   await calendar.save();
+
+  logActivity({
+    action: reviewStatus === "accepted" ? "document_accepted" : "document_rejected",
+    actor: req.user,
+    clientOrgId: calendar.clientOrgId,
+    calendarId: calendar._id,
+    itemIndex: idx,
+    summary:
+      reviewStatus === "accepted"
+        ? `Accepted "${doc.fileName}" for ${item.compliance_name}.`
+        : `Rejected "${doc.fileName}" for ${item.compliance_name}: ${doc.reviewNote}`,
+    meta: { fileName: doc.fileName, note: doc.reviewNote },
+  });
 
   // Best-effort side effects below — a failure here should never block
   // the review itself from having been saved.
