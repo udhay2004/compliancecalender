@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Free Compliance Calendar — ComplyGlobally</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,72,400;0,72,500;0,72,600;1,72,400;1,72,500&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --ink: #14213D; --ink-soft: #435067; --paper: #F1F6F5; --card: #FFFFFF;
-    --rule: #D6E2E0; --rule-soft: #E6EEED;
-    --urgent: #A6332A; --urgent-bg: #FBEFEC;
-    --soon: #B0792A; --soon-bg: #FBF2E3;
-    --later: #34A9A1; --later-dark: #257972; --later-bg: #E2F4F2;
-    --grey-dot: #8B96A0; --grey-bg: #F0F3F2;
-    --mono: 'IBM Plex Mono', monospace; --sans: 'IBM Plex Sans', sans-serif; --serif: 'Newsreader', serif;
-    --shadow: 0 1px 2px rgba(20,33,61,0.04), 0 8px 22px rgba(20,33,61,0.06);
+    --ink: #1B2A2E; --ink-soft: #5C6E72; --paper: #F5F8F8; --card: #FFFFFF;
+    --rule: #E1E9E8; --rule-soft: #ECF2F1;
+    --urgent: #D64545; --urgent-bg: #FBEAEA;
+    --soon: #C68A2E; --soon-bg: #FBF1E1;
+    --later: #34A9A1; --later-dark: #278A83; --later-bg: #E3F5F3;
+    --grey-dot: #98A6A5; --grey-bg: #F1F4F3;
+    --mono: 'Inter', sans-serif; --sans: 'Inter', sans-serif; --serif: 'Plus Jakarta Sans', sans-serif;
+    --shadow: 0 1px 2px rgba(27,42,46,0.04), 0 4px 16px rgba(27,42,46,0.06);
   }
   * { box-sizing: border-box; }
   body {
@@ -32,7 +32,7 @@
   .brand { font-family: var(--mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
   .brand strong { color: var(--ink); font-weight: 600; }
   .staff-link { font-family: var(--mono); font-size: 11px; color: var(--ink-soft); text-decoration: none; }
-  .staff-link:hover { color: var(--later-dark); }
+  .staff-link:hover { color: var(--later); }
 
   /* ---- intake ---- */
   .intake { margin-top: 32px; background: var(--card); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
@@ -83,8 +83,8 @@
     font-family: var(--sans); font-size: 14px; font-weight: 600;
     border: none; border-radius: 9px; padding: 12px 22px; cursor: pointer; transition: transform .08s, opacity .12s;
   }
-  button#submit, .btn-primary { background: var(--ink); color: #fff; }
-  button#submit:hover:not(:disabled), .btn-primary:hover:not(:disabled) { opacity: .9; }
+  button#submit, .btn-primary { background: var(--later); color: #fff; }
+  button#submit:hover:not(:disabled), .btn-primary:hover:not(:disabled) { background: var(--later-dark); opacity: 1; }
   button#submit:disabled, .btn-primary:disabled { background: #B7BCC0; cursor: wait; }
   .btn-secondary { background: var(--grey-bg); color: var(--ink); }
   .btn-secondary:hover { background: var(--rule); }
@@ -106,7 +106,7 @@
     cursor: pointer; transition: all .1s;
   }
   .filter-chip:hover { background: var(--rule); }
-  .filter-chip.active { background: var(--ink); color: #fff; }
+  .filter-chip.active { background: var(--later); color: #fff; }
 
   /* deadline cards */
   .deadline-card {
@@ -120,7 +120,7 @@
   }
   .days-pill.urgent { background: var(--urgent-bg); color: var(--urgent); }
   .days-pill.soon { background: var(--soon-bg); color: var(--soon); }
-  .days-pill.later { background: var(--later-bg); color: var(--later-dark); }
+  .days-pill.later { background: var(--later-bg); color: var(--later); }
   .days-pill.unknown { background: var(--grey-bg); color: var(--grey-dot); }
   .days-pill .num { display: block; font-size: 15px; }
 
@@ -129,18 +129,18 @@
   .deadline-due-date { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); margin-bottom: 6px; }
   .deadline-cat {
     display: inline-block; font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
-    color: var(--later-dark); background: var(--later-bg); border-radius: 5px; padding: 2px 7px; margin-bottom: 6px;
+    color: var(--later); background: var(--later-bg); border-radius: 5px; padding: 2px 7px; margin-bottom: 6px;
   }
   .deadline-desc { font-size: 13px; color: var(--ink-soft); }
   .deadline-meta { font-size: 12px; color: var(--grey-dot); margin-top: 4px; }
-  .deadline-meta a { color: var(--later-dark); text-decoration: none; }
+  .deadline-meta a { color: var(--later); text-decoration: none; }
   .deadline-meta a:hover { text-decoration: underline; }
 
   .no-match { padding: 20px 4px; color: var(--ink-soft); font-size: 13.5px; font-style: italic; }
 
   .action-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 22px 0 4px; padding-top: 18px; border-top: 1px solid var(--rule-soft); }
   .action-bar .btn-primary { text-decoration: none; display: inline-block; }
-  .action-bar .review-status { flex-basis: 100%; font-size: 12.5px; color: var(--later-dark); font-family: var(--mono); }
+  .action-bar .review-status { flex-basis: 100%; font-size: 12.5px; color: var(--later); font-family: var(--mono); }
 
   /* locked summary */
   .locked-summary {
@@ -157,14 +157,14 @@
     font-family: var(--mono); font-size: 11px; color: var(--urgent); background: #fff;
     border: 1px solid var(--urgent); border-radius: 999px; padding: 5px 11px;
   }
-  .review-status { font-size: 12.5px; color: var(--later-dark); font-family: var(--mono); margin-top: 12px; }
+  .review-status { font-size: 12.5px; color: var(--later); font-family: var(--mono); margin-top: 12px; }
 
   /* urgency / call-to-action banner, above the login button */
   .urgency-banner {
-    margin-top: 22px; padding: 22px 24px; background: #f0fdf4; border-radius: 12px;
-    border: 1px solid #16a34a;
+    margin-top: 22px; padding: 22px 24px; background: var(--later-bg); border-radius: 12px;
+    border: 1px solid var(--later);
   }
-  .urgency-banner-head { font-family: var(--serif); font-weight: 600; font-size: 17px; margin-bottom: 8px; color: #15803d; }
+  .urgency-banner-head { font-family: var(--serif); font-weight: 600; font-size: 17px; margin-bottom: 8px; color: var(--later-dark); }
   .urgency-banner p { font-size: 13px; color: var(--ink-soft); margin: 0; max-width: 62ch; }
 
   .legend { margin-top: 20px; font-family: var(--mono); font-size: 11px; color: var(--ink-soft); display: flex; gap: 18px; flex-wrap: wrap; }
