@@ -21,6 +21,7 @@ const razorpay = require("../config/razorpay");
 const Calendar = require("../models/Calendar");
 const { requireAuth, requireClientRole } = require("../middleware/auth");
 const { getRequiredDocuments } = require("../lib/requiredDocuments");
+const { logActivity } = require("../lib/auditLog");
 
 // True once every required document (see lib/requiredDocuments.js) for
 // this item has at least one matching client_upload SOMEWHERE in the
@@ -218,6 +219,18 @@ async function razorpayWebhookHandler(req, res) {
         item.paymentEvents.push({ event: "webhook_failed", razorpayOrderId: orderId, razorpayPaymentId: paymentId });
       }
       await calendar.save();
+
+      logActivity({
+        action: event.event === "payment.captured" ? "payment_captured" : "payment_failed",
+        actor: null, // system event — Razorpay's webhook, no logged-in user
+        clientOrgId: calendar.clientOrgId,
+        calendarId: calendar._id,
+        summary:
+          event.event === "payment.captured"
+            ? `Payment captured for ${item.compliance_name} (${item.feeAmountCents ? "$" + (item.feeAmountCents / 100).toLocaleString("en-US") : "amount unknown"}).`
+            : `Payment attempt failed for ${item.compliance_name}.`,
+        meta: { razorpayOrderId: orderId, razorpayPaymentId: paymentId },
+      });
     }
 
     res.status(200).json({ received: true });
