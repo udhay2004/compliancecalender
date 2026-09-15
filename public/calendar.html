@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Calendar — Compliance Calendar Generator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,72,400;0,72,500;0,72,600;1,72,400;1,72,500&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/shared.css">
 </head>
 <body>
@@ -339,7 +339,7 @@
               ${clientDocs.length ? clientDocs.map(d => {
                 const di = item.documents.indexOf(d);
                 const badge = d.reviewStatus === 'accepted'
-                  ? `<span class="status-pill-cw" style="color:#16a34a;">Accepted</span>`
+                  ? `<span class="status-pill-cw" style="color:var(--brand-dark);background:var(--teal-bg);">Accepted</span>`
                   : d.reviewStatus === 'rejected'
                     ? `<span class="status-pill-cw" style="color:var(--stamp-red);">Rejected</span>`
                     : `<span class="status-pill-cw">Pending review</span>`;
