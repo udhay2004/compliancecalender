@@ -278,9 +278,11 @@
       const isOpen = expandedItems.has(idx);
 
       // For each required doc: is it uploaded on THIS item, uploaded on
-      // a DIFFERENT item already (reuse), or missing entirely.
+      // a DIFFERENT item already (reuse), or missing entirely. A
+      // REJECTED upload never counts as satisfying anything — see the
+      // matching fix in routes/portal.routes.js's withRequiredDocuments.
       const required = item.requiredDocuments || [];
-      const ownLabels = new Set(clientDocs.map(d => d.requirementLabel));
+      const ownLabels = new Set(clientDocs.filter(d => d.reviewStatus !== 'rejected').map(d => d.requirementLabel));
       const rows = required.map(label => {
         if (ownLabels.has(label)) return { label, state: 'own' };
         const shared = sharedDocumentIndex[label];
@@ -343,7 +345,18 @@
 
             ${clientDocs.length ? `<div style="margin-top:8px;">
               <div class="ts" style="font-size:12px;color:var(--ink-soft);">Your uploads</div>
-              ${clientDocs.map((d) => `<a class="doc-chip" href="/api/portal/calendars/${calendar._id}/items/${idx}/documents/${item.documents.indexOf(d)}/download">${escapeHtml(d.fileName)} ↓</a>`).join('')}
+              ${clientDocs.map((d) => {
+                const badge = d.reviewStatus === 'accepted'
+                  ? `<span class="status-pill status-Filed" style="margin-left:6px;">Accepted</span>`
+                  : d.reviewStatus === 'rejected'
+                    ? `<span class="status-pill status-Overdue" style="margin-left:6px;">Not accepted</span>`
+                    : `<span class="status-pill status-Not-Started" style="margin-left:6px;">Pending review</span>`;
+                return `
+                  <div style="margin-bottom:6px;">
+                    <a class="doc-chip" href="/api/portal/calendars/${calendar._id}/items/${idx}/documents/${item.documents.indexOf(d)}/download">${escapeHtml(d.fileName)} ↓</a>${badge}
+                    ${d.reviewStatus === 'rejected' ? `<div style="font-size:12.5px;color:var(--stamp-red);margin:2px 0 0 2px;">${escapeHtml(d.reviewNote || 'Please re-upload a corrected file.')}</div>` : ''}
+                  </div>`;
+              }).join('')}
             </div>` : ''}
 
             ${checklistHtml}
@@ -354,7 +367,9 @@
                   ? `<button class="pay-btn" data-idx="${idx}" data-amount="${item.feeAmountCents}">Proceed & pay $${dollars}</button>`
                   : `<button class="pay-btn" disabled style="opacity:0.5;cursor:not-allowed;">Proceed & pay $${dollars}</button>
                      <div class="pay-note">Upload all the documents above to unlock payment.</div>`
-              ) : ``}
+              ) : (item.paymentStatus === 'Not Invoiced' && item.clientStatus !== 'Not Started'
+                    ? `<div class="pay-note">We haven't set a fee for this filing yet — your account contact will let you know once it's ready to invoice.</div>`
+                    : ``)}
               <span class="hint" data-hint-idx="${idx}"></span>
             </div>
           </div>
