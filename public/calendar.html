@@ -336,7 +336,26 @@
 
             <div style="margin-top:12px;">
               <div class="ts" style="font-size:11px;color:var(--ink-soft);text-transform:uppercase;">Client uploads (${clientDocs.length})</div>
-              ${clientDocs.length ? clientDocs.map(d => `<a class="doc-chip" href="/api/calendars/${id}/items/${idx}/documents/${item.documents.indexOf(d)}/download">${escapeHtml(d.fileName)} ↓</a>`).join('') : `<div style="font-size:12.5px;color:var(--ink-soft);">Nothing uploaded yet.</div>`}
+              ${clientDocs.length ? clientDocs.map(d => {
+                const di = item.documents.indexOf(d);
+                const badge = d.reviewStatus === 'accepted'
+                  ? `<span class="status-pill-cw" style="color:#16a34a;">Accepted</span>`
+                  : d.reviewStatus === 'rejected'
+                    ? `<span class="status-pill-cw" style="color:var(--stamp-red);">Rejected</span>`
+                    : `<span class="status-pill-cw">Pending review</span>`;
+                return `
+                  <div style="margin-bottom:8px;">
+                    <a class="doc-chip" href="/api/calendars/${id}/items/${idx}/documents/${di}/download">${escapeHtml(d.fileName)} ↓</a>${badge}
+                    ${d.reviewStatus === 'rejected' ? `<div style="font-size:12px;color:var(--stamp-red);margin:2px 0 0 2px;">${escapeHtml(d.reviewNote)}</div>` : ''}
+                    ${d.reviewStatus === 'pending' ? `
+                      <div style="margin-top:4px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                        <button class="ghost" data-review-action="accept" data-idx="${idx}" data-doc="${di}" style="padding:4px 10px;font-size:12px;">Accept</button>
+                        <input type="text" class="rejectNote" data-idx="${idx}" data-doc="${di}" placeholder="Reason if rejecting…" style="font-size:12px;padding:4px 8px;flex:1;min-width:160px;">
+                        <button class="danger" data-review-action="reject" data-idx="${idx}" data-doc="${di}" style="padding:4px 10px;font-size:12px;">Reject</button>
+                      </div>
+                      <span class="hint" data-review-hint="${idx}-${di}" style="display:block;font-size:11.5px;"></span>` : ''}
+                  </div>`;
+              }).join('') : `<div style="font-size:12.5px;color:var(--ink-soft);">Nothing uploaded yet.</div>`}
             </div>
 
             <div style="margin-top:10px;">
@@ -374,6 +393,37 @@
           </div>
         </div>`;
     }).join('');
+
+    el.querySelectorAll('[data-review-action]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = btn.dataset.idx;
+        const docIdx = btn.dataset.doc;
+        const action = btn.dataset.reviewAction; // 'accept' | 'reject'
+        const hint = el.querySelector(`[data-review-hint="${idx}-${docIdx}"]`);
+        const noteInput = el.querySelector(`.rejectNote[data-idx="${idx}"][data-doc="${docIdx}"]`);
+        const note = noteInput ? noteInput.value.trim() : '';
+        if (action === 'reject' && !note) {
+          hint.textContent = 'A reason is required when rejecting.';
+          hint.classList.add('err');
+          return;
+        }
+        hint.textContent = 'Saving…'; hint.classList.remove('err');
+        try {
+          const res = await fetch(`/api/calendars/${id}/items/${idx}/documents/${docIdx}/review`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reviewStatus: action === 'accept' ? 'accepted' : 'rejected', note }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || 'Could not save.');
+          calendar = data.calendar;
+          renderClientItems();
+          if (action === 'reject') refreshChatThread(); // rejection auto-posts a chat message server-side
+        } catch (err) {
+          hint.textContent = err.message; hint.classList.add('err');
+        }
+      });
+    });
 
     el.querySelectorAll('.certInput').forEach(input => {
       input.addEventListener('change', async () => {
