@@ -319,6 +319,17 @@
 
     el.innerHTML = items.map((item, idx) => {
       const clientDocs = (item.documents || []).filter(d => d.type === 'client_upload');
+      // The price list (lib/complianceFees.js) is surfaced here as a
+      // read-only hint only — never auto-applied. Three cases: a fixed
+      // price we can suggest, a variable-price item with a note telling
+      // staff how to quote it, and nothing on file at all.
+      const sf = item.suggestedFee;
+      const suggestedPlaceholder = sf && sf.amountCents ? String(sf.amountCents / 100) : 'Set a fee';
+      const suggestionHint = sf
+        ? (sf.amountCents
+            ? `<span class="field-hint">Price list suggests $${(sf.amountCents / 100).toLocaleString('en-US')}${sf.note ? ' — ' + escapeHtml(sf.note) : ''}</span>`
+            : (sf.note ? `<span class="field-hint">${escapeHtml(sf.note)}</span>` : ''))
+        : '';
       const certs = (item.documents || []).filter(d => d.type === 'certificate');
       return `
         <div class="card" style="margin-bottom:14px;">
@@ -383,7 +394,8 @@
               </div>
               <div class="field">
                 <label>Fee (USD)</label>
-                <input type="number" min="0" step="1" class="feeInput" data-idx="${idx}" value="${item.feeAmountCents ? (item.feeAmountCents/100) : ''}">
+                <input type="number" min="0" step="1" class="feeInput" data-idx="${idx}" value="${item.feeAmountCents ? (item.feeAmountCents/100) : ''}" placeholder="${suggestedPlaceholder}">
+                ${suggestionHint}
               </div>
             </div>
             <div class="submit-row" style="margin-top:10px;">
@@ -463,9 +475,32 @@
             body: JSON.stringify(body),
           });
           const data = await res.json().catch(() => ({}));
-          if (!res.ok) throw new Error(data.error || 'Could not save.');
+          if (!res.ok) {
+            // The server returns suggestedFee alongside the "fee is
+            // required to invoice" error — show it rather than making
+            // staff go dig the number out of the price list.
+            let msg = data.error || 'Could not save.';
+            if (data.suggestedFee && data.suggestedFee.amountCents) {
+              msg += ` Price list suggests $${(data.suggestedFee.amountCents / 100).toLocaleString('en-US')}.`;
+            } else if (data.suggestedFee && data.suggestedFee.note) {
+              msg += ` ${data.suggestedFee.note}`;
+            }
+            throw new Error(msg);
+          }
           calendar = data.calendar;
+          // renderClientItems() rebuilds this whole list, which wipes
+          // any hint text written before it — so the confirmation has
+          // to be written AFTER the re-render, by re-finding the (new)
+          // hint element. Without this the save looks like it did
+          // nothing at all, which is exactly how a successful save gets
+          // mistaken for a broken one.
           renderClientItems();
+          const freshHint = el.querySelector(`[data-status-hint="${idx}"]`);
+          if (freshHint) {
+            freshHint.textContent = 'Saved ✓';
+            freshHint.classList.remove('err');
+            setTimeout(() => { if (freshHint.textContent === 'Saved ✓') freshHint.textContent = ''; }, 4000);
+          }
         } catch (err) {
           hint.textContent = err.message; hint.classList.add('err');
         }
