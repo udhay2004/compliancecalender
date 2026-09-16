@@ -148,7 +148,7 @@
     const assigned = o.assignedStaff && typeof o.assignedStaff === 'object' ? o.assignedStaff : null;
     if (editingOrgId.has(o._id)) {
       return `
-        <div class="card" style="margin-bottom:10px;">
+        <div class="card" style="margin-bottom:0;grid-column:1/-1;">
           <div class="card-body">
             <div style="font-weight:500;margin-bottom:10px;">${escapeHtml(o.name)}</div>
             <div class="grid full">
@@ -172,7 +172,7 @@
         </div>`;
     }
     return `
-      <div class="card" style="margin-bottom:10px;">
+      <div class="card" style="margin-bottom:0;">
         <div class="card-body" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
           <div>
             <div style="font-weight:500;">${escapeHtml(o.name)}</div>
@@ -202,7 +202,7 @@
   function renderOrgs() {
     const el = document.getElementById('orgsList');
     if (!orgsCache.length) { el.innerHTML = '<div class="empty-state">No client companies yet.</div>'; return; }
-    el.innerHTML = orgsCache.map(orgRowHtml).join('');
+    el.innerHTML = `<div class="card-grid">${orgsCache.map(orgRowHtml).join('')}</div>`;
 
     el.querySelectorAll('[data-edit-org]').forEach(btn => {
       btn.addEventListener('click', () => { editingOrgId.add(btn.dataset.editOrg); renderOrgs(); });
@@ -271,10 +271,10 @@
     const users = data.users || [];
     const el = document.getElementById('usersList');
     if (!users.length) { el.innerHTML = '<div class="empty-state">No accounts yet.</div>'; return; }
-    el.innerHTML = users.map(u => {
+    el.innerHTML = `<div class="card-grid">${users.map(u => {
       const org = orgsCache.find(o => o._id === u.clientOrgId);
       return `
-        <div class="card" style="margin-bottom:10px;">
+        <div class="card" style="margin-bottom:0;">
           <div class="card-body" style="display:flex;justify-content:space-between;align-items:center;">
             <div>
               <div style="font-weight:500;">${escapeHtml(u.name || u.email)} <span class="ts" style="color:var(--ink-soft);">(${escapeHtml(u.role)})</span></div>
@@ -283,7 +283,7 @@
             <button data-id="${u.id}" data-active="${u.active}" class="toggleActiveBtn">${u.active ? 'Deactivate' : 'Reactivate'}</button>
           </div>
         </div>`;
-    }).join('');
+    }).join('')}</div>`;
     el.querySelectorAll('.toggleActiveBtn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const active = btn.dataset.active !== 'true';
