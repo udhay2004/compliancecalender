@@ -15,6 +15,7 @@ const { requireAuth, requireClientRole } = require("../middleware/auth");
 const { upload } = require("../middleware/upload");
 const storage = require("../lib/storage");
 const { getRequiredDocuments } = require("../lib/requiredDocuments");
+const { getSuggestedFee } = require("../lib/complianceFees");
 const { sendEmail } = require("../lib/mailer");
 
 const router = express.Router();
@@ -68,6 +69,12 @@ function withRequiredDocuments(calendar) {
   obj.items = (obj.items || []).map((item) => ({
     ...item,
     requiredDocuments: getRequiredDocuments(item),
+    // For items with no fee set yet, pass through the price list's
+    // client-facing line (lib/complianceFees.js) so the portal can say
+    // something meaningful instead of leaving a blank space where a
+    // price would go. Never exposes the internal `note` or the
+    // suggested amount — those are staff-only.
+    feeMessage: item.feeAmountCents ? null : (getSuggestedFee(item)?.customerMessage || null),
   }));
   obj.sharedDocumentIndex = sharedDocumentIndex;
   return obj;
