@@ -368,7 +368,7 @@
                   : `<button class="pay-btn" disabled style="opacity:0.5;cursor:not-allowed;">Proceed & pay $${dollars}</button>
                      <div class="pay-note">Upload all the documents above to unlock payment.</div>`
               ) : (item.paymentStatus === 'Not Invoiced' && item.clientStatus !== 'Not Started'
-                    ? `<div class="pay-note">We haven't set a fee for this filing yet — your account contact will let you know once it's ready to invoice.</div>`
+                    ? `<div class="pay-note">${escapeHtml(item.feeMessage || "We haven't set a fee for this filing yet — your account contact will let you know once it's ready to invoice.")}</div>`
                     : ``)}
               <span class="hint" data-hint-idx="${idx}"></span>
             </div>
