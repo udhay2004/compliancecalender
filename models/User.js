@@ -48,6 +48,30 @@ const userSchema = new mongoose.Schema(
     googleId: { type: String, unique: true, sparse: true, default: null },
     name: { type: String, trim: true, default: "" },
     role: { type: String, enum: ROLES, required: true },
+    // Which internal team an operational account belongs to. Only
+    // meaningful for role "staff" — this is what makes tech@ and
+    // finance@ land on two genuinely different dashboards instead of
+    // one shared staff screen. Left "" for admin/super_admin/client.
+    department: { type: String, enum: ["", "tech", "finance"], default: "" },
+    // True between "the account was created by an admin/seed script"
+    // and "the person finished their first OTP login and chose a
+    // password". While true the account has NO passwordHash at all, so
+    // there is nothing to guess and POST /login can never succeed for
+    // it — the only way in is an OTP to the mailbox that owns the
+    // address (see routes/auth.routes.js).
+    mustSetPassword: { type: Boolean, default: false },
+    // Bumped on every password change and on "log out everywhere".
+    // Embedded in the JWT and re-checked on every request, so changing
+    // a password instantly kills every other session that account had
+    // open — the thing a 30-day cookie would otherwise prevent, and
+    // what Facebook/Instagram do when you reset a password.
+    tokenVersion: { type: Number, default: 0 },
+    passwordUpdatedAt: { type: Date, default: null },
+    lastLoginAt: { type: Date, default: null },
+    // Brute-force brake for the OTP step, per account rather than per
+    // IP — an attacker rotating IPs still burns the same counter.
+    failedOtpAttempts: { type: Number, default: 0 },
+    lockedUntil: { type: Date, default: null },
     // Required and ONLY meaningful for role "client" — every other role
     // must leave this null. Enforced in the pre-validate hook below so it's impossible to accidentally create
     // a staff/admin account that is also (incorrectly) scoped to a
@@ -65,14 +89,34 @@ userSchema.pre("validate", function (next) {
   if (this.role !== "client" && this.clientOrgId) {
     return next(new Error("clientOrgId must be null for any role other than 'client'."));
   }
-  if (!this.passwordHash && !this.googleId) {
-    return next(new Error("A user needs either a passwordHash or a googleId."));
+  // An account awaiting its first OTP login legitimately has neither a
+  // password nor a Google link yet — that's the whole point of
+  // mustSetPassword. Every other account still needs one of the two.
+  if (!this.passwordHash && !this.googleId && !this.mustSetPassword) {
+    return next(new Error("A user needs either a passwordHash, a googleId, or mustSetPassword."));
+  }
+  if (this.role !== "staff" && this.department) {
+    return next(new Error("department is only meaningful for role 'staff'."));
   }
   next();
 });
 
 userSchema.methods.setPassword = async function (plainPassword) {
-  this.passwordHash = await bcrypt.hash(plainPassword, 10);
+  // Cost 12 rather than the old 10: ~4x slower to verify (still under
+  // 250ms on a normal server, imperceptible on a login) but 4x more
+  // expensive for anyone brute-forcing a stolen hash dump.
+  this.passwordHash = await bcrypt.hash(plainPassword, 12);
+  this.mustSetPassword = false;
+  this.passwordUpdatedAt = new Date();
+  this.tokenVersion = (this.tokenVersion || 0) + 1;
+  this.failedOtpAttempts = 0;
+  this.lockedUntil = null;
+};
+
+// True while this account is temporarily frozen after too many bad OTP
+// codes. Read this before sending or checking a code.
+userSchema.methods.isLocked = function () {
+  return Boolean(this.lockedUntil && this.lockedUntil > new Date());
 };
 
 userSchema.methods.checkPassword = function (plainPassword) {
@@ -88,8 +132,11 @@ userSchema.methods.toSafeJSON = function () {
     email: this.email,
     name: this.name,
     role: this.role,
+    department: this.department,
     clientOrgId: this.clientOrgId,
     active: this.active,
+    mustSetPassword: this.mustSetPassword,
+    lastLoginAt: this.lastLoginAt,
   };
 };
 
