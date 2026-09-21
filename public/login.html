@@ -3,10 +3,55 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Log in — Compliance Calendar Generator</title>
+<title>Sign in — Compliance Calendar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/shared.css">
+<style>
+  .door-list { display: grid; gap: 12px; margin-top: 4px; }
+  .door {
+    display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
+    padding: 16px 18px; border: 1px solid var(--rule); border-radius: var(--radius);
+    background: var(--card); cursor: pointer; font-family: var(--sans); transition: .12s;
+  }
+  .door:hover { border-color: var(--brand); box-shadow: var(--shadow-sm); }
+  .door-icon {
+    width: 38px; height: 38px; flex: 0 0 38px; border-radius: 9px; display: grid; place-items: center;
+    background: var(--teal-bg); color: var(--brand-dark); font-weight: 800; font-size: 14px;
+  }
+  .door-icon.owner { background: var(--seal-gold-bg); color: var(--seal-gold); }
+  .door-title { font-size: 14.5px; font-weight: 600; color: var(--ink); }
+  .door-sub { font-size: 12.5px; color: var(--ink-soft); margin-top: 2px; }
+  .step { display: none; }
+  .step.active { display: block; }
+  .back-link {
+    background: none; border: 0; padding: 0; color: var(--ink-soft); font-size: 13px;
+    cursor: pointer; font-family: var(--sans); margin-bottom: 18px;
+  }
+  .back-link:hover { color: var(--brand); }
+  .code-input {
+    letter-spacing: 14px; font-size: 26px; text-align: center; font-weight: 700;
+    font-variant-numeric: tabular-nums; padding-left: 14px;
+  }
+  .sent-to { font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; margin: 0 0 20px; }
+  .sent-to strong { color: var(--ink); }
+  .resend-row { margin-top: 16px; text-align: center; font-size: 13px; color: var(--ink-soft); }
+  .resend-row button {
+    background: none; border: 0; color: var(--brand); font-weight: 600; cursor: pointer;
+    font-family: var(--sans); font-size: 13px; padding: 0;
+  }
+  .resend-row button[disabled] { color: var(--grey-dot); cursor: default; }
+  .rules { list-style: none; padding: 0; margin: 10px 0 0; font-size: 12.5px; }
+  .rules li { color: var(--grey-dot); padding: 3px 0 3px 20px; position: relative; }
+  .rules li::before { content: '○'; position: absolute; left: 4px; }
+  .rules li.met { color: var(--brand-dark); }
+  .rules li.met::before { content: '●'; }
+  .notice {
+    font-size: 13px; line-height: 1.6; padding: 12px 14px; border-radius: var(--radius-sm);
+    background: var(--teal-bg); color: var(--brand-dark); margin-bottom: 18px;
+  }
+  .notice.warn { background: var(--seal-gold-bg); color: var(--seal-gold); }
+</style>
 </head>
 <body>
 <div class="topbar">
@@ -15,92 +60,382 @@
 
 <div class="wrap narrow">
   <div class="card">
-    <div class="card-head">
-      <div class="card-eyebrow">Internal Tool · Sign In Required</div>
-      <h1>Log in</h1>
-      <p class="sub">Sign in to generate calendars, review the queue, and download approved PDFs.</p>
-    </div>
-    <div class="card-body">
-      <form id="loginForm">
-        <div class="grid full">
-          <div class="field">
-            <label for="email">Email</label>
-            <input type="email" id="email" autocomplete="username" required>
-          </div>
-          <div class="field">
-            <label for="password">Password</label>
-            <input type="password" id="password" autocomplete="current-password" required>
-          </div>
+
+    <!-- Step 1: which door -->
+    <div class="step active" id="stepDoor">
+      <div class="card-head">
+        <div class="card-eyebrow">Internal Access</div>
+        <h1>Sign in</h1>
+        <p class="sub">Choose how you work with the platform. You'll get a one-time code by email.</p>
+      </div>
+      <div class="card-body">
+        <div class="door-list">
+          <button type="button" class="door" data-portal="staff">
+            <span class="door-icon">ST</span>
+            <span>
+              <span class="door-title">Staff</span>
+              <span class="door-sub">Tech and finance team members</span>
+            </span>
+          </button>
+          <button type="button" class="door" data-portal="super_admin">
+            <span class="door-icon owner">SA</span>
+            <span>
+              <span class="door-title">Super admin</span>
+              <span class="door-sub">Business owner — full access</span>
+            </span>
+          </button>
         </div>
-        <div class="submit-row">
-          <span class="hint" id="statusHint"></span>
-          <button type="submit" class="primary" id="submit">Log in →</button>
+        <div class="form-foot" style="margin-top:22px;">
+          A client? <a href="/api/auth/google">Continue with Google</a>
         </div>
-      </form>
-      <div class="form-foot" style="margin-top: 16px; text-align: center;">
-        <a href="/api/auth/google" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border: 1px solid #d0d0d0; border-radius: 6px; text-decoration: none; color: inherit;">
-          <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
-            <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.88 2.7-6.62z"/>
-            <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.96v2.33A9 9 0 0 0 9 18z"/>
-            <path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.67 9c0-.59.1-1.17.28-1.7V4.97H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.03l2.99-2.33z"/>
-            <path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.97l2.99 2.33C4.66 5.17 6.65 3.58 9 3.58z"/>
-          </svg>
-          Continue with Google
-        </a>
+        <p class="hint" id="doorHint" style="margin-top:14px;"></p>
       </div>
     </div>
+
+    <!-- Step 2: email -->
+    <div class="step" id="stepEmail">
+      <div class="card-head">
+        <button type="button" class="back-link" data-back="stepDoor">← Back</button>
+        <div class="card-eyebrow" id="emailEyebrow">Staff sign-in</div>
+        <h1>What's your work email?</h1>
+        <p class="sub">We'll send a 6-digit code to confirm it's really you.</p>
+      </div>
+      <div class="card-body">
+        <form id="emailForm">
+          <div class="grid full">
+            <div class="field">
+              <label for="email">Work email</label>
+              <input type="email" id="email" autocomplete="username" required autocapitalize="off" spellcheck="false">
+            </div>
+          </div>
+          <div class="submit-row">
+            <span class="hint" id="emailHint"></span>
+            <button type="submit" class="primary" id="emailSubmit">Send code →</button>
+          </div>
+        </form>
+        <div class="form-foot" style="margin-top:16px;">
+          Already set a password? <a href="#" id="usePasswordInstead">Sign in with it instead</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: code -->
+    <div class="step" id="stepCode">
+      <div class="card-head">
+        <button type="button" class="back-link" data-back="stepEmail">← Use a different email</button>
+        <div class="card-eyebrow">Check your inbox</div>
+        <h1>Enter your code</h1>
+      </div>
+      <div class="card-body">
+        <p class="sent-to">We sent a 6-digit code to <strong id="sentTo"></strong>. It expires in 10 minutes and works once.</p>
+        <form id="codeForm">
+          <div class="grid full">
+            <div class="field">
+              <label for="code">6-digit code</label>
+              <input type="text" id="code" class="code-input" inputmode="numeric" autocomplete="one-time-code"
+                     maxlength="6" pattern="[0-9]{6}" required>
+            </div>
+          </div>
+          <div class="submit-row">
+            <span class="hint" id="codeHint"></span>
+            <button type="submit" class="primary" id="codeSubmit">Verify →</button>
+          </div>
+        </form>
+        <div class="resend-row">
+          Didn't get it? <button type="button" id="resendBtn" disabled>Resend</button>
+          <span id="resendTimer"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: set password -->
+    <div class="step" id="stepPassword">
+      <div class="card-head">
+        <div class="card-eyebrow">One last thing</div>
+        <h1>Choose a password</h1>
+        <p class="sub">You'll use this to sign in from now on. The email code stays available as a backup.</p>
+      </div>
+      <div class="card-body">
+        <div class="notice">Your email is confirmed. Set a password to finish setting up your account.</div>
+        <form id="passwordForm">
+          <div class="grid full">
+            <div class="field">
+              <label for="password">New password</label>
+              <input type="password" id="password" autocomplete="new-password" required minlength="12">
+              <ul class="rules" id="rules">
+                <li data-rule="length">At least 12 characters</li>
+                <li data-rule="mix">Contains a letter and a number</li>
+                <li data-rule="personal">Doesn't contain your name or email</li>
+              </ul>
+            </div>
+            <div class="field">
+              <label for="confirmPassword">Confirm password</label>
+              <input type="password" id="confirmPassword" autocomplete="new-password" required minlength="12">
+            </div>
+          </div>
+          <div class="submit-row">
+            <span class="hint" id="passwordHint"></span>
+            <button type="submit" class="primary" id="passwordSubmit">Save and continue →</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Existing-password sign-in, offered once an account has one -->
+    <div class="step" id="stepPasswordLogin">
+      <div class="card-head">
+        <button type="button" class="back-link" data-back="stepDoor">← Back</button>
+        <div class="card-eyebrow">Returning</div>
+        <h1>Sign in with your password</h1>
+      </div>
+      <div class="card-body">
+        <form id="loginForm">
+          <div class="grid full">
+            <div class="field">
+              <label for="loginEmail">Work email</label>
+              <input type="email" id="loginEmail" autocomplete="username" required>
+            </div>
+            <div class="field">
+              <label for="loginPassword">Password</label>
+              <input type="password" id="loginPassword" autocomplete="current-password" required>
+            </div>
+          </div>
+          <div class="submit-row">
+            <span class="hint" id="loginHint"></span>
+            <button type="submit" class="primary" id="loginSubmit">Sign in →</button>
+          </div>
+        </form>
+        <div class="form-foot" style="margin-top:16px;">
+          Forgotten it? <a href="#" id="useCodeInstead">Sign in with an email code</a>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
 <script>
-  const form = document.getElementById('loginForm');
-  const btn = document.getElementById('submit');
-  const hint = document.getElementById('statusHint');
+(function () {
+  'use strict';
 
-  const params = new URLSearchParams(location.search);
-  const REASON_MESSAGES = {
-    session_expired: 'Session expired — please log in again.',
+  var state = { portal: 'staff', email: '', resendAt: 0 };
+
+  function $(id) { return document.getElementById(id); }
+
+  function show(stepId) {
+    var steps = document.querySelectorAll('.step');
+    for (var i = 0; i < steps.length; i++) steps[i].classList.remove('active');
+    $(stepId).classList.add('active');
+    var firstInput = $(stepId).querySelector('input');
+    if (firstInput) setTimeout(function () { firstInput.focus(); }, 40);
+  }
+
+  function setHint(id, message, isError) {
+    var el = $(id);
+    el.textContent = message || '';
+    el.classList.toggle('err', Boolean(isError));
+  }
+
+  // Every request goes through here so a non-JSON error page (a proxy
+  // 502, say) surfaces as a readable message instead of a raw parse
+  // exception in the console.
+  function post(url, body) {
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify(body)
+    }).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (data) {
+        if (!res.ok) throw new Error(data.error || 'Something went wrong. Please try again.');
+        return data;
+      });
+    });
+  }
+
+  // --- reason messages carried over from the old page -----------------
+  var params = new URLSearchParams(location.search);
+  var REASONS = {
+    session_expired: 'Your session expired — please sign in again.',
     google_denied: 'Google sign-in was cancelled.',
     google_invalid_state: 'Google sign-in failed — please try again.',
     google_failed: 'Google sign-in failed — please try again.',
-    account_deactivated: 'This account has been deactivated. Contact an admin.',
-    pending_approval: 'Your account was created and is awaiting admin approval.',
-    not_authorized: 'You don\u2019t have access to that page.',
+    account_deactivated: 'This account has been deactivated. Contact your administrator.',
+    not_authorized: "You don't have access to that page."
   };
-  const reason = params.get('reason');
-  if (reason && REASON_MESSAGES[reason]) {
-    hint.textContent = REASON_MESSAGES[reason];
-    hint.classList.add(reason === 'pending_approval' ? '' : 'err');
+  var reason = params.get('reason');
+  if (reason && REASONS[reason]) setHint('doorHint', REASONS[reason], true);
+
+  // --- step 1: door ---------------------------------------------------
+  var doors = document.querySelectorAll('.door');
+  for (var d = 0; d < doors.length; d++) {
+    doors[d].addEventListener('click', function () {
+      state.portal = this.getAttribute('data-portal');
+      $('emailEyebrow').textContent =
+        state.portal === 'super_admin' ? 'Super admin sign-in' : 'Staff sign-in';
+      setHint('emailHint', '');
+      show('stepEmail');
+    });
   }
 
-  form.addEventListener('submit', async (e) => {
+  var backs = document.querySelectorAll('[data-back]');
+  for (var b = 0; b < backs.length; b++) {
+    backs[b].addEventListener('click', function () { show(this.getAttribute('data-back')); });
+  }
+
+  $('useCodeInstead').addEventListener('click', function (e) {
     e.preventDefault();
+    // Carry whatever they'd already typed across rather than making
+    // them enter the same address a second time.
+    if ($('loginEmail').value) $('email').value = $('loginEmail').value;
+    show('stepEmail');
+  });
+
+  $('usePasswordInstead').addEventListener('click', function (e) {
+    e.preventDefault();
+    if ($('email').value) $('loginEmail').value = $('email').value;
+    show('stepPasswordLogin');
+  });
+
+  // --- step 2: request a code ----------------------------------------
+  function requestCode(email, hintId, button) {
+    button.disabled = true;
+    setHint(hintId, 'Sending code…');
+    return post('/api/auth/otp/request', { email: email, portal: state.portal })
+      .then(function (data) {
+        state.email = email;
+        $('sentTo').textContent = email;
+        setHint(hintId, '');
+        setHint('codeHint', data.message || '');
+        startResendTimer();
+        show('stepCode');
+      })
+      .catch(function (err) { setHint(hintId, err.message, true); })
+      .then(function () { button.disabled = false; });
+  }
+
+  $('emailForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    requestCode($('email').value.trim().toLowerCase(), 'emailHint', $('emailSubmit'));
+  });
+
+  // --- resend cooldown, mirroring the server's 60 seconds -------------
+  var timerHandle = null;
+  function startResendTimer() {
+    state.resendAt = Date.now() + 60000;
+    $('resendBtn').disabled = true;
+    if (timerHandle) clearInterval(timerHandle);
+    timerHandle = setInterval(tickResend, 1000);
+    tickResend();
+  }
+  function tickResend() {
+    var left = Math.ceil((state.resendAt - Date.now()) / 1000);
+    if (left <= 0) {
+      clearInterval(timerHandle);
+      timerHandle = null;
+      $('resendBtn').disabled = false;
+      $('resendTimer').textContent = '';
+      return;
+    }
+    $('resendTimer').textContent = '(in ' + left + 's)';
+  }
+  $('resendBtn').addEventListener('click', function () {
+    requestCode(state.email, 'codeHint', $('resendBtn'));
+  });
+
+  // Digits only, and auto-submit the moment six of them are in — the
+  // extra click after typing a code you just read off your phone is
+  // pure friction.
+  $('code').addEventListener('input', function () {
+    this.value = this.value.replace(/\D/g, '').slice(0, 6);
+    if (this.value.length === 6) $('codeForm').requestSubmit();
+  });
+
+  // --- step 3: verify -------------------------------------------------
+  $('codeForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var btn = $('codeSubmit');
     btn.disabled = true;
-    hint.classList.remove('err');
-    hint.textContent = 'Signing in…';
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: document.getElementById('email').value.trim(),
-          password: document.getElementById('password').value,
-        }),
+    setHint('codeHint', 'Checking…');
+    post('/api/auth/otp/verify', { email: state.email, code: $('code').value })
+      .then(function (data) {
+        if (data.setupRequired) {
+          setHint('codeHint', '');
+          show('stepPassword');
+          return;
+        }
+        location.href = data.redirect || '/dashboard.html';
+      })
+      .catch(function (err) {
+        setHint('codeHint', err.message, true);
+        $('code').value = '';
+        btn.disabled = false;
+        $('code').focus();
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Login failed.');
-      // Respect an explicit ?next= (e.g. bounced off a protected page),
-      // otherwise land clients in the portal and everyone else in the
-      // staff app — a client redirected to /app.html would just get
-      // bounced straight back out by requirePageRole anyway.
-      const dest = params.get('next') || (data.user.role === 'client' ? '/portal.html' : '/app.html');
-      location.href = dest;
-    } catch (err) {
-      hint.textContent = err.message;
-      hint.classList.add('err');
-      btn.disabled = false;
+  });
+
+  // --- step 4: set a password ----------------------------------------
+  // These checks mirror lib/passwordPolicy.js so the rules light up as
+  // you type. The server re-runs them regardless — this is feedback,
+  // not enforcement.
+  function evaluate(pw) {
+    var local = (state.email.split('@')[0] || '').toLowerCase();
+    var lower = pw.toLowerCase();
+    return {
+      length: pw.length >= 12,
+      mix: /[a-zA-Z]/.test(pw) && /[0-9]/.test(pw),
+      personal: pw.length > 0 && !(local.length >= 3 && lower.indexOf(local) !== -1)
+    };
+  }
+
+  $('password').addEventListener('input', function () {
+    var result = evaluate(this.value);
+    var items = $('rules').querySelectorAll('li');
+    for (var i = 0; i < items.length; i++) {
+      items[i].classList.toggle('met', Boolean(result[items[i].getAttribute('data-rule')]));
     }
   });
+
+  $('passwordForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var pw = $('password').value;
+    var confirm = $('confirmPassword').value;
+    if (pw !== confirm) { setHint('passwordHint', "The two passwords don't match.", true); return; }
+
+    var btn = $('passwordSubmit');
+    btn.disabled = true;
+    setHint('passwordHint', 'Saving…');
+    post('/api/auth/password/set', { password: pw, confirmPassword: confirm })
+      .then(function (data) { location.href = data.redirect || '/dashboard.html'; })
+      .catch(function (err) {
+        setHint('passwordHint', err.message, true);
+        btn.disabled = false;
+      });
+  });
+
+  // --- password sign-in for returning users ---------------------------
+  $('loginForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var btn = $('loginSubmit');
+    btn.disabled = true;
+    setHint('loginHint', 'Signing in…');
+    post('/api/auth/login', {
+      email: $('loginEmail').value.trim().toLowerCase(),
+      password: $('loginPassword').value
+    })
+      .then(function (data) {
+        location.href = params.get('next') || data.redirect || '/dashboard.html';
+      })
+      .catch(function (err) {
+        setHint('loginHint', err.message, true);
+        btn.disabled = false;
+      });
+  });
+
+  // ?mode=password deep-links straight to the returning-user form, which
+  // is where a bookmark from a daily user should land.
+  if (params.get('mode') === 'password') show('stepPasswordLogin');
+})();
 </script>
 </body>
 </html>
