@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Compliance Calendar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/shared.css">
+<style>
+  .hero { padding-top: 40px; }
+  .hero h1 { font-family: var(--serif); font-size: 28px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .hero p { color: var(--ink-soft); font-size: 14px; margin: 0; }
+  .role-pill {
+    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .07em;
+    text-transform: uppercase; padding: 4px 10px; border-radius: 999px;
+    background: var(--teal-bg); color: var(--brand-dark); margin-bottom: 10px;
+  }
+  .role-pill.owner { background: var(--seal-gold-bg); color: var(--seal-gold); }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin-top: 22px; }
+  .stat {
+    background: var(--card); border: 1px solid var(--rule); border-radius: var(--radius);
+    padding: 18px 20px; box-shadow: var(--shadow-sm);
+  }
+  .stat-label { font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-soft); }
+  .stat-value { font-family: var(--serif); font-size: 30px; font-weight: 700; margin: 8px 0 4px; letter-spacing: -0.02em; }
+  .stat-value.good { color: var(--brand-dark); }
+  .stat-value.warn { color: var(--seal-gold); }
+  .stat-value.bad  { color: var(--stamp-red); }
+  .stat-hint { font-size: 12px; color: var(--grey-dot); line-height: 1.5; }
+
+  .panel { margin-top: 40px; }
+  .panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+  .panel-head h2 { font-family: var(--serif); font-size: 19px; margin: 0; letter-spacing: -0.01em; }
+  .panel-head .panel-sub { font-size: 13px; color: var(--ink-soft); }
+
+  table.data { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; }
+  table.data th {
+    text-align: left; font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+    color: var(--ink-soft); padding: 12px 16px; border-bottom: 1px solid var(--rule); background: var(--grey-bg);
+  }
+  table.data td { padding: 13px 16px; font-size: 13.5px; border-bottom: 1px solid var(--rule-soft); vertical-align: middle; }
+  table.data tr:last-child td { border-bottom: 0; }
+  table.data td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .table-scroll { overflow-x: auto; }
+
+  .bar-row { display: flex; align-items: center; gap: 12px; padding: 9px 0; }
+  .bar-label { flex: 0 0 160px; font-size: 13.5px; color: var(--ink); }
+  .bar-track { flex: 1; height: 9px; background: var(--grey-bg); border-radius: 999px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--brand); border-radius: 999px; transition: width .4s ease; }
+  .bar-count { flex: 0 0 46px; text-align: right; font-size: 13px; font-variant-numeric: tabular-nums; color: var(--ink-soft); }
+
+  .muted { color: var(--grey-dot); font-size: 13.5px; padding: 26px 0; text-align: center; }
+  .ghost-btn {
+    background: none; border: 1px solid var(--rule); border-radius: var(--radius-sm);
+    padding: 6px 12px; font-size: 12.5px; font-family: var(--sans); cursor: pointer; color: var(--ink-soft);
+  }
+  .ghost-btn:hover { border-color: var(--stamp-red); color: var(--stamp-red); }
+  .feed { list-style: none; padding: 0; margin: 0; }
+  .feed li { padding: 12px 0; border-bottom: 1px solid var(--rule-soft); font-size: 13.5px; line-height: 1.55; }
+  .feed li:last-child { border-bottom: 0; }
+  .feed .feed-meta { color: var(--grey-dot); font-size: 12px; margin-top: 3px; }
+  .skeleton { color: var(--grey-dot); padding: 60px 0; text-align: center; font-size: 14px; }
+  @media (max-width: 720px) { .bar-label { flex-basis: 120px; } }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><a href="/dashboard.html">Compliance Calendar <strong>Generator</strong></a></div>
+  <div class="nav-links" id="navLinks"></div>
+  <div class="nav-user">
+    <span id="navUser"></span>
+    <button type="button" id="logoutBtn">Log out</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div id="root"><div class="skeleton">Loading your dashboard…</div></div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  function $(id) { return document.getElementById(id); }
+
+  // Everything from the server is escaped before it reaches the DOM.
+  // Company names, filing names and audit summaries are all
+  // user-supplied somewhere upstream, so dropping them into innerHTML
+  // raw would be a stored-XSS hole — and on an admin page, XSS means
+  // whoever planted it acts as the super admin.
+  function esc(value) {
+    return String(value === null || value === undefined ? '' : value)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function money(amount) {
+    return '$' + Number(amount || 0).toLocaleString('en-US', {
+      minimumFractionDigits: 2, maximumFractionDigits: 2
+    });
+  }
+
+  function when(value) {
+    if (!value) return '—';
+    var d = new Date(value);
+    if (isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  var ROLE_LABEL = {
+    staff: 'Staff', admin: 'Administrator', super_admin: 'Super admin'
+  };
+  var DEPT_LABEL = { tech: 'Tech', finance: 'Finance' };
+
+  function statCards(cards) {
+    return '<div class="stat-grid">' + cards.map(function (c) {
+      var value = c.money ? money(c.value) : esc(c.value);
+      return '<div class="stat">' +
+        '<div class="stat-label">' + esc(c.label) + '</div>' +
+        '<div class="stat-value ' + esc(c.tone || '') + '">' + value + '</div>' +
+        '<div class="stat-hint">' + esc(c.hint || '') + '</div>' +
+      '</div>';
+    }).join('') + '</div>';
+  }
+
+  function panel(title, sub, body) {
+    return '<section class="panel">' +
+      '<div class="panel-head"><h2>' + esc(title) + '</h2>' +
+      (sub ? '<span class="panel-sub">' + esc(sub) + '</span>' : '') + '</div>' +
+      body + '</section>';
+  }
+
+  function table(headers, rows, emptyMessage) {
+    if (!rows.length) return '<div class="muted">' + esc(emptyMessage) + '</div>';
+    return '<div class="table-scroll"><table class="data"><thead><tr>' +
+      headers.map(function (h) {
+        return '<th' + (h.num ? ' style="text-align:right"' : '') + '>' + esc(h.label) + '</th>';
+      }).join('') +
+      '</tr></thead><tbody>' + rows.join('') + '</tbody></table></div>';
+  }
+
+  function bars(items) {
+    var max = items.reduce(function (m, i) { return Math.max(m, i.value); }, 0) || 1;
+    return '<div>' + items.map(function (i) {
+      return '<div class="bar-row">' +
+        '<div class="bar-label">' + esc(i.label) + '</div>' +
+        '<div class="bar-track"><div class="bar-fill" style="width:' + ((i.value / max) * 100).toFixed(1) + '%"></div></div>' +
+        '<div class="bar-count">' + esc(i.value) + '</div>' +
+      '</div>';
+    }).join('') + '</div>';
+  }
+
+  // ------------------------------------------------------------------
+  function renderTech(tech) {
+    var html = statCards(tech.cards);
+
+    html += panel('Where every filing stands', 'Across all client organisations',
+      bars(tech.filingStatus));
+
+    html += panel('Recently generated calendars', '',
+      table(
+        [{ label: 'Company' }, { label: 'Status' }, { label: 'Generated by' }, { label: 'When' }],
+        tech.recentCalendars.map(function (c) {
+          return '<tr>' +
+            '<td>' + esc(c.company) + '</td>' +
+            '<td><span class="badge ' + esc(c.status) + '">' + esc(c.status.replace(/_/g, ' ')) + '</span></td>' +
+            '<td>' + esc(c.createdBy) + '</td>' +
+            '<td>' + esc(when(c.createdAt)) + '</td>' +
+          '</tr>';
+        }),
+        'No calendars generated yet.'
+      ));
+    return html;
+  }
+
+  function renderFinance(finance) {
+    var html = statCards(finance.cards);
+
+    html += panel('Outstanding invoices', 'Soonest due first',
+      table(
+        [{ label: 'Company' }, { label: 'Filing' }, { label: 'Due' }, { label: 'Status' }, { label: 'Amount', num: true }],
+        finance.outstanding.map(function (r) {
+          return '<tr>' +
+            '<td>' + esc(r.company) + '</td>' +
+            '<td>' + esc(r.task) + '</td>' +
+            '<td>' + esc(r.dueDate || '—') + '</td>' +
+            '<td><span class="badge ' + (r.paymentStatus === 'Overdue' ? 'rejected' : 'pending_review') + '">' + esc(r.paymentStatus) + '</span></td>' +
+            '<td class="num">' + money(r.amount) + '</td>' +
+          '</tr>';
+        }),
+        'Nothing outstanding — everything invoiced has been paid.'
+      ));
+
+    html += panel('Recent payments', '',
+      table(
+        [{ label: 'Company' }, { label: 'Filing' }, { label: 'Paid' }, { label: 'Amount', num: true }],
+        finance.recentPaid.map(function (r) {
+          return '<tr>' +
+            '<td>' + esc(r.company) + '</td>' +
+            '<td>' + esc(r.task) + '</td>' +
+            '<td>' + esc(when(r.paidAt)) + '</td>' +
+            '<td class="num">' + money(r.amount) + '</td>' +
+          '</tr>';
+        }),
+        'No payments recorded yet.'
+      ));
+    return html;
+  }
+
+  function renderOwner(owner) {
+    var html = statCards(owner.cards);
+
+    html += panel('Team accounts', 'Only you can see or reset these',
+      table(
+        [{ label: 'Person' }, { label: 'Role' }, { label: 'Team' }, { label: 'Last signed in' }, { label: '' }],
+        owner.team.map(function (u) {
+          var status = !u.active
+            ? '<span class="badge rejected">deactivated</span>'
+            : (u.mustSetPassword ? '<span class="badge pending_review">setup pending</span>' : '');
+          return '<tr>' +
+            '<td>' + esc(u.name || u.email) + '<div class="stat-hint">' + esc(u.email) + '</div></td>' +
+            '<td>' + esc(ROLE_LABEL[u.role] || u.role) + ' ' + status + '</td>' +
+            '<td>' + esc(DEPT_LABEL[u.department] || '—') + '</td>' +
+            '<td>' + esc(when(u.lastLoginAt)) + '</td>' +
+            '<td class="num"><button type="button" class="ghost-btn" data-reset="' + esc(u.id) + '">Force re-setup</button></td>' +
+          '</tr>';
+        }),
+        'No team accounts yet.'
+      ));
+
+    html += panel('Security and activity log', 'Most recent 15 events',
+      owner.audit.length
+        ? '<ul class="feed">' + owner.audit.map(function (a) {
+            return '<li>' + esc(a.summary) +
+              '<div class="feed-meta">' + esc(a.actor) + ' · ' + esc(a.action.replace(/_/g, ' ')) + ' · ' + esc(when(a.at)) + '</div>' +
+            '</li>';
+          }).join('') + '</ul>'
+        : '<div class="muted">Nothing logged yet.</div>');
+
+    return html;
+  }
+
+  // ------------------------------------------------------------------
+  function render(data) {
+    var user = data.user;
+    var isOwner = user.role === 'super_admin';
+    var teamName = user.department ? DEPT_LABEL[user.department] : ROLE_LABEL[user.role];
+
+    var html = '<div class="hero">' +
+      '<div class="role-pill' + (isOwner ? ' owner' : '') + '">' +
+        esc(ROLE_LABEL[user.role] || user.role) + (user.department ? ' · ' + esc(DEPT_LABEL[user.department]) : '') +
+      '</div>' +
+      '<h1>' + esc(user.name || teamName) + '\u2019s dashboard</h1>' +
+      '<p>Signed in as ' + esc(user.email) + '. Last sign-in ' + esc(when(user.lastLoginAt)) + '.</p>' +
+    '</div>';
+
+    // Order matters for the mixed roles: an admin sees delivery work
+    // first because that's the day job, money second.
+    if (data.tech) html += renderTech(data.tech);
+    if (data.finance) html += renderFinance(data.finance);
+    if (data.owner) html += renderOwner(data.owner);
+
+    $('root').innerHTML = html;
+
+    $('navUser').textContent = user.email;
+    var links = [
+      { href: '/app.html', label: 'Generate' },
+      { href: '/review.html', label: 'Review queue' }
+    ];
+    if (user.role === 'admin' || user.role === 'super_admin') {
+      links.push({ href: '/admin.html', label: 'Administration' });
+    }
+    $('navLinks').innerHTML = links.map(function (l) {
+      return '<a href="' + esc(l.href) + '">' + esc(l.label) + '</a>';
+    }).join('');
+
+    // Wired after innerHTML, since the buttons don't exist before it.
+    var resets = document.querySelectorAll('[data-reset]');
+    for (var i = 0; i < resets.length; i++) {
+      resets[i].addEventListener('click', onReset);
+    }
+  }
+
+  function onReset() {
+    var id = this.getAttribute('data-reset');
+    if (!confirm('This signs that person out everywhere and clears their password. They will have to sign in with an email code and choose a new one. Continue?')) return;
+    var btn = this;
+    btn.disabled = true;
+    fetch('/api/dashboard/team/' + encodeURIComponent(id) + '/reset', {
+      method: 'PATCH',
+      credentials: 'same-origin'
+    })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) {
+        if (!r.ok) throw new Error(d.error || 'Reset failed.');
+        return d;
+      }); })
+      .then(function (d) { alert(d.message); load(); })
+      .catch(function (err) { alert(err.message); btn.disabled = false; });
+  }
+
+  function load() {
+    fetch('/api/dashboard/summary', { credentials: 'same-origin' })
+      .then(function (res) {
+        // A 401 here means the session died while the tab was open —
+        // send them back to sign in rather than showing a broken page.
+        if (res.status === 401 || res.status === 403) {
+          location.href = '/login.html?reason=session_expired';
+          throw new Error('redirecting');
+        }
+        return res.json();
+      })
+      .then(render)
+      .catch(function (err) {
+        if (err.message === 'redirecting') return;
+        $('root').innerHTML = '<div class="muted">Couldn\u2019t load the dashboard. Please refresh.</div>';
+      });
+  }
+
+  $('logoutBtn').addEventListener('click', function () {
+    fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' })
+      .then(function () { location.href = '/login.html'; });
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>
