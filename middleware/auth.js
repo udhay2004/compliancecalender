@@ -11,24 +11,76 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 const COOKIE_NAME = "cc_session";
+// Separate cookie for the half-finished state between "proved you own
+// the mailbox" and "chose a password". It must NOT be the session
+// cookie: if it were, someone who only passed the OTP step would
+// already hold a fully privileged session and could simply navigate
+// away from the password screen and use the app.
+const SETUP_COOKIE_NAME = "cc_setup";
 const TOKEN_TTL = "30d";
+const SETUP_TOKEN_TTL = "15m";
 
+// Internal (staff/admin/super_admin) sessions are deliberately much
+// shorter than the 30-day client session. These accounts can see every
+// client's data, so a laptop left open in a cafe is a real exposure;
+// a working day plus a margin is the right trade-off.
+const STAFF_TOKEN_TTL = "12h";
+const STAFF_MAX_AGE_MS = 12 * 60 * 60 * 1000;
+const CLIENT_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
+
+function isInternal(user) {
+  return user.role !== "client";
+}
+
+// Every token carries:
+//   p — its purpose. A setup token must never be accepted as a session
+//       token, and jwt.verify alone can't tell them apart because both
+//       are signed with the same secret.
+//   v — the account's tokenVersion at issue time. Bumped on every
+//       password change, which is what makes "changing your password
+//       signs out every other device" true rather than aspirational.
 function signToken(user) {
-  return jwt.sign({ id: user._id.toString() }, process.env.JWT_SECRET, { expiresIn: TOKEN_TTL });
+  return jwt.sign(
+    { id: user._id.toString(), p: "session", v: user.tokenVersion || 0 },
+    process.env.JWT_SECRET,
+    { expiresIn: isInternal(user) ? STAFF_TOKEN_TTL : TOKEN_TTL }
+  );
+}
+
+function signSetupToken(user) {
+  return jwt.sign(
+    { id: user._id.toString(), p: "setup", v: user.tokenVersion || 0 },
+    process.env.JWT_SECRET,
+    { expiresIn: SETUP_TOKEN_TTL }
+  );
+}
+
+function cookieOptions(maxAge) {
+  return {
+    httpOnly: true,            // unreadable from JavaScript, so an XSS bug can't steal the session
+    sameSite: "lax",           // not sent on cross-site POSTs, which blocks basic CSRF
+    secure: process.env.NODE_ENV === "production", // HTTPS only once deployed
+    path: "/",
+    maxAge,
+  };
 }
 
 function setSessionCookie(res, user) {
-  const token = signToken(user);
-  res.cookie(COOKIE_NAME, token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 30 * 24 * 60 * 60 * 1000,
-  });
+  res.clearCookie(SETUP_COOKIE_NAME, { path: "/" });
+  res.cookie(
+    COOKIE_NAME,
+    signToken(user),
+    cookieOptions(isInternal(user) ? STAFF_MAX_AGE_MS : CLIENT_MAX_AGE_MS)
+  );
+}
+
+function setSetupCookie(res, user) {
+  res.cookie(SETUP_COOKIE_NAME, signSetupToken(user), cookieOptions(15 * 60 * 1000));
 }
 
 function clearSessionCookie(res) {
-  res.clearCookie(COOKIE_NAME);
+  res.clearCookie(COOKIE_NAME, { path: "/" });
+  res.clearCookie(SETUP_COOKIE_NAME, { path: "/" });
 }
 
 // Shared lookup used by both the API and page guards below. Throws on
@@ -38,8 +90,29 @@ async function loadUserFromRequest(req) {
   const token = req.cookies?.[COOKIE_NAME];
   if (!token) throw new Error("Not logged in.");
   const payload = jwt.verify(token, process.env.JWT_SECRET);
+  if (payload.p !== "session") throw new Error("Wrong token type.");
   const user = await User.findById(payload.id);
   if (!user || !user.active) throw new Error("Session invalid.");
+  // Rejects tokens minted before the last password change / forced
+  // sign-out, even though their signature and expiry are still valid.
+  if ((payload.v ?? 0) !== (user.tokenVersion || 0)) throw new Error("Session superseded.");
+  // An account that still owes us a password has no business holding a
+  // working session — it can only have got here by finishing the OTP
+  // step and then abandoning the password screen.
+  if (user.mustSetPassword) throw new Error("Password setup incomplete.");
+  return user;
+}
+
+// Mirror of the above for the short-lived setup token. Used by exactly
+// one route (POST /api/auth/password/set) and nothing else.
+async function loadUserFromSetupToken(req) {
+  const token = req.cookies?.[SETUP_COOKIE_NAME];
+  if (!token) throw new Error("No setup session.");
+  const payload = jwt.verify(token, process.env.JWT_SECRET);
+  if (payload.p !== "setup") throw new Error("Wrong token type.");
+  const user = await User.findById(payload.id);
+  if (!user || !user.active) throw new Error("Setup session invalid.");
+  if ((payload.v ?? 0) !== (user.tokenVersion || 0)) throw new Error("Setup session superseded.");
   return user;
 }
 
@@ -125,6 +198,10 @@ function requirePageClientRole(req, res, next) {
 
 module.exports = {
   COOKIE_NAME,
+  SETUP_COOKIE_NAME,
+  loadUserFromRequest,
+  loadUserFromSetupToken,
+  setSetupCookie,
   setSessionCookie,
   clearSessionCookie,
   requireAuth,
