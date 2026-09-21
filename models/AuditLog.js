@@ -27,6 +27,11 @@ const auditLogSchema = new mongoose.Schema(
         "payment_failed",
         "user_deactivated",
         "user_reactivated",
+        // Account-security events. Worth keeping alongside the
+        // business events: "who set a password, and when" is the first
+        // question asked after any suspected account compromise.
+        "password_set",
+        "password_changed",
       ],
       required: true,
     },
