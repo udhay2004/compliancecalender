@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0E2B2E">
 <title>Free Compliance Calendar — ComplyGlobally</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -69,8 +69,11 @@
   .topbar-actions { display: flex; align-items: center; gap: 6px; }
   .staff-link { white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 600; color: var(--ink-soft); text-decoration: none; padding: 9px 12px; border-radius: 10px; transition: color .15s, background .15s; }
   .staff-link:hover { color: var(--brand-text); background: var(--brand-tint); }
-  .btn.js-new { display: none; }
+  .btn.js-new, .btn.js-results { display: none; }
   [data-view="results"] .btn.js-new { display: inline-flex; }
+  /* Once a calendar exists, going back to the form must not strand it — offer a way back. */
+  [data-view="landing"][data-has-results="1"] .btn.js-new,
+  [data-view="landing"][data-has-results="1"] .btn.js-results { display: inline-flex; }
 
   /* ============================================================
      Layout shell
@@ -238,6 +241,9 @@
   /* ---- stat strip ---- */
   .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 28px; }
   .stat { display: flex; align-items: center; gap: 14px; padding: 18px; background: #fff; border: 1px solid var(--rule-soft); border-radius: 16px; box-shadow: var(--shadow-sm); }
+  .stat > div { min-width: 0; }
+  .chip { overflow-wrap: anywhere; }
+  .teaser > div { min-width: 0; }
   .stat-ic { display: grid; place-items: center; width: 44px; height: 44px; flex-shrink: 0; border-radius: 12px; font-size: 21px; color: var(--ink-soft); background: var(--grey-bg); }
   .stat-num { font: 800 30px/1 var(--display); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
   .stat-label { margin-top: 5px; font-size: 13px; line-height: 1.3; color: var(--ink-soft); }
@@ -485,6 +491,7 @@
 <div class="topbar"><div class="topbar-inner">
   <div class="brand"><span>Comply<b>Globally</b></span><span class="brand-pill">Free Compliance Calendar</span></div>
   <div class="topbar-actions">
+    <button class="btn btn-ghost js-results" type="button" aria-label="View your calendar" style="height:40px;padding:0 14px;font-size:13.5px"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg><span class="lbl-new">View calendar</span></button>
     <button class="btn btn-ghost js-new" type="button" aria-label="New calendar" style="height:40px;padding:0 14px;font-size:13.5px"><svg class="ic" aria-hidden="true"><use href="#i-calendar"/></svg><span class="lbl-new">New calendar</span></button>
     <a class="staff-link" href="/login.html">Staff Login <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
   </div>
@@ -826,11 +833,14 @@
     { key: 'all', label: 'All', max: Infinity },
   ];
 
+  // An already-overdue filing is the most urgent thing on the calendar, so it
+  // stays inside every window (it used to be filtered out by a `>= 0` test,
+  // which made overdue items disappear from "Next 15 days").
   function withinFilter(daysUntil, filterKey) {
     if (filterKey === 'all') return true;
     if (daysUntil === null || daysUntil === undefined) return filterKey === 'all';
     const f = FILTERS.find(f => f.key === filterKey);
-    return daysUntil >= 0 && daysUntil <= f.max;
+    return daysUntil <= f.max;
   }
 
   /* ---------------- date helpers for the timeline ---------------- */
@@ -891,9 +901,12 @@
       </li>`;
   }
 
-  function renderTimeline(items, animate) {
+  function renderTimeline(items, animate, lockedInWindow) {
     if (!items.length) {
-      return `<div class="no-match">${icon('calendar')}<div><strong>No unlocked deadlines in this window.</strong>Try a longer range to see more of your calendar.</div></div>`;
+      const msg = lockedInWindow
+        ? `Everything falling in this window is still locked — unlock the calendar below to see ${lockedInWindow === 1 ? 'it' : 'them'}.`
+        : 'Try a longer range to see more of your calendar.';
+      return `<div class="no-match">${icon('calendar')}<div><strong>No unlocked deadlines in this window.</strong>${escapeHtml(msg)}</div></div>`;
     }
     let n = 0;
     return groupByMonth(items).map(g => `
@@ -1028,6 +1041,7 @@
 
   function renderCase(profile, allItems, calendarId) {
     caseCount++;
+    document.body.dataset.hasResults = '1';
     document.getElementById('emptyState')?.remove();
 
     const caseEl = document.createElement('div');
@@ -1071,6 +1085,7 @@
             <span><i style="background:var(--urgent)"></i>Due within 15 days</span>
             <span><i style="background:var(--soon)"></i>Due within 60 days</span>
             <span><i style="background:var(--brand)"></i>Further out</span>
+            <span><i style="background:var(--grey-dot)"></i>Date to be confirmed</span>
           </div>
           <p class="disclaimer">Research result — not yet a verified compliance rule. Confirm dates with an official source, or talk to our team to have it verified for you.</p>
         </div>
@@ -1099,7 +1114,7 @@
     function renderFiltered() {
       const visibleUnlocked = allItems.filter(it => !it.locked && withinFilter(it.daysUntil, activeFilter));
       const visibleLocked = allItems.filter(it => it.locked && withinFilter(it.daysUntil, activeFilter));
-      deadlinesContainer.innerHTML = renderTimeline(visibleUnlocked, firstRender && !REDUCED) + renderLockedSummary(visibleLocked, calendarId);
+      deadlinesContainer.innerHTML = renderTimeline(visibleUnlocked, firstRender && !REDUCED, visibleLocked.length) + renderLockedSummary(visibleLocked, calendarId);
       firstRender = false;
     }
 
@@ -1124,14 +1139,23 @@
   function setView(view) {
     document.body.dataset.view = view;
     const casesEl = document.getElementById('cases');
-    casesEl.hidden = (view === 'landing' && !document.getElementById('emptyState'));
+    // Hide the results column only when there is genuinely nothing in it.
+    // Previously any generated calendar was hidden the moment the user hit
+    // "Edit details", with no way back to it short of generating again.
+    casesEl.hidden = (view === 'landing' && caseCount === 0 && !document.getElementById('emptyState'));
     window.scrollTo({ top: 0, behavior: REDUCED ? 'auto' : 'smooth' });
   }
   function backToForm() {
     setView('landing');
     setStep(2, true);
   }
+  function backToResults() {
+    setView('results');
+    const first = document.querySelector('#cases .case');
+    if (first) first.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' });
+  }
   document.addEventListener('click', e => {
+    if (e.target.closest('.js-results')) { backToResults(); return; }
     if (e.target.closest('.js-edit, .js-new')) backToForm();
   });
 
@@ -1140,7 +1164,7 @@
   const stepperItems = Array.from(document.querySelectorAll('.stepper li'));
   let currentStep = 1;
 
-  function isValidEmail(v) { return /^[^\s@]+@[^\s@]+$/.test(v); }
+  function isValidEmail(v) { return /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/.test(v); }
   function showEmailError(msg) {
     const input = document.getElementById('contactEmail');
     document.getElementById('emailError').textContent = msg || '';
