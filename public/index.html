@@ -153,8 +153,13 @@
   label .opt { font-weight: 500; color: var(--ink-soft); }
 
   /* Styled by tag/ancestor — refreshStateField() swaps #state and #entityType with fresh, class-less elements */
+  /* font-size MUST be >= 16px here: iOS Safari auto-zooms the whole page
+     in when a focused input/select is rendered smaller than 16px, and on
+     this wizard (tap a field on step 1, the zoom carries into steps 2/3)
+     it never zooms back out on its own — that's the "opens zoomed in"
+     bug. 15px was just under that threshold. */
   .field input, .field select {
-    width: 100%; height: 48px; padding: 0 14px; font: 500 15px var(--sans); color: var(--ink);
+    width: 100%; height: 48px; padding: 0 14px; font: 500 16px var(--sans); color: var(--ink);
     background-color: #F7FAFA; border: 1px solid var(--rule); border-radius: 12px; outline: none;
     transition: border-color .15s, background-color .15s, box-shadow .15s;
   }
