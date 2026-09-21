@@ -26,6 +26,7 @@ const portalRoutes = require("./routes/portal.routes");
 const publicRoutes = require("./routes/public.routes");
 const paymentsRoutes = require("./routes/payments.routes");
 const messagesRoutes = require("./routes/messages.routes");
+const dashboardRoutes = require("./routes/dashboard.routes");
 const { runReminderSweep } = require("./lib/reminders");
 
 const app = express();
@@ -96,6 +97,13 @@ app.get("/admin.html", requirePageAuth, requirePageRole("admin"), (req, res) => 
   res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
 
+// The role-aware landing screen every internal account gets after
+// signing in. One file, three faces — which panels it can populate is
+// decided by routes/dashboard.routes.js, not by the page.
+app.get("/dashboard.html", requirePageAuth, requirePageRole("staff"), (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "dashboard.html"));
+});
+
 app.get("/portal.html", requirePageAuth, requirePageClientRole, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "portal.html"));
 });
@@ -107,7 +115,7 @@ app.get("/portal.html", requirePageAuth, requirePageClientRole, (req, res) => {
 // backed by routes/public.routes.js), which is the Phase 1 lead-gen path.
 app.get("/", tryPageAuth, (req, res) => {
   if (req.user) {
-    return res.redirect(req.user.role === "client" ? "/portal.html" : "/app.html");
+    return res.redirect(req.user.role === "client" ? "/portal.html" : "/dashboard.html");
   }
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
@@ -127,6 +135,7 @@ app.use("/api/portal", portalRoutes);
 app.use("/api/portal/payments", paymentsRoutes);
 app.use("/api/public", publicRoutes);
 app.use("/api/messages", messagesRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 app.get("/healthz", (req, res) => res.json({ ok: true }));
 
