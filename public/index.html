@@ -470,6 +470,9 @@
     .loader-panel { padding: 22px 18px; }
     .case + .case { margin-top: 44px; padding-top: 44px; }
   }
+  .dl-price { margin-top: 10px; display: inline-flex; gap: 8px; align-items: baseline; padding: 6px 12px; border-radius: 999px; background: var(--brand-soft, #E3F5F3); font-size: 13px; }
+  .dl-price span { color: #5C6E72; }
+  .dl-price b { color: #1B2A2E; }
 </style>
 </head>
 <body data-view="landing">
@@ -539,7 +542,7 @@
       <!-- STEP 1 -->
       <section class="step" data-step="1" aria-labelledby="step-1-title">
         <h2 class="step-title" id="step-1-title" tabindex="-1">Where should we send your calendar?</h2>
-        <p class="step-sub">We'll use your email to deliver your calendar and reach you if you ask for help.</p>
+        <p class="step-sub">We'll use your email to deliver your calendar, and your phone number so our team can reach you about documents and deadlines.</p>
         <div class="grid">
           <div class="field">
             <label for="contactName">Your name</label>
@@ -551,8 +554,9 @@
             <div class="field-error" id="emailError" role="alert"></div>
           </div>
           <div class="field span2">
-            <label for="contactPhone">Phone <span class="opt">(optional)</span></label>
-            <input type="tel" id="contactPhone" placeholder="Optional, but helps us reach you faster" autocomplete="tel">
+            <label for="contactPhone">Phone, with country code <span class="req" aria-hidden="true">*</span><span class="sr-only">(required)</span></label>
+            <input type="tel" id="contactPhone" placeholder="+1 415 555 0100" required autocomplete="tel" aria-describedby="phoneError">
+            <div class="field-error" id="phoneError" role="alert"></div>
           </div>
         </div>
         <div class="step-nav">
@@ -807,6 +811,13 @@
 
   function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
 
+  // Signed-in clients get their calendar saved straight to the portal
+  // (routes/public.routes.js returns portalUrl); everyone else signs in first.
+  const portalUrls = {};
+  function startFilingHref(calendarId) {
+    return portalUrls[calendarId] || `/api/auth/google?calendarId=${encodeURIComponent(calendarId)}`;
+  }
+
   function icon(name, extra) {
     return `<svg class="ic${extra ? ' ' + extra : ''}" aria-hidden="true" focusable="false"><use href="#i-${name}"/></svg>`;
   }
@@ -900,6 +911,7 @@
             <p class="dl-desc">${escapeHtml(it.description)}</p>
             ${it.authority ? `<div class="dl-auth">${icon('building')}<span>${escapeHtml(it.authority)}</span></div>` : ''}
             <div class="dl-meta">Applies to: ${escapeHtml(it.applicable_to || '—')}</div>
+            ${it.price && it.price.label ? `<div class="dl-price"><span>Our fee to handle this</span><b>${escapeHtml(it.price.label)}</b></div>` : ''}
           </div>
           <span class="days-pill ${cls}" title="${escapeHtml(pillAria(it.daysUntil))}" aria-label="${escapeHtml(pillAria(it.daysUntil))}">${icon('clock')}${escapeHtml(pillLabel(it.daysUntil))}</span>
         </article>
@@ -975,7 +987,7 @@
       <div class="cta-card">
         <div class="cta-head">${icon('shield')}<h3>Your calendar is ready</h3></div>
         ${renderUrgencyBanner()}
-        <a class="btn btn-primary btn-lg" href="/api/auth/google?calendarId=${encodeURIComponent(calendarId)}">Log in and let us file this for you ${icon('arrow')}</a>
+        <a class="btn btn-primary btn-lg" href="${startFilingHref(calendarId)}">${portalUrls[calendarId] ? 'Open in your portal' : 'Log in and let us file this for you'} ${icon('arrow')}</a>
         <button class="btn btn-secondary request-review-btn" type="button" data-calendar-id="${id}">Talk to an expert first</button>
         <div class="review-status" role="status" aria-live="polite"></div>
         <ul class="cta-list">
@@ -1100,7 +1112,7 @@
       </div>
 
       <div class="mobile-cta">
-        <a class="btn btn-primary" href="/api/auth/google?calendarId=${encodeURIComponent(calendarId)}">Log in and let us file this ${icon('arrow')}</a>
+        <a class="btn btn-primary" href="${startFilingHref(calendarId)}">${portalUrls[calendarId] ? 'Open in your portal' : 'Log in and let us file this'} ${icon('arrow')}</a>
       </div>
     `;
     document.getElementById('cases').prepend(caseEl);
@@ -1177,6 +1189,15 @@
   }
   document.getElementById('contactEmail').addEventListener('input', () => showEmailError(''));
 
+  // Same rule as the server (lib/calendarView.js normalizePhone): 7–15 digits.
+  function isValidPhone(v) { return /^\+?[\d\s().-]+$/.test(v) && (v.replace(/\D/g, '').length >= 7) && (v.replace(/\D/g, '').length <= 15); }
+  function showPhoneError(msg) {
+    const input = document.getElementById('contactPhone');
+    document.getElementById('phoneError').textContent = msg || '';
+    if (msg) input.setAttribute('aria-invalid', 'true'); else input.removeAttribute('aria-invalid');
+  }
+  document.getElementById('contactPhone').addEventListener('input', () => showPhoneError(''));
+
   function validateStep(n) {
     if (n === 1) {
       const email = document.getElementById('contactEmail');
@@ -1186,6 +1207,13 @@
         return false;
       }
       showEmailError('');
+      const phone = document.getElementById('contactPhone');
+      if (!isValidPhone(phone.value.trim())) {
+        showPhoneError('Enter a phone number with the country code, e.g. +1 415 555 0100.');
+        phone.focus();
+        return false;
+      }
+      showPhoneError('');
     }
     return true;
   }
@@ -1282,6 +1310,13 @@
       document.getElementById('contactEmail').focus();
       return;
     }
+    if (!isValidPhone(contact.phone)) {
+      setStep(1, true);
+      showPhoneError('Enter a phone number with the country code, e.g. +1 415 555 0100.');
+      document.getElementById('statusHint').textContent = 'Please enter a phone number so our team can reach you.';
+      document.getElementById('contactPhone').focus();
+      return;
+    }
 
     const btn = document.getElementById('submit');
     const statusHint = document.getElementById('statusHint');
@@ -1299,6 +1334,7 @@
       if (!items.length) throw new Error('No calendar items returned — try again or refine the profile.');
       loader.stop();
       loader.el.remove();
+      if (data.portalUrl) portalUrls[data.calendarId] = data.portalUrl;
       renderCase(profile, items, data.calendarId);
     } catch (err) {
       loader.stop();
@@ -1316,6 +1352,18 @@
   }
 
   document.getElementById('submit').addEventListener('click', handleSubmit);
+
+  // Signed in already (a client opening /?new=1 from the portal)? Prefill
+  // their contact details so they only fill in the company part.
+  fetch('/api/portal/profile').then(r => r.ok ? r.json() : null).then(d => {
+    if (!d || !d.profile) return;
+    const p = d.profile;
+    if (p.contactName) document.getElementById('contactName').value = p.contactName;
+    if (p.email || p.loginEmail) document.getElementById('contactEmail').value = p.email || p.loginEmail;
+    if (p.phone) document.getElementById('contactPhone').value = p.phone;
+    const staff = document.querySelector('.staff-link');
+    if (staff) { staff.href = '/portal.html'; staff.firstChild.textContent = 'Back to your portal '; }
+  }).catch(() => {});
 </script>
 </body>
 </html>
