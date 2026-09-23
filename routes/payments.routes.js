@@ -1,59 +1,198 @@
 // routes/payments.routes.js
 //
-// Client-facing payment routes for a single Calendar item, mounted at
-// /api/portal/payments (see server.js). Deliberately separate from
-// portal.routes.js so the Razorpay-specific code (signature verification,
-// order creation) doesn't get lost in the upload/download logic — but it
-// shares the exact same ownership pattern: every route re-derives the
-// calendar via findOwnApprovedCalendar-equivalent logic below, never
-// trusts a calendarId alone.
+// Client-facing Razorpay payments for a single Calendar item, mounted at
+// /api/portal/payments (see server.js), plus the webhook handler (mounted
+// separately in server.js with a raw body parser).
 //
-// THE SOURCE OF TRUTH FOR "IS THIS PAID" IS THE WEBHOOK ROUTE, mounted
-// separately in server.js (see the block below and the comment there
-// about raw-body parsing). /verify in this file is a fast-path UX
-// update only, exactly as the amount was in the original orphaned
-// payments.js — that reasoning was correct, it was just pointed at the
-// wrong model.
+// PRINCIPLES (why the code below looks the way it does):
+//
+//  1. The browser never decides the price. The amount charged is always
+//     item.feeAmountCents, set by staff (quote / status routes in
+//     routes/calendar.routes.js).
+//  2. A payment is only trusted after a cryptographic check — the Checkout
+//     signature on /verify, the webhook signature on the webhook — and the
+//     comparison is constant-time.
+//  3. The amount and currency Razorpay reports are compared against what
+//     the order was created for. A mismatch is recorded and flagged to
+//     staff, never silently marked "Paid".
+//  4. Every order ever created for an item is remembered (paymentEvents),
+//     not just the latest one. A client who opens Checkout twice and pays
+//     the FIRST popup used to be charged with nothing recorded, because
+//     the webhook only looked for the latest order id.
+//  5. Webhooks are retried by Razorpay and may arrive before or after
+//     /verify. Every handler is idempotent: the same payment is recorded
+//     once, however many times it's reported.
+//  6. "Authorized" is not "paid". If the Razorpay account isn't set to
+//     auto-capture, an authorized payment is refunded automatically after
+//     a few days — so /verify captures it explicitly before marking Paid.
 
 const express = require("express");
 const crypto = require("crypto");
 const razorpay = require("../config/razorpay");
 const Calendar = require("../models/Calendar");
+const ClientOrg = require("../models/ClientOrg");
 const { requireAuth, requireClientRole } = require("../middleware/auth");
-const { getRequiredDocuments } = require("../lib/requiredDocuments");
+const { hasAllRequiredDocuments, toView } = require("../lib/calendarView");
+const { formatUSD } = require("../lib/complianceFees");
 const { logActivity } = require("../lib/auditLog");
+const { notifyStaff, notifyClient } = require("../lib/notify");
 
-// True once every required document (see lib/requiredDocuments.js) for
-// this item has at least one matching client_upload SOMEWHERE in the
-// calendar — not necessarily on this item. A document uploaded while
-// filing a different item counts here too (see sharedDocumentIndex in
-// portal.routes.js for the client-facing version of this same idea),
-// so a client is never asked to upload the same document twice just
-// because two filings both need it. Checked here — not just in the
-// portal UI — so a client can't force a payment through by calling this
-// endpoint directly while skipping the upload step; the UI gate is only
-// a courtesy, this is the real one.
-function hasAllRequiredDocuments(item, calendar) {
-  const required = getRequiredDocuments(item);
-  if (!required.length) return true;
-  const uploadedLabels = new Set();
-  (calendar.items || []).forEach((it) => {
-    (it.documents || []).forEach((d) => {
-      if (d.type === "client_upload" && d.requirementLabel && d.reviewStatus !== "rejected") uploadedLabels.add(d.requirementLabel);
-    });
-  });
-  return required.every((label) => uploadedLabels.has(label));
+// Prices in lib/complianceFees.js are in USD. Charging USD needs
+// "International Payments" enabled on the Razorpay account.
+const CURRENCY = (process.env.PAYMENT_CURRENCY || "USD").toUpperCase();
+
+function safeEqualHex(a, b) {
+  if (typeof a !== "string" || typeof b !== "string" || a.length !== b.length) return false;
+  try {
+    return crypto.timingSafeEqual(Buffer.from(a, "hex"), Buffer.from(b, "hex"));
+  } catch {
+    return false;
+  }
 }
+
+function hmacHex(secret, data) {
+  return crypto.createHmac("sha256", secret).update(data).digest("hex");
+}
+
+// Every order id this item has ever had, with the amount it was created for.
+function ordersForItem(item) {
+  const orders = new Map();
+  (item.paymentEvents || []).forEach((e) => {
+    if ((e.event === "order_created" || e.event === "order_reused") && e.razorpayOrderId) {
+      orders.set(e.razorpayOrderId, { amountCents: e.amountCents, currency: e.currency });
+    }
+  });
+  if (item.razorpayOrderId && !orders.has(item.razorpayOrderId)) {
+    orders.set(item.razorpayOrderId, { amountCents: item.feeAmountCents, currency: CURRENCY });
+  }
+  return orders;
+}
+
+function alreadyRecorded(item, eventName, paymentId) {
+  return (item.paymentEvents || []).some((e) => e.event === eventName && e.razorpayPaymentId === paymentId);
+}
+
+/**
+ * Record a confirmed payment on an item. Returns "paid" | "duplicate" | "mismatch".
+ * Does NOT save — caller saves the calendar.
+ */
+function applyCapturedPayment(item, { orderId, paymentId, amountCents, currency, source }) {
+  if (item.paymentStatus === "Paid" && item.razorpayPaymentId === paymentId) return "duplicate";
+
+  const expected = ordersForItem(item).get(orderId);
+  const expectedAmount = expected?.amountCents ?? item.feeAmountCents;
+  const expectedCurrency = (expected?.currency || CURRENCY).toUpperCase();
+  const amountOk =
+    typeof amountCents !== "number" || // amount unknown (Razorpay API unreachable) — rely on signature
+    (amountCents === expectedAmount && (!currency || currency.toUpperCase() === expectedCurrency));
+
+  if (!amountOk) {
+    if (!alreadyRecorded(item, "amount_mismatch", paymentId)) {
+      item.paymentEvents.push({ event: "amount_mismatch", razorpayOrderId: orderId, razorpayPaymentId: paymentId, amountCents, currency });
+    }
+    return "mismatch";
+  }
+
+  if (item.paymentStatus === "Paid" && item.razorpayPaymentId && item.razorpayPaymentId !== paymentId) {
+    // A SECOND successful payment for the same item (e.g. two tabs). Money
+    // was taken twice — record it so staff can refund, don't overwrite.
+    if (!alreadyRecorded(item, "duplicate_payment", paymentId)) {
+      item.paymentEvents.push({ event: "duplicate_payment", razorpayOrderId: orderId, razorpayPaymentId: paymentId, amountCents, currency });
+    }
+    return "mismatch";
+  }
+
+  item.paymentStatus = "Paid";
+  item.razorpayPaymentId = paymentId;
+  item.razorpayOrderId = orderId;
+  item.paidAt = item.paidAt || new Date();
+  if (!alreadyRecorded(item, source, paymentId)) {
+    item.paymentEvents.push({ event: source, razorpayOrderId: orderId, razorpayPaymentId: paymentId, amountCents, currency });
+  }
+  return "paid";
+}
+
+// If the client regenerated their calendar after creating an order, the
+// order lives on the OLD calendar. Mirror the payment onto the same
+// filing in the calendar(s) that replaced it, so the portal shows Paid.
+async function propagateToNewerCalendars(calendar, item) {
+  let current = calendar;
+  for (let hops = 0; hops < 10; hops++) {
+    const newer = await Calendar.findOne({ supersedes: current._id });
+    if (!newer) return;
+    const match = newer.items.find(
+      (it) => it.compliance_name.toLowerCase().trim() === item.compliance_name.toLowerCase().trim()
+    );
+    if (match && match.paymentStatus !== "Paid") {
+      match.paymentStatus = "Paid";
+      match.razorpayPaymentId = item.razorpayPaymentId;
+      match.paidAt = item.paidAt;
+      match.feeAmountCents = match.feeAmountCents || item.feeAmountCents;
+      match.paymentEvents.push({ event: "paid_on_previous_calendar", razorpayOrderId: item.razorpayOrderId, razorpayPaymentId: item.razorpayPaymentId });
+      await newer.save();
+    }
+    current = newer;
+  }
+}
+
+async function announcePayment(calendar, item, outcome) {
+  const org = await ClientOrg.findById(calendar.clientOrgId).select("name").lean().catch(() => null);
+  const company = org?.name || calendar.profile?.companyName || "A client";
+  if (outcome === "paid") {
+    const amount = item.feeAmountCents ? formatUSD(item.feeAmountCents) : "";
+    logActivity({
+      action: "payment_captured",
+      actor: null,
+      clientOrgId: calendar.clientOrgId,
+      calendarId: calendar._id,
+      summary: `Payment captured for ${item.compliance_name}${amount ? ` (${amount})` : ""}.`,
+      meta: { razorpayOrderId: item.razorpayOrderId, razorpayPaymentId: item.razorpayPaymentId },
+    });
+    notifyStaff({
+      clientOrgId: calendar.clientOrgId,
+      calendarId: calendar._id,
+      type: "payment_received",
+      title: `${company} paid ${amount} for ${item.compliance_name}`,
+      body: `Razorpay payment ${item.razorpayPaymentId}. The filing can go ahead.`,
+      link: `/calendar.html?id=${calendar._id}`,
+    });
+    notifyClient({
+      clientOrgId: calendar.clientOrgId,
+      calendarId: calendar._id,
+      type: "payment_received",
+      title: `Payment received: ${amount} for ${item.compliance_name}`,
+      body: `Thank you — we've received your payment of ${amount} for ${item.compliance_name} (payment reference ${item.razorpayPaymentId}). We'll start on the filing and keep you posted.`,
+      link: `/portal.html?calendar=${calendar._id}`,
+    });
+  } else if (outcome === "mismatch") {
+    logActivity({
+      action: "payment_amount_mismatch",
+      actor: null,
+      clientOrgId: calendar.clientOrgId,
+      calendarId: calendar._id,
+      summary: `A Razorpay payment for ${item.compliance_name} didn't match the invoiced amount, or was a second payment for an already-paid item. Check Razorpay and refund if needed.`,
+      meta: { events: item.paymentEvents.slice(-3) },
+    });
+    notifyStaff({
+      clientOrgId: calendar.clientOrgId,
+      calendarId: calendar._id,
+      type: "payment_failed",
+      title: `Check payment for ${item.compliance_name} (${company})`,
+      body: "Razorpay reported a payment that doesn't match the invoice, or a second payment for an item that was already paid. It has NOT been marked paid automatically. Check the Razorpay dashboard and refund if needed.",
+      link: `/calendar.html?id=${calendar._id}`,
+    });
+  }
+}
+
+// ---------------------------------------------------------------------
+// Client routes
+// ---------------------------------------------------------------------
 
 const router = express.Router();
 router.use(requireAuth, requireClientRole);
 
-async function findOwnApprovedCalendar(req, calendarId) {
-  return Calendar.findOne({
-    _id: calendarId,
-    clientOrgId: req.user.clientOrgId,
-    status: "approved",
-  });
+function findOwnApprovedCalendar(req, calendarId) {
+  return Calendar.findOne({ _id: calendarId, clientOrgId: req.user.clientOrgId, status: "approved" }).catch(() => null);
 }
 
 function getItemOr404(res, calendar, indexParam) {
@@ -66,67 +205,103 @@ function getItemOr404(res, calendar, indexParam) {
 }
 
 // POST /api/portal/payments/calendars/:id/items/:index/create-order
-// No amount in the request body on purpose — the amount charged is
-// ALWAYS item.feeAmountCents, set by staff via
-// PATCH /api/calendars/:id/items/:index/status. A client sending their
-// own amount here would let them pay whatever they want for a filing.
+// No amount in the request body on purpose — see principle 1.
 router.post("/calendars/:id/items/:index/create-order", async (req, res) => {
   try {
     const calendar = await findOwnApprovedCalendar(req, req.params.id);
     if (!calendar) return res.status(404).json({ error: "Not found." });
+    if (calendar.supersededAt) return res.status(400).json({ error: "This is an older calendar. Pay from your current one." });
     const found = getItemOr404(res, calendar, req.params.index);
     if (!found) return;
     const { idx, item } = found;
 
     if (!item.feeAmountCents || item.feeAmountCents <= 0) {
-      return res.status(400).json({ error: "This item hasn't been invoiced yet." });
+      return res.status(400).json({ error: "We haven't sent a price for this service yet." });
     }
-    if (item.paymentStatus === "Paid") {
-      return res.status(400).json({ error: "This item is already paid." });
+    if (item.paymentStatus === "Paid") return res.status(400).json({ error: "This service is already paid." });
+    if (item.paymentStatus !== "Invoiced" && item.paymentStatus !== "Overdue") {
+      return res.status(400).json({ error: "This service hasn't been invoiced yet." });
     }
     if (!hasAllRequiredDocuments(item, calendar)) {
-      return res.status(400).json({ error: "Please upload all required documents for this item before paying." });
+      return res.status(400).json({ error: "Please upload all required documents for this service before paying." });
+    }
+    const org = await ClientOrg.findById(req.user.clientOrgId).lean();
+    if (!org?.primaryContactEmail || !org?.primaryContactPhone) {
+      return res.status(409).json({ error: "Please add your email and phone number before paying.", code: "CONTACT_INCOMPLETE" });
     }
 
-    // NOTE: Razorpay accounts are INR-by-default; charging in USD requires
-    // "International Payments" to be enabled on your Razorpay dashboard
-    // (Account & Settings > International Payments) and KYC for it approved
-    // — orders.create below will fail with a Razorpay API error until that's
-    // turned on. See README for a note on this.
+    const prefill = { name: org.primaryContactName || req.user.name || "", email: org.primaryContactEmail, contact: org.primaryContactPhone };
+    const payload = (orderId, amount, currency) => ({
+      orderId,
+      amount,
+      currency,
+      keyId: process.env.RAZORPAY_KEY_ID, // public key — safe to send to the browser
+      description: item.compliance_name,
+      prefill,
+    });
+
+    // Reuse the open order if it's for the same amount, instead of
+    // creating a new order on every click (principle 4 still covers the
+    // case where a new one IS created).
+    if (item.razorpayOrderId) {
+      const known = ordersForItem(item).get(item.razorpayOrderId);
+      if (known && known.amountCents === item.feeAmountCents) {
+        try {
+          const existing = await razorpay.orders.fetch(item.razorpayOrderId);
+          if (existing.status === "paid") {
+            // The payment went through but neither /verify nor the webhook
+            // recorded it (closed tab + webhook not configured). Reconcile now.
+            const payments = await razorpay.orders.fetchPayments(item.razorpayOrderId);
+            const captured = (payments.items || []).find((p) => p.status === "captured");
+            if (captured) {
+              const outcome = applyCapturedPayment(item, {
+                orderId: item.razorpayOrderId, paymentId: captured.id,
+                amountCents: captured.amount, currency: captured.currency, source: "reconciled",
+              });
+              await calendar.save();
+              announcePayment(calendar, item, outcome).catch(() => {});
+              return res.status(409).json({ error: "This service is already paid.", calendar: toView(calendar) });
+            }
+          } else if (existing.amount === item.feeAmountCents && existing.currency === CURRENCY) {
+            item.paymentEvents.push({ event: "order_reused", razorpayOrderId: existing.id, amountCents: existing.amount, currency: existing.currency });
+            await calendar.save();
+            return res.json(payload(existing.id, existing.amount, existing.currency));
+          }
+        } catch (err) {
+          console.warn("[payments] could not re-check existing order, creating a new one:", err.message);
+        }
+      }
+    }
+
     const order = await razorpay.orders.create({
       amount: item.feeAmountCents,
-      currency: "USD",
-      receipt: `cal_${calendar._id}_item_${idx}_${Date.now()}`.slice(0, 40), // Razorpay caps receipt at 40 chars
+      currency: CURRENCY,
+      receipt: `cal_${calendar._id}_i${idx}_${Date.now().toString(36)}`.slice(0, 40), // Razorpay caps receipt at 40 chars
       notes: {
         calendarId: String(calendar._id),
         itemIndex: String(idx),
-        complianceName: item.compliance_name,
+        complianceName: item.compliance_name.slice(0, 250),
+        clientOrgId: String(calendar.clientOrgId),
       },
     });
 
     item.razorpayOrderId = order.id;
-    item.paymentEvents.push({ event: "order_created", razorpayOrderId: order.id });
+    item.paymentEvents.push({ event: "order_created", razorpayOrderId: order.id, amountCents: order.amount, currency: order.currency });
     await calendar.save();
 
-    res.json({
-      orderId: order.id,
-      amount: order.amount,
-      currency: order.currency,
-      keyId: process.env.RAZORPAY_KEY_ID, // public key — safe to send to the frontend
-    });
+    res.json(payload(order.id, order.amount, order.currency));
   } catch (err) {
     console.error("[payments] create-order error:", err);
-    res.status(500).json({ error: "Could not create payment order." });
+    const msg = err.code === "RAZORPAY_NOT_CONFIGURED"
+      ? "Online payments aren't set up yet. Please message us to pay another way."
+      : "Could not start the payment. Please try again, or message us if it keeps failing.";
+    res.status(500).json({ error: msg });
   }
 });
 
 // POST /api/portal/payments/calendars/:id/items/:index/verify
-// Called by the frontend immediately after Razorpay Checkout succeeds.
-// Flips paymentStatus to "Paid" right away for a responsive UI — the
-// webhook (server.js) re-confirms this independently and is what you'd
-// trust in a dispute, but making the client wait for a webhook rounp-trip
-// before unlocking uploads would be a noticeably worse experience for the
-// common case where nothing goes wrong.
+// Called by the browser right after Checkout succeeds. Fast path for the
+// UI; the webhook confirms independently.
 router.post("/calendars/:id/items/:index/verify", async (req, res) => {
   try {
     const calendar = await findOwnApprovedCalendar(req, req.params.id);
@@ -139,100 +314,135 @@ router.post("/calendars/:id/items/:index/verify", async (req, res) => {
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
       return res.status(400).json({ error: "Missing Razorpay payment fields." });
     }
-    if (item.razorpayOrderId !== razorpay_order_id) {
-      return res.status(400).json({ error: "Order ID does not match this item's current payment attempt." });
+    if (!ordersForItem(item).has(razorpay_order_id)) {
+      return res.status(400).json({ error: "This payment doesn't belong to this service." });
     }
+    if (!process.env.RAZORPAY_KEY_SECRET) return res.status(500).json({ error: "Payments are not configured." });
 
-    const expectedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-      .digest("hex");
-
-    if (expectedSignature !== razorpay_signature) {
+    const expected = hmacHex(process.env.RAZORPAY_KEY_SECRET, `${razorpay_order_id}|${razorpay_payment_id}`);
+    if (!safeEqualHex(expected, razorpay_signature)) {
       return res.status(400).json({ error: "Signature verification failed." });
     }
 
-    item.razorpayPaymentId = razorpay_payment_id;
-    item.paymentStatus = "Paid";
-    item.paidAt = new Date();
-    item.paymentEvents.push({ event: "verify_ok", razorpayOrderId: razorpay_order_id, razorpayPaymentId: razorpay_payment_id });
-    await calendar.save();
+    // Ask Razorpay what actually happened (principles 3 and 6). If the API
+    // is unreachable, the valid signature is still proof of payment and
+    // the webhook will fill in the rest.
+    let amountCents, currency, source = "verify_ok";
+    try {
+      let payment = await razorpay.payments.fetch(razorpay_payment_id);
+      if (payment.order_id && payment.order_id !== razorpay_order_id) {
+        return res.status(400).json({ error: "Payment and order don't match." });
+      }
+      if (payment.status === "authorized") {
+        payment = await razorpay.payments.capture(razorpay_payment_id, payment.amount, payment.currency);
+        source = "verify_captured";
+      }
+      if (payment.status !== "captured") {
+        item.paymentEvents.push({ event: "verify_not_captured", razorpayOrderId: razorpay_order_id, razorpayPaymentId: razorpay_payment_id });
+        await calendar.save();
+        return res.status(202).json({ pending: true, message: "Your payment is being processed. We'll confirm it here and by email shortly.", calendar: toView(calendar) });
+      }
+      amountCents = payment.amount;
+      currency = payment.currency;
+    } catch (err) {
+      console.warn("[payments] could not fetch payment from Razorpay (relying on signature):", err.message);
+    }
 
-    res.json({ ok: true, calendar });
+    const outcome = applyCapturedPayment(item, {
+      orderId: razorpay_order_id, paymentId: razorpay_payment_id, amountCents, currency, source,
+    });
+    await calendar.save();
+    if (outcome !== "duplicate") {
+      announcePayment(calendar, item, outcome).catch(() => {});
+      if (outcome === "paid") propagateToNewerCalendars(calendar, item).catch(() => {});
+    }
+    if (outcome === "mismatch") {
+      return res.status(409).json({ error: "We received your payment but it needs a quick check by our team. We'll be in touch — no need to pay again.", calendar: toView(calendar) });
+    }
+    res.json({ ok: true, calendar: toView(calendar) });
   } catch (err) {
     console.error("[payments] verify error:", err);
-    res.status(500).json({ error: "Verification failed." });
+    res.status(500).json({ error: "We couldn't confirm the payment yet. If you were charged, don't pay again — we'll confirm it shortly." });
   }
 });
 
 module.exports = router;
 
 // ---------------------------------------------------------------------
-// Webhook handler — exported separately (not on `router`, and not
-// behind requireAuth/requireClientRole above) because Razorpay calls
-// this directly with no session cookie, and it needs the RAW request
-// body for signature verification. See server.js for how this is
-// mounted — it MUST be registered before the global express.json()
-// middleware, on its own path, with express.raw() applied only there.
+// Webhook — no session, raw body. See server.js.
+// Configure in Razorpay Dashboard → Webhooks: URL <APP_URL>/api/webhooks/razorpay,
+// events payment.captured, payment.failed, order.paid.
 // ---------------------------------------------------------------------
+async function findCalendarAndItemForOrder(orderId) {
+  const calendar = await Calendar.findOne({
+    $or: [{ "items.razorpayOrderId": orderId }, { "items.paymentEvents.razorpayOrderId": orderId }],
+  });
+  if (!calendar) return {};
+  const item =
+    calendar.items.find((it) => it.razorpayOrderId === orderId) ||
+    calendar.items.find((it) => (it.paymentEvents || []).some((e) => e.razorpayOrderId === orderId));
+  return { calendar, item };
+}
+
 async function razorpayWebhookHandler(req, res) {
   try {
-    const signature = req.headers["x-razorpay-signature"];
     if (!process.env.RAZORPAY_WEBHOOK_SECRET) {
       console.error("[razorpay webhook] RAZORPAY_WEBHOOK_SECRET not set — rejecting.");
       return res.status(500).json({ error: "Webhook not configured." });
     }
-    const expectedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_WEBHOOK_SECRET)
-      .update(req.body) // must be the raw Buffer, not parsed JSON
-      .digest("hex");
-
-    if (signature !== expectedSignature) {
+    const raw = Buffer.isBuffer(req.body) ? req.body : Buffer.from(typeof req.body === "string" ? req.body : "");
+    const expected = hmacHex(process.env.RAZORPAY_WEBHOOK_SECRET, raw);
+    if (!safeEqualHex(expected, req.headers["x-razorpay-signature"])) {
       console.warn("[razorpay webhook] signature mismatch — possible spoofed request.");
       return res.status(400).json({ error: "Invalid signature." });
     }
 
-    const event = JSON.parse(req.body.toString());
-
-    if (event.event === "payment.captured" || event.event === "payment.failed") {
-      const orderId = event.payload.payment.entity.order_id;
-      const paymentId = event.payload.payment.entity.id;
-
-      // Razorpay orders are tagged with calendarId/itemIndex in `notes`
-      // at creation time (see create-order above) — cheaper and more
-      // reliable than a separate lookup collection for a single field
-      // read.
-      const calendar = await Calendar.findOne({ "items.razorpayOrderId": orderId });
-      if (!calendar) {
-        console.warn(`[razorpay webhook] no calendar found for order ${orderId}`);
-        return res.status(200).json({ received: true }); // ack anyway — Razorpay retries on non-2xx
-      }
-      const item = calendar.items.find((it) => it.razorpayOrderId === orderId);
-      if (!item) return res.status(200).json({ received: true });
-
-      if (event.event === "payment.captured") {
-        item.paymentStatus = "Paid";
-        item.razorpayPaymentId = paymentId;
-        item.paidAt = item.paidAt || new Date();
-        item.paymentEvents.push({ event: "webhook_captured", razorpayOrderId: orderId, razorpayPaymentId: paymentId });
-      } else {
-        item.paymentEvents.push({ event: "webhook_failed", razorpayOrderId: orderId, razorpayPaymentId: paymentId });
-      }
-      await calendar.save();
-
-      logActivity({
-        action: event.event === "payment.captured" ? "payment_captured" : "payment_failed",
-        actor: null, // system event — Razorpay's webhook, no logged-in user
-        clientOrgId: calendar.clientOrgId,
-        calendarId: calendar._id,
-        summary:
-          event.event === "payment.captured"
-            ? `Payment captured for ${item.compliance_name} (${item.feeAmountCents ? "$" + (item.feeAmountCents / 100).toLocaleString("en-US") : "amount unknown"}).`
-            : `Payment attempt failed for ${item.compliance_name}.`,
-        meta: { razorpayOrderId: orderId, razorpayPaymentId: paymentId },
-      });
+    let event;
+    try {
+      event = JSON.parse(raw.toString("utf8"));
+    } catch {
+      return res.status(400).json({ error: "Invalid JSON." });
     }
 
+    const payment = event?.payload?.payment?.entity;
+    const handled = ["payment.captured", "payment.failed", "order.paid"];
+    if (!handled.includes(event.event) || !payment?.order_id) {
+      return res.status(200).json({ received: true });
+    }
+
+    const orderId = payment.order_id;
+    const { calendar, item } = await findCalendarAndItemForOrder(orderId);
+    if (!calendar || !item) {
+      console.warn(`[razorpay webhook] no calendar item found for order ${orderId}`);
+      return res.status(200).json({ received: true }); // ack — Razorpay retries on non-2xx
+    }
+
+    if (event.event === "payment.failed") {
+      if (!alreadyRecorded(item, "webhook_failed", payment.id)) {
+        item.paymentEvents.push({ event: "webhook_failed", razorpayOrderId: orderId, razorpayPaymentId: payment.id, amountCents: payment.amount, currency: payment.currency });
+        await calendar.save();
+        logActivity({
+          action: "payment_failed",
+          actor: null,
+          clientOrgId: calendar.clientOrgId,
+          calendarId: calendar._id,
+          summary: `Payment attempt failed for ${item.compliance_name}${payment.error_description ? `: ${payment.error_description}` : ""}.`,
+          meta: { razorpayOrderId: orderId, razorpayPaymentId: payment.id },
+        });
+      }
+      return res.status(200).json({ received: true });
+    }
+
+    // payment.captured / order.paid
+    if (payment.status && payment.status !== "captured") return res.status(200).json({ received: true });
+    const outcome = applyCapturedPayment(item, {
+      orderId, paymentId: payment.id, amountCents: payment.amount, currency: payment.currency, source: "webhook_captured",
+    });
+    if (outcome !== "duplicate") {
+      await calendar.save();
+      await announcePayment(calendar, item, outcome).catch(() => {});
+      if (outcome === "paid") await propagateToNewerCalendars(calendar, item).catch(() => {});
+    }
     res.status(200).json({ received: true });
   } catch (err) {
     console.error("[razorpay webhook] error:", err);
@@ -240,3 +450,4 @@ async function razorpayWebhookHandler(req, res) {
   }
 }
 module.exports.razorpayWebhookHandler = razorpayWebhookHandler;
+module.exports._internals = { applyCapturedPayment, ordersForItem, safeEqualHex, hmacHex };
