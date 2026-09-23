@@ -12,6 +12,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const Message = require("../models/Message");
+const Notification = require("../models/Notification");
 const ClientOrg = require("../models/ClientOrg");
 const Calendar = require("../models/Calendar");
 const { requireAuth } = require("../middleware/auth");
@@ -137,6 +138,16 @@ router.post("/:clientOrgId", async (req, res) => {
 // delay or break message delivery itself.
 async function notifyOtherSide(org, sender, text, isFromClient) {
   const preview = text.length > 300 ? text.slice(0, 300) + "…" : text;
+  // In-app bell for the other side (email is sent below).
+  Notification.create({
+    audience: isFromClient ? "staff" : "client",
+    clientOrgId: org._id,
+    type: "message",
+    title: isFromClient ? `New message from ${org.name}` : "New message from ComplyGlobally",
+    body: preview.slice(0, 1000),
+    link: isFromClient ? "/dashboard.html" : "/portal.html",
+    actorName: sender.name || sender.email,
+  }).catch((err) => console.error("[messages] notification insert failed (non-fatal):", err.message));
 
   if (isFromClient) {
     const populated = await org.populate("assignedStaff", "email");
