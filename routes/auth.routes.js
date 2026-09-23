@@ -25,6 +25,7 @@ const { getAuthUrl, verifyCodeAndGetProfile } = require("../lib/google");
 const otp = require("../lib/otp");
 const { checkPassword, MIN_LENGTH } = require("../lib/passwordPolicy");
 const { logActivity } = require("../lib/auditLog");
+const { notifyStaff } = require("../lib/notify");
 
 const router = express.Router();
 
@@ -507,7 +508,32 @@ router.get("/google/callback", async (req, res) => {
         },
         { new: true }
       );
-      if (linked) linkedCalendarId = linked._id.toString();
+      if (linked) {
+        linkedCalendarId = linked._id.toString();
+        // Carry the contact details they typed into the public form onto
+        // their company record, so staff have an email AND phone from the
+        // first minute (the portal asks for anything still missing).
+        const org = await ClientOrg.findById(user.clientOrgId);
+        if (org) {
+          const lead = linked.leadContact || {};
+          if (!org.primaryContactPhone && lead.phone) org.primaryContactPhone = lead.phone;
+          if (!org.primaryContactEmail) org.primaryContactEmail = lead.email || user.email;
+          if (!org.primaryContactName && lead.name) org.primaryContactName = lead.name;
+          if (org.createdBy === "google-signup" && linked.profile?.companyName && /'s Company$|@|\./.test(org.name)) {
+            org.name = linked.profile.companyName;
+          }
+          await org.save();
+        }
+        notifyStaff({
+          clientOrgId: user.clientOrgId,
+          calendarId: linked._id,
+          type: "client_signed_up",
+          title: `${org?.name || user.email} signed in to start filing`,
+          body: `${user.name || user.email} claimed their ${linked.items?.length || ""}-item compliance calendar and can now pick services and upload documents.`,
+          link: `/calendar.html?id=${linked._id}`,
+          actorName: user.name || user.email,
+        });
+      }
     } catch (err) {
       console.error("[google-callback] Failed to link pending calendar (non-fatal):", err.message);
     }
