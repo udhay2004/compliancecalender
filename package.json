@@ -10,7 +10,7 @@
     "seed:states": "node scripts/seedStates.js",
     "seed:odi": "node scripts/seedOdi.js",
     "load:states": "node scripts/loadPresearchedStates.js",
-    "test": "node --test tests/",
+    "test": "node --test tests/*.test.js",
     "seed:team": "node scripts/seedTeam.js"
   },
   "engines": {
