@@ -16,6 +16,7 @@
 
 const express = require("express");
 const User = require("../models/User");
+const { normalizePhone } = require("../lib/calendarView");
 const ClientOrg = require("../models/ClientOrg");
 const Calendar = require("../models/Calendar");
 const AuditLog = require("../models/AuditLog");
@@ -40,12 +41,19 @@ function canManageTargetRole(actingRole, targetRole) {
 router.post("/client-orgs", async (req, res) => {
   const { name, primaryContactEmail, primaryContactName, primaryContactPhone, notes } = req.body || {};
   if (!name) return res.status(400).json({ error: "name is required." });
+  // Email AND phone are both required for every client company — staff
+  // need a way to reach them for document issues and quotes.
+  if (!primaryContactEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(primaryContactEmail).trim())) {
+    return res.status(400).json({ error: "A valid contact email is required." });
+  }
+  const phone = normalizePhone(String(primaryContactPhone || ""));
+  if (!phone) return res.status(400).json({ error: "A valid contact phone number (with country code) is required." });
   try {
     const org = await ClientOrg.create({
       name,
       primaryContactEmail,
       primaryContactName,
-      primaryContactPhone,
+      primaryContactPhone: phone,
       notes,
       createdBy: req.user.email,
     });
@@ -71,7 +79,11 @@ router.patch("/client-orgs/:id", async (req, res) => {
   const { primaryContactName, primaryContactEmail, primaryContactPhone, notes, assignedStaff } = req.body || {};
   if (primaryContactName !== undefined) org.primaryContactName = primaryContactName;
   if (primaryContactEmail !== undefined) org.primaryContactEmail = primaryContactEmail;
-  if (primaryContactPhone !== undefined) org.primaryContactPhone = primaryContactPhone;
+  if (primaryContactPhone !== undefined) {
+    const phone = normalizePhone(String(primaryContactPhone || ""));
+    if (!phone) return res.status(400).json({ error: "A valid contact phone number (with country code) is required." });
+    org.primaryContactPhone = phone;
+  }
   if (notes !== undefined) org.notes = notes;
   if (assignedStaff !== undefined) {
     if (assignedStaff) {
