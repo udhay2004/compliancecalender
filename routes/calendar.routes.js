@@ -5,13 +5,17 @@ const Calendar = require("../models/Calendar");
 const ClientOrg = require("../models/ClientOrg");
 const Message = require("../models/Message");
 const { requireAuth, requireRole } = require("../middleware/auth");
-const { sendEmail } = require("../lib/mailer");
 const { generateCompanyCalendar } = require("../lib/claude");
 const { calendarToPdfBuffer } = require("../lib/pdf");
 const { upload } = require("../middleware/upload");
 const storage = require("../lib/storage");
-const { getSuggestedFee } = require("../lib/complianceFees");
+const { getSuggestedFee, formatUSD } = require("../lib/complianceFees");
 const { logActivity } = require("../lib/auditLog");
+const { toView, REAL_WORK_MATCH, setDownloadHeaders } = require("../lib/calendarView");
+const { notifyClient } = require("../lib/notify");
+
+const staffView = (calendar) => toView(calendar, { staff: true });
+const portalLink = (calendar) => `/portal.html?calendar=${calendar._id}`;
 
 const router = express.Router();
 // Everything in this file is internal tooling (generate/review/approve/
@@ -66,7 +70,7 @@ router.post("/generate", async (req, res) => {
       sourceMode,
     });
 
-    return res.status(201).json({ calendar });
+    return res.status(201).json({ calendar: staffView(calendar) });
   } catch (err) {
     console.error("Generate error:", err);
     return res.status(502).json({ error: `Research request failed: ${err.message}` });
@@ -87,7 +91,7 @@ router.get("/mine", async (req, res) => {
 // are NOT real client engagements and must never clutter this queue.
 // See GET /api/admin/leads for where those actually belong.
 router.get("/queue", async (req, res) => {
-  const calendars = await Calendar.find({ status: "pending_review", source: { $ne: "public" } })
+  const calendars = await Calendar.find({ status: "pending_review", ...REAL_WORK_MATCH })
     .sort({ createdAt: 1 });
   res.json({ calendars });
 });
@@ -99,6 +103,38 @@ router.get("/approved", async (req, res) => {
   res.json({ calendars });
 });
 
+// GET /api/calendars/client-work — every CURRENT client calendar (not
+// superseded) with the numbers staff actually act on: how many services
+// the client selected, documents waiting to be verified, items ready for
+// a quote, invoices unpaid. This is the "which client needs me" list.
+router.get("/client-work", async (req, res) => {
+  const calendars = await Calendar.find({
+    status: "approved",
+    clientOrgId: { $ne: null },
+    supersededAt: null,
+  })
+    .sort({ updatedAt: -1 })
+    .limit(200);
+  const orgIds = [...new Set(calendars.map((c) => String(c.clientOrgId)))];
+  const orgs = await ClientOrg.find({ _id: { $in: orgIds } }).select("name primaryContactEmail primaryContactPhone").lean();
+  const orgById = Object.fromEntries(orgs.map((o) => [String(o._id), o]));
+  res.json({
+    clients: calendars.map((c) => {
+      const v = staffView(c);
+      const org = orgById[String(c.clientOrgId)] || {};
+      return {
+        calendarId: String(c._id),
+        clientOrgId: String(c.clientOrgId),
+        company: org.name || c.profile?.companyName || "(unnamed)",
+        email: org.primaryContactEmail || "",
+        phone: org.primaryContactPhone || "",
+        updatedAt: c.updatedAt,
+        ...v.summary,
+      };
+    }),
+  });
+});
+
 // GET /api/calendars/:id
 // Attaches suggestedFee (from the lib/complianceFees.js price list) to
 // each item that hasn't been invoiced yet, purely as a read-only hint
@@ -108,12 +144,7 @@ router.get("/approved", async (req, res) => {
 router.get("/:id", async (req, res) => {
   const calendar = await Calendar.findById(req.params.id);
   if (!calendar) return res.status(404).json({ error: "Not found." });
-  const payload = calendar.toObject();
-  payload.items = payload.items.map((item) => {
-    if (item.feeAmountCents) return item;
-    return { ...item, suggestedFee: getSuggestedFee(item) };
-  });
-  res.json({ calendar: payload });
+  res.json({ calendar: staffView(calendar) });
 });
 
 // PATCH /api/calendars/:id/items/:index — reviewer edits one line item
@@ -145,7 +176,7 @@ router.patch("/:id/items/:index", async (req, res) => {
   calendar.items[idx].editedByReviewer = true;
 
   await calendar.save();
-  res.json({ calendar });
+  res.json({ calendar: staffView(calendar) });
 });
 
 // POST /api/calendars/:id/approve
@@ -168,7 +199,16 @@ router.post("/:id/approve", async (req, res) => {
     summary: `Approved the compliance calendar for ${calendar.profile?.companyName || "a company"}.`,
     meta: { notes: calendar.reviewNotes },
   });
-  res.json({ calendar });
+  notifyClient({
+    clientOrgId: calendar.clientOrgId,
+    calendarId: calendar._id,
+    type: "calendar_approved",
+    title: "Your compliance calendar is ready",
+    body: "Our team has verified your compliance calendar. Choose the services you'd like us to handle and upload the documents listed for each one.",
+    link: portalLink(calendar),
+    actorName: req.user.name || req.user.email,
+  });
+  res.json({ calendar: staffView(calendar) });
 });
 
 // POST /api/calendars/:id/reject
@@ -191,7 +231,7 @@ router.post("/:id/reject", async (req, res) => {
     summary: `Rejected the compliance calendar for ${calendar.profile?.companyName || "a company"}.`,
     meta: { notes: calendar.reviewNotes },
   });
-  res.json({ calendar });
+  res.json({ calendar: staffView(calendar) });
 });
 
 // PATCH /api/calendars/:id/items/:index/status — update the ongoing
@@ -210,6 +250,7 @@ router.patch("/:id/items/:index/status", async (req, res) => {
 
   const { clientStatus, paymentStatus, dueDateActual, feeAmountUSD } = req.body || {};
   const item = calendar.items[idx];
+  const before = { clientStatus: item.clientStatus, paymentStatus: item.paymentStatus, fee: item.feeAmountCents };
   if (clientStatus !== undefined) {
     if (!Calendar.schema.path("items").schema.path("clientStatus").enumValues.includes(clientStatus)) {
       return res.status(400).json({ error: "Invalid clientStatus value." });
@@ -240,7 +281,16 @@ router.patch("/:id/items/:index/status", async (req, res) => {
     if (isNaN(dollars) || dollars <= 0) {
       return res.status(400).json({ error: "feeAmountUSD must be a positive number." });
     }
+    if (item.paymentStatus === "Paid" && Math.round(dollars * 100) !== item.feeAmountCents) {
+      return res.status(400).json({ error: "This item is already paid — the fee can't be changed. Refunds and adjustments go through Razorpay." });
+    }
     item.feeAmountCents = Math.round(dollars * 100);
+    // A Razorpay order is created for a fixed amount. If the fee changes,
+    // the old order must not be payable at the old price any more.
+    if (item.razorpayOrderId && item.feeAmountCents !== before.fee) {
+      item.paymentEvents.push({ event: "order_voided", razorpayOrderId: item.razorpayOrderId, amountCents: before.fee });
+      item.razorpayOrderId = null;
+    }
   }
   if (dueDateActual !== undefined) {
     const parsed = dueDateActual ? new Date(dueDateActual) : null;
@@ -249,9 +299,118 @@ router.patch("/:id/items/:index/status", async (req, res) => {
     }
     item.dueDateActual = parsed;
   }
+  // Staff invoicing an item means the client wants it done.
+  if (item.paymentStatus === "Invoiced" && !item.selectedByClient) {
+    item.selectedByClient = true;
+    item.selectedAt = new Date();
+  }
 
   await calendar.save();
-  res.json({ calendar });
+  res.json({ calendar: staffView(calendar) });
+
+  // Tell the client about changes that matter to them.
+  const who = req.user.name || req.user.email;
+  if (item.paymentStatus === "Invoiced" && (before.paymentStatus !== "Invoiced" || before.fee !== item.feeAmountCents)) {
+    notifyClient({
+      clientOrgId: calendar.clientOrgId,
+      calendarId: calendar._id,
+      itemIndex: idx,
+      type: "quote_sent",
+      title: `Price for ${item.compliance_name}: ${formatUSD(item.feeAmountCents)}`,
+      body: `The fee for ${item.compliance_name} is ${formatUSD(item.feeAmountCents)}. You can pay from your portal once all the documents for it are uploaded.`,
+      link: portalLink(calendar),
+      actorName: who,
+    });
+  } else if (item.clientStatus !== before.clientStatus) {
+    notifyClient({
+      clientOrgId: calendar.clientOrgId,
+      calendarId: calendar._id,
+      itemIndex: idx,
+      type: "status_changed",
+      title: `${item.compliance_name} is now "${item.clientStatus}"`,
+      body: `We updated the status of ${item.compliance_name} from "${before.clientStatus}" to "${item.clientStatus}".`,
+      link: portalLink(calendar),
+      actorName: who,
+      email: item.clientStatus === "Filed" || item.clientStatus === "Overdue",
+    });
+  }
+});
+
+// POST /api/calendars/:id/items/:index/quote  { feeAmountUSD, note? }
+// "While we verify the documents, send them the price on site." Sets the
+// fee, marks the item Invoiced, posts the quote into the client's chat
+// thread and notifies them (bell + email) in one step. The client pays
+// against exactly this amount — payments.routes.js never reads a price
+// from the browser.
+router.post("/:id/items/:index/quote", async (req, res) => {
+  const calendar = await Calendar.findById(req.params.id);
+  if (!calendar) return res.status(404).json({ error: "Not found." });
+  if (calendar.status !== "approved") return res.status(400).json({ error: "Approve the calendar before sending a quote." });
+  if (!calendar.clientOrgId) return res.status(400).json({ error: "This calendar isn't linked to a client yet." });
+  const idx = parseInt(req.params.index, 10);
+  if (isNaN(idx) || idx < 0 || idx >= calendar.items.length) {
+    return res.status(400).json({ error: "Invalid item index." });
+  }
+  const item = calendar.items[idx];
+  if (item.paymentStatus === "Paid") return res.status(400).json({ error: "This item is already paid." });
+
+  const dollars = Number(req.body?.feeAmountUSD);
+  if (!isFinite(dollars) || dollars <= 0) {
+    return res.status(400).json({ error: "Enter the price in USD (a positive number).", suggestedFee: getSuggestedFee(item) });
+  }
+  const cents = Math.round(dollars * 100);
+  const note = typeof req.body?.note === "string" ? req.body.note.trim().slice(0, 500) : "";
+
+  if (item.razorpayOrderId && cents !== item.feeAmountCents) {
+    item.paymentEvents.push({ event: "order_voided", razorpayOrderId: item.razorpayOrderId, amountCents: item.feeAmountCents });
+    item.razorpayOrderId = null;
+  }
+  item.feeAmountCents = cents;
+  item.quoteNote = note;
+  item.quotedBy = req.user.email;
+  item.quotedAt = new Date();
+  item.paymentStatus = "Invoiced";
+  if (!item.selectedByClient) {
+    item.selectedByClient = true;
+    item.selectedAt = new Date();
+  }
+  await calendar.save();
+
+  const price = formatUSD(cents);
+  const who = req.user.name || req.user.email;
+  logActivity({
+    action: "quote_sent",
+    actor: req.user,
+    clientOrgId: calendar.clientOrgId,
+    calendarId: calendar._id,
+    itemIndex: idx,
+    summary: `Quoted ${price} for ${item.compliance_name}.`,
+    meta: { amountCents: cents, note },
+  });
+  Message.create({
+    clientOrgId: calendar.clientOrgId,
+    senderId: req.user._id,
+    senderName: who,
+    senderRole: req.user.role,
+    body: `Price for ${item.compliance_name}: ${price}.${note ? " " + note : ""} You can pay from your portal once all the documents for it are uploaded.`,
+    calendarId: calendar._id,
+    itemIndex: idx,
+    itemLabel: item.compliance_name,
+    readByStaff: true,
+    readByClient: false,
+  }).catch((err) => console.error("[quote] chat message failed (non-fatal):", err.message));
+  notifyClient({
+    clientOrgId: calendar.clientOrgId,
+    calendarId: calendar._id,
+    itemIndex: idx,
+    type: "quote_sent",
+    title: `Price for ${item.compliance_name}: ${price}`,
+    body: `The fee for ${item.compliance_name} is ${price}.${note ? " " + note : ""}`,
+    link: portalLink(calendar),
+    actorName: who,
+  });
+
+  res.json({ calendar: staffView(calendar) });
 });
 
 // POST /api/calendars/:id/items/:index/certificate — staff uploads the
@@ -284,7 +443,17 @@ router.post("/:id/items/:index/certificate", upload.single("file"), async (req, 
     // PATCH .../status if that's wrong for a given item.
     calendar.items[idx].clientStatus = "Filed";
     await calendar.save();
-    res.status(201).json({ calendar });
+    res.status(201).json({ calendar: staffView(calendar) });
+    notifyClient({
+      clientOrgId: calendar.clientOrgId,
+      calendarId: calendar._id,
+      itemIndex: idx,
+      type: "certificate_uploaded",
+      title: `${calendar.items[idx].compliance_name} has been filed`,
+      body: `We've filed ${calendar.items[idx].compliance_name}. The certificate / acknowledgment "${req.file.originalname}" is ready to download in your portal.`,
+      link: portalLink(calendar),
+      actorName: req.user.name || req.user.email,
+    });
   } catch (err) {
     console.error("Certificate upload error:", err);
     res.status(500).json({ error: "Could not save the uploaded file." });
@@ -368,25 +537,32 @@ router.patch("/:id/items/:index/documents/:docIndex/review", async (req, res) =>
       readByClient: false,
     }).catch((err) => console.error("[document review] chat message failed (non-fatal):", err.message));
 
-    ClientOrg.findById(calendar.clientOrgId)
-      .then((org) => {
-        if (!org?.primaryContactEmail) return;
-        return sendEmail({
-          to: org.primaryContactEmail,
-          subject: `Action needed: a document for ${item.compliance_name} was not accepted`,
-          text:
-            `Hi ${org.primaryContactName || ""},\n\n` +
-            `We reviewed "${doc.fileName}" that was uploaded for ${item.compliance_name} and it needs to be re-uploaded.\n\n` +
-            `Reason: ${doc.reviewNote}\n\n` +
-            `Please log in to your portal to upload a corrected file: ${process.env.APP_URL || ""}/portal.html\n\n` +
-            `— ComplyGlobally`,
-          logPrefix: "[document review]",
-        });
-      })
-      .catch((err) => console.error("[document review] client email failed (non-fatal):", err.message));
+    notifyClient({
+      clientOrgId: calendar.clientOrgId,
+      calendarId: calendar._id,
+      itemIndex: idx,
+      type: "document_rejected",
+      title: `Action needed: please re-upload a document for ${item.compliance_name}`,
+      body: `We reviewed "${doc.fileName}" for ${item.compliance_name} and it needs to be re-uploaded.\n\nReason: ${doc.reviewNote}`,
+      link: portalLink(calendar),
+      actorName: req.user.name || req.user.email,
+    });
+  }
+  if (reviewStatus === "accepted" && calendar.clientOrgId) {
+    notifyClient({
+      clientOrgId: calendar.clientOrgId,
+      calendarId: calendar._id,
+      itemIndex: idx,
+      type: "document_accepted",
+      title: `"${doc.fileName}" was accepted`,
+      body: `We verified "${doc.fileName}" for ${item.compliance_name}.`,
+      link: portalLink(calendar),
+      actorName: req.user.name || req.user.email,
+      email: false,
+    });
   }
 
-  res.json({ calendar });
+  res.json({ calendar: staffView(calendar) });
 });
 
 // GET /api/calendars/:id/items/:index/documents/:docIndex/download — any
@@ -404,7 +580,7 @@ router.get("/:id/items/:index/documents/:docIndex/download", async (req, res) =>
 
   const stream = await storage.getFileStream(doc.fileKey);
   if (!stream) return res.status(404).json({ error: "File is missing from storage." });
-  res.setHeader("Content-Disposition", `attachment; filename="${doc.fileName}"`);
+  setDownloadHeaders(res, doc.fileName);
   stream.pipe(res);
 });
 
