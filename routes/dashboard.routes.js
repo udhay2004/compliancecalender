@@ -34,7 +34,12 @@ router.use(requireAuth, requireRole("staff"));
 // "Real client work", as opposed to the anonymous lead-gen calendars
 // from the public tool, which would otherwise inflate every count on
 // every dashboard.
-const REAL_WORK = { source: "staff" };
+// Includes calendars a client claimed from the public tool (they keep
+// source:"public" but gain a clientOrgId) — those used to be invisible
+// here. Superseded calendars are excluded so a regenerated calendar isn't
+// counted twice.
+const { REAL_WORK_MATCH, toView } = require("../lib/calendarView");
+const REAL_WORK = { ...REAL_WORK_MATCH, supersededAt: null };
 
 // Staff accounts created before departments existed have department ""
 // — they fall through to the tech/delivery view, which is what the
@@ -84,6 +89,47 @@ async function buildTechSection() {
     ClientOrg.countDocuments(),
   ]);
 
+  // The actual documents waiting on a human, oldest first, so the
+  // dashboard is a work list and not just a number.
+  const pendingDocList = await Calendar.aggregate([
+    { $match: REAL_WORK },
+    { $project: { profile: 1, clientOrgId: 1, items: { $map: { input: { $range: [0, { $size: "$items" }] }, as: "i", in: { idx: "$$i", it: { $arrayElemAt: ["$items", "$$i"] } } } } } },
+    { $unwind: "$items" },
+    { $project: { profile: 1, idx: "$items.idx", name: "$items.it.compliance_name", selected: "$items.it.selectedByClient", docs: "$items.it.documents" } },
+    { $unwind: "$docs" },
+    { $match: { "docs.type": "client_upload", "docs.reviewStatus": "pending" } },
+    { $sort: { "docs.uploadedAt": 1 } },
+    { $limit: 15 },
+  ]);
+
+  // Per client: what they picked and what's waiting on us. Sorted so the
+  // clients who need something from the team come first.
+  const clientCalendars = await Calendar.find({ status: "approved", clientOrgId: { $ne: null }, supersededAt: null })
+    .sort({ updatedAt: -1 })
+    .limit(60);
+  const orgNames = Object.fromEntries(
+    (await ClientOrg.find({ _id: { $in: clientCalendars.map((c) => c.clientOrgId) } }).select("name primaryContactPhone").lean())
+      .map((o) => [String(o._id), o])
+  );
+  const clientWork = clientCalendars
+    .map((c) => {
+      const sm = toView(c, { staff: true }).summary;
+      const org = orgNames[String(c.clientOrgId)] || {};
+      return {
+        calendarId: String(c._id),
+        company: org.name || c.profile?.companyName || "(unnamed)",
+        hasPhone: Boolean(org.primaryContactPhone),
+        selected: sm.selected,
+        total: sm.totalItems,
+        toVerify: sm.documentsPendingReview,
+        readyToQuote: sm.readyToQuote,
+        awaitingPayment: sm.awaitingPayment,
+        updatedAt: c.updatedAt,
+      };
+    })
+    .sort((a, b) => (b.toVerify + b.readyToQuote) - (a.toVerify + a.readyToQuote) || new Date(b.updatedAt) - new Date(a.updatedAt))
+    .slice(0, 20);
+
   const byStatus = Object.fromEntries(statusCounts.map((r) => [r._id, r.count]));
   const byItemStatus = Object.fromEntries(itemStatusCounts.map((r) => [r._id, r.count]));
 
@@ -101,6 +147,15 @@ async function buildTechSection() {
       { label: "Filed", value: byItemStatus.Filed || 0 },
       { label: "Overdue", value: byItemStatus.Overdue || 0 },
     ],
+    clientWork,
+    pendingDocuments: pendingDocList.map((d) => ({
+      calendarId: String(d._id),
+      company: d.profile?.companyName || "(unnamed)",
+      task: d.name,
+      fileName: d.docs.fileName,
+      requirement: d.docs.requirementLabel || "",
+      uploadedAt: d.docs.uploadedAt,
+    })),
     recentCalendars: recentCalendars.map((c) => ({
       id: String(c._id),
       company: c.profile?.companyName || "(unnamed)",
