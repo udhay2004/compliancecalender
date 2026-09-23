@@ -49,6 +49,21 @@ const itemSchema = new mongoose.Schema(
       enum: ["Not Invoiced", "Invoiced", "Paid", "Overdue"],
       default: "Not Invoiced",
     },
+    // --- Which services the client actually wants us to handle -----
+    // A generated calendar lists EVERYTHING that applies to the company;
+    // the client then picks the filings they want ComplyGlobally to do.
+    // This is the flag that splits the staff screen into "selected" vs
+    // "not selected", so staff only work (and invoice) what was asked
+    // for. Uploading a document for an item selects it automatically —
+    // nobody uploads paperwork for a filing they don't want done.
+    selectedByClient: { type: Boolean, default: false },
+    selectedAt: { type: Date, default: null },
+    // --- Quote sent while verifying documents -------------------------
+    // Set by POST /api/calendars/:id/items/:index/quote. quoteNote is
+    // shown to the client next to the price ("includes 2 extra states").
+    quoteNote: { type: String, default: "" },
+    quotedBy: { type: String, default: null },
+    quotedAt: { type: Date, default: null },
     // Fee for THIS item, set by staff (see PATCH /:id/items/:index/status
     // in calendar.routes.js) when they move paymentStatus to "Invoiced".
     // In cents (USD), matching Razorpay's smallest-unit convention. See
@@ -65,9 +80,15 @@ const itemSchema = new mongoose.Schema(
     paymentEvents: {
       type: [
         {
-          event: { type: String, required: true }, // "order_created" | "verify_ok" | "webhook_captured" | "webhook_failed"
+          // "order_created" | "order_reused" | "verify_ok" | "verify_authorized" |
+          // "webhook_captured" | "webhook_failed" | "amount_mismatch" | "order_voided"
+          event: { type: String, required: true },
           razorpayOrderId: String,
           razorpayPaymentId: String,
+          // What the order was created for / what Razorpay says was paid,
+          // so an amount mismatch is visible after the fact.
+          amountCents: Number,
+          currency: String,
           at: { type: Date, default: Date.now },
         },
       ],
@@ -189,7 +210,15 @@ const calendarSchema = new mongoose.Schema(
     //            real client engagements — never show them in staff
     //            queues/portals meant for actual work, only in the
     //            dedicated leads list (GET /api/admin/leads).
-    source: { type: String, enum: ["staff", "public"], default: "staff", index: true },
+    // "client" = generated (or regenerated) by a logged-in client from
+    //            their own portal / the public tool while signed in. Real
+    //            client work, same as "staff".
+    source: { type: String, enum: ["staff", "public", "client"], default: "staff", index: true },
+    // Set on a calendar a client regenerated: the calendar it replaces.
+    // The old one is kept (never deleted) so documents, payments and the
+    // history stay reachable; the portal just stops treating it as current.
+    supersedes: { type: mongoose.Schema.Types.ObjectId, ref: "Calendar", default: null },
+    supersededAt: { type: Date, default: null },
     // Only present when source is "public" and the visitor chose to
     // unlock their full result — this IS the lead. Absent means someone
     // generated a preview and left without giving contact info.
