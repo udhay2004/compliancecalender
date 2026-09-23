@@ -3,81 +3,34 @@
 // Client-facing API. Every single route here MUST filter by
 // req.user.clientOrgId — never trust a calendarId alone, or one client
 // could view another client's documents by guessing/changing a URL.
-// This file is deliberately much narrower than calendar.routes.js: a
-// client can view their own APPROVED calendar and upload documents
-// against it, and that's it. No generate, no review, no approve, no
-// visibility into other clients or pending_review calendars.
+// A client can:
+//   - see every calendar ever generated for their company (current + history)
+//   - keep their contact details up to date (email AND phone are required
+//     before any work-creating action — see requireCompleteContact)
+//   - pick which services they want ComplyGlobally to handle
+//   - upload documents, see the price for each service, pay
+//   - regenerate their calendar when their company details change
+// No review, no approve, no visibility into other clients.
 
 const express = require("express");
+const mongoose = require("mongoose");
 const Calendar = require("../models/Calendar");
 const ClientOrg = require("../models/ClientOrg");
 const { requireAuth, requireClientRole } = require("../middleware/auth");
 const { upload } = require("../middleware/upload");
 const storage = require("../lib/storage");
-const { getRequiredDocuments } = require("../lib/requiredDocuments");
-const { getSuggestedFee } = require("../lib/complianceFees");
-const { sendEmail } = require("../lib/mailer");
+const { generateCompanyCalendar } = require("../lib/claude");
+const { toView, missingContactFields, normalizePhone, setDownloadHeaders } = require("../lib/calendarView");
+const { notifyStaff, notifyClient } = require("../lib/notify");
+const { logActivity } = require("../lib/auditLog");
 
 const router = express.Router();
 router.use(requireAuth, requireClientRole);
 
-// Attaches a `requiredDocuments` array to every item, PLUS a calendar-
-// level `sharedDocumentIndex` (label -> where a matching upload already
-// exists anywhere in this calendar). This is what makes reuse work: a
-// document uploaded against "Franchise Tax" that happens to also satisfy
-// "Annual Report" (both need "EIN Confirmation Letter", say) shows up as
-// already-done on Annual Report's checklist too, without the client
-// uploading it twice. Matching is purely by label text — same reasoning
-// as requirementLabel itself (see models/Calendar.js): a stable, human-
-// readable string, not a foreign key, so it's easy to reason about and
-// easy to extend.
-// Attaches a `requiredDocuments` array to every item, PLUS a calendar-
-// level `sharedDocumentIndex` (label -> where a matching upload already
-// exists anywhere in this calendar). This is what makes reuse work: a
-// document uploaded against "Franchise Tax" that happens to also satisfy
-// "Annual Report" (both need "EIN Confirmation Letter", say) shows up as
-// already-done on Annual Report's checklist too, without the client
-// uploading it twice. Matching is purely by label text — same reasoning
-// as requirementLabel itself (see models/Calendar.js): a stable, human-
-// readable string, not a foreign key, so it's easy to reason about and
-// easy to extend. A REJECTED upload (see reviewStatus on the document
-// sub-schema) is deliberately excluded here — staff said "this isn't
-// valid", so it must not silently keep satisfying the checklist, on
-// this item or any other one it happened to be shared with.
-function withRequiredDocuments(calendar) {
-  const obj = calendar.toObject ? calendar.toObject() : calendar;
+const clientView = (calendar) => toView(calendar, { staff: false });
 
-  const sharedDocumentIndex = {};
-  (obj.items || []).forEach((item, itemIndex) => {
-    (item.documents || []).forEach((doc, docIndex) => {
-      if (
-        doc.type === "client_upload" &&
-        doc.requirementLabel &&
-        doc.reviewStatus !== "rejected" &&
-        !sharedDocumentIndex[doc.requirementLabel]
-      ) {
-        sharedDocumentIndex[doc.requirementLabel] = {
-          itemIndex,
-          docIndex,
-          fileName: doc.fileName,
-          compliance_name: item.compliance_name,
-        };
-      }
-    });
-  });
-
-  obj.items = (obj.items || []).map((item) => ({
-    ...item,
-    requiredDocuments: getRequiredDocuments(item),
-    // For items with no fee set yet, pass through the price list's
-    // client-facing line (lib/complianceFees.js) so the portal can say
-    // something meaningful instead of leaving a blank space where a
-    // price would go. Never exposes the internal `note` or the
-    // suggested amount — those are staff-only.
-    feeMessage: item.feeAmountCents ? null : (getSuggestedFee(item)?.customerMessage || null),
-  }));
-  obj.sharedDocumentIndex = sharedDocumentIndex;
-  return obj;
+function staffLink(calendarId) {
+  return `/calendar.html?id=${calendarId}`;
 }
 
 // Every route below finds the calendar via this helper, which builds the
@@ -85,6 +38,7 @@ function withRequiredDocuments(calendar) {
 // "forget" to check clientOrgId, the query simply returns nothing for
 // a calendar that isn't theirs.
 function findOwnApprovedCalendar(req, calendarId) {
+  if (!mongoose.isValidObjectId(calendarId)) return Promise.resolve(null);
   return Calendar.findOne({
     _id: calendarId,
     clientOrgId: req.user.clientOrgId,
@@ -92,24 +46,117 @@ function findOwnApprovedCalendar(req, calendarId) {
   });
 }
 
+function parseItemIndex(calendar, raw) {
+  const idx = parseInt(raw, 10);
+  if (isNaN(idx) || idx < 0 || idx >= calendar.items.length) return null;
+  return idx;
+}
+
+// Blocks work-creating actions until the company has both an email and a
+// phone number on file. The portal shows a "complete your details" form
+// when it gets this error code, so the client is never stuck guessing.
+async function requireCompleteContact(req, res, next) {
+  const org = await ClientOrg.findById(req.user.clientOrgId);
+  const missing = missingContactFields(org);
+  if (missing.length) {
+    return res.status(409).json({
+      error: `Please add your ${missing.join(" and ")} before continuing.`,
+      code: "CONTACT_INCOMPLETE",
+      missing,
+    });
+  }
+  req.clientOrg = org;
+  next();
+}
+
+// ---------------------------------------------------------------------
+// Profile / contact details
+// ---------------------------------------------------------------------
+
+function profilePayload(org, user) {
+  return {
+    companyName: org?.name || "",
+    contactName: org?.primaryContactName || user.name || "",
+    email: org?.primaryContactEmail || "",
+    phone: org?.primaryContactPhone || "",
+    loginEmail: user.email,
+    missing: missingContactFields(org),
+  };
+}
+
+// GET /api/portal/profile
+router.get("/profile", async (req, res) => {
+  const org = await ClientOrg.findById(req.user.clientOrgId);
+  res.json({ profile: profilePayload(org, req.user) });
+});
+
+// PATCH /api/portal/profile  { companyName?, contactName?, email?, phone? }
+router.patch("/profile", async (req, res) => {
+  const org = await ClientOrg.findById(req.user.clientOrgId);
+  if (!org) return res.status(404).json({ error: "Company not found." });
+  const { companyName, contactName, email, phone } = req.body || {};
+  const changed = [];
+
+  if (companyName !== undefined) {
+    const v = String(companyName).trim().slice(0, 200);
+    if (!v) return res.status(400).json({ error: "Company name can't be empty." });
+    if (v !== org.name) { org.name = v; changed.push("company name"); }
+  }
+  if (contactName !== undefined) {
+    const v = String(contactName).trim().slice(0, 200);
+    if (v !== org.primaryContactName) { org.primaryContactName = v; changed.push("contact name"); }
+  }
+  if (email !== undefined) {
+    const v = String(email).trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return res.status(400).json({ error: "Enter a valid email address." });
+    if (v !== org.primaryContactEmail) { org.primaryContactEmail = v; changed.push("email"); }
+  }
+  if (phone !== undefined) {
+    const v = normalizePhone(String(phone));
+    if (!v) return res.status(400).json({ error: "Enter a valid phone number, including the country code (e.g. +1 415 555 0100)." });
+    if (v !== org.primaryContactPhone) { org.primaryContactPhone = v; changed.push("phone"); }
+  }
+  // Belt and braces: never let an update leave the org without an email
+  // or phone — this route is the only way a client can change them.
+  const stillMissing = missingContactFields(org);
+  if (stillMissing.length) {
+    return res.status(400).json({ error: `Your ${stillMissing.join(" and ")} is required.`, missing: stillMissing });
+  }
+
+  await org.save();
+  if (changed.length) {
+    notifyStaff({
+      clientOrgId: org._id,
+      type: "profile_updated",
+      title: `${org.name} updated their contact details`,
+      body: `Changed: ${changed.join(", ")}.`,
+      link: "/admin.html",
+      actorName: req.user.name || req.user.email,
+      email: false,
+    });
+  }
+  res.json({ profile: profilePayload(org, req.user) });
+});
+
+// ---------------------------------------------------------------------
+// Calendars
+// ---------------------------------------------------------------------
+
 // GET /api/portal/calendars — every approved calendar belonging to this
-// client's org (usually one, but a client could have more than one
-// entity under the same login in the future).
+// client's org, CURRENT first (not superseded), then history newest
+// first. Nothing a client ever generated is dropped from here.
 router.get("/calendars", async (req, res) => {
   const calendars = await Calendar.find({
     clientOrgId: req.user.clientOrgId,
     status: "approved",
-  }).sort({ reviewedAt: -1 });
-  res.json({ calendars: calendars.map(withRequiredDocuments) });
+  }).sort({ supersededAt: 1, createdAt: -1 });
+  const views = calendars.map(clientView);
+  views.sort((a, b) => (a.supersededAt ? 1 : 0) - (b.supersededAt ? 1 : 0) || new Date(b.createdAt) - new Date(a.createdAt));
+  res.json({ calendars: views });
 });
 
-// GET /api/portal/calendars/pending — READ-ONLY. A client whose calendar
-// was just linked to their account (e.g. via the "Start Filing" Google
-// login flow in routes/auth.routes.js) needs SOME signal that something
-// is happening, rather than an empty portal that looks broken. This
-// deliberately does NOT support upload/document routes — those still
-// only work on approved calendars via findOwnApprovedCalendar below —
-// so the staff-review gate stays exactly as strict as it was before.
+// GET /api/portal/calendars/pending — READ-ONLY summary of calendars still
+// under staff review, so the portal isn't blank while that happens.
 router.get("/calendars/pending", async (req, res) => {
   const calendars = await Calendar.find({
     clientOrgId: req.user.clientOrgId,
@@ -124,18 +171,59 @@ router.get("/calendars/pending", async (req, res) => {
 router.get("/calendars/:id", async (req, res) => {
   const calendar = await findOwnApprovedCalendar(req, req.params.id);
   if (!calendar) return res.status(404).json({ error: "Not found." });
-  res.json({ calendar: withRequiredDocuments(calendar) });
+  res.json({ calendar: clientView(calendar) });
+});
+
+// POST /api/portal/calendars/:id/items/:index/select  { selected: true|false }
+// The client choosing which services they want us to handle.
+router.post("/calendars/:id/items/:index/select", requireCompleteContact, async (req, res) => {
+  const calendar = await findOwnApprovedCalendar(req, req.params.id);
+  if (!calendar) return res.status(404).json({ error: "Not found." });
+  if (calendar.supersededAt) return res.status(400).json({ error: "This is an older calendar. Make changes on your current one." });
+  const idx = parseItemIndex(calendar, req.params.index);
+  if (idx === null) return res.status(400).json({ error: "Invalid item index." });
+  const item = calendar.items[idx];
+  const selected = req.body?.selected !== false;
+
+  if (!selected) {
+    if (item.paymentStatus === "Paid" || item.clientStatus === "Filed") {
+      return res.status(400).json({ error: "This service is already paid for or filed, so it can't be removed. Message us if something's wrong." });
+    }
+    if (item.paymentStatus === "Invoiced" || item.paymentStatus === "Overdue") {
+      return res.status(400).json({ error: "We've already sent a quote for this service. Message us if you'd like to cancel it." });
+    }
+  }
+  if (item.selectedByClient === selected) return res.json({ calendar: clientView(calendar) });
+
+  item.selectedByClient = selected;
+  item.selectedAt = selected ? new Date() : null;
+  if (selected && item.clientStatus === "Not Started") item.clientStatus = "Awaiting Documents";
+  if (!selected && item.clientStatus === "Awaiting Documents") item.clientStatus = "Not Started";
+  await calendar.save();
+
+  res.json({ calendar: clientView(calendar) });
+
+  notifyStaff({
+    clientOrgId: calendar.clientOrgId,
+    calendarId: calendar._id,
+    itemIndex: idx,
+    type: selected ? "service_selected" : "service_deselected",
+    title: `${req.clientOrg.name} ${selected ? "selected" : "removed"} ${item.compliance_name}`,
+    body: selected ? "They want ComplyGlobally to handle this filing." : "They no longer want this filing handled.",
+    link: staffLink(calendar._id),
+    actorName: req.user.name || req.user.email,
+    email: false, // selections are frequent; the bell is enough, uploads/payments still email
+  });
 });
 
 // POST /api/portal/calendars/:id/items/:index/upload — client uploads a
 // document as proof/support for one compliance item.
-router.post("/calendars/:id/items/:index/upload", upload.single("file"), async (req, res) => {
+router.post("/calendars/:id/items/:index/upload", requireCompleteContact, upload.single("file"), async (req, res) => {
   const calendar = await findOwnApprovedCalendar(req, req.params.id);
   if (!calendar) return res.status(404).json({ error: "Not found." });
-  const idx = parseInt(req.params.index, 10);
-  if (isNaN(idx) || idx < 0 || idx >= calendar.items.length) {
-    return res.status(400).json({ error: "Invalid item index." });
-  }
+  if (calendar.supersededAt) return res.status(400).json({ error: "This is an older calendar. Upload on your current one." });
+  const idx = parseItemIndex(calendar, req.params.index);
+  if (idx === null) return res.status(400).json({ error: "Invalid item index." });
   if (!req.file) return res.status(400).json({ error: "No file uploaded (field name must be 'file')." });
 
   try {
@@ -144,13 +232,9 @@ router.post("/calendars/:id/items/:index/upload", upload.single("file"), async (
       fileName: req.file.originalname,
     });
     const item = calendar.items[idx];
-    // requirementLabel is set by the portal UI to say WHICH checklist row
-    // this upload satisfies (e.g. "Registered Agent Consent Letter" — see
-    // lib/requiredDocuments.js). Not required/validated against the
-    // lookup table server-side: it's a display/checklist-matching hint,
-    // not an access-control value, so a stale or unrecognized label just
-    // means that one row won't show a tick — it never blocks the upload
-    // itself from succeeding.
+    // requirementLabel says WHICH checklist row this upload satisfies (see
+    // lib/requiredDocuments.js). A display/matching hint, not an access-
+    // control value, so an unknown label never blocks the upload.
     const requirementLabel = typeof req.body.requirementLabel === "string" ? req.body.requirementLabel.slice(0, 200) : "";
     item.documents.push({
       fileKey,
@@ -159,37 +243,40 @@ router.post("/calendars/:id/items/:index/upload", upload.single("file"), async (
       uploadedBy: req.user.email,
       type: "client_upload",
       requirementLabel,
+      reviewStatus: "pending",
     });
-    // Client uploading something is the "I've given you what you asked
-    // for" signal — moves the item into staff's queue for review. Staff
-    // can still set it back via PATCH /api/calendars/:id/items/:index/status.
+    // Nobody uploads paperwork for a filing they don't want done.
+    if (!item.selectedByClient) {
+      item.selectedByClient = true;
+      item.selectedAt = new Date();
+    }
     if (item.clientStatus === "Not Started" || item.clientStatus === "Awaiting Documents") {
       item.clientStatus = "Under Review";
     }
     await calendar.save();
-    res.status(201).json({ calendar: withRequiredDocuments(calendar) });
+    res.status(201).json({ calendar: clientView(calendar) });
 
-    // Best-effort — never block the upload response on this. Tells
-    // whoever is this client's point of contact (or the general ops
-    // inbox if nobody's assigned yet) that something showed up to
-    // review, the same "new lead" notification pattern already used in
-    // routes/public.routes.js, just pointed at a different event.
-    ClientOrg.findById(req.user.clientOrgId)
-      .populate("assignedStaff", "email name")
-      .then((org) => {
-        const to = org?.assignedStaff?.email || process.env.ADMIN_EMAIL;
-        if (!to) return;
-        return sendEmail({
-          to,
-          subject: `New document uploaded: ${org?.name || "a client"} — ${item.compliance_name}`,
-          text:
-            `${req.user.name || req.user.email} uploaded "${req.file.originalname}" for ${item.compliance_name}` +
-            (requirementLabel ? ` (${requirementLabel})` : "") +
-            `.\n\nReview it here: ${process.env.APP_URL || ""}/calendar.html?id=${calendar._id}`,
-          logPrefix: "[client upload]",
-        });
-      })
-      .catch((err) => console.error("[client upload] staff notification failed (non-fatal):", err.message));
+    logActivity({
+      action: "document_uploaded",
+      actor: req.user,
+      clientOrgId: calendar.clientOrgId,
+      calendarId: calendar._id,
+      itemIndex: idx,
+      summary: `Uploaded "${req.file.originalname}" for ${item.compliance_name}.`,
+    });
+    notifyStaff({
+      clientOrgId: calendar.clientOrgId,
+      calendarId: calendar._id,
+      itemIndex: idx,
+      type: "document_uploaded",
+      title: `New document for ${item.compliance_name}`,
+      body:
+        `${req.user.name || req.user.email} uploaded "${req.file.originalname}"` +
+        (requirementLabel ? ` (${requirementLabel})` : "") +
+        `. It's waiting for someone to verify it.`,
+      link: staffLink(calendar._id),
+      actorName: req.user.name || req.user.email,
+    });
   } catch (err) {
     console.error("Client upload error:", err);
     res.status(500).json({ error: "Could not save the uploaded file." });
@@ -200,23 +287,158 @@ router.post("/calendars/:id/items/:index/upload", upload.single("file"), async (
 router.get("/calendars/:id/items/:index/documents/:docIndex/download", async (req, res) => {
   const calendar = await findOwnApprovedCalendar(req, req.params.id);
   if (!calendar) return res.status(404).json({ error: "Not found." });
-  const idx = parseInt(req.params.index, 10);
+  const idx = parseItemIndex(calendar, req.params.index);
   const docIdx = parseInt(req.params.docIndex, 10);
-  const item = calendar.items[idx];
-  const doc = item && item.documents[docIdx];
+  const doc = idx !== null ? calendar.items[idx].documents[docIdx] : null;
   if (!doc) return res.status(404).json({ error: "Document not found." });
 
   const stream = await storage.getFileStream(doc.fileKey);
   if (!stream) return res.status(404).json({ error: "File is missing from storage." });
-  res.setHeader("Content-Disposition", `attachment; filename="${doc.fileName}"`);
+  setDownloadHeaders(res, doc.fileName);
   stream.pipe(res);
 });
 
-// GET /api/portal/contact — who to reach for help: the staff member
-// assigned to this client's org (see ClientOrg.assignedStaff), if any,
-// plus ComplyGlobally's general contact details as an always-available
-// fallback. Configure the fallback via SUPPORT_EMAIL / SUPPORT_PHONE in
-// .env — see .env.example.
+// ---------------------------------------------------------------------
+// Regenerate
+// ---------------------------------------------------------------------
+
+// Research calls cost real money (Claude + web search), so a client can
+// regenerate a few times a day, not in a loop. Per org, in memory — the
+// same trade-off as the staff limiter in calendar.routes.js.
+const REGEN_LIMIT_PER_DAY = 3;
+const regenHits = new Map();
+function regenRateLimited(orgId) {
+  const now = Date.now();
+  const arr = (regenHits.get(orgId) || []).filter((t) => now - t < 24 * 60 * 60 * 1000);
+  if (arr.length >= REGEN_LIMIT_PER_DAY) return true;
+  arr.push(now);
+  regenHits.set(orgId, arr);
+  return false;
+}
+
+const EDITABLE_PROFILE_FIELDS = [
+  "companyName", "entityType", "taxStatus", "incorpDate", "fyStart", "fyEnd",
+  "hasForeignParent", "odiDone", "odiInvestorType", "employeeStates", "quarterlyGrossReceipts",
+];
+
+function nameKey(name) {
+  return String(name || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+// Carry the client's work over from the calendar being replaced: for any
+// filing that still exists in the new calendar (same name), keep what they
+// selected, what they uploaded, and anything already paid or filed. The
+// old calendar itself is left untouched in history.
+function carryOverProgress(oldCalendar, newItems) {
+  const byName = new Map();
+  oldCalendar.items.forEach((it) => byName.set(nameKey(it.compliance_name), it));
+  let carried = 0;
+  const items = newItems.map((it) => {
+    const prev = byName.get(nameKey(it.compliance_name));
+    if (!prev) return it;
+    carried++;
+    const p = prev.toObject ? prev.toObject() : prev;
+    return {
+      ...it,
+      selectedByClient: p.selectedByClient,
+      selectedAt: p.selectedAt,
+      clientStatus: p.clientStatus,
+      documents: p.documents || [],
+      feeAmountCents: p.feeAmountCents,
+      quoteNote: p.quoteNote,
+      quotedBy: p.quotedBy,
+      quotedAt: p.quotedAt,
+      paymentStatus: p.paymentStatus,
+      paidAt: p.paidAt,
+      razorpayPaymentId: p.paymentStatus === "Paid" ? p.razorpayPaymentId : null,
+      // An unpaid Razorpay order stays attached to the OLD item so the
+      // webhook can still find it; the client gets a fresh order here.
+      razorpayOrderId: null,
+      paymentEvents: p.paymentEvents || [],
+      dueDateActual: p.dueDateActual,
+    };
+  });
+  return { items, carried };
+}
+
+// POST /api/portal/calendars/regenerate  { calendarId, profile: { ...changes } }
+router.post("/calendars/regenerate", requireCompleteContact, async (req, res) => {
+  const base = await findOwnApprovedCalendar(req, req.body?.calendarId);
+  if (!base) return res.status(404).json({ error: "Calendar not found." });
+  if (base.supersededAt) return res.status(400).json({ error: "Regenerate from your current calendar." });
+  if (regenRateLimited(String(req.user.clientOrgId))) {
+    return res.status(429).json({ error: `You can regenerate up to ${REGEN_LIMIT_PER_DAY} times a day. Try again tomorrow, or message us.` });
+  }
+
+  const baseProfile = base.profile.toObject ? base.profile.toObject() : { ...base.profile };
+  const changes = req.body?.profile || {};
+  const profile = { ...baseProfile };
+  EDITABLE_PROFILE_FIELDS.forEach((f) => {
+    if (changes[f] !== undefined) profile[f] = changes[f];
+  });
+  // Country / state define a different legal entity — that's a new
+  // calendar from the public tool, not a regeneration of this one.
+
+  try {
+    const { items, sourceMode } = await generateCompanyCalendar(profile);
+    if (!items.length) {
+      return res.status(502).json({ error: "The research came back empty. Try again in a few minutes." });
+    }
+    const { items: mergedItems, carried } = carryOverProgress(base, items);
+
+    // Auto-approved, the same way a calendar claimed through "Start
+    // filing" is (routes/auth.routes.js) — the client keeps working
+    // without a gap. Staff are notified and can still edit or reject it.
+    const calendar = await Calendar.create({
+      createdBy: req.user.email,
+      source: "client",
+      clientOrgId: req.user.clientOrgId,
+      profile,
+      items: mergedItems,
+      status: "approved",
+      reviewedBy: "auto",
+      reviewedAt: new Date(),
+      sourceMode,
+      supersedes: base._id,
+    });
+    base.supersededAt = new Date();
+    await base.save();
+
+    res.status(201).json({ calendar: clientView(calendar), carried });
+
+    const who = req.user.name || req.user.email;
+    logActivity({
+      action: "calendar_regenerated",
+      actor: req.user,
+      clientOrgId: calendar.clientOrgId,
+      calendarId: calendar._id,
+      summary: `Regenerated the compliance calendar for ${profile.companyName || "their company"} (${items.length} items, ${carried} carried over).`,
+    });
+    notifyStaff({
+      clientOrgId: calendar.clientOrgId,
+      calendarId: calendar._id,
+      type: "calendar_regenerated",
+      title: `${req.clientOrg.name} regenerated their calendar`,
+      body: `${who} regenerated the calendar: ${items.length} items, ${carried} carried over from the previous version. Please give it a quick check.`,
+      link: staffLink(calendar._id),
+      actorName: who,
+    });
+    notifyClient({
+      clientOrgId: calendar.clientOrgId,
+      calendarId: calendar._id,
+      type: "calendar_regenerated",
+      title: "Your compliance calendar was regenerated",
+      body: `Your new calendar has ${items.length} items. We kept your selections, documents and payments for the ${carried} filings that are still on it. Your previous calendar is still available under "Calendar history".`,
+      link: `/portal.html?calendar=${calendar._id}`,
+      actorName: who,
+    });
+  } catch (err) {
+    console.error("Client regenerate error:", err);
+    res.status(502).json({ error: "We couldn't finish the research just now. Please try again in a few minutes." });
+  }
+});
+
+// GET /api/portal/contact — who to reach for help.
 router.get("/contact", async (req, res) => {
   const org = await ClientOrg.findById(req.user.clientOrgId).populate("assignedStaff", "name email");
   res.json({
@@ -230,3 +452,4 @@ router.get("/contact", async (req, res) => {
 });
 
 module.exports = router;
+module.exports.carryOverProgress = carryOverProgress;
