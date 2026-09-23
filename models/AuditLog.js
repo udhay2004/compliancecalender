@@ -25,6 +25,10 @@ const auditLogSchema = new mongoose.Schema(
         "document_rejected",
         "payment_captured",
         "payment_failed",
+        "payment_amount_mismatch",
+        "document_uploaded",
+        "calendar_regenerated",
+        "quote_sent",
         "user_deactivated",
         "user_reactivated",
         // Account-security events. Worth keeping alongside the
