@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/shared.css">
 <style>
-  .status-pill { display:inline-block; padding:2px 10px; border-radius:999px; font-size:12px; font-weight:500; }
+  .status-pill { display:inline-block; padding:2px 10px; border-radius:999px; font-size:12px; font-weight:500; white-space:nowrap; }
   .status-Not-Started { background:var(--grey-bg); color:var(--grey-dot); }
   .status-Awaiting-Documents { background:var(--seal-gold-bg); color:var(--seal-gold); }
   .status-Under-Review { background:var(--teal-bg); color:var(--teal); }
@@ -16,11 +16,45 @@
   .status-Overdue { background:var(--stamp-red-bg); color:var(--stamp-red); }
   .item-row { border-bottom:1px solid var(--rule); padding:16px 0; }
   .item-row:last-child { border-bottom:none; }
-  .doc-chip { display:inline-flex; align-items:center; gap:6px; font-size:13px; padding:4px 10px; border:1px solid var(--rule); border-radius:999px; margin:4px 6px 0 0; text-decoration:none; color:var(--ink); }
-  .pay-btn { display:inline-block; padding:8px 16px; border-radius:6px; background:var(--teal); color:#fff; font-size:13px; font-weight:600; border:none; cursor:pointer; }
-  .pay-btn:disabled { opacity:0.6; cursor:default; }
-  .pay-note { font-size:12px; color:var(--ink-soft); margin-top:6px; }
-  .upload-locked { font-size:13px; color:var(--ink-soft); }
+  .item-header { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; }
+  .item-toggle { background:none; border:none; padding:0; text-align:left; cursor:pointer; font:inherit; color:inherit; flex:1; min-width:220px; }
+  .item-toggle:focus-visible { outline:2px solid var(--brand); outline-offset:3px; border-radius:4px; }
+  .item-name { font-weight:600; font-size:15px; }
+  .item-meta { color:var(--ink-soft); font-size:13px; margin-top:2px; }
+  .item-side { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+  .select-btn { font-size:12.5px; font-weight:600; padding:6px 12px; border-radius:999px; cursor:pointer; border:1px solid var(--brand); background:var(--card); color:var(--brand-dark); }
+  .select-btn.on { background:var(--brand); color:#fff; }
+  .select-btn:disabled { opacity:.6; cursor:default; }
+  .pay-btn { display:inline-block; padding:9px 18px; border-radius:6px; background:var(--teal); color:#fff; font-size:13.5px; font-weight:600; border:none; cursor:pointer; }
+  .pay-btn:disabled { opacity:0.5; cursor:not-allowed; }
+  .pay-note { font-size:12.5px; color:var(--ink-soft); margin-top:6px; }
+  .checklist { margin-top:12px; border:1px solid var(--rule); border-radius:8px; padding:10px 12px; }
+  .checklist-title { font-size:12px; font-weight:600; color:var(--ink-soft); margin-bottom:6px; }
+  .check-row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:5px 0; font-size:13px; }
+  .check-dot { display:inline-flex; width:18px; height:18px; border-radius:50%; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; background:var(--rule); color:var(--ink-soft); }
+  .check-dot.accepted { background:var(--teal); color:#fff; }
+  .check-dot.pending { background:var(--teal-bg); color:var(--teal); }
+  .check-dot.rejected { background:var(--stamp-red-bg); color:var(--stamp-red); }
+  .check-sub { font-size:11.5px; color:var(--ink-soft); margin-left:26px; }
+  .price-box { margin-top:12px; padding:12px 14px; border-radius:8px; background:var(--paper); display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; }
+  .price-box .price-line { font-size:14px; }
+  .price-box .price-line b { font-size:16px; }
+  .group-title { font-family:var(--serif); font-weight:700; font-size:17px; margin:28px 0 2px; }
+  .group-sub { font-size:13px; color:var(--ink-soft); margin-bottom:6px; }
+  .banner { margin-top:16px; padding:14px 16px; border-radius:var(--radius); font-size:13.5px; }
+  .banner.warn { background:var(--seal-gold-bg); color:#6b4a14; border:1px solid #efd9b3; }
+  .banner.info { background:var(--teal-bg); color:var(--brand-dark); border:1px solid #c7e9e5; }
+  .toolbar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:4px; }
+  .toolbar select { width:auto; font-size:13.5px; padding:7px 10px; border:1px solid var(--rule); border-radius:6px; background:var(--card); max-width:100%; }
+  .stat-row { display:flex; flex-wrap:wrap; gap:22px; margin-top:14px; font-size:13px; color:var(--ink-soft); }
+  .stat-row b { display:block; font-size:20px; color:var(--ink); font-family:var(--serif); }
+  dialog.sheet { border:none; border-radius:var(--radius-lg); padding:0; width:min(560px, calc(100vw - 32px)); box-shadow:var(--shadow); }
+  dialog.sheet::backdrop { background:rgba(27,42,46,.35); }
+  .sheet-body { padding:24px 26px; }
+  .sheet-body h2 { font-family:var(--serif); margin:0 0 6px; font-size:20px; }
+  .sheet-body input, .sheet-body select { width:100%; }
+  .req { color:var(--stamp-red); }
+  @media (max-width:640px) { .item-side { width:100%; } }
 </style>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
@@ -33,122 +67,210 @@
 <div class="wrap">
   <div class="page-grid">
     <div class="main-col">
-      <div class="card" style="margin-top:36px;">
-        <div class="card-head" style="padding-bottom:20px;">
-          <div class="card-eyebrow">Your Compliance Calendar</div>
+      <div id="contactGate"></div>
+      <div class="card" style="margin-top:28px;">
+        <div class="card-head" style="padding-bottom:22px;">
+          <div class="card-eyebrow">Your compliance calendar</div>
           <h1 id="calTitle">Loading…</h1>
-          <p class="sub" id="calSub"></p>
+          <p class="sub" id="calSub" style="margin-bottom:8px;"></p>
+          <div class="toolbar" id="calToolbar"></div>
+          <div id="calStats"></div>
         </div>
       </div>
-
-      <div id="itemsList" style="margin-top:24px;"><div class="empty-state">Loading…</div></div>
+      <div id="calBanner"></div>
+      <div id="itemsList" style="margin-top:8px;"><div class="empty-state">Loading…</div></div>
     </div>
     <div class="side-col">
+      <div id="detailsPanel"></div>
       <div id="contactPanel"></div>
       <div id="chatPanel"></div>
     </div>
   </div>
 </div>
 
+<dialog class="sheet" id="regenDialog">
+  <form method="dialog" class="sheet-body" id="regenForm">
+    <h2>Update details and regenerate</h2>
+    <p class="section-sub" style="margin-bottom:16px;">We'll research your calendar again with these details. Your selected services, uploaded documents and payments carry over to every filing that's still on the new calendar, and the current version stays under "Calendar history".</p>
+    <div class="edit-grid">
+      <div class="field span2"><label for="rgCompany">Company name</label><input id="rgCompany" type="text"></div>
+      <div class="field"><label for="rgEntity">Entity type</label>
+        <select id="rgEntity"><option>Corporation</option><option>LLC</option><option>Partnership</option><option>Disregarded Entity</option></select></div>
+      <div class="field"><label for="rgTax">Tax status</label><input id="rgTax" type="text" placeholder="e.g. C-Corp"></div>
+      <div class="field"><label for="rgIncorp">Date of incorporation</label><input id="rgIncorp" type="date"></div>
+      <div class="field"><label for="rgFyEnd">Financial year end</label><input id="rgFyEnd" type="text" placeholder="e.g. December"></div>
+      <div class="field span2"><label for="rgEmp">Other states with employees</label><input id="rgEmp" type="text" placeholder="Comma-separated, e.g. California, New York"></div>
+      <div class="field span2" style="flex-direction:row;align-items:center;gap:8px;"><input id="rgForeign" type="checkbox" style="width:auto;"><label for="rgForeign" style="margin:0;">Has a foreign parent company</label></div>
+    </div>
+    <div class="submit-row">
+      <span class="hint" id="regenHint"></span>
+      <button type="button" class="ghost" id="regenCancel">Cancel</button>
+      <button type="submit" class="primary" id="regenSubmit">Regenerate calendar</button>
+    </div>
+  </form>
+</dialog>
+
 <script>
   function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
   function statusClass(s) { return 'status-' + (s || '').replace(/\s+/g, '-'); }
+  function money(cents) { const d = cents / 100; return '$' + d.toLocaleString('en-US', { minimumFractionDigits: d % 1 ? 2 : 0, maximumFractionDigits: 2 }); }
 
-  let calendar = null;
   let me = null;
-  const expandedItems = new Set(); // idx of items currently expanded — persists across re-renders
+  let profile = null;
+  let calendars = [];
+  let calendar = null;
+  const expandedItems = new Set();
 
-  async function loadUser() {
-    try {
-      const res = await fetch('/api/auth/me');
-      if (!res.ok) { location.href = '/login.html?next=/portal.html'; return; }
-      const { user } = await res.json();
-      if (user.role !== 'client') { location.href = '/app.html'; return; }
-      me = user;
-      const el = document.getElementById('navUser');
-      el.innerHTML = `<span>${escapeHtml(user.name || user.email)}</span><button id="logoutBtn">Log out</button>`;
-      document.getElementById('logoutBtn').addEventListener('click', async () => {
-        await fetch('/api/auth/logout', { method: 'POST' });
-        location.href = '/login.html';
-      });
-    } catch (err) {
-      location.href = '/login.html';
-    }
+  async function api(url, opts) {
+    const res = await fetch(url, opts);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) { const e = new Error(data.error || 'Something went wrong.'); e.data = data; e.status = res.status; throw e; }
+    return data;
   }
 
-  // ---- Contact: who to reach at ComplyGlobally ----
+  async function loadUser() {
+    const res = await fetch('/api/auth/me');
+    if (!res.ok) { location.href = '/login.html?next=/portal.html'; return false; }
+    const { user } = await res.json();
+    if (user.role !== 'client') { location.href = '/dashboard.html'; return false; }
+    me = user;
+    document.getElementById('navUser').innerHTML = `<span>${escapeHtml(user.name || user.email)}</span><button id="logoutBtn">Log out</button>`;
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      location.href = '/login.html';
+    });
+    return true;
+  }
+
+  // ---------------- Contact details (email + phone required) ----------------
+  async function loadProfile() {
+    try { profile = (await api('/api/portal/profile')).profile; } catch { profile = null; }
+    renderContactGate();
+    renderDetailsPanel();
+  }
+  function contactComplete() { return profile && !profile.missing.length; }
+
+  function contactFormHtml(prefix) {
+    return `
+      <div class="edit-grid">
+        <div class="field"><label for="${prefix}Name">Your name</label><input id="${prefix}Name" type="text" autocomplete="name" value="${escapeHtml(profile.contactName)}"></div>
+        <div class="field"><label for="${prefix}Company">Company name</label><input id="${prefix}Company" type="text" autocomplete="organization" value="${escapeHtml(profile.companyName)}"></div>
+        <div class="field"><label for="${prefix}Email">Email <span class="req">*</span></label><input id="${prefix}Email" type="email" autocomplete="email" required value="${escapeHtml(profile.email || profile.loginEmail)}"></div>
+        <div class="field"><label for="${prefix}Phone">Phone, with country code <span class="req">*</span></label><input id="${prefix}Phone" type="tel" autocomplete="tel" required placeholder="+1 415 555 0100" value="${escapeHtml(profile.phone)}"></div>
+      </div>
+      <div class="submit-row" style="margin-top:14px;"><span class="hint" id="${prefix}Hint"></span><button class="primary" id="${prefix}Save">Save details</button></div>`;
+  }
+  function wireContactForm(prefix) {
+    document.getElementById(prefix + 'Save').addEventListener('click', async (e) => {
+      e.preventDefault();
+      const hint = document.getElementById(prefix + 'Hint');
+      hint.textContent = 'Saving…'; hint.classList.remove('err');
+      try {
+        profile = (await api('/api/portal/profile', {
+          method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contactName: document.getElementById(prefix + 'Name').value,
+            companyName: document.getElementById(prefix + 'Company').value,
+            email: document.getElementById(prefix + 'Email').value,
+            phone: document.getElementById(prefix + 'Phone').value,
+          }),
+        })).profile;
+        renderContactGate(); renderDetailsPanel(); if (calendar) renderItems();
+      } catch (err) { hint.textContent = err.message; hint.classList.add('err'); }
+    });
+  }
+  function renderContactGate() {
+    const el = document.getElementById('contactGate');
+    if (!profile || contactComplete()) { el.innerHTML = ''; return; }
+    el.innerHTML = `
+      <div class="card" style="border-color:var(--seal-gold);">
+        <div class="card-head" style="padding-bottom:24px;">
+          <div class="card-eyebrow" style="color:var(--seal-gold);">One more step</div>
+          <h1 style="font-size:21px;">Add your ${escapeHtml(profile.missing.join(' and '))} to get started</h1>
+          <p class="sub">We need an email and a phone number so our team can reach you about documents, prices and deadlines. You can pick services, upload documents and pay once these are saved.</p>
+          ${contactFormHtml('gate')}
+        </div>
+      </div>`;
+    wireContactForm('gate');
+  }
+  function renderDetailsPanel() {
+    const el = document.getElementById('detailsPanel');
+    if (!profile) { el.innerHTML = ''; return; }
+    el.innerHTML = `
+      <div class="list-section" style="margin-top:28px;">
+        <div class="section-title">Your details</div>
+        <div class="contact-card">
+          <div class="contact-card-row"><b>${escapeHtml(profile.companyName || '—')}</b></div>
+          <div class="contact-card-row">${escapeHtml(profile.contactName || '—')}</div>
+          <div class="contact-card-row">${escapeHtml(profile.email || 'Email missing')}</div>
+          <div class="contact-card-row">${escapeHtml(profile.phone || 'Phone missing')}</div>
+          <button class="ghost" id="editDetailsBtn" style="margin-top:10px;padding:6px 12px;font-size:12.5px;">Edit details</button>
+          <div id="detailsForm" hidden style="margin-top:14px;"></div>
+        </div>
+      </div>`;
+    document.getElementById('editDetailsBtn').addEventListener('click', () => {
+      const f = document.getElementById('detailsForm');
+      f.hidden = !f.hidden;
+      if (!f.hidden) { f.innerHTML = contactFormHtml('side'); wireContactForm('side'); }
+    });
+  }
+
+  // ---------------- Support contact + chat ----------------
   async function loadContact() {
     const el = document.getElementById('contactPanel');
     try {
-      const res = await fetch('/api/portal/contact');
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) { el.innerHTML = ''; return; }
+      const data = await api('/api/portal/contact');
       const person = data.yourContact;
       const company = data.company || {};
+      const email = person ? person.email : company.email;
       el.innerHTML = `
-        <div class="list-section" style="margin-top:32px;">
+        <div class="list-section">
           <div class="section-title">Your contact at ComplyGlobally</div>
-          <div class="contact-grid">
-            <div class="contact-card">
-              <div class="contact-card-label">${person ? 'Your account contact' : 'General support'}</div>
-              <div class="contact-card-row">${escapeHtml(person ? (person.name || person.email) : company.name || 'ComplyGlobally')}</div>
-              <div class="contact-card-row">${(person ? person.email : company.email) ? `<a href="mailto:${escapeHtml(person ? person.email : company.email)}">${escapeHtml(person ? person.email : company.email)}</a>` : '—'}</div>
-              ${!person && company.phone ? `<div class="contact-card-row">${escapeHtml(company.phone)}</div>` : ''}
-            </div>
+          <div class="contact-card">
+            <div class="contact-card-label">${person ? 'Your account contact' : 'General support'}</div>
+            <div class="contact-card-row">${escapeHtml(person ? (person.name || person.email) : company.name || 'ComplyGlobally')}</div>
+            <div class="contact-card-row">${email ? `<a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a>` : '—'}</div>
+            ${company.phone ? `<div class="contact-card-row"><a href="tel:${escapeHtml(company.phone.replace(/[^\d+]/g, ''))}">${escapeHtml(company.phone)}</a></div>` : ''}
           </div>
         </div>`;
-    } catch (err) {
-      el.innerHTML = '';
-    }
+    } catch { el.innerHTML = ''; }
   }
 
-  // ---- Chat: message the ComplyGlobally team directly ----
   async function loadChat() {
     const el = document.getElementById('chatPanel');
-    if (!el || !me || !me.clientOrgId) return;
+    if (!me || !me.clientOrgId) return;
     el.innerHTML = `
-      <div class="list-section" style="margin-top:32px;">
+      <div class="list-section">
         <div class="section-title">Messages</div>
-        <div class="section-sub">Questions about a filing, a document, or anything else — send them here instead of email so everything stays in one place.</div>
+        <div class="section-sub">Questions about a filing, a document or a price — send them here so everything stays in one place.</div>
         <div class="chat-box">
           <div class="chat-thread" id="chatThread"><div class="empty-state">Loading…</div></div>
           <div class="chat-compose">
-            <textarea id="chatInput" placeholder="Write a message…"></textarea>
+            <textarea id="chatInput" placeholder="Write a message…" aria-label="Message"></textarea>
             <button class="primary" id="chatSendBtn">Send</button>
           </div>
           <span class="hint" id="chatHint" style="display:block;padding:0 18px 12px;"></span>
         </div>
       </div>`;
     document.getElementById('chatSendBtn').addEventListener('click', sendChatMessage);
-    document.getElementById('chatInput').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) sendChatMessage();
-    });
+    document.getElementById('chatInput').addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) sendChatMessage(); });
     await refreshChatThread();
   }
-
   async function refreshChatThread() {
     const thread = document.getElementById('chatThread');
     if (!thread) return;
     try {
-      const res = await fetch(`/api/messages/${me.clientOrgId}`);
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Could not load messages.');
+      const data = await api(`/api/messages/${me.clientOrgId}`);
       const messages = data.messages || [];
-      if (!messages.length) {
-        thread.innerHTML = '<div class="empty-state">No messages yet — send the first one.</div>';
-        return;
-      }
+      if (!messages.length) { thread.innerHTML = '<div class="empty-state">No messages yet. Send the first one.</div>'; return; }
       thread.innerHTML = messages.map(m => `
         <div class="chat-msg ${m.senderRole === 'client' ? 'from-client' : 'from-staff'}">
           <div class="chat-msg-meta">${escapeHtml(m.senderName)} · ${new Date(m.createdAt).toLocaleString()}${m.itemLabel ? ` · <span class="chat-tag">${escapeHtml(m.itemLabel)}</span>` : ''}</div>
           <div class="chat-msg-body">${escapeHtml(m.body)}</div>
         </div>`).join('');
       thread.scrollTop = thread.scrollHeight;
-    } catch (err) {
-      thread.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
-    }
+    } catch (err) { thread.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`; }
   }
-
   async function sendChatMessage() {
     const input = document.getElementById('chatInput');
     const hint = document.getElementById('chatHint');
@@ -156,272 +278,336 @@
     if (!text) return;
     hint.textContent = 'Sending…'; hint.classList.remove('err');
     try {
-      const res = await fetch(`/api/messages/${me.clientOrgId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ body: text }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Could not send.');
-      input.value = '';
-      hint.textContent = '';
+      await api(`/api/messages/${me.clientOrgId}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ body: text }) });
+      input.value = ''; hint.textContent = '';
       await refreshChatThread();
-    } catch (err) {
-      hint.textContent = err.message; hint.classList.add('err');
-    }
+    } catch (err) { hint.textContent = err.message; hint.classList.add('err'); }
   }
 
-  async function loadCalendar() {
-    const res = await fetch('/api/portal/calendars');
-    const data = await res.json().catch(() => ({}));
-    const calendars = data.calendars || [];
-
+  // ---------------- Calendars ----------------
+  async function loadCalendars(preferId) {
+    const data = await api('/api/portal/calendars').catch(() => ({ calendars: [] }));
+    calendars = data.calendars || [];
     if (!calendars.length) {
-      // No approved calendar yet — check for one still under review
-      // before assuming there's genuinely nothing (e.g. a client who
-      // just signed in via "Start Filing" from the public calendar).
-      const pendingRes = await fetch('/api/portal/calendars/pending');
-      const pendingData = await pendingRes.json().catch(() => ({}));
-      const pending = (pendingData.calendars || [])[0];
-
+      const pending = ((await api('/api/portal/calendars/pending').catch(() => ({}))).calendars || [])[0];
+      document.getElementById('calToolbar').innerHTML = `<a class="ghost" href="/?new=1" style="text-decoration:none;padding:8px 14px;border:1px solid var(--rule);border-radius:6px;font-size:13px;">Generate a calendar</a>`;
       if (pending) {
         document.getElementById('calTitle').textContent = pending.profile.companyName || 'Your compliance calendar';
-        document.getElementById('calSub').textContent =
-          `${pending.profile.entityType || ''} · ${pending.profile.state || ''} · Submitted ${new Date(pending.createdAt).toLocaleDateString()}`;
+        document.getElementById('calSub').textContent = `${pending.profile.entityType || ''} · ${pending.profile.state || ''} · Submitted ${new Date(pending.createdAt).toLocaleDateString()}`;
         document.getElementById('itemsList').innerHTML = `
-          <div class="card"><div class="card-body" style="padding:28px;">
-            <div style="font-weight:600;margin-bottom:6px;">⏳ Under review by our compliance team</div>
-            <p style="font-size:14px;color:var(--ink-soft);margin:0;">
-              We received your ${escapeHtml(String(pending.items?.length || ''))}-item compliance calendar and our team
-              is verifying it before document upload opens. This is usually quick — we'll notify you the moment it's ready.
-            </p>
-          </div></div>`;
+          <div class="banner info"><b>Our team is verifying your ${escapeHtml(String(pending.items?.length || ''))}-item calendar.</b> You'll get a notification here and by email as soon as it's ready, and then you can pick services and upload documents.</div>`;
         return;
       }
-
       document.getElementById('calTitle').textContent = 'No calendar yet';
-      document.getElementById('calSub').textContent = 'Your compliance calendar will appear here once ComplyGlobally has generated and approved it.';
+      document.getElementById('calSub').textContent = 'Generate your compliance calendar to see every filing your company owes, with prices, and choose the ones you want us to handle.';
       document.getElementById('itemsList').innerHTML = '';
       return;
     }
-    calendar = calendars[0]; // most recently approved
-    document.getElementById('calTitle').textContent = calendar.profile.companyName || 'Your compliance calendar';
-    document.getElementById('calSub').textContent =
-      `${calendar.profile.entityType || ''} · ${calendar.profile.state || ''} · FY ${calendar.profile.fyStart || ''}–${calendar.profile.fyEnd || ''}`;
+    const wanted = preferId || new URLSearchParams(location.search).get('calendar') || (calendar && calendar._id);
+    calendar = calendars.find(c => c._id === wanted) || calendars[0];
+    renderHeader();
     renderItems();
   }
 
-  // Cookie-based auth (see middleware/auth.js) — no Authorization header
-  // needed, fetch() sends the session cookie automatically same-origin.
-  async function payForItem(idx, btn) {
-    const el = document.getElementById('itemsList');
-    const hint = el.querySelector(`[data-hint-idx="${idx}"]`);
-    btn.disabled = true;
-    hint.textContent = ''; hint.classList.remove('err');
-    try {
-      const orderRes = await fetch(`/api/portal/payments/calendars/${calendar._id}/items/${idx}/create-order`, { method: 'POST' });
-      const order = await orderRes.json();
-      if (!orderRes.ok) throw new Error(order.error || 'Could not start payment.');
+  function renderHeader() {
+    const p = calendar.profile || {};
+    document.getElementById('calTitle').textContent = p.companyName || 'Your compliance calendar';
+    document.getElementById('calSub').textContent = [p.entityType, p.state, p.country && p.country !== 'United States' ? p.country : '', (p.fyStart || p.fyEnd) ? `FY ${p.fyStart || ''}–${p.fyEnd || ''}` : '', `Generated ${new Date(calendar.createdAt).toLocaleDateString()}`].filter(Boolean).join(' · ');
 
-      const options = {
+    const current = calendars.filter(c => !c.supersededAt);
+    const older = calendars.filter(c => c.supersededAt);
+    const opt = (c) => `<option value="${c._id}" ${c._id === calendar._id ? 'selected' : ''}>${escapeHtml(c.profile.companyName || 'Calendar')} · ${c.supersededAt ? `previous version, replaced ${new Date(c.supersededAt).toLocaleDateString()}` : `generated ${new Date(c.createdAt).toLocaleDateString()}`}</option>`;
+    const picker = calendars.length > 1 ? `
+      <label class="sr-only" for="calPicker">Choose calendar</label>
+      <select id="calPicker">
+        <optgroup label="Current">${current.map(opt).join('')}</optgroup>
+        ${older.length ? `<optgroup label="Calendar history">${older.map(opt).join('')}</optgroup>` : ''}
+      </select>` : '';
+    document.getElementById('calToolbar').innerHTML = `
+      ${picker}
+      ${calendar.supersededAt ? '' : `<button class="ghost" id="regenBtn" style="padding:8px 14px;font-size:13px;">Update details &amp; regenerate</button>`}
+      <a href="/?new=1" style="font-size:13px;">Calendar for another company</a>`;
+    document.getElementById('calPicker')?.addEventListener('change', (e) => {
+      calendar = calendars.find(c => c._id === e.target.value);
+      window.history.replaceState(null, '', `/portal.html?calendar=${calendar._id}`);
+      expandedItems.clear(); renderHeader(); renderItems();
+    });
+    document.getElementById('regenBtn')?.addEventListener('click', openRegen);
+
+    const s = calendar.summary || {};
+    document.getElementById('calStats').innerHTML = `
+      <div class="stat-row">
+        <div><b>${s.totalItems ?? calendar.items.length}</b>filings apply to you</div>
+        <div><b>${s.selected ?? 0}</b>selected for us to handle</div>
+        <div><b>${s.awaitingPayment ?? 0}</b>awaiting payment</div>
+        ${s.selectedInvoicedCents ? `<div><b>${money(s.selectedInvoicedCents)}</b>priced so far</div>` : ''}
+      </div>`;
+    document.getElementById('calBanner').innerHTML = calendar.supersededAt
+      ? `<div class="banner warn">This is an older version of your calendar, kept for your records. Documents and certificates here can still be downloaded. To make changes, switch to your current calendar above.</div>`
+      : '';
+  }
+
+  function priceTag(item) {
+    const pr = item.price || {};
+    if (item.paymentStatus === 'Paid') return `<span class="price-tag paid">Paid ${escapeHtml(pr.label || '')}</span>`;
+    return `<span class="price-tag ${escapeHtml(pr.kind || 'quote')}" title="Price">${escapeHtml(pr.label || 'Quoted after document review')}</span>`;
+  }
+
+  function itemHtml(item, idx) {
+    const readOnly = !!calendar.supersededAt;
+    const clientDocs = (item.documents || []).map((d, di) => ({ ...d, di })).filter(d => d.type === 'client_upload');
+    const certs = (item.documents || []).map((d, di) => ({ ...d, di })).filter(d => d.type === 'certificate');
+    const cs = item.checklistSummary || { total: 0, provided: 0, allProvided: true };
+    const isOpen = expandedItems.has(idx);
+    const lockSelect = item.paymentStatus === 'Paid' || item.clientStatus === 'Filed' || item.paymentStatus === 'Invoiced' || item.paymentStatus === 'Overdue';
+    const dl = (d) => `/api/portal/calendars/${calendar._id}/items/${idx}/documents/${d.di}/download`;
+
+    const checklist = (item.checklist || []).map(r => {
+      const icon = r.state === 'accepted' ? '✓' : r.state === 'pending' ? '•' : r.state === 'rejected' ? '!' : '';
+      const label = r.state === 'accepted' ? 'Verified' : r.state === 'pending' ? 'Uploaded, being verified' : r.state === 'rejected' ? 'Not accepted, upload again' : 'Needed';
+      const canUpload = !readOnly && (r.state === 'missing' || r.state === 'rejected');
+      return `
+        <div>
+          <div class="check-row">
+            <div style="display:flex;align-items:center;gap:8px;"><span class="check-dot ${r.state}" aria-hidden="true">${icon}</span><span>${escapeHtml(r.label)}</span></div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:11.5px;color:var(--ink-soft);">${label}</span>
+              ${canUpload ? `<label class="upload-btn" style="cursor:pointer;white-space:nowrap;">Upload<input type="file" class="uploadInput" data-idx="${idx}" data-label="${escapeHtml(r.label)}" style="display:none;"></label>` : ''}
+            </div>
+          </div>
+          ${r.reused ? `<div class="check-sub">Using the file you gave us for "${escapeHtml(r.fromItem)}", no need to upload again</div>` : ''}
+        </div>`;
+    }).join('');
+
+    let payArea = '';
+    if (item.paymentStatus === 'Paid') {
+      payArea = `<div class="price-line">Paid <b>${escapeHtml(item.price?.label || '')}</b>${item.paidAt ? ` on ${new Date(item.paidAt).toLocaleDateString()}` : ''}</div>`;
+    } else if (item.paymentStatus === 'Invoiced' || item.paymentStatus === 'Overdue') {
+      payArea = `
+        <div><div class="price-line">Price: <b>${escapeHtml(item.price?.label || '')}</b></div>${item.quoteNote ? `<div class="pay-note">${escapeHtml(item.quoteNote)}</div>` : ''}</div>
+        <div>${!readOnly && cs.allProvided
+          ? `<button class="pay-btn" data-pay-idx="${idx}">Pay ${escapeHtml(item.price?.label || '')}</button>`
+          : `<button class="pay-btn" disabled>Pay ${escapeHtml(item.price?.label || '')}</button><div class="pay-note">Upload every document above to unlock payment.</div>`}</div>`;
+    } else {
+      const pr = item.price || {};
+      const explain = pr.kind === 'fixed' ? 'Standard price. We confirm it after checking your documents, then you can pay here.'
+        : pr.kind === 'from' ? 'Starting price. We send the exact price after checking your documents.'
+        : pr.kind === 'included' ? 'No separate charge.'
+        : 'We send the price after checking your documents.';
+      payArea = `<div><div class="price-line">Price: <b>${escapeHtml(pr.label || 'Quoted after document review')}</b></div><div class="pay-note">${explain}</div></div>`;
+    }
+
+    return `
+      <div class="item-row">
+        <div class="item-header">
+          <button class="item-toggle" data-toggle-idx="${idx}" aria-expanded="${isOpen}">
+            <div class="item-name">${escapeHtml(item.compliance_name)}</div>
+            <div class="item-meta">Due ${escapeHtml(item.due_date)}${item.selectedByClient && cs.total ? ` · ${cs.provided}/${cs.total} documents provided` : ''}</div>
+          </button>
+          <div class="item-side">
+            ${priceTag(item)}
+            ${item.selectedByClient ? `<span class="status-pill ${statusClass(item.clientStatus)}">${escapeHtml(item.clientStatus)}</span>` : ''}
+            ${readOnly ? '' : `<button class="select-btn ${item.selectedByClient ? 'on' : ''}" data-select-idx="${idx}" data-selected="${item.selectedByClient ? '1' : '0'}" ${item.selectedByClient && lockSelect ? 'disabled title="Already priced or filed"' : ''}>${item.selectedByClient ? 'Selected' : 'Add to my services'}</button>`}
+          </div>
+        </div>
+        <div class="item-body" ${isOpen ? '' : 'hidden'} style="margin-top:10px;">
+          <p style="font-size:14px;color:var(--ink-soft);margin:8px 0;">${escapeHtml(item.description)}</p>
+          ${item.authority ? `<div style="font-size:12.5px;color:var(--ink-soft);">Authority: ${escapeHtml(item.authority)}</div>` : ''}
+          ${certs.length ? `<div style="margin-top:10px;"><div class="checklist-title">Certificate / acknowledgment</div>${certs.map(d => `<a class="doc-chip" href="${dl(d)}">${escapeHtml(d.fileName)} ↓</a>`).join('')}</div>` : ''}
+          ${item.selectedByClient || clientDocs.length ? `
+            ${(item.checklist || []).length ? `<div class="checklist"><div class="checklist-title">Documents we need</div>${checklist}</div>` : ''}
+            ${clientDocs.length ? `<div style="margin-top:10px;"><div class="checklist-title">Your uploads</div>${clientDocs.map(d => `
+              <div style="margin-bottom:6px;">
+                <a class="doc-chip" href="${dl(d)}">${escapeHtml(d.fileName)} ↓</a>
+                <span class="status-pill ${d.reviewStatus === 'accepted' ? 'status-Filed' : d.reviewStatus === 'rejected' ? 'status-Overdue' : 'status-Not-Started'}">${d.reviewStatus === 'accepted' ? 'Verified' : d.reviewStatus === 'rejected' ? 'Not accepted' : 'Being verified'}</span>
+                ${d.reviewStatus === 'rejected' ? `<div style="font-size:12.5px;color:var(--stamp-red);margin:2px 0 0 2px;">${escapeHtml(d.reviewNote || 'Please upload a corrected file.')}</div>` : ''}
+              </div>`).join('')}</div>` : ''}
+          ` : `<div class="pay-note" style="margin-top:10px;">Add this to your services to see the documents we'll need.</div>`}
+          <div class="price-box">${payArea}</div>
+          <span class="hint" data-hint-idx="${idx}" style="display:block;margin-top:6px;"></span>
+        </div>
+      </div>`;
+  }
+
+  function renderItems() {
+    const el = document.getElementById('itemsList');
+    if (!calendar.items.length) { el.innerHTML = '<div class="empty-state">No filings on this calendar.</div>'; return; }
+    const withIdx = calendar.items.map((it, idx) => ({ it, idx }));
+    const selected = withIdx.filter(x => x.it.selectedByClient);
+    const others = withIdx.filter(x => !x.it.selectedByClient);
+    el.innerHTML = `
+      <div class="group-title">Your selected services</div>
+      <div class="group-sub">${selected.length ? 'Upload the documents for each one. We verify them, confirm the price, and you pay here.' : 'Nothing selected yet. Add the filings you want us to handle from the list below.'}</div>
+      ${selected.length ? `<div class="card" style="margin-top:8px;"><div class="card-body" style="padding:4px 24px;">${selected.map(x => itemHtml(x.it, x.idx)).join('')}</div></div>` : ''}
+      ${others.length ? `
+        <div class="group-title">Other filings that apply to you</div>
+        <div class="group-sub">Everything else your company owes. Prices are shown so you can decide what to hand over to us.</div>
+        <div class="card" style="margin-top:8px;"><div class="card-body" style="padding:4px 24px;">${others.map(x => itemHtml(x.it, x.idx)).join('')}</div></div>` : ''}`;
+
+    el.querySelectorAll('[data-toggle-idx]').forEach(b => b.addEventListener('click', () => {
+      const idx = +b.dataset.toggleIdx;
+      expandedItems.has(idx) ? expandedItems.delete(idx) : expandedItems.add(idx);
+      renderItems();
+    }));
+    el.querySelectorAll('[data-select-idx]').forEach(b => b.addEventListener('click', () => toggleSelect(+b.dataset.selectIdx, b.dataset.selected !== '1', b)));
+    el.querySelectorAll('[data-pay-idx]').forEach(b => b.addEventListener('click', () => payForItem(+b.dataset.payIdx, b)));
+    el.querySelectorAll('.uploadInput').forEach(input => input.addEventListener('change', () => uploadFor(input)));
+  }
+
+  function needContact(err) {
+    if (err.data && err.data.code === 'CONTACT_INCOMPLETE') {
+      loadProfile().then(() => document.getElementById('contactGate').scrollIntoView({ behavior: 'smooth' }));
+      return true;
+    }
+    return false;
+  }
+  function hintFor(idx) { return document.querySelector(`[data-hint-idx="${idx}"]`); }
+  function replaceCalendar(updated) {
+    const i = calendars.findIndex(c => c._id === updated._id);
+    if (i >= 0) calendars[i] = updated;
+    calendar = updated;
+    renderHeader(); renderItems();
+  }
+
+  async function toggleSelect(idx, selected, btn) {
+    btn.disabled = true;
+    try {
+      const data = await api(`/api/portal/calendars/${calendar._id}/items/${idx}/select`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ selected }),
+      });
+      if (selected) expandedItems.add(idx);
+      replaceCalendar(data.calendar);
+    } catch (err) {
+      btn.disabled = false;
+      if (!needContact(err)) alert(err.message);
+    }
+  }
+
+  async function uploadFor(input) {
+    const idx = +input.dataset.idx;
+    const hint = hintFor(idx);
+    const file = input.files[0];
+    if (!file) return;
+    hint.textContent = `Uploading ${file.name}…`; hint.classList.remove('err');
+    const formData = new FormData();
+    formData.append('requirementLabel', input.dataset.label || '');
+    formData.append('file', file);
+    try {
+      const data = await api(`/api/portal/calendars/${calendar._id}/items/${idx}/upload`, { method: 'POST', body: formData });
+      replaceCalendar(data.calendar);
+      const h = hintFor(idx); if (h) h.textContent = 'Uploaded. We\'ll verify it and let you know.';
+    } catch (err) {
+      if (!needContact(err)) { hint.textContent = err.message; hint.classList.add('err'); }
+    }
+  }
+
+  async function payForItem(idx, btn) {
+    const hint = hintFor(idx);
+    btn.disabled = true; hint.textContent = ''; hint.classList.remove('err');
+    try {
+      const order = await api(`/api/portal/payments/calendars/${calendar._id}/items/${idx}/create-order`, { method: 'POST' });
+      const rzp = new Razorpay({
         key: order.keyId,
         amount: order.amount,
         currency: order.currency,
         name: 'ComplyGlobally',
-        description: 'Compliance filing fee',
+        description: order.description || 'Compliance filing fee',
         order_id: order.orderId,
+        prefill: order.prefill || {},
         handler: async function (response) {
           hint.textContent = 'Confirming payment…';
           try {
-            const verifyRes = await fetch(`/api/portal/payments/calendars/${calendar._id}/items/${idx}/verify`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(response),
+            const res = await fetch(`/api/portal/payments/calendars/${calendar._id}/items/${idx}/verify`, {
+              method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(response),
             });
-            const result = await verifyRes.json();
-            if (!verifyRes.ok) throw new Error(result.error || 'Payment verification failed.');
-            calendar = result.calendar;
-            renderItems();
+            const result = await res.json().catch(() => ({}));
+            if (result.calendar) replaceCalendar(result.calendar);
+            const h = hintFor(idx);
+            if (res.status === 202 || res.status === 409) { if (h) h.textContent = result.message || result.error; }
+            else if (!res.ok) throw new Error(result.error || 'Payment verification failed.');
+            else if (h) h.textContent = 'Payment received. Thank you!';
           } catch (err) {
-            hint.textContent = `${err.message} — if you were charged, contact support.`;
-            hint.classList.add('err');
-            btn.disabled = false;
+            const h = hintFor(idx) || hint;
+            h.textContent = `${err.message} If you were charged, don't pay again. We'll confirm it shortly.`;
+            h.classList.add('err');
           }
         },
-        modal: {
-          // If the client closes the Razorpay popup without paying,
-          // re-enable the button rather than leaving it stuck disabled.
-          ondismiss: function () { btn.disabled = false; },
-        },
+        modal: { ondismiss: function () { btn.disabled = false; } },
         theme: { color: '#34A9A1' },
-      };
-
-      const rzp = new Razorpay(options);
+      });
       rzp.on('payment.failed', function (response) {
-        hint.textContent = `Payment failed: ${response.error.description}`;
+        hint.textContent = `Payment failed: ${response.error.description}. You haven't been charged — try again or use another card.`;
         hint.classList.add('err');
         btn.disabled = false;
       });
       rzp.open();
     } catch (err) {
-      hint.textContent = err.message; hint.classList.add('err');
+      if (err.data && err.data.calendar) replaceCalendar(err.data.calendar);
+      if (!needContact(err)) { const h = hintFor(idx) || hint; h.textContent = err.message; h.classList.add('err'); }
       btn.disabled = false;
     }
   }
 
-  function renderItems() {
-    const el = document.getElementById('itemsList');
-    if (!calendar.items.length) { el.innerHTML = '<div class="empty-state">No items on this calendar.</div>'; return; }
-    const sharedDocumentIndex = calendar.sharedDocumentIndex || {};
-
-    el.innerHTML = `<div class="card"><div class="card-body">` + calendar.items.map((item, idx) => {
-      const clientDocs = (item.documents || []).filter(d => d.type === 'client_upload');
-      const certs = (item.documents || []).filter(d => d.type === 'certificate');
-      const needsPayment = item.paymentStatus === 'Invoiced' || item.paymentStatus === 'Overdue';
-      const dollars = item.feeAmountCents ? (item.feeAmountCents / 100).toLocaleString('en-US') : null;
-      const isOpen = expandedItems.has(idx);
-
-      // For each required doc: is it uploaded on THIS item, uploaded on
-      // a DIFFERENT item already (reuse), or missing entirely. A
-      // REJECTED upload never counts as satisfying anything — see the
-      // matching fix in routes/portal.routes.js's withRequiredDocuments.
-      const required = item.requiredDocuments || [];
-      const ownLabels = new Set(clientDocs.filter(d => d.reviewStatus !== 'rejected').map(d => d.requirementLabel));
-      const rows = required.map(label => {
-        if (ownLabels.has(label)) return { label, state: 'own' };
-        const shared = sharedDocumentIndex[label];
-        if (shared) return { label, state: 'reused', shared };
-        return { label, state: 'missing' };
-      });
-      const allDocsUploaded = rows.every(r => r.state !== 'missing');
-      const doneCount = rows.filter(r => r.state !== 'missing').length;
-
-      const checklistHtml = required.length ? `
-        <div style="margin-top:10px;border:1px solid var(--rule);border-radius:8px;padding:10px 12px;">
-          <div class="ts" style="font-size:12px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;">Documents needed</div>
-          ${rows.map(r => {
-            const done = r.state !== 'missing';
-            const reuseNote = r.state === 'reused'
-              ? `<div style="font-size:11px;color:var(--teal);margin-left:26px;">Reused from "${escapeHtml(r.shared.compliance_name)}" — no need to upload again</div>`
-              : '';
-            return `
-              <div style="padding:4px 0;">
-                <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-                  <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
-                    <span style="display:inline-flex;width:18px;height:18px;border-radius:50%;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;
-                      background:${done ? 'var(--teal)' : 'var(--rule)'};color:${done ? '#fff' : 'var(--ink-soft)'};">${done ? '✓' : ''}</span>
-                    <span style="${done ? 'color:var(--ink-soft);text-decoration:line-through;' : ''}">${escapeHtml(r.label)}</span>
-                  </div>
-                  ${done ? '' : `
-                    <label class="upload-btn" style="cursor:pointer;font-size:12px;color:var(--teal);white-space:nowrap;">
-                      Upload
-                      <input type="file" data-idx="${idx}" data-label="${escapeHtml(r.label)}" style="display:none;" class="uploadInput">
-                    </label>`}
-                </div>
-                ${reuseNote}
-              </div>`;
-          }).join('')}
-        </div>` : '';
-
-      const progressLabel = required.length ? `${doneCount}/${required.length} documents ready` : '';
-
-      return `
-        <div class="item-row">
-          <div class="item-header" data-toggle-idx="${idx}" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;cursor:pointer;">
-            <div>
-              <div style="font-weight:500;">${escapeHtml(item.compliance_name)}</div>
-              <div class="ts" style="color:var(--ink-soft);font-size:13px;margin-top:2px;">Due: ${escapeHtml(item.due_date)}${progressLabel ? ` · ${progressLabel}` : ''}</div>
-            </div>
-            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-              ${item.paymentStatus !== 'Not Invoiced' ? `<span class="status-pill ${item.paymentStatus === 'Paid' ? 'status-Filed' : 'status-Overdue'}">${escapeHtml(item.paymentStatus)}</span>` : ''}
-              <span class="status-pill ${statusClass(item.clientStatus)}">${escapeHtml(item.clientStatus)}</span>
-              <span style="font-size:12px;color:var(--ink-soft);">${isOpen ? '▲ Hide' : '▼ View & upload'}</span>
-            </div>
-          </div>
-
-          <div class="item-body" style="${isOpen ? '' : 'display:none;'}margin-top:10px;">
-            <p style="font-size:14px;color:var(--ink-soft);margin:8px 0;">${escapeHtml(item.description)}</p>
-
-            ${certs.length ? `<div style="margin-top:8px;">
-              <div class="ts" style="font-size:12px;color:var(--ink-soft);">Certificate / acknowledgment</div>
-              ${certs.map((d, di) => `<a class="doc-chip" href="/api/portal/calendars/${calendar._id}/items/${idx}/documents/${item.documents.indexOf(d)}/download">${escapeHtml(d.fileName)} ↓</a>`).join('')}
-            </div>` : ''}
-
-            ${clientDocs.length ? `<div style="margin-top:8px;">
-              <div class="ts" style="font-size:12px;color:var(--ink-soft);">Your uploads</div>
-              ${clientDocs.map((d) => {
-                const badge = d.reviewStatus === 'accepted'
-                  ? `<span class="status-pill status-Filed" style="margin-left:6px;">Accepted</span>`
-                  : d.reviewStatus === 'rejected'
-                    ? `<span class="status-pill status-Overdue" style="margin-left:6px;">Not accepted</span>`
-                    : `<span class="status-pill status-Not-Started" style="margin-left:6px;">Pending review</span>`;
-                return `
-                  <div style="margin-bottom:6px;">
-                    <a class="doc-chip" href="/api/portal/calendars/${calendar._id}/items/${idx}/documents/${item.documents.indexOf(d)}/download">${escapeHtml(d.fileName)} ↓</a>${badge}
-                    ${d.reviewStatus === 'rejected' ? `<div style="font-size:12.5px;color:var(--stamp-red);margin:2px 0 0 2px;">${escapeHtml(d.reviewNote || 'Please re-upload a corrected file.')}</div>` : ''}
-                  </div>`;
-              }).join('')}
-            </div>` : ''}
-
-            ${checklistHtml}
-
-            <div style="margin-top:10px;">
-              ${needsPayment ? (
-                allDocsUploaded
-                  ? `<button class="pay-btn" data-idx="${idx}" data-amount="${item.feeAmountCents}">Proceed & pay $${dollars}</button>`
-                  : `<button class="pay-btn" disabled style="opacity:0.5;cursor:not-allowed;">Proceed & pay $${dollars}</button>
-                     <div class="pay-note">Upload all the documents above to unlock payment.</div>`
-              ) : (item.paymentStatus === 'Not Invoiced' && item.clientStatus !== 'Not Started'
-                    ? `<div class="pay-note">${escapeHtml(item.feeMessage || "We haven't set a fee for this filing yet — your account contact will let you know once it's ready to invoice.")}</div>`
-                    : ``)}
-              <span class="hint" data-hint-idx="${idx}"></span>
-            </div>
-          </div>
-        </div>`;
-    }).join('') + `</div></div>`;
-
-    el.querySelectorAll('[data-toggle-idx]').forEach(header => {
-      header.addEventListener('click', () => {
-        const idx = parseInt(header.dataset.toggleIdx, 10);
-        if (expandedItems.has(idx)) expandedItems.delete(idx); else expandedItems.add(idx);
-        renderItems();
-      });
-    });
-
-    el.querySelectorAll('.pay-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => { e.stopPropagation(); payForItem(btn.dataset.idx, btn); });
-    });
-
-    el.querySelectorAll('.uploadInput').forEach(input => {
-      input.addEventListener('click', (e) => e.stopPropagation());
-      input.addEventListener('change', async () => {
-        const idx = input.dataset.idx;
-        const hint = el.querySelector(`[data-hint-idx="${idx}"]`);
-        const file = input.files[0];
-        if (!file) return;
-        hint.textContent = 'Uploading…'; hint.classList.remove('err');
-        const formData = new FormData();
-        formData.append('file', file);
-        if (input.dataset.label) formData.append('requirementLabel', input.dataset.label);
-        try {
-          const res = await fetch(`/api/portal/calendars/${calendar._id}/items/${idx}/upload`, { method: 'POST', body: formData });
-          const data = await res.json().catch(() => ({}));
-          if (!res.ok) throw new Error(data.error || 'Upload failed.');
-          calendar = data.calendar;
-          renderItems();
-        } catch (err) {
-          hint.textContent = err.message; hint.classList.add('err');
-        }
-      });
-    });
+  // ---------------- Regenerate ----------------
+  const regenDialog = document.getElementById('regenDialog');
+  function openRegen() {
+    if (!contactComplete()) { document.getElementById('contactGate').scrollIntoView({ behavior: 'smooth' }); return; }
+    const p = calendar.profile || {};
+    document.getElementById('rgCompany').value = p.companyName || '';
+    document.getElementById('rgEntity').value = p.entityType || 'Corporation';
+    document.getElementById('rgTax').value = p.taxStatus || '';
+    document.getElementById('rgIncorp').value = (p.incorpDate || '').slice(0, 10);
+    document.getElementById('rgFyEnd').value = p.fyEnd || '';
+    document.getElementById('rgEmp').value = (p.employeeStates || []).join(', ');
+    document.getElementById('rgForeign').checked = !!p.hasForeignParent;
+    document.getElementById('regenHint').textContent = '';
+    regenDialog.showModal();
   }
+  document.getElementById('regenCancel').addEventListener('click', () => regenDialog.close());
+  document.getElementById('regenForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('regenSubmit');
+    const hint = document.getElementById('regenHint');
+    btn.disabled = true; hint.classList.remove('err');
+    hint.textContent = 'Researching your filings from official sources. This usually takes one to two minutes; keep this window open.';
+    try {
+      const data = await api('/api/portal/calendars/regenerate', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          calendarId: calendar._id,
+          profile: {
+            companyName: document.getElementById('rgCompany').value.trim(),
+            entityType: document.getElementById('rgEntity').value,
+            taxStatus: document.getElementById('rgTax').value.trim(),
+            incorpDate: document.getElementById('rgIncorp').value,
+            fyEnd: document.getElementById('rgFyEnd').value.trim(),
+            employeeStates: document.getElementById('rgEmp').value.split(',').map(s => s.trim()).filter(Boolean),
+            hasForeignParent: document.getElementById('rgForeign').checked,
+          },
+        }),
+      });
+      regenDialog.close();
+      expandedItems.clear();
+      await loadCalendars(data.calendar._id);
+      window.history.replaceState(null, '', `/portal.html?calendar=${data.calendar._id}`);
+    } catch (err) {
+      if (needContact(err)) regenDialog.close();
+      hint.textContent = err.message; hint.classList.add('err');
+    } finally { btn.disabled = false; }
+  });
+
+  // New notification (quote sent, document verified, payment confirmed…)
+  // → refresh what's on screen so the client never has to reload.
+  document.addEventListener('cc:notifications', () => { loadCalendars(); refreshChatThread(); });
 
   (async () => {
-    await loadUser();
-    await loadCalendar();
-    await loadContact();
-    await loadChat();
+    if (!(await loadUser())) return;
+    await loadProfile();
+    await loadCalendars();
+    loadContact();
+    loadChat();
   })();
 </script>
+<script src="/js/notifications.js" defer></script>
 </body>
 </html>
