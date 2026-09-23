@@ -27,6 +27,7 @@ const publicRoutes = require("./routes/public.routes");
 const paymentsRoutes = require("./routes/payments.routes");
 const messagesRoutes = require("./routes/messages.routes");
 const dashboardRoutes = require("./routes/dashboard.routes");
+const notificationsRoutes = require("./routes/notifications.routes");
 const { runReminderSweep } = require("./lib/reminders");
 
 const app = express();
@@ -52,6 +53,14 @@ if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET || !process
     "\n[startup warning] RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET / RAZORPAY_WEBHOOK_SECRET " +
     "not fully set — payment routes will fail and the webhook will reject everything. " +
     "See .env.example.\n"
+  );
+}
+
+if (process.env.NODE_ENV === "production" && (process.env.STORAGE_DRIVER || "local") === "local") {
+  console.warn(
+    "\n[startup warning] STORAGE_DRIVER is 'local': client documents are being written to this server's disk. " +
+    "On Railway/Render/Heroku that disk is wiped on every deploy and the files are LOST. " +
+    "Set STORAGE_DRIVER=s3 with the S3_* settings (Cloudflare R2 works) — see .env.example.\n"
   );
 }
 
@@ -114,7 +123,10 @@ app.get("/portal.html", requirePageAuth, requirePageClientRole, (req, res) => {
 // login anymore — they get the public free-tier tool (public/index.html,
 // backed by routes/public.routes.js), which is the Phase 1 lead-gen path.
 app.get("/", tryPageAuth, (req, res) => {
-  if (req.user) {
+  // A signed-in client can still open the generator (/?new=1) to create a
+  // calendar for another entity — it's saved straight to their portal
+  // (see routes/public.routes.js).
+  if (req.user && !(req.user.role === "client" && req.query.new === "1")) {
     return res.redirect(req.user.role === "client" ? "/portal.html" : "/dashboard.html");
   }
   res.sendFile(path.join(__dirname, "public", "index.html"));
@@ -136,6 +148,7 @@ app.use("/api/portal/payments", paymentsRoutes);
 app.use("/api/public", publicRoutes);
 app.use("/api/messages", messagesRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/notifications", notificationsRoutes);
 
 app.get("/healthz", (req, res) => res.json({ ok: true }));
 
