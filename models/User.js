@@ -45,7 +45,15 @@ const userSchema = new mongoose.Schema(
     // email matched (see routes/auth.routes.js's /google/callback).
     // unique + sparse so many users can each have googleId: null
     // without tripping the unique index.
-    googleId: { type: String, unique: true, sparse: true, default: null },
+    // No `default: null` here on purpose: a sparse unique index only
+    // skips documents where the field is genuinely ABSENT. Setting a
+    // default of null means every non-Google account writes an explicit
+    // null into this field, which defeats the sparse behavior — the
+    // first such account claims the one allowed "null", and every
+    // account created after it hits a duplicate-key error on this
+    // index. Leaving the field unset for non-Google accounts is what
+    // lets any number of them coexist.
+    googleId: { type: String, unique: true, sparse: true },
     name: { type: String, trim: true, default: "" },
     role: { type: String, enum: ROLES, required: true },
     // Which internal team an operational account belongs to. Only
