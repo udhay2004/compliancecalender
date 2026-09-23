@@ -24,6 +24,10 @@ const rateLimit = require("express-rate-limit");
 const Calendar = require("../models/Calendar");
 const { generateCompanyCalendar } = require("../lib/claude");
 const { sendEmail } = require("../lib/mailer");
+const { loadUserFromRequest } = require("../middleware/auth");
+const { getPriceInfo } = require("../lib/complianceFees");
+const { normalizePhone } = require("../lib/calendarView");
+const { notifyStaff, notifyClient } = require("../lib/notify");
 
 const router = express.Router();
 
@@ -117,7 +121,9 @@ function applyRevealPolicy(items) {
 
   return withDays.map((it, idx) => {
     if (idx < unlockedCount) {
-      return { ...it, locked: false };
+      // Every visible service carries its price label, so pricing is
+      // visible from the very first screen, not only after signing up.
+      return { ...it, locked: false, price: getPriceInfo(it) };
     }
     return {
       locked: true,
@@ -161,14 +167,63 @@ router.post("/generate", generateLimiter, async (req, res) => {
   if (!profile || !profile.state || !profile.entityType) {
     return res.status(400).json({ error: "Missing required profile fields (state, entityType)." });
   }
-  if (!contact.email || !contact.email.includes("@")) {
-    return res.status(400).json({ error: "A valid email is required to generate your compliance calendar." });
+  // A signed-in client generating another calendar: it belongs to their
+  // company straight away (saved, visible in their portal, nothing locked).
+  const viewer = await loadUserFromRequest(req).catch(() => null);
+  const signedInClient = viewer && viewer.role === "client" && viewer.clientOrgId ? viewer : null;
+
+  if (!contact.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(contact.email).trim())) {
+    return res.status(400).json({ error: "A valid email is required to generate your compliance calendar.", field: "email" });
   }
+  const phone = normalizePhone(String(contact.phone || ""));
+  if (!phone) {
+    return res.status(400).json({ error: "A valid phone number (with country code) is required so our team can reach you.", field: "phone" });
+  }
+  contact.phone = phone;
 
   try {
     const { items, sourceMode } = await generateCompanyCalendar(profile);
     if (!items.length) {
       return res.status(502).json({ error: "No calendar items returned — try again or refine the profile." });
+    }
+
+    if (signedInClient) {
+      const calendar = await Calendar.create({
+        createdBy: signedInClient.email,
+        source: "client",
+        clientOrgId: signedInClient.clientOrgId,
+        profile,
+        items,
+        status: "approved",
+        reviewedBy: "auto",
+        reviewedAt: new Date(),
+        sourceMode,
+      });
+      notifyStaff({
+        clientOrgId: calendar.clientOrgId,
+        calendarId: calendar._id,
+        type: "calendar_generated",
+        title: `New calendar generated: ${profile.companyName || profile.state}`,
+        body: `${signedInClient.name || signedInClient.email} generated a ${items.length}-item calendar for ${profile.companyName || "another entity"} (${profile.state}, ${profile.entityType}).`,
+        link: `/calendar.html?id=${calendar._id}`,
+        actorName: signedInClient.name || signedInClient.email,
+      });
+      notifyClient({
+        clientOrgId: calendar.clientOrgId,
+        calendarId: calendar._id,
+        type: "calendar_generated",
+        title: "Your new compliance calendar is saved",
+        body: `We saved your ${items.length}-item calendar for ${profile.companyName || "your company"} to your portal.`,
+        link: `/portal.html?calendar=${calendar._id}`,
+        email: false,
+      });
+      return res.status(201).json({
+        calendarId: calendar._id,
+        itemCount: items.length,
+        savedToPortal: true,
+        portalUrl: `/portal.html?calendar=${calendar._id}`,
+        items: items.map((it) => ({ ...it, locked: false, daysUntil: daysUntilOf(it.due_date), price: getPriceInfo(it) })),
+      });
     }
 
     const calendar = await Calendar.create({
@@ -181,8 +236,8 @@ router.post("/generate", generateLimiter, async (req, res) => {
       sourceMode,
       leadContact: {
         name: contact.name || "",
-        email: contact.email,
-        phone: contact.phone || "",
+        email: String(contact.email).trim().toLowerCase(),
+        phone: contact.phone,
         unlockedAt: new Date(),
       },
     });
