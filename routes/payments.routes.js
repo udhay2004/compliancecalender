@@ -38,9 +38,20 @@ const { formatUSD } = require("../lib/complianceFees");
 const { logActivity } = require("../lib/auditLog");
 const { notifyStaff, notifyClient } = require("../lib/notify");
 
-// Prices in lib/complianceFees.js are in USD. Charging USD needs
-// "International Payments" enabled on the Razorpay account.
-const CURRENCY = (process.env.PAYMENT_CURRENCY || "USD").toUpperCase();
+// Prices are in USD; what's charged (USD, or INR at a set rate) comes
+// from lib/paymentConfig.js.
+const { paymentCurrency, chargeFor, formatCharge, explainRazorpayError } = require("../lib/paymentConfig");
+const CURRENCY = paymentCurrency();
+
+// When Razorpay refuses to create an order, the team hears about it once
+// per reason per hour (bell + email) instead of finding out from a client.
+const lastAlert = new Map();
+function alertTeamOnce(key, fn) {
+  const now = Date.now();
+  if (now - (lastAlert.get(key) || 0) < 60 * 60 * 1000) return;
+  lastAlert.set(key, now);
+  fn();
+}
 
 function safeEqualHex(a, b) {
   if (typeof a !== "string" || typeof b !== "string" || a.length !== b.length) return false;
@@ -64,7 +75,9 @@ function ordersForItem(item) {
     }
   });
   if (item.razorpayOrderId && !orders.has(item.razorpayOrderId)) {
-    orders.set(item.razorpayOrderId, { amountCents: item.feeAmountCents, currency: CURRENCY });
+    let fallback = { amountCents: item.feeAmountCents, currency: CURRENCY };
+    try { const c = chargeFor(item.feeAmountCents); fallback = { amountCents: c.amount, currency: c.currency }; } catch {}
+    orders.set(item.razorpayOrderId, fallback);
   }
   return orders;
 }
@@ -232,10 +245,14 @@ router.post("/calendars/:id/items/:index/create-order", async (req, res) => {
     }
 
     const prefill = { name: org.primaryContactName || req.user.name || "", email: org.primaryContactEmail, contact: org.primaryContactPhone };
+    const charge = chargeFor(item.feeAmountCents);
     const payload = (orderId, amount, currency) => ({
       orderId,
       amount,
       currency,
+      displayAmount: formatCharge(amount, currency),
+      // e.g. "$125 = ₹10,438 at ₹83.5 per $" so the client isn't surprised
+      conversionNote: charge.rate ? `${formatCharge(item.feeAmountCents, "USD")} is charged as ${formatCharge(amount, currency)} (₹${charge.rate} per US$).` : "",
       keyId: process.env.RAZORPAY_KEY_ID, // public key — safe to send to the browser
       description: item.compliance_name,
       prefill,
@@ -246,7 +263,7 @@ router.post("/calendars/:id/items/:index/create-order", async (req, res) => {
     // case where a new one IS created).
     if (item.razorpayOrderId) {
       const known = ordersForItem(item).get(item.razorpayOrderId);
-      if (known && known.amountCents === item.feeAmountCents) {
+      if (known && known.amountCents === charge.amount && (known.currency || CURRENCY) === charge.currency) {
         try {
           const existing = await razorpay.orders.fetch(item.razorpayOrderId);
           if (existing.status === "paid") {
@@ -263,7 +280,7 @@ router.post("/calendars/:id/items/:index/create-order", async (req, res) => {
               announcePayment(calendar, item, outcome).catch(() => {});
               return res.status(409).json({ error: "This service is already paid.", calendar: await toView(calendar) });
             }
-          } else if (existing.amount === item.feeAmountCents && existing.currency === CURRENCY) {
+          } else if (existing.amount === charge.amount && existing.currency === charge.currency) {
             item.paymentEvents.push({ event: "order_reused", razorpayOrderId: existing.id, amountCents: existing.amount, currency: existing.currency });
             await calendar.save();
             return res.json(payload(existing.id, existing.amount, existing.currency));
@@ -275,14 +292,16 @@ router.post("/calendars/:id/items/:index/create-order", async (req, res) => {
     }
 
     const order = await razorpay.orders.create({
-      amount: item.feeAmountCents,
-      currency: CURRENCY,
+      amount: charge.amount,
+      currency: charge.currency,
       receipt: `cal_${calendar._id}_i${idx}_${Date.now().toString(36)}`.slice(0, 40), // Razorpay caps receipt at 40 chars
       notes: {
         calendarId: String(calendar._id),
         itemIndex: String(idx),
         complianceName: item.compliance_name.slice(0, 250),
         clientOrgId: String(calendar.clientOrgId),
+        priceUsdCents: String(item.feeAmountCents),
+        ...(charge.rate ? { usdToInrRate: String(charge.rate) } : {}),
       },
     });
 
@@ -292,11 +311,24 @@ router.post("/calendars/:id/items/:index/create-order", async (req, res) => {
 
     res.json(payload(order.id, order.amount, order.currency));
   } catch (err) {
-    console.error("[payments] create-order error:", err);
-    const msg = err.code === "RAZORPAY_NOT_CONFIGURED"
-      ? "Online payments aren't set up yet. Please message us to pay another way."
-      : "Could not start the payment. Please try again, or message us if it keeps failing.";
-    res.status(500).json({ error: msg });
+    const why = explainRazorpayError(err);
+    // One readable line in the logs, with Razorpay's own words.
+    console.error(`[payments] create-order FAILED (${why.status || "-"} ${why.code}): ${why.description} | ${why.reason} | Fix: ${why.fix}`);
+    alertTeamOnce(why.code + why.description, () => {
+      notifyStaff({
+        type: "payment_failed",
+        title: "Online payments are failing",
+        body: `A client tried to pay and Razorpay refused. ${why.reason}\n\nHow to fix: ${why.fix}\n\nRazorpay's message: ${why.description}`,
+        link: "/admin.html",
+      });
+    });
+    const temporary = why.reason.startsWith("The server couldn't reach Razorpay");
+    res.status(temporary ? 503 : 500).json({
+      error: temporary
+        ? "The payment service didn't respond. Please try again in a minute."
+        : "Online payment isn't available for this right now. Our team has been notified and will contact you shortly; you haven't been charged.",
+      code: "PAYMENT_UNAVAILABLE",
+    });
   }
 });
 
