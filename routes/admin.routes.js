@@ -26,6 +26,55 @@ const { requireAuth, requireRole } = require("../middleware/auth");
 const router = express.Router();
 router.use(requireAuth, requireRole("admin"));
 
+// GET /api/admin/payments-health — "why can't clients pay?" in one click.
+// Checks the settings, then asks Razorpay directly: are the keys accepted,
+// and will it create an order in our currency? The test order is for the
+// smallest amount and is never paid (unpaid orders cost nothing).
+router.get("/payments-health", async (req, res) => {
+  const { paymentCurrency, currencyProblems, chargeFor, formatCharge, explainRazorpayError } = require("../lib/paymentConfig");
+  const keyId = process.env.RAZORPAY_KEY_ID || "";
+  const report = {
+    currency: paymentCurrency(),
+    mode: keyId.startsWith("rzp_live_") ? "live" : keyId.startsWith("rzp_test_") ? "test" : keyId ? "unknown" : null,
+    webhookUrl: `${process.env.APP_URL || "<APP_URL>"}/api/webhooks/razorpay`,
+    webhookSecretSet: Boolean(process.env.RAZORPAY_WEBHOOK_SECRET),
+    appUrlSet: Boolean(process.env.APP_URL),
+    steps: [],
+    ok: false,
+  };
+  const add = (name, ok, detail = "", fix = "") => report.steps.push({ name, ok, detail, fix });
+
+  add("API keys are set", Boolean(keyId && process.env.RAZORPAY_KEY_SECRET), "",
+    "Add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in your host's variables and redeploy.");
+  const cp = currencyProblems();
+  add(`Currency settings (${report.currency})`, cp.length === 0, cp.join(" "), cp.length ? "Fix the settings above and redeploy." : "");
+
+  if (report.steps.every((s) => s.ok)) {
+    const razorpay = require("../config/razorpay");
+    try {
+      await razorpay.orders.all({ count: 1 });
+      add("Razorpay accepts the keys", true, report.mode === "test" ? "These are TEST keys: no real money is collected." : "");
+      try {
+        const c = chargeFor(100); // US$1.00 (or its rupee equivalent)
+        const order = await razorpay.orders.create({ amount: Math.max(c.amount, 100), currency: c.currency, receipt: `healthcheck_${Date.now()}`.slice(0, 40), notes: { purpose: "admin payments check, never paid" } });
+        add(`Razorpay can create a ${c.currency} payment`, true, `Test order ${order.id} for ${formatCharge(order.amount, order.currency)} created (never charged).`);
+      } catch (err) {
+        const why = explainRazorpayError(err);
+        add(`Razorpay can create a ${report.currency} payment`, false, `${why.reason} (Razorpay said: ${why.description})`, why.fix);
+      }
+    } catch (err) {
+      const why = explainRazorpayError(err);
+      add("Razorpay accepts the keys", false, `${why.reason} (Razorpay said: ${why.description})`, why.fix);
+    }
+  }
+  add("Webhook secret is set", report.webhookSecretSet, report.webhookSecretSet ? "" : "Without it, payments where the client closes the window early are never recorded.",
+    `Razorpay → Webhooks → Add webhook: URL ${report.webhookUrl}, events payment.captured, payment.failed, order.paid. Put its secret in RAZORPAY_WEBHOOK_SECRET.`);
+  if (!report.appUrlSet) add("APP_URL is set", false, "Needed for the webhook URL and links in emails.", "Set APP_URL to your site's address, e.g. https://yourapp.up.railway.app");
+
+  report.ok = report.steps.every((s) => s.ok);
+  res.json(report);
+});
+
 // GET /api/admin/storage-health — "is document storage actually working?"
 // Uploads, reads back and deletes a tiny test file, then lists client
 // documents whose files are missing (e.g. uploaded while files were still
