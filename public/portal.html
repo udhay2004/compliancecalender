@@ -54,6 +54,11 @@
   .sheet-body h2 { font-family:var(--serif); margin:0 0 6px; font-size:20px; }
   .sheet-body input, .sheet-body select { width:100%; }
   .req { color:var(--stamp-red); }
+  .proof-card { margin-top:12px; padding:12px 14px; border-radius:8px; background:var(--teal-bg); border:1px solid #c7e9e5; }
+  .proof-title { font-weight:700; font-size:14px; color:var(--brand-dark); margin-bottom:6px; }
+  .proof-title span { font-weight:500; color:var(--ink-soft); font-size:13px; }
+  .proof-item { padding:6px 0; border-top:1px solid #d6efec; }
+  .proof-item:first-of-type { border-top:none; }
   .price-list { padding:10px 16px; }
   .price-row { display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid var(--rule-soft); font-size:13px; }
   .price-row:last-of-type { border-bottom:none; }
@@ -440,7 +445,18 @@
         <div class="item-body" ${isOpen ? '' : 'hidden'} style="margin-top:10px;">
           <p style="font-size:14px;color:var(--ink-soft);margin:8px 0;">${escapeHtml(item.description)}</p>
           ${item.authority ? `<div style="font-size:12.5px;color:var(--ink-soft);">Authority: ${escapeHtml(item.authority)}</div>` : ''}
-          ${certs.length ? `<div style="margin-top:10px;"><div class="checklist-title">Certificate / acknowledgment</div>${certs.map(d => d.fileMissing ? `<div class="pay-note">We're re-uploading your certificate "${escapeHtml(d.fileName)}". It will be back here shortly.</div>` : `<a class="doc-chip" href="${dl(d)}">${escapeHtml(d.fileName)} ↓</a>`).join('')}</div>` : ''}
+          ${certs.length ? `
+            <div class="proof-card">
+              <div class="proof-title">${item.clientStatus === 'Filed' ? '✓ Done' : 'Documents from us'}${item.completedAt ? ` <span>on ${new Date(item.completedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</span>` : ''}</div>
+              ${certs.map(d => `
+                <div class="proof-item">
+                  ${d.fileMissing
+                    ? `<div class="pay-note">We're re-uploading "${escapeHtml(d.fileName)}". It will be back here shortly.</div>`
+                    : `<a class="doc-chip" href="${dl(d)}">${escapeHtml(d.fileName)} ↓</a>`}
+                  ${d.referenceNumber ? `<div class="pay-note">Reference: <b>${escapeHtml(d.referenceNumber)}</b></div>` : ''}
+                  ${d.proofNote ? `<div class="pay-note" style="color:var(--ink);">${escapeHtml(d.proofNote)}</div>` : ''}
+                </div>`).join('')}
+            </div>` : ''}
           ${item.selectedByClient || clientDocs.length ? `
             ${(item.checklist || []).length ? `<div class="checklist"><div class="checklist-title">Documents we need</div>${checklist}</div>` : ''}
             ${clientDocs.length ? `<div style="margin-top:10px;"><div class="checklist-title">Your uploads</div>${clientDocs.map(d => `
