@@ -20,14 +20,17 @@ const { requireAuth, requireClientRole } = require("../middleware/auth");
 const { upload } = require("../middleware/upload");
 const storage = require("../lib/storage");
 const { generateCompanyCalendar } = require("../lib/claude");
-const { toView, missingContactFields, normalizePhone, setDownloadHeaders } = require("../lib/calendarView");
+const { toView, missingContactFields, normalizePhone, missingKeysFor } = require("../lib/calendarView");
+const { sendStoredFile } = require("../lib/download");
 const { notifyStaff, notifyClient } = require("../lib/notify");
+const { applyListPrice, removeListPrice, PRICE_LIST_ACTOR, formatUSD } = require("../lib/complianceFees");
 const { logActivity } = require("../lib/auditLog");
 
 const router = express.Router();
 router.use(requireAuth, requireClientRole);
 
-const clientView = (calendar) => toView(calendar, { staff: false });
+// Async: a document whose file was lost shows as "please upload again".
+const clientView = async (calendar) => toView(calendar, { staff: false, missingKeys: await missingKeysFor(calendar) });
 
 function staffLink(calendarId) {
   return `/calendar.html?id=${calendarId}`;
@@ -150,7 +153,7 @@ router.get("/calendars", async (req, res) => {
     clientOrgId: req.user.clientOrgId,
     status: "approved",
   }).sort({ supersededAt: 1, createdAt: -1 });
-  const views = calendars.map(clientView);
+  const views = await Promise.all(calendars.map(clientView));
   views.sort((a, b) => (a.supersededAt ? 1 : 0) - (b.supersededAt ? 1 : 0) || new Date(b.createdAt) - new Date(a.createdAt));
   res.json({ calendars: views });
 });
@@ -171,7 +174,7 @@ router.get("/calendars/pending", async (req, res) => {
 router.get("/calendars/:id", async (req, res) => {
   const calendar = await findOwnApprovedCalendar(req, req.params.id);
   if (!calendar) return res.status(404).json({ error: "Not found." });
-  res.json({ calendar: clientView(calendar) });
+  res.json({ calendar: await clientView(calendar) });
 });
 
 // POST /api/portal/calendars/:id/items/:index/select  { selected: true|false }
@@ -189,19 +192,22 @@ router.post("/calendars/:id/items/:index/select", requireCompleteContact, async 
     if (item.paymentStatus === "Paid" || item.clientStatus === "Filed") {
       return res.status(400).json({ error: "This service is already paid for or filed, so it can't be removed. Message us if something's wrong." });
     }
-    if (item.paymentStatus === "Invoiced" || item.paymentStatus === "Overdue") {
-      return res.status(400).json({ error: "We've already sent a quote for this service. Message us if you'd like to cancel it." });
+    // A price that came automatically from the price list can be undone
+    // with the selection; a price staff sent personally can't.
+    if ((item.paymentStatus === "Invoiced" || item.paymentStatus === "Overdue") && item.quotedBy !== PRICE_LIST_ACTOR) {
+      return res.status(400).json({ error: "We've already sent you a price for this service. Message us if you'd like to cancel it." });
     }
   }
-  if (item.selectedByClient === selected) return res.json({ calendar: clientView(calendar) });
+  if (item.selectedByClient === selected) return res.json({ calendar: await clientView(calendar) });
 
   item.selectedByClient = selected;
   item.selectedAt = selected ? new Date() : null;
   if (selected && item.clientStatus === "Not Started") item.clientStatus = "Awaiting Documents";
   if (!selected && item.clientStatus === "Awaiting Documents") item.clientStatus = "Not Started";
+  const priced = selected ? applyListPrice(item) : (removeListPrice(item), false);
   await calendar.save();
 
-  res.json({ calendar: clientView(calendar) });
+  res.json({ calendar: await clientView(calendar) });
 
   notifyStaff({
     clientOrgId: calendar.clientOrgId,
@@ -209,7 +215,11 @@ router.post("/calendars/:id/items/:index/select", requireCompleteContact, async 
     itemIndex: idx,
     type: selected ? "service_selected" : "service_deselected",
     title: `${req.clientOrg.name} ${selected ? "selected" : "removed"} ${item.compliance_name}`,
-    body: selected ? "They want ComplyGlobally to handle this filing." : "They no longer want this filing handled.",
+    body: selected
+      ? (priced
+          ? `They want ComplyGlobally to handle this filing. The list price of ${formatUSD(item.feeAmountCents)} was applied automatically.`
+          : "They want ComplyGlobally to handle this filing. It has no fixed list price, so send them a price once their documents are in.")
+      : "They no longer want this filing handled.",
     link: staffLink(calendar._id),
     actorName: req.user.name || req.user.email,
     email: false, // selections are frequent; the bell is enough, uploads/payments still email
@@ -230,6 +240,7 @@ router.post("/calendars/:id/items/:index/upload", requireCompleteContact, upload
     const { fileKey, fileUrl } = await storage.saveFile({
       buffer: req.file.buffer,
       fileName: req.file.originalname,
+      contentType: req.file.mimetype,
     });
     const item = calendar.items[idx];
     // requirementLabel says WHICH checklist row this upload satisfies (see
@@ -250,11 +261,12 @@ router.post("/calendars/:id/items/:index/upload", requireCompleteContact, upload
       item.selectedByClient = true;
       item.selectedAt = new Date();
     }
+    applyListPrice(item);
     if (item.clientStatus === "Not Started" || item.clientStatus === "Awaiting Documents") {
       item.clientStatus = "Under Review";
     }
     await calendar.save();
-    res.status(201).json({ calendar: clientView(calendar) });
+    res.status(201).json({ calendar: await clientView(calendar) });
 
     logActivity({
       action: "document_uploaded",
@@ -273,7 +285,8 @@ router.post("/calendars/:id/items/:index/upload", requireCompleteContact, upload
       body:
         `${req.user.name || req.user.email} uploaded "${req.file.originalname}"` +
         (requirementLabel ? ` (${requirementLabel})` : "") +
-        `. It's waiting for someone to verify it.`,
+        `. It's waiting for someone to verify it.` +
+        (item.feeAmountCents ? "" : " This filing has no fixed price yet; send the client a price once everything is in."),
       link: staffLink(calendar._id),
       actorName: req.user.name || req.user.email,
     });
@@ -292,10 +305,7 @@ router.get("/calendars/:id/items/:index/documents/:docIndex/download", async (re
   const doc = idx !== null ? calendar.items[idx].documents[docIdx] : null;
   if (!doc) return res.status(404).json({ error: "Document not found." });
 
-  const stream = await storage.getFileStream(doc.fileKey);
-  if (!stream) return res.status(404).json({ error: "File is missing from storage." });
-  setDownloadHeaders(res, doc.fileName);
-  stream.pipe(res);
+  await sendStoredFile(req, res, doc, { audience: "client", backHref: `/portal.html?calendar=${calendar._id}` });
 });
 
 // ---------------------------------------------------------------------
@@ -404,7 +414,7 @@ router.post("/calendars/regenerate", requireCompleteContact, async (req, res) =>
     base.supersededAt = new Date();
     await base.save();
 
-    res.status(201).json({ calendar: clientView(calendar), carried });
+    res.status(201).json({ calendar: await clientView(calendar), carried });
 
     const who = req.user.name || req.user.email;
     logActivity({
