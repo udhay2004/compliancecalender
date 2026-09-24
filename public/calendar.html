@@ -13,6 +13,7 @@
   .ws-stats { display: flex; flex-wrap: wrap; gap: 8px 26px; font-size: 12.5px; color: var(--ink-soft); margin: 4px 0 16px; }
   .ws-stats b { display: block; font-family: var(--serif); font-size: 21px; color: var(--ink); }
   .ws-stats .attn b { color: var(--seal-gold); }
+  .ws-stats .late b { color: var(--stamp-red); }
   .ws-tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--rule); margin-bottom: 4px; flex-wrap: wrap; }
   .ws-tab { background: none; border: none; border-bottom: 2px solid transparent; padding: 8px 12px; font: 500 13.5px var(--sans); color: var(--ink-soft); cursor: pointer; margin-bottom: -1px; }
   .ws-tab span { font-size: 11.5px; background: var(--grey-bg); border-radius: 999px; padding: 1px 7px; margin-left: 4px; }
@@ -140,6 +141,18 @@
 
   // "https://www.irs.gov/forms-pubs/about-form-941" -> "irs.gov"
   function sourceHost(url) { try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return 'link'; } }
+  function fmtDue(d) { return new Date(d).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }); }
+  function staffDueLine(item) {
+    if (!item.dueDateActual) {
+      return item.recurrence === 'event' ? `As triggered: ${escapeHtml(item.due_date)}`
+        : `<span style="color:var(--stamp-red);font-weight:600;">No due date. Set one below.</span> (${escapeHtml(item.due_date)})`;
+    }
+    const d = item.daysUntil, done = item.clientStatus === 'Filed';
+    const rel = done || d === null ? '' : d < 0 ? ` · <b style="color:var(--stamp-red);">${-d} day${d === -1 ? '' : 's'} overdue</b>`
+      : d <= 7 ? ` · <b style="color:var(--seal-gold);">${d === 0 ? 'due today' : d === 1 ? 'due tomorrow' : 'in ' + d + ' days'}</b>` : ` · in ${d} days`;
+    const src = item.dueDateSource === 'staff' ? ' · set by staff' : '';
+    return `Due <b>${fmtDue(item.dueDateActual)}</b>${rel}${src}${item.dueDateNote ? ` <span title="${escapeHtml(item.dueDateNote)}" style="cursor:help;">ⓘ</span>` : ''}`;
+  }
   function money(cents) { const d = cents / 100; return '$' + d.toLocaleString('en-US', { minimumFractionDigits: d % 1 ? 2 : 0, maximumFractionDigits: 2 }); }
   function priceTag(item) {
     const pr = item.price || {};
@@ -230,7 +243,7 @@
           <tbody>
           ${groups[cat].map(it => `
             <tr id="row-${it.__index}">
-              <td class="due" data-label="Due">${escapeHtml(it.due_date)}</td>
+              <td class="due" data-label="Due">${it.dueDateActual ? `<b>${fmtDue(it.dueDateActual)}</b><div style="font-weight:400;font-size:11.5px;color:var(--ink-soft);">${escapeHtml(it.due_date)}</div>` : escapeHtml(it.due_date)}</td>
               <td class="name"><span class="dot ${escapeHtml(it.confidence||'medium')}"></span>${escapeHtml(it.compliance_name)}${it.editedByReviewer ? '<span class="edited-flag">edited</span>' : ''}
                 <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">${priceTag(it)}${calendar.clientOrgId ? (it.selectedByClient ? '<span class="sel-badge on">Client selected</span>' : '<span class="sel-badge">Not selected</span>') : ''}</div></td>
               <td class="applies" data-label="Applies to">${escapeHtml(it.applicable_to)}</td>
@@ -434,6 +447,8 @@
       <div class="ws-stats">
         <div><b>${sm.selected ?? 0}</b>selected by client</div>
         <div><b>${sm.notSelected ?? 0}</b>not selected</div>
+        ${sm.overdue ? `<div class="late"><b>${sm.overdue}</b>overdue</div>` : ''}
+        <div><b>${sm.dueSoon ?? 0}</b>due in 30 days</div>
         <div class="${sm.documentsPendingReview ? 'attn' : ''}"><b>${sm.documentsPendingReview ?? 0}</b>documents to verify</div>
         <div class="${sm.readyToQuote ? 'attn' : ''}"><b>${sm.readyToQuote ?? 0}</b>ready for a price</div>
         <div><b>${sm.awaitingPayment ?? 0}</b>awaiting payment</div>
@@ -441,7 +456,8 @@
     const tabs = document.getElementById('workspaceTabs');
     if (tabs) {
       const t = (key, label, n) => `<button role="tab" class="ws-tab ${workspaceFilter === key ? 'on' : ''}" aria-selected="${workspaceFilter === key}" data-filter="${key}">${label} <span>${n}</span></button>`;
-      tabs.innerHTML = t('selected', 'Selected by client', sm.selected ?? 0) + t('unselected', 'Not selected', sm.notSelected ?? 0) + t('all', 'All filings', sm.totalItems ?? calendar.items.length);
+      tabs.innerHTML = t('selected', 'Selected by client', sm.selected ?? 0) + t('unselected', 'Not selected', sm.notSelected ?? 0) + t('all', 'All filings', sm.totalItems ?? calendar.items.length)
+        + (sm.historyItems ? t('history', 'Previous periods', sm.historyItems) : '');
       tabs.querySelectorAll('[data-filter]').forEach(b => b.addEventListener('click', () => { workspaceFilter = b.dataset.filter; renderClientItems(); }));
     }
   }
@@ -569,7 +585,7 @@
           <button class="ws-card-head" data-card-idx="${idx}" aria-expanded="${isOpen}">
             <div>
               <div style="font-weight:600;">${escapeHtml(item.compliance_name)}</div>
-              <div style="color:var(--ink-soft);font-size:12.5px;">Due ${escapeHtml(item.due_date)}${item.selectedAt ? ` · selected ${new Date(item.selectedAt).toLocaleDateString()}` : ''}</div>
+              <div style="color:var(--ink-soft);font-size:12.5px;">${staffDueLine(item)}${item.selectedAt ? ` · selected ${new Date(item.selectedAt).toLocaleDateString()}` : ''}</div>
             </div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center;">
               ${priceTag(item)}
@@ -630,6 +646,13 @@
                   ${PAYMENT_STATUS_OPTIONS.map(s => `<option value="${s}" ${s===item.paymentStatus?'selected':''}>${s}</option>`).join('')}
                 </select>
               </div>
+              <div class="field span2">
+                <label for="dd-${idx}">Due date <span style="font-weight:400;color:var(--ink-soft);">${item.dueDateSource === 'staff' ? '(set by staff)' : item.dueDateActual ? '(automatic)' : '(not set)'}</span></label>
+                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                  <input id="dd-${idx}" type="date" class="dueDateInput" data-idx="${idx}" value="${item.dueDateActual ? new Date(item.dueDateActual).toISOString().slice(0,10) : ''}" style="max-width:190px;">
+                  ${item.dueDateSource === 'staff' ? `<button class="doc-btn" data-reset-due="${idx}" type="button">Use automatic date</button>` : ''}
+                </div>
+              </div>
             </div>
             <div class="submit-row" style="margin-top:10px;">
               <span class="hint" data-status-hint="${idx}"></span>
@@ -655,7 +678,11 @@
     }
     renderWorkspaceHeader();
     const all = calendar.items.map((it, idx) => ({ it, idx }));
-    const shown = all.filter(x => workspaceFilter === 'all' ? true : workspaceFilter === 'selected' ? x.it.selectedByClient : !x.it.selectedByClient);
+    const byDue = (a, b) => (a.it.dueDateActual ? new Date(a.it.dueDateActual) : Infinity) - (b.it.dueDateActual ? new Date(b.it.dueDateActual) : Infinity);
+    const shown = all.filter(x => workspaceFilter === 'history' ? x.it.isHistory
+      : x.it.isHistory ? false
+      : workspaceFilter === 'all' ? true : workspaceFilter === 'selected' ? x.it.selectedByClient : !x.it.selectedByClient)
+      .sort(byDue);
     if (!shown.length) {
       el.innerHTML = `<div class="empty-state">${workspaceFilter === 'selected'
         ? 'The client hasn\'t selected any services yet. They\'ll appear here as soon as they pick one or upload a document, and you\'ll get a notification.'
@@ -782,6 +809,21 @@
       });
     });
 
+    el.querySelectorAll('[data-reset-due]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = btn.dataset.resetDue;
+        btn.disabled = true;
+        try {
+          const res = await fetch(`/api/calendars/${id}/items/${idx}/status`, {
+            method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dueDateActual: '' }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || 'Could not reset.');
+          calendar = data.calendar; openCards.add(+idx); renderClientItems();
+        } catch (err) { alert(err.message); btn.disabled = false; }
+      });
+    });
+
     el.querySelectorAll('[data-action="saveStatus"]').forEach(btn => {
       btn.addEventListener('click', async () => {
         const idx = btn.dataset.idx;
@@ -789,6 +831,10 @@
         const clientStatus = el.querySelector(`.clientStatusSelect[data-idx="${idx}"]`).value;
         const paymentStatus = el.querySelector(`.paymentStatusSelect[data-idx="${idx}"]`).value;
         const body = { clientStatus, paymentStatus };
+        const ddInput = el.querySelector(`.dueDateInput[data-idx="${idx}"]`);
+        const it0 = calendar.items[idx];
+        const currentDue = it0.dueDateActual ? new Date(it0.dueDateActual).toISOString().slice(0, 10) : '';
+        if (ddInput && ddInput.value && ddInput.value !== currentDue) body.dueDateActual = ddInput.value;
         const feeVal = el.querySelector(`.quoteAmount[data-idx="${idx}"]`)?.value;
         if (paymentStatus === 'Invoiced' && feeVal) body.feeAmountUSD = Number(feeVal);
         hint.textContent = 'Saving…'; hint.classList.remove('err');
