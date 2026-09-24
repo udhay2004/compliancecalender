@@ -112,6 +112,26 @@ async function buildTechSection() {
     (await ClientOrg.find({ _id: { $in: clientCalendars.map((c) => c.clientOrgId) } }).select("name primaryContactPhone").lean())
       .map((o) => [String(o._id), o])
   );
+  // Deadlines across all clients: selected filings not done yet, overdue
+  // first, then the next 30 days; plus filings with no date to set.
+  const deadlines = [];
+  const needsDate = [];
+  clientCalendars.forEach((c) => {
+    const org = orgNames[String(c.clientOrgId)] || {};
+    c.items.forEach((it, idx) => {
+      if (it.isHistory) return;
+      const base = { calendarId: String(c._id), itemIndex: idx, company: org.name || c.profile?.companyName || "(unnamed)", task: it.compliance_name };
+      if (!it.dueDateActual) {
+        if (it.selectedByClient && it.recurrence !== "event") needsDate.push({ ...base, dueText: it.due_date });
+        return;
+      }
+      if (!it.selectedByClient || it.clientStatus === "Filed") return;
+      const days = Math.round((new Date(it.dueDateActual).setUTCHours(0, 0, 0, 0) - new Date().setUTCHours(0, 0, 0, 0)) / 86400000);
+      if (days <= 30) deadlines.push({ ...base, dueDate: it.dueDateActual, days, status: it.clientStatus, paymentStatus: it.paymentStatus });
+    });
+  });
+  deadlines.sort((a, b) => a.days - b.days);
+
   const clientWork = clientCalendars
     .map((c) => {
       const sm = toView(c, { staff: true }).summary;
@@ -149,6 +169,8 @@ async function buildTechSection() {
       { label: "Overdue", value: byItemStatus.Overdue || 0 },
     ],
     clientWork,
+    deadlines: deadlines.slice(0, 40),
+    needsDate: needsDate.slice(0, 25),
     pendingDocuments: pendingDocList.map((d) => ({
       calendarId: String(d._id),
       company: d.profile?.companyName || "(unnamed)",
@@ -229,7 +251,7 @@ async function buildFinanceSection() {
   clientCals.forEach((c) => {
     const v = toView(c, { staff: true });
     v.items.forEach((it) => {
-      if (!it.selectedByClient || it.feeAmountCents || it.paymentStatus !== "Not Invoiced") return;
+      if (it.isHistory || !it.selectedByClient || it.feeAmountCents || it.paymentStatus !== "Not Invoiced") return;
       if (it.price?.kind === "included") return;
       needsPrice.push({
         calendarId: String(c._id),
