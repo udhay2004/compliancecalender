@@ -26,6 +26,40 @@ const { requireAuth, requireRole } = require("../middleware/auth");
 const router = express.Router();
 router.use(requireAuth, requireRole("admin"));
 
+// GET /api/admin/storage-health — "is document storage actually working?"
+// Uploads, reads back and deletes a tiny test file, then lists client
+// documents whose files are missing (e.g. uploaded while files were still
+// going to the server's disk) so the team knows whom to ask to re-upload.
+router.get("/storage-health", async (req, res) => {
+  const storage = require("../lib/storage");
+  const Calendar = require("../models/Calendar");
+  const report = await storage.healthCheck();
+
+  const calendars = await Calendar.find({ clientOrgId: { $ne: null }, supersededAt: null })
+    .select("profile items.compliance_name items.documents")
+    .limit(300)
+    .lean();
+  const docs = [];
+  calendars.forEach((c) => c.items.forEach((it, idx) => (it.documents || []).forEach((d) => {
+    if (d.fileKey && d.reviewStatus !== "rejected") docs.push({ c, it, idx, d });
+  })));
+  let missing = new Set();
+  if (report.ok) missing = await storage.findMissing(docs.map((x) => x.d.fileKey));
+  report.documentsChecked = report.ok ? docs.length : 0;
+  report.missingDocuments = docs
+    .filter((x) => missing.has(x.d.fileKey))
+    .slice(0, 100)
+    .map((x) => ({
+      calendarId: String(x.c._id),
+      company: x.c.profile?.companyName || "(unnamed)",
+      filing: x.it.compliance_name,
+      fileName: x.d.fileName,
+      type: x.d.type,
+      uploadedAt: x.d.uploadedAt,
+    }));
+  res.json(report);
+});
+
 // A plain admin may only manage users at "staff" or "client" level.
 // super_admin may manage anyone, including other admins/super_admins.
 function canManageTargetRole(actingRole, targetRole) {
