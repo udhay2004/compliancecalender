@@ -29,6 +29,8 @@ const auditLogSchema = new mongoose.Schema(
         "document_uploaded",
         "calendar_regenerated",
         "quote_sent",
+        "proof_uploaded",
+        "proof_removed",
         "user_deactivated",
         "user_reactivated",
         // Account-security events. Worth keeping alongside the
