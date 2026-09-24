@@ -62,7 +62,48 @@
   .feed li:last-child { border-bottom: 0; }
   .feed .feed-meta { color: var(--grey-dot); font-size: 12px; margin-top: 3px; }
   .skeleton { color: var(--grey-dot); padding: 60px 0; text-align: center; font-size: 14px; }
-  @media (max-width: 720px) { .bar-label { flex-basis: 120px; } }
+  .section-heading { margin: 48px 0 -8px; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--brand-dark); border-top: 1px solid var(--rule); padding-top: 18px; }
+  .fin-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 28px; margin-top: 8px; align-items: start; }
+  .fin-col { min-width: 0; }
+  .fin-panel { margin-top: 32px; }
+  .fin-head h2 { font-family: var(--serif); font-size: 18px; margin: 0; }
+  .fin-head p { font-size: 13px; color: var(--ink-soft); margin: 4px 0 12px; line-height: 1.5; }
+  .fin-list { background: var(--card); border: 1px solid var(--rule); border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden; }
+  .fin-row { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 13px 16px; border-bottom: 1px solid var(--rule-soft); text-decoration: none; color: inherit; }
+  .fin-row:last-child { border-bottom: 0; }
+  .fin-row:hover { background: var(--paper); }
+  .fin-row:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
+  .fin-main { min-width: 0; }
+  .fin-title { font-weight: 600; font-size: 14px; color: var(--brand-dark); overflow-wrap: anywhere; }
+  .fin-sub { font-size: 12.5px; color: var(--ink-soft); margin-top: 2px; overflow-wrap: anywhere; }
+  .fin-side { text-align: right; flex-shrink: 0; max-width: 45%; }
+  .fin-amt { font-family: var(--serif); font-weight: 700; font-size: 16px; font-variant-numeric: tabular-nums; }
+  .fin-amt.good { color: var(--brand-dark); }
+  .fin-amt.bad { color: var(--stamp-red); }
+  .fin-pill { display: inline-block; font-family: var(--sans); font-size: 11.5px; font-weight: 600; padding: 2px 9px; border-radius: 999px; background: var(--grey-bg); color: var(--ink-soft); }
+  .fin-pill.ready { background: var(--seal-gold-bg); color: var(--seal-gold); }
+  .fin-pill.bad { background: var(--stamp-red-bg); color: var(--stamp-red); }
+  .fin-empty { background: var(--card); border: 1px dashed var(--rule); border-radius: var(--radius); padding: 22px 16px; text-align: center; color: var(--ink-soft); font-size: 13.5px; }
+  .fin-list.price { padding: 4px 16px; }
+  .fin-price-row { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--rule-soft); font-size: 13px; }
+  .fin-price-row:last-child { border-bottom: 0; }
+  .fin-price-row b { white-space: nowrap; text-align: right; }
+  .fin-price-row b.quote, .fin-price-row b.included, .fin-price-row b.from { font-weight: 500; color: var(--ink-soft); white-space: normal; max-width: 50%; }
+  @media (max-width: 1020px) { .fin-grid { grid-template-columns: minmax(0, 1fr); gap: 0; } }
+  @media (max-width: 720px) {
+    .bar-label { flex-basis: 120px; }
+    table.data, table.data tbody, table.data tr, table.data td { display: block; width: 100%; }
+    table.data thead { display: none; }
+    table.data tr { border-bottom: 1px solid var(--rule); padding: 8px 0; }
+    table.data td { border: 0; padding: 4px 14px; text-align: left !important; }
+    table.data td[data-label]:not([data-label=""])::before { content: attr(data-label); display: block; font-size: 10.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-soft); }
+    .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .stat { padding: 14px 14px; }
+    .stat-label { font-size: 10.5px; }
+    .stat-value { font-size: 22px; margin: 6px 0 2px; }
+    .stat-hint { font-size: 11px; }
+    .hero h1 { font-size: 23px; }
+  }
 </style>
 </head>
 <body>
@@ -205,38 +246,80 @@
     return html;
   }
 
+  // Finance: compact rows instead of wide tables, so nothing ever needs a
+  // sideways scroll; each row opens that client's calendar.
+  function daysAgo(value) {
+    if (!value) return '';
+    var d = Math.floor((Date.now() - new Date(value).getTime()) / 86400000);
+    return d <= 0 ? 'today' : d === 1 ? '1 day ago' : d + ' days ago';
+  }
+  function calLink(id) { return '/calendar.html?id=' + encodeURIComponent(id); }
+  function rows(list, fn, empty) {
+    if (!list || !list.length) return '<div class="fin-empty">' + esc(empty) + '</div>';
+    return '<div class="fin-list">' + list.map(fn).join('') + '</div>';
+  }
+  function row(href, title, sub, right, rightSub, tone) {
+    return '<a class="fin-row" href="' + href + '">' +
+      '<div class="fin-main"><div class="fin-title">' + title + '</div><div class="fin-sub">' + sub + '</div></div>' +
+      '<div class="fin-side"><div class="fin-amt ' + (tone || '') + '">' + right + '</div>' + (rightSub ? '<div class="fin-sub">' + rightSub + '</div>' : '') + '</div>' +
+    '</a>';
+  }
+  function finPanel(title, sub, body) {
+    return '<section class="fin-panel"><div class="fin-head"><h2>' + esc(title) + '</h2>' +
+      (sub ? '<p>' + esc(sub) + '</p>' : '') + '</div>' + body + '</section>';
+  }
+
   function renderFinance(finance) {
     var html = statCards(finance.cards);
+    html += '<div class="fin-grid">';
 
-    html += panel('Outstanding invoices', 'Soonest due first',
-      table(
-        [{ label: 'Company' }, { label: 'Filing' }, { label: 'Due' }, { label: 'Status' }, { label: 'Amount', num: true }],
-        finance.outstanding.map(function (r) {
-          return '<tr>' +
-            '<td>' + esc(r.company) + '</td>' +
-            '<td>' + esc(r.task) + '</td>' +
-            '<td>' + esc(r.dueDate || '—') + '</td>' +
-            '<td><span class="badge ' + (r.paymentStatus === 'Overdue' ? 'rejected' : 'pending_review') + '">' + esc(r.paymentStatus) + '</span></td>' +
-            '<td class="num">' + money(r.amount) + '</td>' +
-          '</tr>';
-        }),
-        'Nothing outstanding — everything invoiced has been paid.'
-      ));
+    html += '<div class="fin-col">';
+    html += finPanel('Needs a price', 'Services clients chose that have no price in your list. Clients were told you\u2019ll contact them once their documents are in.',
+      rows(finance.needsPrice, function (r) {
+        return row(calLink(r.calendarId),
+          esc(r.company),
+          esc(r.task),
+          r.ready ? '<span class="fin-pill ready">Documents in</span>' : '<span class="fin-pill">' + esc(r.docsProvided) + '/' + esc(r.docsTotal) + ' documents</span>',
+          r.listLabel && r.listLabel !== 'Price on request' ? 'List: ' + esc(r.listLabel) : 'Not in price list');
+      }, 'Every selected service has a price. Nothing to do here.'));
 
-    html += panel('Recent payments', '',
-      table(
-        [{ label: 'Company' }, { label: 'Filing' }, { label: 'Paid' }, { label: 'Amount', num: true }],
-        finance.recentPaid.map(function (r) {
-          return '<tr>' +
-            '<td>' + esc(r.company) + '</td>' +
-            '<td>' + esc(r.task) + '</td>' +
-            '<td>' + esc(when(r.paidAt)) + '</td>' +
-            '<td class="num">' + money(r.amount) + '</td>' +
-          '</tr>';
-        }),
-        'No payments recorded yet.'
-      ));
+    html += finPanel('Waiting for payment', 'Overdue first, then the longest waiting.',
+      rows(finance.outstanding, function (r) {
+        var overdue = r.paymentStatus === 'Overdue';
+        return row(calLink(r.calendarId),
+          esc(r.company),
+          esc(r.task) + ' \u00b7 due ' + esc(r.dueDate || '\u2014'),
+          money(r.amount),
+          (overdue ? '<span class="fin-pill bad">Overdue</span> ' : '') + (r.quotedAt ? 'priced ' + esc(daysAgo(r.quotedAt)) : '') + (r.autoPriced ? ' \u00b7 from list' : ''),
+          overdue ? 'bad' : '');
+      }, 'Nothing outstanding. Everything priced has been paid.'));
+    html += '</div>';
+
+    html += '<div class="fin-col">';
+    html += finPanel('Recent payments', '',
+      rows(finance.recentPaid, function (r) {
+        return row(calLink(r.calendarId), esc(r.company), esc(r.task), money(r.amount), esc(when(r.paidAt)), 'good');
+      }, 'No payments recorded yet.'));
+
+    html += finPanel('Price list', 'Fixed prices are added automatically when a client selects the service. Edit them in lib/complianceFees.js.',
+      '<div class="fin-list price">' + (finance.priceList || []).map(function (p) {
+        return '<div class="fin-price-row"><span>' + esc(p.service) + '</span><b class="' + esc(p.kind) + '">' + esc(p.label) + '</b></div>';
+      }).join('') + '</div>');
+    html += '</div>';
+
+    html += '</div>';
     return html;
+  }
+
+  // Tables elsewhere on the dashboard: label each cell so they can stack
+  // into cards on a phone instead of scrolling sideways.
+  function labelTableCells(root) {
+    root.querySelectorAll('table.data').forEach(function (t) {
+      var heads = Array.prototype.map.call(t.querySelectorAll('thead th'), function (th) { return th.textContent.trim(); });
+      t.querySelectorAll('tbody tr').forEach(function (tr) {
+        Array.prototype.forEach.call(tr.children, function (td, i) { if (heads[i]) td.setAttribute('data-label', heads[i]); });
+      });
+    });
   }
 
   function renderOwner(owner) {
@@ -288,11 +371,14 @@
 
     // Order matters for the mixed roles: an admin sees delivery work
     // first because that's the day job, money second.
-    if (data.tech) html += renderTech(data.tech);
-    if (data.finance) html += renderFinance(data.finance);
-    if (data.owner) html += renderOwner(data.owner);
+    var many = [data.tech, data.finance, data.owner].filter(Boolean).length > 1;
+    function heading(t) { return many ? '<div class="section-heading">' + esc(t) + '</div>' : ''; }
+    if (data.tech) html += heading('Client work') + renderTech(data.tech);
+    if (data.finance) html += heading('Finance') + renderFinance(data.finance);
+    if (data.owner) html += heading('Team & security') + renderOwner(data.owner);
 
     $('root').innerHTML = html;
+    labelTableCells($('root'));
 
     $('navUser').textContent = user.email;
     var links = [
