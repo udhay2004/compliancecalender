@@ -54,6 +54,12 @@
   .sheet-body h2 { font-family:var(--serif); margin:0 0 6px; font-size:20px; }
   .sheet-body input, .sheet-body select { width:100%; }
   .req { color:var(--stamp-red); }
+  .price-list { padding:10px 16px; }
+  .price-row { display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid var(--rule-soft); font-size:13px; }
+  .price-row:last-of-type { border-bottom:none; }
+  .price-name { color:var(--ink); overflow-wrap:anywhere; }
+  .price-val { font-weight:600; white-space:nowrap; text-align:right; }
+  .price-sel { font-size:10.5px; font-weight:700; color:var(--brand-dark); background:var(--teal-bg); padding:1px 6px; border-radius:999px; margin-left:4px; }
   @media (max-width:640px) { .item-side { width:100%; } }
 </style>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
@@ -82,6 +88,7 @@
     </div>
     <div class="side-col">
       <div id="detailsPanel"></div>
+      <div id="pricesPanel"></div>
       <div id="contactPanel"></div>
       <div id="chatPanel"></div>
     </div>
@@ -347,10 +354,33 @@
       : '';
   }
 
+  // "Prices" section: every filing on this calendar with its price, so the
+  // client sees all costs in one place before choosing anything.
+  function renderPrices() {
+    const el = document.getElementById('pricesPanel');
+    if (!calendar || !calendar.items.length) { el.innerHTML = ''; return; }
+    const rows = calendar.items.map((it, idx) => ({ it, idx }))
+      .sort((a, b) => (b.it.selectedByClient ? 1 : 0) - (a.it.selectedByClient ? 1 : 0));
+    const onRequest = calendar.items.some(it => (it.price || {}).kind === 'quote' || (it.price || {}).kind === 'from');
+    el.innerHTML = `
+      <div class="list-section">
+        <div class="section-title">Prices</div>
+        <div class="section-sub">What each filing costs if you'd like us to handle it.</div>
+        <div class="contact-card price-list">
+          ${rows.map(({ it }) => `
+            <div class="price-row">
+              <span class="price-name">${escapeHtml(it.compliance_name)}${it.selectedByClient ? ' <span class="price-sel">selected</span>' : ''}</span>
+              <span class="price-val">${it.paymentStatus === 'Paid' ? 'Paid ' : ''}${escapeHtml((it.price || {}).label || 'Price on request')}</span>
+            </div>`).join('')}
+          ${onRequest ? `<div class="pay-note" style="margin-top:10px;">Where it says "Price on request" or "From", we'll contact you with the exact price as soon as you upload your documents.</div>` : ''}
+        </div>
+      </div>`;
+  }
+
   function priceTag(item) {
     const pr = item.price || {};
     if (item.paymentStatus === 'Paid') return `<span class="price-tag paid">Paid ${escapeHtml(pr.label || '')}</span>`;
-    return `<span class="price-tag ${escapeHtml(pr.kind || 'quote')}" title="Price">${escapeHtml(pr.label || 'Quoted after document review')}</span>`;
+    return `<span class="price-tag ${escapeHtml(pr.kind || 'quote')}" title="${escapeHtml(pr.message || 'Price')}">${escapeHtml(pr.label || 'Price on request')}</span>`;
   }
 
   function itemHtml(item, idx) {
@@ -359,12 +389,12 @@
     const certs = (item.documents || []).map((d, di) => ({ ...d, di })).filter(d => d.type === 'certificate');
     const cs = item.checklistSummary || { total: 0, provided: 0, allProvided: true };
     const isOpen = expandedItems.has(idx);
-    const lockSelect = item.paymentStatus === 'Paid' || item.clientStatus === 'Filed' || item.paymentStatus === 'Invoiced' || item.paymentStatus === 'Overdue';
+    const lockSelect = item.paymentStatus === 'Paid' || item.clientStatus === 'Filed' || ((item.paymentStatus === 'Invoiced' || item.paymentStatus === 'Overdue') && item.quotedBy !== 'price-list');
     const dl = (d) => `/api/portal/calendars/${calendar._id}/items/${idx}/documents/${d.di}/download`;
 
     const checklist = (item.checklist || []).map(r => {
       const icon = r.state === 'accepted' ? '✓' : r.state === 'pending' ? '•' : r.state === 'rejected' ? '!' : '';
-      const label = r.state === 'accepted' ? 'Verified' : r.state === 'pending' ? 'Uploaded, being verified' : r.state === 'rejected' ? 'Not accepted, upload again' : 'Needed';
+      const label = r.state === 'accepted' ? 'Verified' : r.state === 'pending' ? 'Uploaded, being verified' : r.state === 'rejected' ? 'Please upload again' : r.lost ? 'Please upload again' : 'Needed';
       const canUpload = !readOnly && (r.state === 'missing' || r.state === 'rejected');
       return `
         <div>
@@ -376,6 +406,7 @@
             </div>
           </div>
           ${r.reused ? `<div class="check-sub">Using the file you gave us for "${escapeHtml(r.fromItem)}", no need to upload again</div>` : ''}
+          ${r.lost && r.state === 'missing' ? `<div class="check-sub" style="color:var(--stamp-red);">We couldn't find the file you sent earlier on our side, sorry. Please upload it once more.</div>` : ''}
         </div>`;
     }).join('');
 
@@ -384,17 +415,13 @@
       payArea = `<div class="price-line">Paid <b>${escapeHtml(item.price?.label || '')}</b>${item.paidAt ? ` on ${new Date(item.paidAt).toLocaleDateString()}` : ''}</div>`;
     } else if (item.paymentStatus === 'Invoiced' || item.paymentStatus === 'Overdue') {
       payArea = `
-        <div><div class="price-line">Price: <b>${escapeHtml(item.price?.label || '')}</b></div>${item.quoteNote ? `<div class="pay-note">${escapeHtml(item.quoteNote)}</div>` : ''}</div>
+        <div><div class="price-line">Price: <b>${escapeHtml(item.price?.label || '')}</b></div>${item.quoteNote ? `<div class="pay-note">${escapeHtml(item.quoteNote)}</div>` : ''}<div class="pay-note">${escapeHtml(item.price?.message || '')}</div></div>
         <div>${!readOnly && cs.allProvided
           ? `<button class="pay-btn" data-pay-idx="${idx}">Pay ${escapeHtml(item.price?.label || '')}</button>`
           : `<button class="pay-btn" disabled>Pay ${escapeHtml(item.price?.label || '')}</button><div class="pay-note">Upload every document above to unlock payment.</div>`}</div>`;
     } else {
       const pr = item.price || {};
-      const explain = pr.kind === 'fixed' ? 'Standard price. We confirm it after checking your documents, then you can pay here.'
-        : pr.kind === 'from' ? 'Starting price. We send the exact price after checking your documents.'
-        : pr.kind === 'included' ? 'No separate charge.'
-        : 'We send the price after checking your documents.';
-      payArea = `<div><div class="price-line">Price: <b>${escapeHtml(pr.label || 'Quoted after document review')}</b></div><div class="pay-note">${explain}</div></div>`;
+      payArea = `<div><div class="price-line">Price: <b>${escapeHtml(pr.label || 'Price on request')}</b></div><div class="pay-note">${escapeHtml(pr.message || '')}</div></div>`;
     }
 
     return `
@@ -407,19 +434,19 @@
           <div class="item-side">
             ${priceTag(item)}
             ${item.selectedByClient ? `<span class="status-pill ${statusClass(item.clientStatus)}">${escapeHtml(item.clientStatus)}</span>` : ''}
-            ${readOnly ? '' : `<button class="select-btn ${item.selectedByClient ? 'on' : ''}" data-select-idx="${idx}" data-selected="${item.selectedByClient ? '1' : '0'}" ${item.selectedByClient && lockSelect ? 'disabled title="Already priced or filed"' : ''}>${item.selectedByClient ? 'Selected' : 'Add to my services'}</button>`}
+            ${readOnly ? '' : `<button class="select-btn ${item.selectedByClient ? 'on' : ''}" data-select-idx="${idx}" data-selected="${item.selectedByClient ? '1' : '0'}" ${item.selectedByClient && lockSelect ? 'disabled title="We\'ve already sent you a price for this. Message us to cancel."' : ''}>${item.selectedByClient ? 'Selected' : 'Add to my services'}</button>`}
           </div>
         </div>
         <div class="item-body" ${isOpen ? '' : 'hidden'} style="margin-top:10px;">
           <p style="font-size:14px;color:var(--ink-soft);margin:8px 0;">${escapeHtml(item.description)}</p>
           ${item.authority ? `<div style="font-size:12.5px;color:var(--ink-soft);">Authority: ${escapeHtml(item.authority)}</div>` : ''}
-          ${certs.length ? `<div style="margin-top:10px;"><div class="checklist-title">Certificate / acknowledgment</div>${certs.map(d => `<a class="doc-chip" href="${dl(d)}">${escapeHtml(d.fileName)} ↓</a>`).join('')}</div>` : ''}
+          ${certs.length ? `<div style="margin-top:10px;"><div class="checklist-title">Certificate / acknowledgment</div>${certs.map(d => d.fileMissing ? `<div class="pay-note">We're re-uploading your certificate "${escapeHtml(d.fileName)}". It will be back here shortly.</div>` : `<a class="doc-chip" href="${dl(d)}">${escapeHtml(d.fileName)} ↓</a>`).join('')}</div>` : ''}
           ${item.selectedByClient || clientDocs.length ? `
             ${(item.checklist || []).length ? `<div class="checklist"><div class="checklist-title">Documents we need</div>${checklist}</div>` : ''}
             ${clientDocs.length ? `<div style="margin-top:10px;"><div class="checklist-title">Your uploads</div>${clientDocs.map(d => `
               <div style="margin-bottom:6px;">
-                <a class="doc-chip" href="${dl(d)}">${escapeHtml(d.fileName)} ↓</a>
-                <span class="status-pill ${d.reviewStatus === 'accepted' ? 'status-Filed' : d.reviewStatus === 'rejected' ? 'status-Overdue' : 'status-Not-Started'}">${d.reviewStatus === 'accepted' ? 'Verified' : d.reviewStatus === 'rejected' ? 'Not accepted' : 'Being verified'}</span>
+                ${d.fileMissing ? `<span class="doc-chip" style="opacity:.6;">${escapeHtml(d.fileName)}</span>` : `<a class="doc-chip" href="${dl(d)}">${escapeHtml(d.fileName)} ↓</a>`}
+                <span class="status-pill ${d.fileMissing || d.reviewStatus === 'rejected' ? 'status-Overdue' : d.reviewStatus === 'accepted' ? 'status-Filed' : 'status-Not-Started'}">${d.fileMissing && d.reviewStatus !== 'rejected' ? 'Lost, please upload again' : d.reviewStatus === 'accepted' ? 'Verified' : d.reviewStatus === 'rejected' ? 'Please upload again' : 'Being verified'}</span>
                 ${d.reviewStatus === 'rejected' ? `<div style="font-size:12.5px;color:var(--stamp-red);margin:2px 0 0 2px;">${escapeHtml(d.reviewNote || 'Please upload a corrected file.')}</div>` : ''}
               </div>`).join('')}</div>` : ''}
           ` : `<div class="pay-note" style="margin-top:10px;">Add this to your services to see the documents we'll need.</div>`}
@@ -437,7 +464,7 @@
     const others = withIdx.filter(x => !x.it.selectedByClient);
     el.innerHTML = `
       <div class="group-title">Your selected services</div>
-      <div class="group-sub">${selected.length ? 'Upload the documents for each one. We verify them, confirm the price, and you pay here.' : 'Nothing selected yet. Add the filings you want us to handle from the list below.'}</div>
+      <div class="group-sub">${selected.length ? 'Upload the documents for each one. Listed prices are added straight away; for the rest we\'ll contact you with the price once your documents are in. You pay here.' : 'Nothing selected yet. Add the filings you want us to handle from the list below.'}</div>
       ${selected.length ? `<div class="card" style="margin-top:8px;"><div class="card-body" style="padding:4px 24px;">${selected.map(x => itemHtml(x.it, x.idx)).join('')}</div></div>` : ''}
       ${others.length ? `
         <div class="group-title">Other filings that apply to you</div>
@@ -452,6 +479,7 @@
     el.querySelectorAll('[data-select-idx]').forEach(b => b.addEventListener('click', () => toggleSelect(+b.dataset.selectIdx, b.dataset.selected !== '1', b)));
     el.querySelectorAll('[data-pay-idx]').forEach(b => b.addEventListener('click', () => payForItem(+b.dataset.payIdx, b)));
     el.querySelectorAll('.uploadInput').forEach(input => input.addEventListener('change', () => uploadFor(input)));
+    renderPrices();
   }
 
   function needContact(err) {
