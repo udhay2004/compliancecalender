@@ -32,7 +32,8 @@ const razorpay = require("../config/razorpay");
 const Calendar = require("../models/Calendar");
 const ClientOrg = require("../models/ClientOrg");
 const { requireAuth, requireClientRole } = require("../middleware/auth");
-const { hasAllRequiredDocuments, toView } = require("../lib/calendarView");
+const { hasAllRequiredDocuments, toView: toViewSync, missingKeysFor } = require("../lib/calendarView");
+const toView = async (calendar) => toViewSync(calendar, { missingKeys: await missingKeysFor(calendar) });
 const { formatUSD } = require("../lib/complianceFees");
 const { logActivity } = require("../lib/auditLog");
 const { notifyStaff, notifyClient } = require("../lib/notify");
@@ -222,7 +223,7 @@ router.post("/calendars/:id/items/:index/create-order", async (req, res) => {
     if (item.paymentStatus !== "Invoiced" && item.paymentStatus !== "Overdue") {
       return res.status(400).json({ error: "This service hasn't been invoiced yet." });
     }
-    if (!hasAllRequiredDocuments(item, calendar)) {
+    if (!hasAllRequiredDocuments(item, calendar, await missingKeysFor(calendar))) {
       return res.status(400).json({ error: "Please upload all required documents for this service before paying." });
     }
     const org = await ClientOrg.findById(req.user.clientOrgId).lean();
@@ -260,7 +261,7 @@ router.post("/calendars/:id/items/:index/create-order", async (req, res) => {
               });
               await calendar.save();
               announcePayment(calendar, item, outcome).catch(() => {});
-              return res.status(409).json({ error: "This service is already paid.", calendar: toView(calendar) });
+              return res.status(409).json({ error: "This service is already paid.", calendar: await toView(calendar) });
             }
           } else if (existing.amount === item.feeAmountCents && existing.currency === CURRENCY) {
             item.paymentEvents.push({ event: "order_reused", razorpayOrderId: existing.id, amountCents: existing.amount, currency: existing.currency });
@@ -340,7 +341,7 @@ router.post("/calendars/:id/items/:index/verify", async (req, res) => {
       if (payment.status !== "captured") {
         item.paymentEvents.push({ event: "verify_not_captured", razorpayOrderId: razorpay_order_id, razorpayPaymentId: razorpay_payment_id });
         await calendar.save();
-        return res.status(202).json({ pending: true, message: "Your payment is being processed. We'll confirm it here and by email shortly.", calendar: toView(calendar) });
+        return res.status(202).json({ pending: true, message: "Your payment is being processed. We'll confirm it here and by email shortly.", calendar: await toView(calendar) });
       }
       amountCents = payment.amount;
       currency = payment.currency;
@@ -357,9 +358,9 @@ router.post("/calendars/:id/items/:index/verify", async (req, res) => {
       if (outcome === "paid") propagateToNewerCalendars(calendar, item).catch(() => {});
     }
     if (outcome === "mismatch") {
-      return res.status(409).json({ error: "We received your payment but it needs a quick check by our team. We'll be in touch — no need to pay again.", calendar: toView(calendar) });
+      return res.status(409).json({ error: "We received your payment but it needs a quick check by our team. We'll be in touch — no need to pay again.", calendar: await toView(calendar) });
     }
-    res.json({ ok: true, calendar: toView(calendar) });
+    res.json({ ok: true, calendar: await toView(calendar) });
   } catch (err) {
     console.error("[payments] verify error:", err);
     res.status(500).json({ error: "We couldn't confirm the payment yet. If you were charged, don't pay again — we'll confirm it shortly." });
