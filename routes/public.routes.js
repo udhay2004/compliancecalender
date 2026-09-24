@@ -112,9 +112,17 @@ function daysUntilOf(dueDateStr) {
 // Sorts nearest-due first, unlocks the nearest UNLOCK_RATIO of items in
 // full, and reduces the farthest-out remainder to { locked, category,
 // daysUntil } — no name, no description.
-function applyRevealPolicy(items) {
+// Days until the next real due date (lib/deadlines.js: weekends,
+// holidays, fiscal-year and anniversary rules), or null if event-based.
+function daysUntilFor(item, profile) {
+  const D = require("../lib/deadlines");
+  const next = D.nextOccurrence(D.scheduleFor(item), profile || {}, new Date(), { businessDays: D.usesUsBusinessDays(item) });
+  return next ? D.daysBetween(new Date(), next.date) : daysUntilOf(item.due_date);
+}
+
+function applyRevealPolicy(items, profile) {
   const withDays = items
-    .map((it) => ({ ...it, daysUntil: daysUntilOf(it.due_date) }))
+    .map((it) => ({ ...it, daysUntil: daysUntilFor(it, profile) }))
     .sort((a, b) => (a.daysUntil ?? Infinity) - (b.daysUntil ?? Infinity));
 
   const unlockedCount = Math.max(2, Math.round(withDays.length * UNLOCK_RATIO));
@@ -222,7 +230,7 @@ router.post("/generate", generateLimiter, async (req, res) => {
         itemCount: items.length,
         savedToPortal: true,
         portalUrl: `/portal.html?calendar=${calendar._id}`,
-        items: items.map((it) => ({ ...it, locked: false, daysUntil: daysUntilOf(it.due_date), price: getPriceInfo(it) })),
+        items: items.map((it) => ({ ...it, locked: false, daysUntil: daysUntilFor(it, profile), price: getPriceInfo(it) })),
       });
     }
 
@@ -247,7 +255,7 @@ router.post("/generate", generateLimiter, async (req, res) => {
     return res.status(201).json({
       calendarId: calendar._id,
       itemCount: items.length,
-      items: applyRevealPolicy(items),
+      items: applyRevealPolicy(items, profile),
     });
   } catch (err) {
     console.error("Public generate error:", err);
