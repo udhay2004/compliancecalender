@@ -198,6 +198,25 @@
   function renderTech(tech) {
     var html = statCards(tech.cards);
 
+    html += finPanel('Deadlines', 'Services clients chose that are overdue or due in the next 30 days. Dates are worked out automatically, including weekends and US holidays.',
+      rows(tech.deadlines, function (r) {
+        var d = new Date(r.dueDate);
+        var label = r.days < 0 ? (-r.days) + ' day' + (r.days === -1 ? '' : 's') + ' overdue' : r.days === 0 ? 'due today' : r.days === 1 ? 'due tomorrow' : 'in ' + r.days + ' days';
+        return row('/calendar.html?id=' + encodeURIComponent(r.calendarId) + '#item-' + encodeURIComponent(r.itemIndex),
+          esc(r.company), esc(r.task) + ' \u00b7 ' + esc(r.status),
+          d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }),
+          '<span class="fin-pill ' + (r.days < 0 ? 'bad' : r.days <= 7 ? 'ready' : '') + '">' + esc(label) + '</span>',
+          r.days < 0 ? 'bad' : '');
+      }, 'Nothing overdue or due in the next 30 days.'));
+
+    if (tech.needsDate && tech.needsDate.length) {
+      html += finPanel('Needs a due date', 'The due date for these couldn\u2019t be worked out automatically. Open each one and set the date by hand.',
+        rows(tech.needsDate, function (r) {
+          return row('/calendar.html?id=' + encodeURIComponent(r.calendarId) + '#item-' + encodeURIComponent(r.itemIndex),
+            esc(r.company), esc(r.task), '<span class="fin-pill">Set date</span>', esc(r.dueText || ''));
+        }, ''));
+    }
+
     html += panel('Documents waiting for verification', 'Oldest first. Open the calendar to download, verify or reject.',
       table(
         [{ label: 'Company' }, { label: 'Service' }, { label: 'Document' }, { label: 'Uploaded' }],
