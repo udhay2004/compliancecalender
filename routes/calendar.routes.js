@@ -14,6 +14,8 @@ const { logActivity } = require("../lib/auditLog");
 const { toView, REAL_WORK_MATCH, missingKeysFor } = require("../lib/calendarView");
 const { sendStoredFile } = require("../lib/download");
 const { notifyClient } = require("../lib/notify");
+const { onFiled, onUnfiled } = require("../lib/reminders");
+const { fmt: fmtDay } = require("../lib/deadlines");
 
 // Async because it checks storage for each uploaded file, so staff see
 // "File missing" instead of discovering it by clicking Download.
@@ -300,7 +302,22 @@ router.patch("/:id/items/:index/status", async (req, res) => {
     if (dueDateActual && isNaN(parsed.getTime())) {
       return res.status(400).json({ error: "dueDateActual must be a valid date." });
     }
-    item.dueDateActual = parsed;
+    if (parsed) {
+      // Staff-set date: never overwritten automatically.
+      if (!item.dueDateActual || new Date(item.dueDateActual).getTime() !== parsed.getTime()) item.remindersSent = [];
+      item.dueDateActual = parsed;
+      item.dueDateSource = "staff";
+      item.dueDateNote = "";
+    } else {
+      // Empty value = go back to the automatic date (recomputed on save).
+      item.dueDateSource = null;
+      item.dueDateParsedFrom = null;
+      item.remindersSent = [];
+    }
+  }
+  if (clientStatus !== undefined && clientStatus !== before.clientStatus) {
+    if (clientStatus === "Filed") onFiled(calendar, idx);
+    else if (before.clientStatus === "Filed") onUnfiled(calendar, idx);
   }
   // Staff invoicing an item means the client wants it done.
   if (item.paymentStatus === "Invoiced" && !item.selectedByClient) {
@@ -479,11 +496,14 @@ router.post("/:id/items/:index/certificate", (req, res, next) => {
       });
     }
     item.documents.push(...saved);
+    let nextDue = null;
     if (markDone) {
       item.clientStatus = "Filed";
       item.completedBy = req.user.email;
       item.completedByName = who;
       item.completedAt = completedOn;
+      // Recurring filing: next period's filing is created now.
+      nextDue = onFiled(calendar, idx);
     }
     await calendar.save();
     res.status(201).json({ calendar: await staffView(calendar) });
@@ -503,6 +523,7 @@ router.post("/:id/items/:index/certificate", (req, res, next) => {
         referenceNumber ? `Reference: ${referenceNumber}` : "",
         `Completed on: ${completedOn.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`,
         note ? `\n${note}` : "",
+        nextDue ? `\nNext due date for this filing: ${fmtDay(nextDue)}. It's already on your calendar.` : "",
       ].filter(Boolean).join("\n");
       notifyClient({
         clientOrgId: calendar.clientOrgId,
@@ -543,6 +564,7 @@ router.delete("/:id/items/:index/certificate/:docIndex", async (req, res) => {
     item.completedBy = null;
     item.completedByName = "";
     item.completedAt = null;
+    onUnfiled(calendar, idx); // back in the active list (next period stays)
   }
   await calendar.save();
   logActivity({
