@@ -245,6 +245,27 @@ async function buildFinanceSection() {
   });
   needsPrice.sort((a, b) => (b.ready - a.ready) || new Date(a.selectedAt || 0) - new Date(b.selectedAt || 0));
 
+  // Paid (or priced) services the client chose that nobody has marked done
+  // yet: the "do the work, then upload proof" list. Paid first.
+  const readyToComplete = [];
+  const recentlyCompleted = [];
+  clientCals.forEach((c) => {
+    c.items.forEach((it, idx) => {
+      if (!it.selectedByClient) return;
+      const proofs = (it.documents || []).filter((d) => d.type === "certificate").length;
+      const base = { calendarId: String(c._id), itemIndex: idx, company: c.profile?.companyName || "(unnamed)", task: it.compliance_name };
+      if (it.clientStatus === "Filed") {
+        if (it.completedAt) recentlyCompleted.push({ ...base, completedAt: it.completedAt, completedByName: it.completedByName || it.completedBy || "", proofs });
+        return;
+      }
+      if (it.paymentStatus === "Paid") {
+        readyToComplete.push({ ...base, paid: true, paidAt: it.paidAt, amountCents: it.feeAmountCents || 0, dueDate: it.due_date });
+      }
+    });
+  });
+  readyToComplete.sort((a, b) => new Date(a.paidAt || 0) - new Date(b.paidAt || 0));
+  recentlyCompleted.sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
+
   const by = Object.fromEntries(payAgg.map((r) => [r._id, r]));
   const paidCents = by.Paid?.cents || 0;
   const invoicedCents = by.Invoiced?.cents || 0;
@@ -259,6 +280,8 @@ async function buildFinanceSection() {
       { label: "Need a price", value: needsPrice.length, tone: needsPrice.length ? "warn" : "neutral", hint: `${needsPrice.filter((n) => n.ready).length} with all documents in` },
     ],
     needsPrice: needsPrice.slice(0, 25),
+    readyToComplete: readyToComplete.slice(0, 25).map((r) => ({ ...r, amount: (r.amountCents || 0) / 100 })),
+    recentlyCompleted: recentlyCompleted.slice(0, 10),
     priceList: getPriceList(),
     recentPaid: recentPaid.map((r) => ({
       calendarId: String(r._id),
