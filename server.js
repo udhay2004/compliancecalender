@@ -56,12 +56,16 @@ if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET || !process
   );
 }
 
-if (process.env.NODE_ENV === "production" && (process.env.STORAGE_DRIVER || "local") === "local") {
-  console.warn(
-    "\n[startup warning] STORAGE_DRIVER is 'local': client documents are being written to this server's disk. " +
-    "On Railway/Render/Heroku that disk is wiped on every deploy and the files are LOST. " +
-    "Set STORAGE_DRIVER=s3 with the S3_* settings (Cloudflare R2 works) — see .env.example.\n"
-  );
+// Say exactly where documents are going, every boot. If this says LOCAL
+// DISK on a hosted server, uploads will disappear on the next deploy.
+{
+  const storage = require("./lib/storage");
+  const line = `[storage] Client documents are stored in: ${storage.describe()}`;
+  if (storage.DRIVER === "local" && process.env.NODE_ENV === "production") {
+    console.warn(`\n${line}\n[storage] WARNING: files on local disk are LOST on redeploy. Add the R2_* settings (see .env.example).\n`);
+  } else {
+    console.log(line);
+  }
 }
 
 // A single unhandled promise rejection anywhere in the app (e.g. a stale
