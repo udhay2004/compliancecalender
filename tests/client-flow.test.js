@@ -114,8 +114,9 @@ const fakeAuth = {
 const rzp = { orders: {}, payments: {}, created: 0, captured: [] };
 const fakeRazorpay = {
   orders: {
-    create: async ({ amount, currency }) => { rzp.created++; const id = `order_${rzp.created}`; rzp.orders[id] = { id, amount, currency, status: "created" }; return rzp.orders[id]; },
+    create: async ({ amount, currency }) => { if (rzp.failWith) throw rzp.failWith; rzp.created++; const id = `order_${rzp.created}`; rzp.orders[id] = { id, amount, currency, status: "created" }; return rzp.orders[id]; },
     fetch: async (id) => rzp.orders[id],
+    all: async () => { if (rzp.authFail) throw { statusCode: 401, error: { code: "BAD_REQUEST_ERROR", description: "Authentication failed" } }; return { items: [] }; },
     fetchPayments: async (id) => ({ items: Object.values(rzp.payments).filter((p) => p.order_id === id) }),
   },
   payments: {
@@ -164,6 +165,7 @@ app.use(express.json());
 app.use("/api/portal", portalRoutes);
 app.use("/api/portal/payments", paymentsRoutes);
 app.use("/api/calendars", calendarRoutes);
+app.use("/api/admin", require("../routes/admin.routes"));
 
 let server, base;
 test.before(async () => {
@@ -186,7 +188,7 @@ async function call(method, url, { user = "client", body, form, headers = {} } =
 // Fresh client with one approved calendar for each test.
 function setup({ phone = "+1 415 555 0100", items } = {}) {
   calendars = []; orgs = []; notifications.length = 0; audit.length = 0;
-  rzp.orders = {}; rzp.payments = {}; rzp.captured = []; rzp.created = 0; lostKeys.clear();
+  rzp.orders = {}; rzp.payments = {}; rzp.captured = []; rzp.created = 0; rzp.failWith = null; lostKeys.clear();
   const org = makeOrg({ primaryContactEmail: "jane@acme.com", primaryContactPhone: phone, primaryContactName: "Jane" });
   users.client = { _id: oid(), email: "jane@acme.com", name: "Jane", role: "client", clientOrgId: org._id };
   users.other = { _id: oid(), email: "eve@evil.com", name: "Eve", role: "client", clientOrgId: makeOrg({ name: "Evil" })._id };
@@ -665,4 +667,97 @@ test("payment stays locked while a required document is lost", async () => {
   const r = await call("POST", `/api/portal/payments/calendars/${cal._id}/items/0/create-order`);
   assert.strictEqual(r.status, 400);
   assert.match(r.body.error, /documents/);
+});
+
+// =====================================================================
+// When Razorpay refuses, and charging in rupees
+// =====================================================================
+const { explainRazorpayError } = require("../lib/paymentConfig");
+
+test("Razorpay errors are explained in plain words", () => {
+  const cur = explainRazorpayError({ statusCode: 400, error: { code: "BAD_REQUEST_ERROR", description: "Currency USD is not supported" } });
+  assert.match(cur.reason, /can't accept USD/);
+  assert.match(cur.fix, /International Payments|PAYMENT_CURRENCY=INR/);
+  const auth = explainRazorpayError({ statusCode: 401, error: { code: "BAD_REQUEST_ERROR", description: "Authentication failed" } });
+  assert.match(auth.reason, /rejected the API keys/);
+  const keys = explainRazorpayError(Object.assign(new Error("x"), { code: "RAZORPAY_NOT_CONFIGURED" }));
+  assert.match(keys.fix, /RAZORPAY_KEY_ID/);
+});
+
+test("if Razorpay refuses, the client gets a clear message and the team is told why", async () => {
+  const { cal } = setup();
+  readyToPay(cal);
+  rzp.failWith = { statusCode: 400, error: { code: "BAD_REQUEST_ERROR", description: "Currency USD is not supported" } };
+  const r = await call("POST", `/api/portal/payments/calendars/${cal._id}/items/0/create-order`);
+  assert.strictEqual(r.status, 500);
+  assert.strictEqual(r.body.code, "PAYMENT_UNAVAILABLE");
+  assert.match(r.body.error, /haven't been charged/);
+  await new Promise((r) => setImmediate(r));
+  const alert = notifications.find((n) => n.audience === "staff" && n.type === "payment_failed");
+  assert.ok(alert, "staff alerted");
+  assert.match(alert.body, /International Payments/);
+});
+
+test("PAYMENT_CURRENCY=INR charges rupees at the set rate and verifies against that amount", async () => {
+  process.env.PAYMENT_CURRENCY = "INR";
+  process.env.USD_TO_INR_RATE = "83.5";
+  try {
+    const { cal } = setup();
+    readyToPay(cal); // $125
+    const { body: order } = await call("POST", `/api/portal/payments/calendars/${cal._id}/items/0/create-order`);
+    assert.strictEqual(order.currency, "INR");
+    assert.strictEqual(order.amount, 1043750); // ₹10,437.50 in paise
+    assert.match(order.conversionNote, /\$125 is charged as ₹10,437\.50/);
+
+    // Reuses the same rupee order on a second click
+    const again = await call("POST", `/api/portal/payments/calendars/${cal._id}/items/0/create-order`);
+    assert.strictEqual(again.body.orderId, order.orderId);
+
+    rzp.payments.pay_inr = { id: "pay_inr", order_id: order.orderId, amount: 1043750, currency: "INR", status: "captured" };
+    const v = await call("POST", `/api/portal/payments/calendars/${cal._id}/items/0/verify`, {
+      body: { razorpay_order_id: order.orderId, razorpay_payment_id: "pay_inr", razorpay_signature: sign(order.orderId, "pay_inr") },
+    });
+    assert.strictEqual(v.status, 200, JSON.stringify(v.body));
+    assert.strictEqual(cal.items[0].paymentStatus, "Paid");
+  } finally {
+    delete process.env.PAYMENT_CURRENCY;
+    delete process.env.USD_TO_INR_RATE;
+  }
+});
+
+test("INR without a rate is reported, not silently mischarged", async () => {
+  process.env.PAYMENT_CURRENCY = "INR";
+  try {
+    const { cal } = setup();
+    readyToPay(cal);
+    const r = await call("POST", `/api/portal/payments/calendars/${cal._id}/items/0/create-order`);
+    assert.strictEqual(r.status, 500);
+    await new Promise((r) => setImmediate(r));
+    assert.ok(notifications.some((n) => n.type === "payment_failed" && /USD_TO_INR_RATE/.test(n.body)));
+  } finally { delete process.env.PAYMENT_CURRENCY; }
+});
+
+test("Admin → Check payments pinpoints the problem", async () => {
+  setup();
+  users.admin = { _id: oid(), email: "admin@firm.com", name: "Admin", role: "admin" };
+  process.env.RAZORPAY_WEBHOOK_SECRET = "rzp_webhook_secret";
+
+  rzp.failWith = { statusCode: 400, error: { code: "BAD_REQUEST_ERROR", description: "Currency USD is not supported" } };
+  let r = await call("GET", "/api/admin/payments-health", { user: "admin" });
+  assert.strictEqual(r.status, 200);
+  assert.strictEqual(r.body.ok, false);
+  const cur = r.body.steps.find((st) => /create a USD payment/.test(st.name));
+  assert.strictEqual(cur.ok, false);
+  assert.match(cur.fix, /International Payments/);
+
+  rzp.failWith = null; rzp.authFail = true;
+  r = await call("GET", "/api/admin/payments-health", { user: "admin" });
+  assert.match(r.body.steps.find((st) => /accepts the keys/.test(st.name)).fix, /API Keys/);
+
+  rzp.authFail = false;
+  process.env.APP_URL = "https://example.test";
+  r = await call("GET", "/api/admin/payments-health", { user: "admin" });
+  assert.strictEqual(r.body.ok, true, JSON.stringify(r.body.steps));
+  assert.strictEqual(r.body.mode, "test");
+  delete process.env.APP_URL;
 });
