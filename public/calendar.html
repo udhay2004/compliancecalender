@@ -66,6 +66,20 @@
     table.cal th:nth-child(3), table.cal td:nth-child(3) { display: block; }
     table.cal td.edit-cell { text-align: left; }
   }
+  .proof-box { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--rule); border-radius: 8px; }
+  .proof-box.done { border-color: #bfe3de; background: #f5fbfa; }
+  .proof-done { font-size: 13px; font-weight: 600; color: var(--brand-dark); margin-bottom: 8px; }
+  .proof-row { padding: 10px 0; border-bottom: 1px solid var(--rule-soft); }
+  .proof-form { margin-top: 8px; }
+  .proof-form summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--brand-dark); padding: 4px 0; }
+  .proof-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; margin-top: 10px; }
+  .proof-grid .span2 { grid-column: 1 / -1; }
+  .proof-grid .field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .proof-grid label { font-size: 12px; font-weight: 600; }
+  .proof-grid input[type=file] { font-size: 12.5px; max-width: 100%; }
+  .proof-check { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .proof-check input { width: auto; }
+  @media (max-width: 640px) { .proof-grid { grid-template-columns: 1fr; } }
   .contact-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
   .contact-btn { font-size: 12.5px; font-weight: 600; text-decoration: none; padding: 6px 12px; border: 1px solid var(--rule); border-radius: 6px; color: var(--brand-dark); }
   .contact-btn:hover { border-color: var(--brand); }
@@ -484,6 +498,65 @@
       </div>`;
   }
 
+  // Proof of completion: whoever did the work (often finance) uploads the
+  // certificate / acknowledgment / receipt with a reference and a note.
+  function proofHtml(item, idx, certs, dl) {
+    const today = new Date().toISOString().slice(0, 10);
+    const done = item.clientStatus === 'Filed';
+    const unpaid = item.paymentStatus !== 'Paid';
+    const list = certs.map(d => `
+      <div class="proof-row">
+        <div class="doc-row-top">
+          <span class="doc-name">${escapeHtml(d.fileName)}</span>
+          ${d.fileMissing ? '<span class="status-pill-cw" style="color:var(--stamp-red);background:var(--stamp-red-bg);">File missing</span>' : ''}
+        </div>
+        <div class="doc-meta">
+          ${d.completedOn ? 'Done ' + new Date(d.completedOn).toLocaleDateString() + ' · ' : ''}uploaded by ${escapeHtml(d.uploadedByName || d.uploadedBy)}${d.uploadedByDepartment ? ' (' + escapeHtml(d.uploadedByDepartment) + ')' : ''}
+          ${d.referenceNumber ? ` · Ref <b>${escapeHtml(d.referenceNumber)}</b>` : ''}
+        </div>
+        ${d.proofNote ? `<div class="doc-meta" style="color:var(--ink);margin-top:4px;">“${escapeHtml(d.proofNote)}”</div>` : ''}
+        <div class="doc-actions">
+          ${d.fileMissing ? '<span class="doc-note">Upload this proof again below.</span>' : `
+            ${/\.(pdf|png|jpe?g|gif|webp|txt)$/i.test(d.fileName || '') ? `<a class="doc-btn" href="${dl(d)}?view=1" target="_blank" rel="noopener">Open</a>` : ''}
+            <a class="doc-btn" href="${dl(d)}">Download</a>`}
+          <button class="doc-btn reject" data-remove-proof="${idx}" data-doc="${d.di}">Remove</button>
+        </div>
+      </div>`).join('');
+    return `
+      <div class="proof-box ${done ? 'done' : ''}">
+        <div class="ws-label">Proof of completion${certs.length ? ` (${certs.length})` : ''}</div>
+        ${done && item.completedAt ? `<div class="proof-done">✓ Marked done ${new Date(item.completedAt).toLocaleDateString()}${item.completedByName ? ' by ' + escapeHtml(item.completedByName) : ''}</div>` : ''}
+        ${list}
+        <details class="proof-form" ${certs.length ? '' : 'open'}>
+          <summary>${certs.length ? 'Add more proof' : 'Upload proof that this service is done'}</summary>
+          <div class="proof-grid">
+            <div class="field span2">
+              <label for="pf-${idx}">Files <span style="font-weight:400;color:var(--ink-soft);">(certificate, acknowledgment, receipt… up to 10, 15 MB each)</span></label>
+              <input id="pf-${idx}" type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,.doc,.docx,.xls,.xlsx" class="proofFiles" data-idx="${idx}">
+            </div>
+            <div class="field">
+              <label for="pr-${idx}">Reference / confirmation number</label>
+              <input id="pr-${idx}" type="text" maxlength="120" class="proofRef" data-idx="${idx}" placeholder="e.g. IRS acknowledgment no.">
+            </div>
+            <div class="field">
+              <label for="pd-${idx}">Date completed</label>
+              <input id="pd-${idx}" type="date" max="${today}" value="${today}" class="proofDate" data-idx="${idx}">
+            </div>
+            <div class="field span2">
+              <label for="pn-${idx}">Note to the client (optional)</label>
+              <textarea id="pn-${idx}" rows="2" maxlength="1000" class="proofNote" data-idx="${idx}" placeholder="e.g. Filed with the Delaware Division of Corporations; next due 1 March 2027."></textarea>
+            </div>
+            <label class="proof-check span2"><input type="checkbox" class="proofDone" data-idx="${idx}" ${done ? '' : 'checked'}> Mark this service as done and notify the client</label>
+          </div>
+          ${unpaid ? `<div class="doc-note" style="color:var(--seal-gold);">Heads up: this service ${item.paymentStatus === 'Not Invoiced' ? 'has no price yet' : 'is not paid yet'} (${escapeHtml(item.paymentStatus)}).</div>` : ''}
+          <div class="submit-row" style="margin-top:8px;">
+            <span class="hint" data-proof-hint="${idx}"></span>
+            <button class="primary" data-upload-proof="${idx}">Upload proof</button>
+          </div>
+        </details>
+      </div>`;
+  }
+
   function itemCardHtml(item, idx) {
     const clientDocs = (item.documents || []).map((d, di) => ({ ...d, di })).filter(d => d.type === 'client_upload');
     const certs = (item.documents || []).map((d, di) => ({ ...d, di })).filter(d => d.type === 'certificate');
@@ -491,7 +564,7 @@
     const isOpen = !closedCards.has(idx) && (openCards.has(idx) || (item.selectedByClient && workspaceFilter !== 'all'));
     const dl = (d) => `/api/calendars/${id}/items/${idx}/documents/${d.di}/download`;
     return `
-      <div class="card ws-card ${item.selectedByClient ? '' : 'muted'}" style="margin-top:12px;">
+      <div class="card ws-card ${item.selectedByClient ? '' : 'muted'}" id="ws-item-${idx}" style="margin-top:12px;">
         <div class="card-body" style="padding:16px 20px;">
           <button class="ws-card-head" data-card-idx="${idx}" aria-expanded="${isOpen}">
             <div>
@@ -543,17 +616,7 @@
               }).join('') : `<div style="font-size:12.5px;color:var(--ink-soft);">Nothing uploaded yet.</div>`}
             </div>
             ${quoteHtml(item, idx)}
-            <div style="margin-top:12px;">
-              <div class="ws-label">Filed certificate (${certs.length})</div>
-              ${certs.map(d => d.fileMissing
-                ? `<div class="doc-note" style="margin-bottom:6px;">"${escapeHtml(d.fileName)}" is missing from storage. Please upload the certificate again.</div>`
-                : `<a class="doc-chip" href="${dl(d)}">${escapeHtml(d.fileName)} ↓</a>`).join('')}
-              <label class="upload-btn" style="cursor:pointer;display:inline-block;margin-top:4px;">
-                Upload certificate ↑
-                <input type="file" data-idx="${idx}" class="certInput" style="display:none;">
-              </label>
-              <span class="hint" data-cert-hint="${idx}" style="display:block;"></span>
-            </div>
+            ${proofHtml(item, idx, certs, dl)}
             <div class="edit-grid" style="margin-top:14px;">
               <div class="field">
                 <label>Filing status</label>
@@ -577,9 +640,19 @@
       </div>`;
   }
 
+  let jumpedToHash = false;
   async function renderClientItems() {
     const el = document.getElementById('clientItemsList');
     if (!el) return;
+    // Links like /calendar.html?id=…#item-3 (from the finance screen) open
+    // that service's card and scroll to it, once.
+    const hashIdx = !jumpedToHash && /^#item-(\d+)$/.test(location.hash) ? +location.hash.slice(6) : null;
+    if (hashIdx !== null && calendar.items[hashIdx]) {
+      jumpedToHash = true;
+      openCards.add(hashIdx); closedCards.delete(hashIdx);
+      if (!calendar.items[hashIdx].selectedByClient) workspaceFilter = 'all';
+      setTimeout(() => document.getElementById(`ws-item-${hashIdx}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+    }
     renderWorkspaceHeader();
     const all = calendar.items.map((it, idx) => ({ it, idx }));
     const shown = all.filter(x => workspaceFilter === 'all' ? true : workspaceFilter === 'selected' ? x.it.selectedByClient : !x.it.selectedByClient);
@@ -664,22 +737,48 @@
       });
     });
 
-    el.querySelectorAll('.certInput').forEach(input => {
-      input.addEventListener('change', async () => {
-        const idx = input.dataset.idx;
-        const hint = el.querySelector(`[data-cert-hint="${idx}"]`);
-        const file = input.files[0];
-        if (!file) return;
-        hint.textContent = 'Uploading…'; hint.classList.remove('err');
-        const formData = new FormData();
-        formData.append('file', file);
+    el.querySelectorAll('[data-upload-proof]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = btn.dataset.uploadProof;
+        const hint = el.querySelector(`[data-proof-hint="${idx}"]`);
+        const files = el.querySelector(`.proofFiles[data-idx="${idx}"]`).files;
+        if (!files.length) { hint.textContent = 'Choose at least one file.'; hint.classList.add('err'); return; }
+        const item = calendar.items[idx];
+        const markDone = el.querySelector(`.proofDone[data-idx="${idx}"]`).checked;
+        if (markDone && item.paymentStatus !== 'Paid' &&
+            !confirm(`${item.compliance_name} is not paid yet (${item.paymentStatus}). Mark it done anyway?`)) return;
+        const fd = new FormData();
+        Array.from(files).forEach(f => fd.append('files', f));
+        fd.append('referenceNumber', el.querySelector(`.proofRef[data-idx="${idx}"]`).value);
+        fd.append('completedOn', el.querySelector(`.proofDate[data-idx="${idx}"]`).value);
+        fd.append('note', el.querySelector(`.proofNote[data-idx="${idx}"]`).value);
+        fd.append('markDone', markDone ? 'true' : 'false');
+        btn.disabled = true; hint.textContent = `Uploading ${files.length} file${files.length > 1 ? 's' : ''}…`; hint.classList.remove('err');
         try {
-          const res = await fetch(`/api/calendars/${id}/items/${idx}/certificate`, { method: 'POST', body: formData });
+          const res = await fetch(`/api/calendars/${id}/items/${idx}/certificate`, { method: 'POST', body: fd });
           const data = await res.json().catch(() => ({}));
           if (!res.ok) throw new Error(data.error || 'Upload failed.');
           calendar = data.calendar; openCards.add(+idx);
           renderClientItems();
-        } catch (err) { hint.textContent = err.message; hint.classList.add('err'); }
+          const h = el.querySelector(`[data-proof-hint="${idx}"]`);
+          if (h) h.textContent = markDone ? 'Uploaded. The service is marked done and the client has been notified.' : 'Uploaded. The client can see it in their portal.';
+        } catch (err) { hint.textContent = err.message; hint.classList.add('err'); btn.disabled = false; }
+      });
+    });
+
+    el.querySelectorAll('[data-remove-proof]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = btn.dataset.removeProof, docIdx = btn.dataset.doc;
+        const doc = calendar.items[idx].documents[docIdx];
+        if (!confirm(`Remove "${doc.fileName}"? The client will no longer see it. This is recorded in the activity log.`)) return;
+        btn.disabled = true;
+        try {
+          const res = await fetch(`/api/calendars/${id}/items/${idx}/certificate/${docIdx}`, { method: 'DELETE' });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || 'Could not remove.');
+          calendar = data.calendar; openCards.add(+idx);
+          renderClientItems();
+        } catch (err) { alert(err.message); btn.disabled = false; }
       });
     });
 
