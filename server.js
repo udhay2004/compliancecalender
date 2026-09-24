@@ -15,6 +15,8 @@
 require("dotenv").config();
 const path = require("path");
 const express = require("express");
+// Must come before any routes: answers errors thrown in async handlers.
+const { errorHandler } = require("./lib/asyncErrors");
 const cookieParser = require("cookie-parser");
 const cron = require("node-cron");
 const { connectDB } = require("./config/db");
@@ -28,7 +30,7 @@ const paymentsRoutes = require("./routes/payments.routes");
 const messagesRoutes = require("./routes/messages.routes");
 const dashboardRoutes = require("./routes/dashboard.routes");
 const notificationsRoutes = require("./routes/notifications.routes");
-const { runReminderSweep } = require("./lib/reminders");
+const { runReminderSweep, backfillDueDates } = require("./lib/reminders");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -156,6 +158,9 @@ app.use("/api/notifications", notificationsRoutes);
 
 app.get("/healthz", (req, res) => res.json({ ok: true }));
 
+// Last: turns any unexpected error into a clear response (never a hang).
+app.use(errorHandler);
+
 async function start() {
   await connectDB();
   app.listen(PORT, () => {
@@ -168,6 +173,12 @@ async function start() {
   // your timezone/host. Set DISABLE_REMINDERS=true to turn this off
   // entirely (e.g. in a local dev environment where you don't want test
   // data emailing anyone).
+  // Give every existing filing a real due date (once, shortly after boot;
+  // no reminders are sent by this).
+  setTimeout(() => {
+    backfillDueDates().catch((err) => console.error("[deadlines] Backfill failed:", err.message));
+  }, 5000);
+
   if (process.env.DISABLE_REMINDERS !== "true") {
     const schedule = process.env.REMINDER_CRON || "0 8 * * *";
     cron.schedule(schedule, () => {
