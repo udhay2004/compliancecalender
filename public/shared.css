@@ -340,3 +340,10 @@ table.cal td.edit-cell { width: 30px; text-align: right; }
 .price-tag.included, .price-tag.quote { font-weight: 500; color: var(--ink-soft); }
 .price-tag.paid { border-color: var(--brand); background: var(--brand); color: #fff; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+/* Small phones: keep the top bar on one line */
+@media (max-width: 480px) {
+  .topbar .brand { font-size: 14px; }
+  .nav-user #navUser, .nav-user > span:first-child { display: none; }
+  .nav-right { gap: 8px; }
+}
