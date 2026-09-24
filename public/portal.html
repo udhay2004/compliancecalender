@@ -533,7 +533,11 @@
     const hint = hintFor(idx);
     btn.disabled = true; hint.textContent = ''; hint.classList.remove('err');
     try {
+      if (typeof Razorpay === 'undefined') {
+        throw new Error("The payment window couldn't load. If you use an ad or tracker blocker, allow checkout.razorpay.com and reload the page.");
+      }
       const order = await api(`/api/portal/payments/calendars/${calendar._id}/items/${idx}/create-order`, { method: 'POST' });
+      if (order.conversionNote) hint.textContent = order.conversionNote;
       const rzp = new Razorpay({
         key: order.keyId,
         amount: order.amount,
