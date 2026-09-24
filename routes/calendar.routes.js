@@ -11,10 +11,13 @@ const { upload } = require("../middleware/upload");
 const storage = require("../lib/storage");
 const { getSuggestedFee, formatUSD } = require("../lib/complianceFees");
 const { logActivity } = require("../lib/auditLog");
-const { toView, REAL_WORK_MATCH, setDownloadHeaders } = require("../lib/calendarView");
+const { toView, REAL_WORK_MATCH, missingKeysFor } = require("../lib/calendarView");
+const { sendStoredFile } = require("../lib/download");
 const { notifyClient } = require("../lib/notify");
 
-const staffView = (calendar) => toView(calendar, { staff: true });
+// Async because it checks storage for each uploaded file, so staff see
+// "File missing" instead of discovering it by clicking Download.
+const staffView = async (calendar) => toView(calendar, { staff: true, missingKeys: await missingKeysFor(calendar) });
 const portalLink = (calendar) => `/portal.html?calendar=${calendar._id}`;
 
 const router = express.Router();
@@ -70,7 +73,7 @@ router.post("/generate", async (req, res) => {
       sourceMode,
     });
 
-    return res.status(201).json({ calendar: staffView(calendar) });
+    return res.status(201).json({ calendar: await staffView(calendar) });
   } catch (err) {
     console.error("Generate error:", err);
     return res.status(502).json({ error: `Research request failed: ${err.message}` });
@@ -144,7 +147,7 @@ router.get("/client-work", async (req, res) => {
 router.get("/:id", async (req, res) => {
   const calendar = await Calendar.findById(req.params.id);
   if (!calendar) return res.status(404).json({ error: "Not found." });
-  res.json({ calendar: staffView(calendar) });
+  res.json({ calendar: await staffView(calendar) });
 });
 
 // PATCH /api/calendars/:id/items/:index — reviewer edits one line item
@@ -176,7 +179,7 @@ router.patch("/:id/items/:index", async (req, res) => {
   calendar.items[idx].editedByReviewer = true;
 
   await calendar.save();
-  res.json({ calendar: staffView(calendar) });
+  res.json({ calendar: await staffView(calendar) });
 });
 
 // POST /api/calendars/:id/approve
@@ -208,7 +211,7 @@ router.post("/:id/approve", async (req, res) => {
     link: portalLink(calendar),
     actorName: req.user.name || req.user.email,
   });
-  res.json({ calendar: staffView(calendar) });
+  res.json({ calendar: await staffView(calendar) });
 });
 
 // POST /api/calendars/:id/reject
@@ -231,7 +234,7 @@ router.post("/:id/reject", async (req, res) => {
     summary: `Rejected the compliance calendar for ${calendar.profile?.companyName || "a company"}.`,
     meta: { notes: calendar.reviewNotes },
   });
-  res.json({ calendar: staffView(calendar) });
+  res.json({ calendar: await staffView(calendar) });
 });
 
 // PATCH /api/calendars/:id/items/:index/status — update the ongoing
@@ -306,7 +309,7 @@ router.patch("/:id/items/:index/status", async (req, res) => {
   }
 
   await calendar.save();
-  res.json({ calendar: staffView(calendar) });
+  res.json({ calendar: await staffView(calendar) });
 
   // Tell the client about changes that matter to them.
   const who = req.user.name || req.user.email;
@@ -410,7 +413,7 @@ router.post("/:id/items/:index/quote", async (req, res) => {
     actorName: who,
   });
 
-  res.json({ calendar: staffView(calendar) });
+  res.json({ calendar: await staffView(calendar) });
 });
 
 // POST /api/calendars/:id/items/:index/certificate — staff uploads the
@@ -430,6 +433,7 @@ router.post("/:id/items/:index/certificate", upload.single("file"), async (req, 
     const { fileKey, fileUrl } = await storage.saveFile({
       buffer: req.file.buffer,
       fileName: req.file.originalname,
+      contentType: req.file.mimetype,
     });
     calendar.items[idx].documents.push({
       fileKey,
@@ -443,7 +447,7 @@ router.post("/:id/items/:index/certificate", upload.single("file"), async (req, 
     // PATCH .../status if that's wrong for a given item.
     calendar.items[idx].clientStatus = "Filed";
     await calendar.save();
-    res.status(201).json({ calendar: staffView(calendar) });
+    res.status(201).json({ calendar: await staffView(calendar) });
     notifyClient({
       clientOrgId: calendar.clientOrgId,
       calendarId: calendar._id,
@@ -491,6 +495,12 @@ router.patch("/:id/items/:index/documents/:docIndex/review", async (req, res) =>
   }
   if (reviewStatus === "rejected" && !note?.trim()) {
     return res.status(400).json({ error: "A note explaining why is required when rejecting a document." });
+  }
+  if (reviewStatus === "accepted" && !(await storage.fileExists(doc.fileKey))) {
+    return res.status(409).json({
+      error: "This file is missing from storage, so it can't be verified. Use \"Ask client to re-upload\" instead.",
+      code: "FILE_MISSING",
+    });
   }
 
   doc.reviewStatus = reviewStatus;
@@ -562,7 +572,7 @@ router.patch("/:id/items/:index/documents/:docIndex/review", async (req, res) =>
     });
   }
 
-  res.json({ calendar: staffView(calendar) });
+  res.json({ calendar: await staffView(calendar) });
 });
 
 // GET /api/calendars/:id/items/:index/documents/:docIndex/download — any
@@ -578,10 +588,7 @@ router.get("/:id/items/:index/documents/:docIndex/download", async (req, res) =>
   const doc = item && item.documents[docIdx];
   if (!doc) return res.status(404).json({ error: "Document not found." });
 
-  const stream = await storage.getFileStream(doc.fileKey);
-  if (!stream) return res.status(404).json({ error: "File is missing from storage." });
-  setDownloadHeaders(res, doc.fileName);
-  stream.pipe(res);
+  await sendStoredFile(req, res, doc, { audience: "staff", backHref: `/calendar.html?id=${calendar._id}` });
 });
 
 // GET /api/calendars/:id/client-contact — the client org's contact
