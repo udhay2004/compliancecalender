@@ -28,6 +28,19 @@
     </div>
   </div>
 
+  <div class="card" style="margin-top:20px;" id="storageCard">
+    <div class="card-body" style="padding:18px 24px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div>
+          <h2 style="margin:0;font-size:16px;">Document storage</h2>
+          <div class="section-sub" style="margin:2px 0 0;">Checks that client documents can be uploaded to and downloaded from Cloudflare R2, and lists any files that are missing.</div>
+        </div>
+        <button class="primary" id="storageCheckBtn">Check storage</button>
+      </div>
+      <div id="storageResult" aria-live="polite"></div>
+    </div>
+  </div>
+
   <div class="tabs">
     <button class="tab-btn active" id="tabOrgs">Client Companies</button>
     <button class="tab-btn" id="tabUsers">Accounts</button>
@@ -93,6 +106,37 @@
 <script>
   function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
   let me = null;
+
+  document.getElementById('storageCheckBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('storageCheckBtn');
+    const out = document.getElementById('storageResult');
+    btn.disabled = true; out.innerHTML = '<p class="hint" style="margin-top:12px;">Checking… this takes a few seconds.</p>';
+    try {
+      const res = await fetch('/api/admin/storage-health');
+      const r = await res.json();
+      if (!res.ok) throw new Error(r.error || 'Check failed.');
+      const where = r.driver === 's3'
+        ? `Cloudflare R2 bucket <b>${escapeHtml(r.bucket)}</b> (${escapeHtml(r.endpointHost)})`
+        : `<b style="color:var(--stamp-red);">the server's own disk</b>. Files here are deleted on every deploy.`;
+      let html = `<div style="margin-top:14px;padding:14px 16px;border-radius:8px;background:${r.ok && r.durable ? 'var(--teal-bg)' : 'var(--stamp-red-bg)'};font-size:13.5px;line-height:1.6;">`;
+      html += `<div><b>${r.ok && r.durable ? '✓ Storage is working' : r.ok ? '⚠ Working, but not safe for real client files' : '✗ Storage is not working'}</b></div>`;
+      html += `<div>Documents are stored in ${where}</div>`;
+      if (r.missingSettings && r.missingSettings.length) html += `<div style="margin-top:6px;">To use R2, add these settings on your host and redeploy: <b>${r.missingSettings.map(escapeHtml).join(', ')}</b></div>`;
+      html += '<ul style="margin:8px 0 0;padding:0;list-style:none;">' + r.steps.map(st => `<li>${st.ok ? '✓' : '✗'} ${escapeHtml(st.name)}${st.error ? ` — <span style="color:var(--stamp-red);">${escapeHtml(st.error)}</span>` : ''}</li>`).join('') + '</ul>';
+      html += '</div>';
+      if (r.ok) {
+        html += r.missingDocuments.length
+          ? `<div style="margin-top:14px;font-size:13.5px;"><b>${r.missingDocuments.length} uploaded file${r.missingDocuments.length === 1 ? ' is' : 's are'} missing</b> (checked ${r.documentsChecked}). These were most likely uploaded before R2 was connected. Open each calendar and click <b>Ask client to re-upload</b>.</div>
+             <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px;">${r.missingDocuments.map(d => `
+               <a href="/calendar.html?id=${encodeURIComponent(d.calendarId)}" style="display:block;padding:10px 12px;border:1px solid var(--rule);border-radius:6px;text-decoration:none;color:var(--ink);font-size:13px;">
+                 <b>${escapeHtml(d.company)}</b> · ${escapeHtml(d.filing)}<br><span style="color:var(--ink-soft);">${escapeHtml(d.fileName)}${d.type === 'certificate' ? ' (your filed certificate, upload it again)' : ''}</span></a>`).join('')}</div>`
+          : `<div style="margin-top:12px;font-size:13.5px;color:var(--ink-soft);">All ${r.documentsChecked} uploaded documents were found in storage.</div>`;
+      }
+      out.innerHTML = html;
+    } catch (err) {
+      out.innerHTML = `<p class="hint err" style="margin-top:12px;">${escapeHtml(err.message)}</p>`;
+    } finally { btn.disabled = false; }
+  });
   let orgsCache = [];
   let staffCache = []; // staff/admin/super_admin accounts eligible to be a client's "assigned to" contact
   const editingOrgId = new Set(); // orgs currently showing their inline edit form
