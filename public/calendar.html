@@ -35,6 +35,37 @@
   .ws-quote-row .quoteAmount { width: 110px; }
   .ws-quote-row .quoteNote { flex: 1; min-width: 180px; }
   .ws-dollar { font-weight: 600; color: var(--ink-soft); }
+  .doc-row { padding: 10px 12px; border: 1px solid var(--rule); border-radius: 8px; margin-bottom: 8px; }
+  .doc-row.lost { border-color: #f1c4bf; background: var(--stamp-red-bg); }
+  .doc-row-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .doc-name { font-weight: 600; font-size: 13.5px; overflow-wrap: anywhere; }
+  .doc-meta { font-size: 11.5px; color: var(--ink-soft); margin-top: 2px; }
+  .doc-note { font-size: 12.5px; color: var(--stamp-red); margin-top: 4px; }
+  .doc-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+  .doc-actions .rejectNote { flex: 1 1 180px; min-width: 0; font-size: 12.5px; padding: 6px 8px; }
+  .doc-btn { font: 600 12.5px var(--sans); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--rule); background: var(--card); color: var(--brand-dark); text-decoration: none; cursor: pointer; }
+  .doc-btn:hover { border-color: var(--brand); }
+  .doc-btn.verify { border-color: var(--brand); background: var(--brand); color: #fff; }
+  .doc-btn.reject { color: var(--stamp-red); }
+  .doc-btn.reject:hover { border-color: var(--stamp-red); }
+  button.primary.small { padding: 6px 12px; font-size: 12.5px; }
+  /* Calendar table: never wider than the screen */
+  table.cal { table-layout: fixed; }
+  table.cal th:nth-child(1), table.cal td.due { width: 17%; }
+  table.cal th:nth-child(2), table.cal td.name { width: 30%; }
+  table.cal th:nth-child(3), table.cal td.applies { width: 16%; }
+  table.cal td { overflow-wrap: anywhere; }
+  table.cal td.due, table.cal td.applies { white-space: normal; }
+  @media (max-width: 760px) {
+    table.cal, table.cal tbody, table.cal tr, table.cal td { display: block; width: 100% !important; }
+    table.cal thead { display: none; }
+    table.cal tr { border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; }
+    table.cal td { border: 0; padding: 3px 0; }
+    table.cal td[data-label]::before { content: attr(data-label) ": "; font-weight: 600; color: var(--ink-soft); }
+    table.cal td[data-label]:empty { display: none !important; }
+    table.cal th:nth-child(3), table.cal td:nth-child(3) { display: block; }
+    table.cal td.edit-cell { text-align: left; }
+  }
   .contact-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
   .contact-btn { font-size: 12.5px; font-weight: 600; text-decoration: none; padding: 6px 12px; border: 1px solid var(--rule); border-radius: 6px; color: var(--brand-dark); }
   .contact-btn:hover { border-color: var(--brand); }
@@ -93,11 +124,13 @@
 
   let calendar = null;
 
+  // "https://www.irs.gov/forms-pubs/about-form-941" -> "irs.gov"
+  function sourceHost(url) { try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return 'link'; } }
   function money(cents) { const d = cents / 100; return '$' + d.toLocaleString('en-US', { minimumFractionDigits: d % 1 ? 2 : 0, maximumFractionDigits: 2 }); }
   function priceTag(item) {
     const pr = item.price || {};
     if (item.paymentStatus === 'Paid') return `<span class="price-tag paid">Paid ${escapeHtml(pr.label || '')}</span>`;
-    const prefix = pr.kind === 'invoiced' ? 'Quoted ' : '';
+    const prefix = pr.kind === 'invoiced' ? (item.quotedBy === 'price-list' ? '' : 'Quoted ') : '';
     return `<span class="price-tag ${escapeHtml(pr.kind || 'quote')}">${prefix}${escapeHtml(pr.label || 'Quote needed')}</span>`;
   }
   let workspaceFilter = 'selected';
@@ -183,12 +216,12 @@
           <tbody>
           ${groups[cat].map(it => `
             <tr id="row-${it.__index}">
-              <td class="due">${escapeHtml(it.due_date)}</td>
+              <td class="due" data-label="Due">${escapeHtml(it.due_date)}</td>
               <td class="name"><span class="dot ${escapeHtml(it.confidence||'medium')}"></span>${escapeHtml(it.compliance_name)}${it.editedByReviewer ? '<span class="edited-flag">edited</span>' : ''}
                 <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">${priceTag(it)}${calendar.clientOrgId ? (it.selectedByClient ? '<span class="sel-badge on">Client selected</span>' : '<span class="sel-badge">Not selected</span>') : ''}</div></td>
-              <td class="applies">${escapeHtml(it.applicable_to)}</td>
-              <td>${escapeHtml(it.description)} — <span style="color:var(--ink-soft)">${escapeHtml(it.authority||'')}</span>
-                ${it.source_url ? `<a class="src-link" href="${escapeHtml(it.source_url)}" target="_blank" rel="noopener">${escapeHtml(it.source_url)}</a>` : ''}
+              <td class="applies" data-label="Applies to">${escapeHtml(it.applicable_to)}</td>
+              <td class="desc">${escapeHtml(it.description)} — <span style="color:var(--ink-soft)">${escapeHtml(it.authority||'')}</span>
+                ${it.source_url ? `<a class="src-link" href="${escapeHtml(it.source_url)}" target="_blank" rel="noopener">Source: ${escapeHtml(sourceHost(it.source_url))} ↗</a>` : ''}
               </td>
               ${editable ? `<td class="edit-cell"><button class="row-edit-btn" onclick="openEdit(${it.__index})">Edit</button></td>` : ''}
             </tr>
@@ -410,7 +443,7 @@
           <div class="ws-check ${r.state}">
             <span class="ws-check-dot" aria-hidden="true"></span>
             <span class="ws-check-name">${escapeHtml(r.label)}</span>
-            <span class="ws-check-state">${label[r.state]}${r.reused ? ` · from "${escapeHtml(r.fromItem)}"` : ''}</span>
+            <span class="ws-check-state">${r.state === 'missing' && r.lost ? '<span style="color:var(--stamp-red);">File lost, ask the client again</span>' : label[r.state]}${r.reused ? ` · from "${escapeHtml(r.fromItem)}"` : ''}</span>
             ${r.fileName && r.itemIndex !== undefined ? `<a href="/api/calendars/${id}/items/${r.itemIndex}/documents/${r.docIndex}/download">Download</a>` : ''}
           </div>`).join('')}
       </div>`;
@@ -423,8 +456,17 @@
     const sf = item.suggestedFee;
     const current = item.feeAmountCents ? item.feeAmountCents / 100 : (sf && sf.amountCents ? sf.amountCents / 100 : '');
     const listLine = sf
-      ? `Price list: <b>${escapeHtml(sf.label)}</b>${sf.note ? ` · ${escapeHtml(sf.note)}` : ''}`
-      : (item.feeAmountCents ? `Quoted ${money(item.feeAmountCents)}${item.quotedAt ? ` on ${new Date(item.quotedAt).toLocaleDateString()}` : ''}${item.quotedBy ? ` by ${escapeHtml(item.quotedBy)}` : ''}` : '');
+      ? (sf.kind === 'fixed'
+          ? `Price list: <b>${escapeHtml(sf.label)}</b>. Applied automatically when the client selects this service.`
+          : sf.kind === 'included'
+            ? `Price list: <b>${escapeHtml(sf.label)}</b>.`
+            : `${sf.kind === 'from' ? `Price list: <b>${escapeHtml(sf.label)}</b>.` : '<b>No price in the list.</b>'} The client has been told you'll contact them with the price once they upload their documents.`)
+        + (sf.note ? `<div style="margin-top:2px;">Internal note: ${escapeHtml(sf.note)}</div>` : '')
+      : (item.feeAmountCents
+          ? (item.quotedBy === 'price-list'
+              ? `Price <b>${money(item.feeAmountCents)}</b> applied automatically from the price list${item.quotedAt ? ` on ${new Date(item.quotedAt).toLocaleDateString()}` : ''}. Change it below if needed.`
+              : `Price <b>${money(item.feeAmountCents)}</b> sent${item.quotedAt ? ` on ${new Date(item.quotedAt).toLocaleDateString()}` : ''}${item.quotedBy ? ` by ${escapeHtml(item.quotedBy)}` : ''}.`)
+          : '');
     const docsReady = item.checklistSummary?.allProvided;
     return `
       <div class="ws-quote">
@@ -468,30 +510,44 @@
             <div style="margin-top:12px;">
               <div class="ws-label">Uploaded by the client (${clientDocs.length})</div>
               ${clientDocs.length ? clientDocs.map(d => {
-                const badge = d.reviewStatus === 'accepted'
-                  ? `<span class="status-pill-cw" style="color:var(--brand-dark);background:var(--teal-bg);">Verified${d.reviewedBy ? ' by ' + escapeHtml(d.reviewedBy) : ''}</span>`
-                  : d.reviewStatus === 'rejected'
-                    ? `<span class="status-pill-cw" style="color:var(--stamp-red);">Rejected</span>`
-                    : `<span class="status-pill-cw" style="background:var(--seal-gold-bg);color:var(--seal-gold);">Needs verifying</span>`;
+                const badge = d.fileMissing && d.reviewStatus !== 'rejected'
+                  ? `<span class="status-pill-cw" style="color:var(--stamp-red);background:var(--stamp-red-bg);">File missing</span>`
+                  : d.reviewStatus === 'accepted'
+                    ? `<span class="status-pill-cw" style="color:var(--brand-dark);background:var(--teal-bg);">Verified${d.reviewedBy ? ' by ' + escapeHtml(d.reviewedBy) : ''}</span>`
+                    : d.reviewStatus === 'rejected'
+                      ? `<span class="status-pill-cw" style="color:var(--stamp-red);">Sent back to client</span>`
+                      : `<span class="status-pill-cw" style="background:var(--seal-gold-bg);color:var(--seal-gold);">Needs verifying</span>`;
+                const canView = /\.(pdf|png|jpe?g|gif|webp|txt)$/i.test(d.fileName || '');
                 return `
-                  <div style="margin-bottom:10px;">
-                    <a class="doc-chip" href="${dl(d)}">${escapeHtml(d.fileName)} ↓</a>${badge}
-                    <div style="font-size:11.5px;color:var(--ink-soft);margin-left:2px;">${d.requirementLabel ? escapeHtml(d.requirementLabel) + ' · ' : ''}uploaded ${new Date(d.uploadedAt).toLocaleString()}</div>
-                    ${d.reviewStatus === 'rejected' ? `<div style="font-size:12px;color:var(--stamp-red);margin:2px 0 0 2px;">${escapeHtml(d.reviewNote)}</div>` : ''}
-                    ${d.reviewStatus === 'pending' ? `
-                      <div style="margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-                        <button class="ghost" data-review-action="accept" data-idx="${idx}" data-doc="${d.di}" style="padding:4px 12px;font-size:12px;">Verify</button>
-                        <input type="text" class="rejectNote" data-idx="${idx}" data-doc="${d.di}" aria-label="Reason for rejecting" placeholder="Reason, if rejecting" style="font-size:12px;padding:4px 8px;flex:1;min-width:160px;">
-                        <button class="danger" data-review-action="reject" data-idx="${idx}" data-doc="${d.di}" style="padding:4px 12px;font-size:12px;">Reject</button>
-                      </div>
-                      <span class="hint" data-review-hint="${idx}-${d.di}" style="display:block;font-size:11.5px;"></span>` : ''}
+                  <div class="doc-row${d.fileMissing && d.reviewStatus !== 'rejected' ? ' lost' : ''}">
+                    <div class="doc-row-top">
+                      <span class="doc-name">${escapeHtml(d.fileName)}</span>${badge}
+                    </div>
+                    <div class="doc-meta">${d.requirementLabel ? escapeHtml(d.requirementLabel) + ' · ' : ''}uploaded ${new Date(d.uploadedAt).toLocaleString()}</div>
+                    ${d.reviewStatus === 'rejected' ? `<div class="doc-note">${escapeHtml(d.reviewNote)}</div>` : ''}
+                    ${d.fileMissing && d.reviewStatus !== 'rejected' ? `
+                      <div class="doc-note">This file can't be found in storage (most likely uploaded before cloud storage was connected). Ask the client to upload it again; they'll get an email and a portal notification.</div>
+                      <div class="doc-actions">
+                        <button class="primary small" data-reupload-idx="${idx}" data-doc="${d.di}">Ask client to re-upload</button>
+                      </div>` : `
+                      <div class="doc-actions">
+                        ${canView ? `<a class="doc-btn" href="${dl(d)}?view=1" target="_blank" rel="noopener">Open</a>` : ''}
+                        <a class="doc-btn" href="${dl(d)}">Download</a>
+                        ${d.reviewStatus === 'pending' ? `
+                          <button class="doc-btn verify" data-review-action="accept" data-idx="${idx}" data-doc="${d.di}">Verify</button>
+                          <input type="text" class="rejectNote" data-idx="${idx}" data-doc="${d.di}" aria-label="Reason for sending back" placeholder="What's wrong? (to send it back)">
+                          <button class="doc-btn reject" data-review-action="reject" data-idx="${idx}" data-doc="${d.di}">Send back</button>` : ''}
+                      </div>`}
+                    <span class="hint" data-review-hint="${idx}-${d.di}" style="display:block;font-size:11.5px;"></span>
                   </div>`;
               }).join('') : `<div style="font-size:12.5px;color:var(--ink-soft);">Nothing uploaded yet.</div>`}
             </div>
             ${quoteHtml(item, idx)}
             <div style="margin-top:12px;">
               <div class="ws-label">Filed certificate (${certs.length})</div>
-              ${certs.map(d => `<a class="doc-chip" href="${dl(d)}">${escapeHtml(d.fileName)} ↓</a>`).join('')}
+              ${certs.map(d => d.fileMissing
+                ? `<div class="doc-note" style="margin-bottom:6px;">"${escapeHtml(d.fileName)}" is missing from storage. Please upload the certificate again.</div>`
+                : `<a class="doc-chip" href="${dl(d)}">${escapeHtml(d.fileName)} ↓</a>`).join('')}
               <label class="upload-btn" style="cursor:pointer;display:inline-block;margin-top:4px;">
                 Upload certificate ↑
                 <input type="file" data-idx="${idx}" class="certInput" style="display:none;">
@@ -551,7 +607,7 @@
         const hint = el.querySelector(`[data-review-hint="${idx}-${docIdx}"]`);
         const noteInput = el.querySelector(`.rejectNote[data-idx="${idx}"][data-doc="${docIdx}"]`);
         const note = noteInput ? noteInput.value.trim() : '';
-        if (action === 'reject' && !note) { hint.textContent = 'Add a reason so the client knows what to fix.'; hint.classList.add('err'); noteInput?.focus(); return; }
+        if (action === 'reject' && !note) { hint.textContent = 'Write what needs fixing, so the client knows what to upload.'; hint.classList.add('err'); noteInput?.focus(); return; }
         hint.textContent = 'Saving…'; hint.classList.remove('err');
         try {
           const res = await fetch(`/api/calendars/${id}/items/${idx}/documents/${docIdx}/review`, {
@@ -564,6 +620,24 @@
           renderClientItems();
           if (action === 'reject') refreshChatThread();
         } catch (err) { hint.textContent = err.message; hint.classList.add('err'); }
+      });
+    });
+
+    el.querySelectorAll('[data-reupload-idx]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = btn.dataset.reuploadIdx, docIdx = btn.dataset.doc;
+        const hint = el.querySelector(`[data-review-hint="${idx}-${docIdx}"]`);
+        btn.disabled = true; hint.textContent = 'Sending…'; hint.classList.remove('err');
+        try {
+          const res = await fetch(`/api/calendars/${id}/items/${idx}/documents/${docIdx}/review`, {
+            method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reviewStatus: 'rejected', note: "We couldn't open this file on our side. Sorry for the trouble; please upload it again." }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || 'Could not send.');
+          calendar = data.calendar; openCards.add(+idx);
+          renderClientItems(); refreshChatThread();
+        } catch (err) { hint.textContent = err.message; hint.classList.add('err'); btn.disabled = false; }
       });
     });
 
