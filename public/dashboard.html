@@ -83,6 +83,7 @@
   .fin-pill { display: inline-block; font-family: var(--sans); font-size: 11.5px; font-weight: 600; padding: 2px 9px; border-radius: 999px; background: var(--grey-bg); color: var(--ink-soft); }
   .fin-pill.ready { background: var(--seal-gold-bg); color: var(--seal-gold); }
   .fin-pill.bad { background: var(--stamp-red-bg); color: var(--stamp-red); }
+  .fin-pill.done { background: var(--teal-bg); color: var(--brand-dark); }
   .fin-empty { background: var(--card); border: 1px dashed var(--rule); border-radius: var(--radius); padding: 22px 16px; text-align: center; color: var(--ink-soft); font-size: 13.5px; }
   .fin-list.price { padding: 4px 16px; }
   .fin-price-row { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--rule-soft); font-size: 13px; }
@@ -283,6 +284,15 @@
           r.listLabel && r.listLabel !== 'Price on request' ? 'List: ' + esc(r.listLabel) : 'Not in price list');
       }, 'Every selected service has a price. Nothing to do here.'));
 
+    html += finPanel('Ready to complete', 'Paid services still to be done. Open one, do the work, then upload the proof: that marks it done and notifies the client.',
+      rows(finance.readyToComplete, function (r) {
+        return row(calLink(r.calendarId) + '#item-' + encodeURIComponent(r.itemIndex),
+          esc(r.company),
+          esc(r.task) + (r.dueDate ? ' \u00b7 due ' + esc(r.dueDate) : ''),
+          '<span class="fin-pill ready">Upload proof</span>',
+          'paid ' + esc(daysAgo(r.paidAt)) + (r.amount ? ' \u00b7 ' + money(r.amount) : ''));
+      }, 'Nothing waiting. Every paid service has been completed.'));
+
     html += finPanel('Waiting for payment', 'Overdue first, then the longest waiting.',
       rows(finance.outstanding, function (r) {
         var overdue = r.paymentStatus === 'Overdue';
@@ -300,6 +310,13 @@
       rows(finance.recentPaid, function (r) {
         return row(calLink(r.calendarId), esc(r.company), esc(r.task), money(r.amount), esc(when(r.paidAt)), 'good');
       }, 'No payments recorded yet.'));
+
+    html += finPanel('Recently completed', '',
+      rows(finance.recentlyCompleted, function (r) {
+        return row(calLink(r.calendarId) + '#item-' + encodeURIComponent(r.itemIndex), esc(r.company), esc(r.task),
+          '<span class="fin-pill done">Done</span>',
+          esc(when(r.completedAt)) + (r.completedByName ? ' \u00b7 ' + esc(r.completedByName) : '') + ' \u00b7 ' + esc(r.proofs) + ' proof' + (r.proofs === 1 ? '' : 's'));
+      }, 'Nothing completed yet.'));
 
     html += finPanel('Price list', 'Fixed prices are added automatically when a client selects the service. Edit them in lib/complianceFees.js.',
       '<div class="fin-list price">' + (finance.priceList || []).map(function (p) {
