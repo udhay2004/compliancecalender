@@ -761,3 +761,98 @@ test("Admin → Check payments pinpoints the problem", async () => {
   assert.strictEqual(r.body.mode, "test");
   delete process.env.APP_URL;
 });
+
+// =====================================================================
+// Proof of completion (finance / whoever did the work)
+// =====================================================================
+function proofForm(files, fields = {}) {
+  const f = new FormData();
+  files.forEach(([name, type]) => f.append("files", new Blob(["%PDF-1.4 proof"], { type }), name));
+  Object.entries(fields).forEach(([k, v]) => f.append(k, v));
+  return f;
+}
+
+test("finance uploads proof: files + reference + note, service marked done, client told", async () => {
+  const { cal } = setup();
+  users.fin = { _id: oid(), email: "fin@firm.com", name: "Rahul", role: "staff", department: "finance" };
+  Object.assign(cal.items[0], { selectedByClient: true, paymentStatus: "Paid", feeAmountCents: 12500 });
+  const r = await call("POST", `/api/calendars/${cal._id}/items/0/certificate`, {
+    user: "fin",
+    form: proofForm([["ack.pdf", "application/pdf"], ["receipt.png", "image/png"]], {
+      referenceNumber: "DE-2026-99812", completedOn: "2026-09-20", note: "Filed with Delaware; next due 1 March 2027.",
+    }),
+  });
+  assert.strictEqual(r.status, 201, JSON.stringify(r.body));
+  const it = cal.items[0];
+  const proofs = it.documents.filter((d) => d.type === "certificate");
+  assert.strictEqual(proofs.length, 2);
+  assert.strictEqual(proofs[0].referenceNumber, "DE-2026-99812");
+  assert.strictEqual(proofs[0].uploadedByDepartment, "finance");
+  assert.strictEqual(proofs[0].uploadedByName, "Rahul");
+  assert.strictEqual(it.clientStatus, "Filed");
+  assert.strictEqual(it.completedBy, "fin@firm.com");
+  assert.strictEqual(new Date(it.completedAt).toISOString().slice(0, 10), "2026-09-20");
+  await new Promise((r) => setImmediate(r));
+  const n = notifications.find((x) => x.audience === "client" && x.type === "certificate_uploaded");
+  assert.match(n.title, /is done/);
+  assert.match(n.body, /DE-2026-99812/);
+  assert.match(n.body, /next due 1 March 2027/);
+  assert.ok(audit.some((a) => a.action === "proof_uploaded"));
+
+  // Client sees it in the portal with the details.
+  const p = await call("GET", `/api/portal/calendars/${cal._id}`);
+  const cert = p.body.calendar.items[0].documents.find((d) => d.type === "certificate");
+  assert.strictEqual(cert.referenceNumber, "DE-2026-99812");
+  assert.strictEqual(cert.proofNote, "Filed with Delaware; next due 1 March 2027.");
+});
+
+test("proof can be attached without marking done", async () => {
+  const { cal } = setup();
+  users.fin = { _id: oid(), email: "fin@firm.com", name: "Rahul", role: "staff", department: "finance" };
+  cal.items[0].clientStatus = "Under Review";
+  const r = await call("POST", `/api/calendars/${cal._id}/items/0/certificate`, { user: "fin", form: proofForm([["draft.pdf", "application/pdf"]], { markDone: "false" }) });
+  assert.strictEqual(r.status, 201);
+  assert.strictEqual(cal.items[0].clientStatus, "Under Review");
+  assert.ok(!cal.items[0].completedAt);
+});
+
+test("proof upload validation: no file, future date, wrong file type", async () => {
+  const { cal } = setup();
+  users.fin = { _id: oid(), email: "fin@firm.com", name: "Rahul", role: "staff", department: "finance" };
+  let r = await call("POST", `/api/calendars/${cal._id}/items/0/certificate`, { user: "fin", form: proofForm([], { note: "x" }) });
+  assert.strictEqual(r.status, 400);
+  assert.match(r.body.error, /at least one file/);
+  r = await call("POST", `/api/calendars/${cal._id}/items/0/certificate`, { user: "fin", form: proofForm([["a.pdf", "application/pdf"]], { completedOn: "2099-01-01" }) });
+  assert.strictEqual(r.status, 400);
+  assert.match(r.body.error, /future/);
+  r = await call("POST", `/api/calendars/${cal._id}/items/0/certificate`, { user: "fin", form: proofForm([["evil.html", "text/html"]]) });
+  assert.strictEqual(r.status, 400);
+  assert.match(r.body.error, /PDF, image/);
+});
+
+test("removing the last proof un-marks the service as done, and is logged", async () => {
+  const { cal } = setup();
+  users.fin = { _id: oid(), email: "fin@firm.com", name: "Rahul", role: "staff", department: "finance" };
+  await call("POST", `/api/calendars/${cal._id}/items/0/certificate`, { user: "fin", form: proofForm([["ack.pdf", "application/pdf"]]) });
+  assert.strictEqual(cal.items[0].clientStatus, "Filed");
+  const docIdx = cal.items[0].documents.findIndex((d) => d.type === "certificate");
+  const r = await call("DELETE", `/api/calendars/${cal._id}/items/0/certificate/${docIdx}`, { user: "fin" });
+  assert.strictEqual(r.status, 200);
+  assert.strictEqual(cal.items[0].documents.filter((d) => d.type === "certificate").length, 0);
+  assert.strictEqual(cal.items[0].clientStatus, "Under Review");
+  assert.ok(audit.some((a) => a.action === "proof_removed"));
+  // Can't delete a client's upload through this route
+  cal.items[0].documents.push({ type: "client_upload", fileKey: "k", fileName: "c.pdf" });
+  const bad = await call("DELETE", `/api/calendars/${cal._id}/items/0/certificate/${cal.items[0].documents.length - 1}`, { user: "fin" });
+  assert.strictEqual(bad.status, 404);
+});
+
+test("old single-file certificate upload still works", async () => {
+  const { cal } = setup();
+  users.staff = { _id: oid(), email: "tech@firm.com", name: "Tech", role: "staff" };
+  const f = new FormData();
+  f.append("file", new Blob(["%PDF"], { type: "application/pdf" }), "cert.pdf");
+  const r = await call("POST", `/api/calendars/${cal._id}/items/0/certificate`, { user: "staff", form: f });
+  assert.strictEqual(r.status, 201);
+  assert.strictEqual(cal.items[0].clientStatus, "Filed");
+});
