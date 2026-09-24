@@ -56,6 +56,10 @@ const itemSchema = new mongoose.Schema(
     // "not selected", so staff only work (and invoice) what was asked
     // for. Uploading a document for an item selects it automatically —
     // nobody uploads paperwork for a filing they don't want done.
+    // Who marked this service as done (by uploading proof), and when.
+    completedBy: { type: String, default: null },
+    completedByName: { type: String, default: "" },
+    completedAt: { type: Date, default: null },
     selectedByClient: { type: Boolean, default: false },
     selectedAt: { type: Date, default: null },
     // --- Quote sent while verifying documents -------------------------
@@ -120,6 +124,15 @@ const itemSchema = new mongoose.Schema(
           // that can grow over time, and a document uploaded before a label
           // existed shouldn't become invalid.
           requirementLabel: { type: String, default: "" },
+          // --- Proof of completion (type:"certificate") ---------------
+          // Whoever did the work (often the finance team) uploads proof:
+          // the filed certificate, a government acknowledgment, a receipt.
+          // These details are shown to the client next to the file.
+          uploadedByName: { type: String, default: "" },
+          uploadedByDepartment: { type: String, default: "" },
+          proofNote: { type: String, default: "" },
+          referenceNumber: { type: String, default: "" },
+          completedOn: { type: Date, default: null },
           // --- Staff validation of a client's upload -----------------
           // Only meaningful for type:"client_upload" — a staff-uploaded
           // certificate has no reviewStatus, it just IS the deliverable.
