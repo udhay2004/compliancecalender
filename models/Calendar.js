@@ -165,6 +165,28 @@ const itemSchema = new mongoose.Schema(
     // only cover items staff has dated; payment reminders (see
     // lib/reminders.js) don't depend on this at all and work today.
     dueDateActual: { type: Date, default: null },
+    // --- Real deadlines (lib/deadlines.js) ---------------------------
+    // Computed automatically from `schedule` (structured, from the AI) or
+    // from the due_date text, moved to the next business day where US
+    // rules say so. dueDateSource:
+    //   "auto"  - computed; recomputed if the due_date text changes
+    //   "staff" - typed in by staff; never overwritten automatically
+    //   "none"  - couldn't be computed ("As Triggered", unclear text)
+    schedule: { type: mongoose.Schema.Types.Mixed, default: null },
+    recurrence: { type: String, default: "" }, // annual | multiple | monthly | event | unknown
+    dueDateSource: { type: String, enum: ["auto", "staff", "none", null], default: null },
+    dueDateParsedFrom: { type: String, default: null },
+    dueDateNote: { type: String, default: "" },
+    // --- Periods: next year's filing is a NEW item -------------------
+    // When a recurring filing is done (or its date passes unselected),
+    // the next period is created as a fresh item and this one becomes
+    // history. Keeps each period's documents, price and proof separate.
+    isHistory: { type: Boolean, default: false },
+    nextOccurrenceSpawned: { type: Boolean, default: false },
+    previousDueDate: { type: Date, default: null },
+    // Reminder keys already sent for this item ("client-7:2027-04-15"),
+    // so each reminder goes out exactly once per due date.
+    remindersSent: { type: [String], default: [] },
   },
   { _id: false }
 );
@@ -273,5 +295,17 @@ const calendarSchema = new mongoose.Schema(
 );
 
 calendarSchema.index({ createdBy: 1, createdAt: -1 });
+
+// Every save computes real due dates for filings that don't have one yet
+// (or whose due-date text changed). Covers every way a calendar is created:
+// public tool, staff, regenerate, carry-over, edits during review.
+calendarSchema.pre("save", function computeDueDates(next) {
+  try {
+    require("../lib/deadlines").ensureDueDates(this);
+  } catch (err) {
+    console.error("[deadlines] could not compute due dates (non-fatal):", err.message);
+  }
+  next();
+});
 
 module.exports = mongoose.model("Calendar", calendarSchema);
