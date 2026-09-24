@@ -7,7 +7,7 @@ const Message = require("../models/Message");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { generateCompanyCalendar } = require("../lib/claude");
 const { calendarToPdfBuffer } = require("../lib/pdf");
-const { upload } = require("../middleware/upload");
+const { upload, MAX_FILE_SIZE_MB } = require("../middleware/upload");
 const storage = require("../lib/storage");
 const { getSuggestedFee, formatUSD } = require("../lib/complianceFees");
 const { logActivity } = require("../lib/auditLog");
@@ -416,52 +416,145 @@ router.post("/:id/items/:index/quote", async (req, res) => {
   res.json({ calendar: await staffView(calendar) });
 });
 
-// POST /api/calendars/:id/items/:index/certificate — staff uploads the
-// filed certificate/acknowledgment for one item, which immediately
-// becomes visible to the client in the portal. This is the "status
-// shared with them" loop closing on the staff side.
-router.post("/:id/items/:index/certificate", upload.single("file"), async (req, res) => {
+// POST /api/calendars/:id/items/:index/certificate — proof of completion.
+// Whoever did the work (e.g. the finance team) uploads the filed
+// certificate / acknowledgment / receipt, with optional details:
+//   files (1–10) or file        the proof itself
+//   referenceNumber             e.g. IRS confirmation or state filing number
+//   completedOn                 YYYY-MM-DD the work was done (default today)
+//   note                        a short message shown to the client
+//   markDone                    "false" to attach proof without marking the
+//                               service done (default: mark done)
+// Marking done sets the status to Filed, records who did it, and tells the
+// client (bell + email) with the reference and note.
+const proofUpload = upload.fields([{ name: "files", maxCount: 10 }, { name: "file", maxCount: 1 }]);
+router.post("/:id/items/:index/certificate", (req, res, next) => {
+  proofUpload(req, res, (err) => {
+    if (!err) return next();
+    const msg = err.code === "LIMIT_FILE_SIZE" ? `Each file must be under ${MAX_FILE_SIZE_MB} MB.`
+      : err.code === "LIMIT_UNEXPECTED_FILE" || err.code === "LIMIT_FILE_COUNT" ? "You can upload up to 10 files at once."
+      : /not allowed/.test(err.message) ? "Upload a PDF, image (PNG/JPG/WEBP), Word or Excel file."
+      : "The upload failed. Please try again.";
+    res.status(400).json({ error: msg });
+  });
+}, async (req, res) => {
   const calendar = await Calendar.findById(req.params.id);
   if (!calendar) return res.status(404).json({ error: "Not found." });
   const idx = parseInt(req.params.index, 10);
   if (isNaN(idx) || idx < 0 || idx >= calendar.items.length) {
     return res.status(400).json({ error: "Invalid item index." });
   }
-  if (!req.file) return res.status(400).json({ error: "No file uploaded (field name must be 'file')." });
+  const files = [...(req.files?.files || []), ...(req.files?.file || [])];
+  if (!files.length) return res.status(400).json({ error: "Choose at least one file to upload as proof." });
+
+  const clean = (v, max) => (typeof v === "string" ? v.trim().slice(0, max) : "");
+  const note = clean(req.body.note, 1000);
+  const referenceNumber = clean(req.body.referenceNumber, 120);
+  let completedOn = new Date();
+  if (req.body.completedOn) {
+    const d = new Date(`${req.body.completedOn}T12:00:00Z`);
+    if (isNaN(d.getTime())) return res.status(400).json({ error: "The completion date isn't a valid date." });
+    if (d.getTime() > Date.now() + 36 * 3600 * 1000) return res.status(400).json({ error: "The completion date can't be in the future." });
+    completedOn = d;
+  }
+  const markDone = req.body.markDone !== "false";
+  const item = calendar.items[idx];
+  const who = req.user.name || req.user.email;
 
   try {
-    const { fileKey, fileUrl } = await storage.saveFile({
-      buffer: req.file.buffer,
-      fileName: req.file.originalname,
-      contentType: req.file.mimetype,
-    });
-    calendar.items[idx].documents.push({
-      fileKey,
-      fileUrl,
-      fileName: req.file.originalname,
-      uploadedBy: req.user.email,
-      type: "certificate",
-    });
-    // Uploading the certificate is the natural "this is done" signal —
-    // auto-advance status, but staff can still override it manually via
-    // PATCH .../status if that's wrong for a given item.
-    calendar.items[idx].clientStatus = "Filed";
+    const saved = [];
+    for (const f of files) {
+      const { fileKey, fileUrl } = await storage.saveFile({ buffer: f.buffer, fileName: f.originalname, contentType: f.mimetype });
+      saved.push({
+        fileKey,
+        fileUrl,
+        fileName: f.originalname,
+        uploadedBy: req.user.email,
+        uploadedByName: who,
+        uploadedByDepartment: req.user.department || "",
+        type: "certificate",
+        proofNote: note,
+        referenceNumber,
+        completedOn,
+      });
+    }
+    item.documents.push(...saved);
+    if (markDone) {
+      item.clientStatus = "Filed";
+      item.completedBy = req.user.email;
+      item.completedByName = who;
+      item.completedAt = completedOn;
+    }
     await calendar.save();
     res.status(201).json({ calendar: await staffView(calendar) });
-    notifyClient({
+
+    const names = saved.map((d) => `"${d.fileName}"`).join(", ");
+    logActivity({
+      action: "proof_uploaded",
+      actor: req.user,
       clientOrgId: calendar.clientOrgId,
       calendarId: calendar._id,
       itemIndex: idx,
-      type: "certificate_uploaded",
-      title: `${calendar.items[idx].compliance_name} has been filed`,
-      body: `We've filed ${calendar.items[idx].compliance_name}. The certificate / acknowledgment "${req.file.originalname}" is ready to download in your portal.`,
-      link: portalLink(calendar),
-      actorName: req.user.name || req.user.email,
+      summary: `Uploaded proof for ${item.compliance_name}: ${names}${markDone ? " and marked it done" : ""}.`,
+      meta: { referenceNumber, note, completedOn, paymentStatus: item.paymentStatus },
     });
+    if (calendar.clientOrgId) {
+      const details = [
+        referenceNumber ? `Reference: ${referenceNumber}` : "",
+        `Completed on: ${completedOn.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`,
+        note ? `\n${note}` : "",
+      ].filter(Boolean).join("\n");
+      notifyClient({
+        clientOrgId: calendar.clientOrgId,
+        calendarId: calendar._id,
+        itemIndex: idx,
+        type: "certificate_uploaded",
+        title: markDone ? `${item.compliance_name} is done` : `New document for ${item.compliance_name}`,
+        body: markDone
+          ? `We've completed ${item.compliance_name}. Proof of completion (${names}) is ready to download in your portal.\n\n${details}`
+          : `We've added ${names} to ${item.compliance_name} in your portal.${note ? `\n\n${note}` : ""}`,
+        link: portalLink(calendar),
+        actorName: who,
+      });
+    }
   } catch (err) {
-    console.error("Certificate upload error:", err);
-    res.status(500).json({ error: "Could not save the uploaded file." });
+    console.error("Proof upload error:", err);
+    res.status(500).json({ error: "Could not save the uploaded file. If this keeps happening, run Admin → Check storage." });
   }
+});
+
+// DELETE /api/calendars/:id/items/:index/certificate/:docIndex — remove a
+// proof uploaded by mistake. Logged in the audit trail. If it was the last
+// proof on a service marked done, the service goes back to "Under Review"
+// so it doesn't stay "Filed" with nothing to show for it.
+router.delete("/:id/items/:index/certificate/:docIndex", async (req, res) => {
+  const calendar = await Calendar.findById(req.params.id);
+  if (!calendar) return res.status(404).json({ error: "Not found." });
+  const idx = parseInt(req.params.index, 10);
+  const docIdx = parseInt(req.params.docIndex, 10);
+  const item = calendar.items[idx];
+  const doc = item && item.documents[docIdx];
+  if (!doc || doc.type !== "certificate") return res.status(404).json({ error: "Proof not found." });
+
+  item.documents.splice(docIdx, 1);
+  const stillHasProof = item.documents.some((d) => d.type === "certificate");
+  if (!stillHasProof && item.clientStatus === "Filed") {
+    item.clientStatus = "Under Review";
+    item.completedBy = null;
+    item.completedByName = "";
+    item.completedAt = null;
+  }
+  await calendar.save();
+  logActivity({
+    action: "proof_removed",
+    actor: req.user,
+    clientOrgId: calendar.clientOrgId,
+    calendarId: calendar._id,
+    itemIndex: idx,
+    summary: `Removed proof "${doc.fileName}" from ${item.compliance_name}${!stillHasProof ? " (service no longer marked done)" : ""}.`,
+    meta: { fileKey: doc.fileKey, uploadedBy: doc.uploadedBy },
+  });
+  res.json({ calendar: await staffView(calendar) });
 });
 
 // PATCH /api/calendars/:id/items/:index/documents/:docIndex/review —
