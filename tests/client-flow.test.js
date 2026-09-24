@@ -129,7 +129,20 @@ stub("models/Calendar.js", FakeCalendar);
 stub("models/ClientOrg.js", FakeClientOrg);
 stub("middleware/auth.js", fakeAuth);
 stub("config/razorpay.js", fakeRazorpay);
-stub("lib/storage.js", { saveFile: async ({ fileName }) => ({ fileKey: `k/${fileName}`, fileUrl: "" }), getFileStream: async () => null });
+// Fake storage: files "exist" unless their key is in lostKeys.
+const lostKeys = new Set();
+const storedBodies = new Map();
+stub("lib/storage.js", {
+  saveFile: async ({ fileName, buffer }) => { const k = `k/${fileName}`; storedBodies.set(k, buffer); return { fileKey: k, fileUrl: "" }; },
+  getFile: async (k) => {
+    if (lostKeys.has(k)) return null;
+    const { Readable } = require("node:stream");
+    return { stream: Readable.from([storedBodies.get(k) || Buffer.from("%PDF-1.4 stored")]), contentType: "application/pdf", contentLength: undefined };
+  },
+  getFileStream: async () => null,
+  fileExists: async (k) => !lostKeys.has(k),
+  findMissing: async (keys) => new Set(keys.filter((k) => lostKeys.has(k))),
+});
 stub("lib/claude.js", { generateCompanyCalendar: async () => ({ items: clone(generatedItems), sourceMode: "live" }) });
 stub("lib/notify.js", {
   notifyStaff: async (n) => { notifications.push({ audience: "staff", ...n }); },
@@ -173,7 +186,7 @@ async function call(method, url, { user = "client", body, form, headers = {} } =
 // Fresh client with one approved calendar for each test.
 function setup({ phone = "+1 415 555 0100", items } = {}) {
   calendars = []; orgs = []; notifications.length = 0; audit.length = 0;
-  rzp.orders = {}; rzp.payments = {}; rzp.captured = []; rzp.created = 0;
+  rzp.orders = {}; rzp.payments = {}; rzp.captured = []; rzp.created = 0; lostKeys.clear();
   const org = makeOrg({ primaryContactEmail: "jane@acme.com", primaryContactPhone: phone, primaryContactName: "Jane" });
   users.client = { _id: oid(), email: "jane@acme.com", name: "Jane", role: "client", clientOrgId: org._id };
   users.other = { _id: oid(), email: "eve@evil.com", name: "Eve", role: "client", clientOrgId: makeOrg({ name: "Evil" })._id };
@@ -535,4 +548,121 @@ test("a paid item can't be re-priced", async () => {
   Object.assign(cal.items[0], { paymentStatus: "Paid", feeAmountCents: 12500 });
   const r = await call("POST", `/api/calendars/${cal._id}/items/0/quote`, { user: "staff", body: { feeAmountUSD: 10 } });
   assert.strictEqual(r.status, 400);
+});
+
+// =====================================================================
+// Prices from the price list apply automatically
+// =====================================================================
+test("choosing a service with a fixed list price prices it straight away", async () => {
+  const { cal } = setup();
+  const r = await call("POST", `/api/portal/calendars/${cal._id}/items/0/select`, { body: { selected: true } });
+  assert.strictEqual(r.status, 200);
+  const it = r.body.calendar.items[0];
+  assert.strictEqual(it.paymentStatus, "Invoiced");
+  assert.strictEqual(it.feeAmountCents, 12500);
+  assert.strictEqual(it.quotedBy, "price-list");
+  assert.strictEqual(it.price.kind, "invoiced");
+  await new Promise((r) => setImmediate(r));
+  assert.ok(notifications.some((n) => n.audience === "staff" && /applied automatically/.test(n.body)));
+});
+
+test("a 'From' price or an unlisted service waits for staff, with the contact-you message", async () => {
+  const { cal } = setup({ items: [{ compliance_name: "Form 1120 Federal Corporate Income Tax Return" }, { compliance_name: "Some Brand-New State Filing" }] });
+  let r = await call("POST", `/api/portal/calendars/${cal._id}/items/0/select`, { body: { selected: true } });
+  assert.strictEqual(r.body.calendar.items[0].paymentStatus, "Not Invoiced");
+  assert.match(r.body.calendar.items[0].price.message, /as soon as you upload your documents/);
+  r = await call("POST", `/api/portal/calendars/${cal._id}/items/1/select`, { body: { selected: true } });
+  const it = r.body.calendar.items[1];
+  assert.strictEqual(it.price.label, "Price on request");
+  assert.strictEqual(it.price.message, "We'll contact you with the price as soon as you upload your documents.");
+});
+
+test("uploading a document for a fixed-price service also applies the price", async () => {
+  const { cal } = setup();
+  const r = await call("POST", `/api/portal/calendars/${cal._id}/items/0/upload`, { form: pdfForm("Registered Agent Consent Letter") });
+  assert.strictEqual(r.status, 201);
+  assert.strictEqual(r.body.calendar.items[0].feeAmountCents, 12500);
+});
+
+test("removing an automatically priced service removes its price; a hand-sent price can't be dropped", async () => {
+  const { cal } = setup();
+  await call("POST", `/api/portal/calendars/${cal._id}/items/0/select`, { body: { selected: true } });
+  const r = await call("POST", `/api/portal/calendars/${cal._id}/items/0/select`, { body: { selected: false } });
+  assert.strictEqual(r.status, 200);
+  assert.strictEqual(r.body.calendar.items[0].paymentStatus, "Not Invoiced");
+  assert.strictEqual(r.body.calendar.items[0].feeAmountCents, null);
+
+  Object.assign(cal.items[1], { selectedByClient: true, paymentStatus: "Invoiced", feeAmountCents: 9000, quotedBy: "tech@firm.com" });
+  const r2 = await call("POST", `/api/portal/calendars/${cal._id}/items/1/select`, { body: { selected: false } });
+  assert.strictEqual(r2.status, 400);
+});
+
+// =====================================================================
+// Files lost from storage
+// =====================================================================
+function withUpload(cal, key = "k/lease.pdf") {
+  cal.items[0].selectedByClient = true;
+  cal.items[0].documents.push({ type: "client_upload", requirementLabel: "Registered Office Address Proof", reviewStatus: "accepted", fileName: "lease.pdf", fileKey: key, uploadedAt: new Date() });
+}
+
+test("a lost file shows as missing on both sides and stops counting as provided", async () => {
+  const { cal } = setup();
+  users.staff = { _id: oid(), email: "tech@firm.com", name: "Tech", role: "staff" };
+  withUpload(cal);
+  lostKeys.add("k/lease.pdf");
+  const staff = await call("GET", `/api/calendars/${cal._id}`, { user: "staff" });
+  assert.strictEqual(staff.body.calendar.items[0].documents[0].fileMissing, true);
+  assert.strictEqual(staff.body.calendar.summary.filesMissing, 1);
+  const row = staff.body.calendar.items[0].checklist.find((c) => c.label === "Registered Office Address Proof");
+  assert.strictEqual(row.state, "missing");
+  assert.strictEqual(row.lost, true);
+
+  const client = await call("GET", `/api/portal/calendars/${cal._id}`);
+  assert.strictEqual(client.body.calendar.items[0].documents[0].fileMissing, true);
+});
+
+test("staff can't verify a lost file", async () => {
+  const { cal } = setup();
+  users.staff = { _id: oid(), email: "tech@firm.com", name: "Tech", role: "staff" };
+  withUpload(cal);
+  cal.items[0].documents[0].reviewStatus = "pending";
+  lostKeys.add("k/lease.pdf");
+  const r = await call("PATCH", `/api/calendars/${cal._id}/items/0/documents/0/review`, { user: "staff", body: { reviewStatus: "accepted" } });
+  assert.strictEqual(r.status, 409);
+  assert.strictEqual(r.body.code, "FILE_MISSING");
+});
+
+test("downloading a lost file gives a readable page, not raw JSON", async () => {
+  const { cal } = setup();
+  users.staff = { _id: oid(), email: "tech@firm.com", name: "Tech", role: "staff" };
+  withUpload(cal);
+  lostKeys.add("k/lease.pdf");
+  const res = await fetch(`${base}/api/calendars/${cal._id}/items/0/documents/0/download`, { headers: { "x-test-user": "staff", accept: "text/html" } });
+  assert.strictEqual(res.status, 404);
+  const html = await res.text();
+  assert.match(res.headers.get("content-type"), /html/);
+  assert.match(html, /isn(&#39;|')t in storage any more/);
+  assert.match(html, /Ask client to re-upload/);
+});
+
+test("downloading a stored file works, and 'Open' shows PDFs inline", async () => {
+  const { cal } = setup();
+  users.staff = { _id: oid(), email: "tech@firm.com", name: "Tech", role: "staff" };
+  withUpload(cal);
+  let res = await fetch(`${base}/api/calendars/${cal._id}/items/0/documents/0/download`, { headers: { "x-test-user": "staff" } });
+  assert.strictEqual(res.status, 200);
+  assert.match(res.headers.get("content-disposition"), /^attachment/);
+  assert.match(await res.text(), /%PDF/);
+  res = await fetch(`${base}/api/calendars/${cal._id}/items/0/documents/0/download?view=1`, { headers: { "x-test-user": "staff" } });
+  assert.match(res.headers.get("content-disposition"), /^inline/);
+  assert.strictEqual(res.headers.get("content-type"), "application/pdf");
+});
+
+test("payment stays locked while a required document is lost", async () => {
+  const { cal } = setup();
+  readyToPay(cal);
+  lostKeys.add("b");
+  const r = await call("POST", `/api/portal/payments/calendars/${cal._id}/items/0/create-order`);
+  assert.strictEqual(r.status, 400);
+  assert.match(r.body.error, /documents/);
 });
