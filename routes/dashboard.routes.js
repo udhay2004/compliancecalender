@@ -39,6 +39,7 @@ router.use(requireAuth, requireRole("staff"));
 // here. Superseded calendars are excluded so a regenerated calendar isn't
 // counted twice.
 const { REAL_WORK_MATCH, toView } = require("../lib/calendarView");
+const { getPriceList } = require("../lib/complianceFees");
 const REAL_WORK = { ...REAL_WORK_MATCH, supersededAt: null };
 
 // Staff accounts created before departments existed have department ""
@@ -194,6 +195,7 @@ async function buildFinanceSection() {
           task: "$items.compliance_name",
           cents: { $ifNull: ["$items.feeAmountCents", 0] },
           paidAt: "$items.paidAt",
+          paymentId: "$items.razorpayPaymentId",
         },
       },
     ]),
@@ -201,8 +203,8 @@ async function buildFinanceSection() {
       { $match: REAL_WORK },
       { $unwind: "$items" },
       { $match: { "items.paymentStatus": { $in: ["Invoiced", "Overdue"] } } },
-      { $sort: { "items.dueDateActual": 1 } },
-      { $limit: 10 },
+      { $sort: { "items.paymentStatus": -1, "items.quotedAt": 1 } }, // Overdue first, then longest waiting
+      { $limit: 25 },
       {
         $project: {
           company: "$profile.companyName",
@@ -210,10 +212,38 @@ async function buildFinanceSection() {
           cents: { $ifNull: ["$items.feeAmountCents", 0] },
           paymentStatus: "$items.paymentStatus",
           dueDate: "$items.due_date",
+          quotedAt: "$items.quotedAt",
+          quotedBy: "$items.quotedBy",
         },
       },
     ]),
   ]);
+
+  // Services clients chose that have no price yet: the finance to-do list.
+  // Sorted so the ones with every document already uploaded come first,
+  // because those clients are waiting on us.
+  const clientCals = await Calendar.find({ status: "approved", clientOrgId: { $ne: null }, supersededAt: null })
+    .sort({ updatedAt: -1 })
+    .limit(150);
+  const needsPrice = [];
+  clientCals.forEach((c) => {
+    const v = toView(c, { staff: true });
+    v.items.forEach((it) => {
+      if (!it.selectedByClient || it.feeAmountCents || it.paymentStatus !== "Not Invoiced") return;
+      if (it.price?.kind === "included") return;
+      needsPrice.push({
+        calendarId: String(c._id),
+        company: c.profile?.companyName || "(unnamed)",
+        task: it.compliance_name,
+        listLabel: it.price?.label || "",
+        docsProvided: it.checklistSummary.provided,
+        docsTotal: it.checklistSummary.total,
+        ready: it.checklistSummary.allProvided,
+        selectedAt: it.selectedAt,
+      });
+    });
+  });
+  needsPrice.sort((a, b) => (b.ready - a.ready) || new Date(a.selectedAt || 0) - new Date(b.selectedAt || 0));
 
   const by = Object.fromEntries(payAgg.map((r) => [r._id, r]));
   const paidCents = by.Paid?.cents || 0;
@@ -226,15 +256,22 @@ async function buildFinanceSection() {
       { label: "Collected", value: money(paidCents), money: true, tone: "good", hint: `${by.Paid?.count || 0} paid filings` },
       { label: "Outstanding", value: money(invoicedCents), money: true, tone: "warn", hint: `${by.Invoiced?.count || 0} invoiced, not yet paid` },
       { label: "Overdue", value: money(overdueCents), money: true, tone: "bad", hint: `${by.Overdue?.count || 0} past their due date` },
-      { label: "Not invoiced", value: by["Not Invoiced"]?.count || 0, tone: "neutral", hint: "Filings with no fee raised yet" },
+      { label: "Need a price", value: needsPrice.length, tone: needsPrice.length ? "warn" : "neutral", hint: `${needsPrice.filter((n) => n.ready).length} with all documents in` },
     ],
+    needsPrice: needsPrice.slice(0, 25),
+    priceList: getPriceList(),
     recentPaid: recentPaid.map((r) => ({
+      calendarId: String(r._id),
+      paymentId: r.paymentId || "",
       company: r.company || "(unnamed)",
       task: r.task,
       amount: money(r.cents),
       paidAt: r.paidAt,
     })),
     outstanding: outstanding.map((r) => ({
+      calendarId: String(r._id),
+      quotedAt: r.quotedAt,
+      autoPriced: r.quotedBy === "price-list",
       company: r.company || "(unnamed)",
       task: r.task,
       amount: money(r.cents),
