@@ -54,6 +54,11 @@
   .sheet-body h2 { font-family:var(--serif); margin:0 0 6px; font-size:20px; }
   .sheet-body input, .sheet-body select { width:100%; }
   .req { color:var(--stamp-red); }
+  .due-late { color:var(--stamp-red); font-weight:700; }
+  .due-soon { color:var(--seal-gold); font-weight:700; }
+  .stat-late b { color:var(--stamp-red); }
+  .history-block { margin-top:28px; }
+  .history-block summary { cursor:pointer; font-family:var(--serif); font-weight:700; font-size:17px; }
   .proof-card { margin-top:12px; padding:12px 14px; border-radius:8px; background:var(--teal-bg); border:1px solid #c7e9e5; }
   .proof-title { font-weight:700; font-size:14px; color:var(--brand-dark); margin-bottom:6px; }
   .proof-title span { font-weight:500; color:var(--ink-soft); font-size:13px; }
@@ -350,6 +355,8 @@
     document.getElementById('calStats').innerHTML = `
       <div class="stat-row">
         <div><b>${s.totalItems ?? calendar.items.length}</b>filings apply to you</div>
+        ${s.overdue ? `<div class="stat-late"><b>${s.overdue}</b>overdue</div>` : ''}
+        <div><b>${s.dueSoon ?? 0}</b>due in the next 30 days</div>
         <div><b>${s.selected ?? 0}</b>selected for us to handle</div>
         <div><b>${s.awaitingPayment ?? 0}</b>awaiting payment</div>
         ${s.selectedInvoicedCents ? `<div><b>${money(s.selectedInvoicedCents)}</b>priced so far</div>` : ''}
@@ -364,7 +371,7 @@
   function renderPrices() {
     const el = document.getElementById('pricesPanel');
     if (!calendar || !calendar.items.length) { el.innerHTML = ''; return; }
-    const rows = calendar.items.map((it, idx) => ({ it, idx }))
+    const rows = calendar.items.map((it, idx) => ({ it, idx })).filter(x => !x.it.isHistory)
       .sort((a, b) => (b.it.selectedByClient ? 1 : 0) - (a.it.selectedByClient ? 1 : 0));
     const onRequest = calendar.items.some(it => (it.price || {}).kind === 'quote' || (it.price || {}).kind === 'from');
     el.innerHTML = `
@@ -381,6 +388,24 @@
         </div>
       </div>`;
   }
+
+  // "Due 15 Apr 2027 · in 34 days", red when overdue, amber inside a week.
+  function fmtDue(d) { return new Date(d).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }); }
+  function dueLine(item) {
+    if (!item.dueDateActual) return `Due ${escapeHtml(item.due_date)}`;
+    const days = item.daysUntil;
+    const done = item.clientStatus === 'Filed';
+    let rel = '';
+    if (!done && days !== null) {
+      rel = days < 0 ? `<span class="due-late">${-days} day${days === -1 ? '' : 's'} overdue</span>`
+        : days === 0 ? '<span class="due-soon">due today</span>'
+        : days === 1 ? '<span class="due-soon">due tomorrow</span>'
+        : days <= 7 ? `<span class="due-soon">in ${days} days</span>` : `in ${days} days`;
+    }
+    const note = item.dueDateNote ? ` title="${escapeHtml(item.dueDateNote)}"` : '';
+    return `<span${note}>Due ${fmtDue(item.dueDateActual)}</span>${rel ? ' · ' + rel : ''}${item.recurrenceLabel ? ' · ' + escapeHtml(item.recurrenceLabel) : ''}`;
+  }
+  const byDue = (a, b) => (a.it.dueDateActual ? new Date(a.it.dueDateActual) : Infinity) - (b.it.dueDateActual ? new Date(b.it.dueDateActual) : Infinity);
 
   function priceTag(item) {
     const pr = item.price || {};
@@ -434,12 +459,12 @@
         <div class="item-header">
           <button class="item-toggle" data-toggle-idx="${idx}" aria-expanded="${isOpen}">
             <div class="item-name">${escapeHtml(item.compliance_name)}</div>
-            <div class="item-meta">Due ${escapeHtml(item.due_date)}${item.selectedByClient && cs.total ? ` · ${cs.provided}/${cs.total} documents provided` : ''}</div>
+            <div class="item-meta">${dueLine(item)}${item.selectedByClient && cs.total && item.clientStatus !== 'Filed' ? ` · ${cs.provided}/${cs.total} documents provided` : ''}</div>
           </button>
           <div class="item-side">
             ${priceTag(item)}
             ${item.selectedByClient ? `<span class="status-pill ${statusClass(item.clientStatus)}">${escapeHtml(item.clientStatus)}</span>` : ''}
-            ${readOnly ? '' : `<button class="select-btn ${item.selectedByClient ? 'on' : ''}" data-select-idx="${idx}" data-selected="${item.selectedByClient ? '1' : '0'}" ${item.selectedByClient && lockSelect ? 'disabled title="We\'ve already sent you a price for this. Message us to cancel."' : ''}>${item.selectedByClient ? 'Selected' : 'Add to my services'}</button>`}
+            ${readOnly || item.isHistory ? '' : `<button class="select-btn ${item.selectedByClient ? 'on' : ''}" data-select-idx="${idx}" data-selected="${item.selectedByClient ? '1' : '0'}" ${item.selectedByClient && lockSelect ? 'disabled title="We\'ve already sent you a price for this. Message us to cancel."' : ''}>${item.selectedByClient ? 'Selected' : 'Add to my services'}</button>`}
           </div>
         </div>
         <div class="item-body" ${isOpen ? '' : 'hidden'} style="margin-top:10px;">
@@ -476,8 +501,10 @@
     const el = document.getElementById('itemsList');
     if (!calendar.items.length) { el.innerHTML = '<div class="empty-state">No filings on this calendar.</div>'; return; }
     const withIdx = calendar.items.map((it, idx) => ({ it, idx }));
-    const selected = withIdx.filter(x => x.it.selectedByClient);
-    const others = withIdx.filter(x => !x.it.selectedByClient);
+    const history = withIdx.filter(x => x.it.isHistory).sort((a, b) => byDue(b, a));
+    const currentItems = withIdx.filter(x => !x.it.isHistory);
+    const selected = currentItems.filter(x => x.it.selectedByClient).sort(byDue);
+    const others = currentItems.filter(x => !x.it.selectedByClient).sort(byDue);
     el.innerHTML = `
       <div class="group-title">Your selected services</div>
       <div class="group-sub">${selected.length ? 'Upload the documents for each one. Listed prices are added straight away; for the rest we\'ll contact you with the price once your documents are in. You pay here.' : 'Nothing selected yet. Add the filings you want us to handle from the list below.'}</div>
@@ -485,7 +512,13 @@
       ${others.length ? `
         <div class="group-title">Other filings that apply to you</div>
         <div class="group-sub">Everything else your company owes. Prices are shown so you can decide what to hand over to us.</div>
-        <div class="card" style="margin-top:8px;"><div class="card-body" style="padding:4px 24px;">${others.map(x => itemHtml(x.it, x.idx)).join('')}</div></div>` : ''}`;
+        <div class="card" style="margin-top:8px;"><div class="card-body" style="padding:4px 24px;">${others.map(x => itemHtml(x.it, x.idx)).join('')}</div></div>` : ''}
+      ${history.length ? `
+        <details class="history-block">
+          <summary>Previous periods (${history.length})</summary>
+          <div class="group-sub">Filings we've completed for earlier years or quarters, with their proof and receipts.</div>
+          <div class="card" style="margin-top:8px;"><div class="card-body" style="padding:4px 24px;">${history.map(x => itemHtml(x.it, x.idx)).join('')}</div></div>
+        </details>` : ''}`;
 
     el.querySelectorAll('[data-toggle-idx]').forEach(b => b.addEventListener('click', () => {
       const idx = +b.dataset.toggleIdx;
