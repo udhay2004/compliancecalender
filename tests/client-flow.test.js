@@ -24,6 +24,10 @@ process.env.RAZORPAY_KEY_SECRET = "rzp_test_secret";
 process.env.RAZORPAY_WEBHOOK_SECRET = "rzp_webhook_secret";
 
 const root = path.join(__dirname, "..");
+// The real Calendar schema (status lists etc.), loaded before the in-memory
+// stand-in replaces the model below.
+const RealCalendarSchema = require("../models/Calendar").schema;
+const { errorHandler } = require("../lib/asyncErrors");
 const stub = (rel, exports) => {
   const file = require.resolve(path.join(root, rel));
   require.cache[file] = { id: file, filename: file, loaded: true, exports };
@@ -82,6 +86,7 @@ function matches(doc, q) {
 }
 
 const FakeCalendar = {
+  schema: RealCalendarSchema,
   findOne: (q) => query(() => calendars.find((c) => matches(c, q)) || null),
   find: (q) => query(() => calendars.filter((c) => matches(c, q))),
   findById: (id) => query(() => calendars.find((c) => String(c._id) === String(id)) || null),
@@ -166,6 +171,7 @@ app.use("/api/portal", portalRoutes);
 app.use("/api/portal/payments", paymentsRoutes);
 app.use("/api/calendars", calendarRoutes);
 app.use("/api/admin", require("../routes/admin.routes"));
+app.use(errorHandler);
 
 let server, base;
 test.before(async () => {
@@ -855,4 +861,71 @@ test("old single-file certificate upload still works", async () => {
   const r = await call("POST", `/api/calendars/${cal._id}/items/0/certificate`, { user: "staff", form: f });
   assert.strictEqual(r.status, 201);
   assert.strictEqual(cal.items[0].clientStatus, "Filed");
+});
+
+// =====================================================================
+// Real deadlines through the routes
+// =====================================================================
+test("uploading proof rolls the filing to next period and tells the client the date", async () => {
+  const { cal } = setup();
+  users.fin = { _id: oid(), email: "fin@firm.com", name: "Rahul", role: "staff", department: "finance" };
+  cal.profile.fyEnd = "Dec";
+  Object.assign(cal.items[1], { selectedByClient: true, paymentStatus: "Paid", feeAmountCents: 10000, due_date: "1 March (Annually)", dueDateActual: new Date("2027-03-01T00:00:00Z"), dueDateSource: "auto" });
+  const before = cal.items.length;
+  const r = await call("POST", `/api/calendars/${cal._id}/items/1/certificate`, { user: "fin", form: proofForm([["ack.pdf", "application/pdf"]]) });
+  assert.strictEqual(r.status, 201);
+  assert.strictEqual(cal.items.length, before + 1);
+  assert.strictEqual(cal.items[1].isHistory, true);
+  const nextItem = cal.items[before];
+  assert.strictEqual(nextItem.dueDateActual.toISOString().slice(0, 10), "2028-03-01");
+  assert.strictEqual(nextItem.selectedByClient, true);
+  assert.strictEqual(nextItem.feeAmountCents, 10000, "list price for the annual report applied again");
+  await new Promise((r) => setImmediate(r));
+  const n = notifications.find((x) => x.audience === "client" && x.type === "certificate_uploaded");
+  assert.match(n.body, /Next due date for this filing: 1 Mar 2028/);
+
+  // The past period can't be selected/deselected any more.
+  const sel = await call("POST", `/api/portal/calendars/${cal._id}/items/1/select`, { body: { selected: false } });
+  assert.strictEqual(sel.status, 400);
+  // It's excluded from the counts.
+  const v = await call("GET", `/api/portal/calendars/${cal._id}`);
+  assert.strictEqual(v.body.calendar.summary.historyItems, 1);
+  assert.strictEqual(v.body.calendar.summary.totalItems, before);
+});
+
+test("staff can set a due date by hand and go back to the automatic one", async () => {
+  const { cal } = setup();
+  users.staff = { _id: oid(), email: "tech@firm.com", name: "Tech", role: "staff" };
+  Object.assign(cal.items[0], { dueDateActual: new Date("2027-05-20T00:00:00Z"), dueDateSource: "auto", remindersSent: ["client-due-30:2027-05-20"] });
+  let r = await call("PATCH", `/api/calendars/${cal._id}/items/0/status`, { user: "staff", body: { dueDateActual: "2027-06-10" } });
+  assert.strictEqual(r.status, 200, JSON.stringify(r.body));
+  assert.strictEqual(cal.items[0].dueDateSource, "staff");
+  assert.deepStrictEqual(cal.items[0].remindersSent, [], "reminders restart for the new date");
+  r = await call("PATCH", `/api/calendars/${cal._id}/items/0/status`, { user: "staff", body: { dueDateActual: "" } });
+  assert.strictEqual(r.status, 200);
+  assert.strictEqual(cal.items[0].dueDateSource, null, "recomputed automatically on save");
+});
+
+test("marking a filing Filed from the status menu also creates the next period", async () => {
+  const { cal } = setup();
+  users.staff = { _id: oid(), email: "tech@firm.com", name: "Tech", role: "staff" };
+  Object.assign(cal.items[0], { selectedByClient: true, due_date: "Annually, on the anniversary of the company's incorporation date", dueDateActual: new Date("2027-05-20T00:00:00Z") });
+  cal.profile.incorpDate = "2024-05-20";
+  const before = cal.items.length;
+  const r = await call("PATCH", `/api/calendars/${cal._id}/items/0/status`, { user: "staff", body: { clientStatus: "Filed" } });
+  assert.strictEqual(r.status, 200);
+  assert.strictEqual(cal.items.length, before + 1);
+  assert.strictEqual(cal.items[before].dueDateActual.toISOString().slice(0, 10), "2028-05-22");
+});
+
+test("an unexpected error in a route gets a clear 500 instead of hanging", async () => {
+  const { cal } = setup();
+  users.staff = { _id: oid(), email: "tech@firm.com", name: "Tech", role: "staff" };
+  const orig = FakeCalendar.findById;
+  FakeCalendar.findById = () => query(() => { throw new Error("database hiccup"); });
+  try {
+    const r = await call("GET", `/api/calendars/${cal._id}`, { user: "staff" });
+    assert.strictEqual(r.status, 500);
+    assert.match(r.body.error, /Something went wrong/);
+  } finally { FakeCalendar.findById = orig; }
 });
