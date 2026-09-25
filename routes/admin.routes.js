@@ -26,6 +26,20 @@ const { requireAuth, requireRole } = require("../middleware/auth");
 const router = express.Router();
 router.use(requireAuth, requireRole("admin"));
 
+// GET /api/admin/legal-status — which business details are still missing
+// from the legal pages, and the exact page links to give Razorpay.
+router.get("/legal-status", (req, res) => {
+  const { missingBusinessInfo, businessInfo } = require("../lib/businessInfo");
+  const { LINKS } = require("../lib/legalPages");
+  const b = businessInfo();
+  const base = b.appUrl || `${req.protocol}://${req.get("host")}`;
+  res.json({
+    missing: missingBusinessInfo(),
+    businessName: b.displayName,
+    pages: LINKS.map(([path, label]) => ({ label, url: base + path })),
+  });
+});
+
 // GET /api/admin/payments-health — "why can't clients pay?" in one click.
 // Checks the settings, then asks Razorpay directly: are the keys accepted,
 // and will it create an order in our currency? The test order is for the
