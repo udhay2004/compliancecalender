@@ -1,470 +1,486 @@
-// routes/portal.routes.js
+// routes/payments.routes.js
 //
-// Client-facing API. Every single route here MUST filter by
-// req.user.clientOrgId — never trust a calendarId alone, or one client
-// could view another client's documents by guessing/changing a URL.
-// A client can:
-//   - see every calendar ever generated for their company (current + history)
-//   - keep their contact details up to date (email AND phone are required
-//     before any work-creating action — see requireCompleteContact)
-//   - pick which services they want ComplyGlobally to handle
-//   - upload documents, see the price for each service, pay
-//   - regenerate their calendar when their company details change
-// No review, no approve, no visibility into other clients.
+// Client-facing Razorpay payments for a single Calendar item, mounted at
+// /api/portal/payments (see server.js), plus the webhook handler (mounted
+// separately in server.js with a raw body parser).
+//
+// PRINCIPLES (why the code below looks the way it does):
+//
+//  1. The browser never decides the price. The amount charged is always
+//     item.feeAmountCents, set by staff (quote / status routes in
+//     routes/calendar.routes.js).
+//  2. A payment is only trusted after a cryptographic check — the Checkout
+//     signature on /verify, the webhook signature on the webhook — and the
+//     comparison is constant-time.
+//  3. The amount and currency Razorpay reports are compared against what
+//     the order was created for. A mismatch is recorded and flagged to
+//     staff, never silently marked "Paid".
+//  4. Every order ever created for an item is remembered (paymentEvents),
+//     not just the latest one. A client who opens Checkout twice and pays
+//     the FIRST popup used to be charged with nothing recorded, because
+//     the webhook only looked for the latest order id.
+//  5. Webhooks are retried by Razorpay and may arrive before or after
+//     /verify. Every handler is idempotent: the same payment is recorded
+//     once, however many times it's reported.
+//  6. "Authorized" is not "paid". If the Razorpay account isn't set to
+//     auto-capture, an authorized payment is refunded automatically after
+//     a few days — so /verify captures it explicitly before marking Paid.
 
 const express = require("express");
-const mongoose = require("mongoose");
+const crypto = require("crypto");
+const razorpay = require("../config/razorpay");
 const Calendar = require("../models/Calendar");
 const ClientOrg = require("../models/ClientOrg");
 const { requireAuth, requireClientRole } = require("../middleware/auth");
-const { upload } = require("../middleware/upload");
-const storage = require("../lib/storage");
-const { generateCompanyCalendar } = require("../lib/claude");
-const { toView, missingContactFields, normalizePhone, missingKeysFor } = require("../lib/calendarView");
-const { sendStoredFile } = require("../lib/download");
-const { notifyStaff, notifyClient } = require("../lib/notify");
-const { applyListPrice, removeListPrice, PRICE_LIST_ACTOR, formatUSD } = require("../lib/complianceFees");
+const { hasAllRequiredDocuments, toView: toViewSync, missingKeysFor } = require("../lib/calendarView");
+const toView = async (calendar) => toViewSync(calendar, { missingKeys: await missingKeysFor(calendar) });
+const { formatUSD } = require("../lib/complianceFees");
 const { logActivity } = require("../lib/auditLog");
+const { notifyStaff, notifyClient } = require("../lib/notify");
 
-const router = express.Router();
-router.use(requireAuth, requireClientRole);
+// Prices are in USD; what's charged (USD, or INR at a set rate) comes
+// from lib/paymentConfig.js.
+const { paymentCurrency, chargeFor, formatCharge, explainRazorpayError } = require("../lib/paymentConfig");
+const CURRENCY = paymentCurrency();
 
-// Async: a document whose file was lost shows as "please upload again".
-const clientView = async (calendar) => toView(calendar, { staff: false, missingKeys: await missingKeysFor(calendar) });
-
-function staffLink(calendarId) {
-  return `/calendar.html?id=${calendarId}`;
-}
-
-// Every route below finds the calendar via this helper, which builds the
-// ownership check directly into the query — so a route can never
-// "forget" to check clientOrgId, the query simply returns nothing for
-// a calendar that isn't theirs.
-function findOwnApprovedCalendar(req, calendarId) {
-  if (!mongoose.isValidObjectId(calendarId)) return Promise.resolve(null);
-  return Calendar.findOne({
-    _id: calendarId,
-    clientOrgId: req.user.clientOrgId,
-    status: "approved",
-  });
-}
-
-function parseItemIndex(calendar, raw) {
-  const idx = parseInt(raw, 10);
-  if (isNaN(idx) || idx < 0 || idx >= calendar.items.length) return null;
-  return idx;
-}
-
-// Blocks work-creating actions until the company has both an email and a
-// phone number on file. The portal shows a "complete your details" form
-// when it gets this error code, so the client is never stuck guessing.
-async function requireCompleteContact(req, res, next) {
-  const org = await ClientOrg.findById(req.user.clientOrgId);
-  const missing = missingContactFields(org);
-  if (missing.length) {
-    return res.status(409).json({
-      error: `Please add your ${missing.join(" and ")} before continuing.`,
-      code: "CONTACT_INCOMPLETE",
-      missing,
-    });
-  }
-  req.clientOrg = org;
-  next();
-}
-
-// ---------------------------------------------------------------------
-// Profile / contact details
-// ---------------------------------------------------------------------
-
-function profilePayload(org, user) {
-  return {
-    companyName: org?.name || "",
-    contactName: org?.primaryContactName || user.name || "",
-    email: org?.primaryContactEmail || "",
-    phone: org?.primaryContactPhone || "",
-    loginEmail: user.email,
-    missing: missingContactFields(org),
-  };
-}
-
-// GET /api/portal/profile
-router.get("/profile", async (req, res) => {
-  const org = await ClientOrg.findById(req.user.clientOrgId);
-  res.json({ profile: profilePayload(org, req.user) });
-});
-
-// PATCH /api/portal/profile  { companyName?, contactName?, email?, phone? }
-router.patch("/profile", async (req, res) => {
-  const org = await ClientOrg.findById(req.user.clientOrgId);
-  if (!org) return res.status(404).json({ error: "Company not found." });
-  const { companyName, contactName, email, phone } = req.body || {};
-  const changed = [];
-
-  if (companyName !== undefined) {
-    const v = String(companyName).trim().slice(0, 200);
-    if (!v) return res.status(400).json({ error: "Company name can't be empty." });
-    if (v !== org.name) { org.name = v; changed.push("company name"); }
-  }
-  if (contactName !== undefined) {
-    const v = String(contactName).trim().slice(0, 200);
-    if (v !== org.primaryContactName) { org.primaryContactName = v; changed.push("contact name"); }
-  }
-  if (email !== undefined) {
-    const v = String(email).trim().toLowerCase();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return res.status(400).json({ error: "Enter a valid email address." });
-    if (v !== org.primaryContactEmail) { org.primaryContactEmail = v; changed.push("email"); }
-  }
-  if (phone !== undefined) {
-    const v = normalizePhone(String(phone));
-    if (!v) return res.status(400).json({ error: "Enter a valid phone number, including the country code (e.g. +1 415 555 0100)." });
-    if (v !== org.primaryContactPhone) { org.primaryContactPhone = v; changed.push("phone"); }
-  }
-  // Belt and braces: never let an update leave the org without an email
-  // or phone — this route is the only way a client can change them.
-  const stillMissing = missingContactFields(org);
-  if (stillMissing.length) {
-    return res.status(400).json({ error: `Your ${stillMissing.join(" and ")} is required.`, missing: stillMissing });
-  }
-
-  await org.save();
-  if (changed.length) {
-    notifyStaff({
-      clientOrgId: org._id,
-      type: "profile_updated",
-      title: `${org.name} updated their contact details`,
-      body: `Changed: ${changed.join(", ")}.`,
-      link: "/admin.html",
-      actorName: req.user.name || req.user.email,
-      email: false,
-    });
-  }
-  res.json({ profile: profilePayload(org, req.user) });
-});
-
-// ---------------------------------------------------------------------
-// Calendars
-// ---------------------------------------------------------------------
-
-// GET /api/portal/calendars — every approved calendar belonging to this
-// client's org, CURRENT first (not superseded), then history newest
-// first. Nothing a client ever generated is dropped from here.
-router.get("/calendars", async (req, res) => {
-  const calendars = await Calendar.find({
-    clientOrgId: req.user.clientOrgId,
-    status: "approved",
-  }).sort({ supersededAt: 1, createdAt: -1 });
-  const views = await Promise.all(calendars.map(clientView));
-  views.sort((a, b) => (a.supersededAt ? 1 : 0) - (b.supersededAt ? 1 : 0) || new Date(b.createdAt) - new Date(a.createdAt));
-  res.json({ calendars: views });
-});
-
-// GET /api/portal/calendars/pending — READ-ONLY summary of calendars still
-// under staff review, so the portal isn't blank while that happens.
-router.get("/calendars/pending", async (req, res) => {
-  const calendars = await Calendar.find({
-    clientOrgId: req.user.clientOrgId,
-    status: "pending_review",
-  })
-    .select("profile createdAt items")
-    .sort({ createdAt: -1 });
-  res.json({ calendars });
-});
-
-// GET /api/portal/calendars/:id
-router.get("/calendars/:id", async (req, res) => {
-  const calendar = await findOwnApprovedCalendar(req, req.params.id);
-  if (!calendar) return res.status(404).json({ error: "Not found." });
-  res.json({ calendar: await clientView(calendar) });
-});
-
-// POST /api/portal/calendars/:id/items/:index/select  { selected: true|false }
-// The client choosing which services they want us to handle.
-router.post("/calendars/:id/items/:index/select", requireCompleteContact, async (req, res) => {
-  const calendar = await findOwnApprovedCalendar(req, req.params.id);
-  if (!calendar) return res.status(404).json({ error: "Not found." });
-  if (calendar.supersededAt) return res.status(400).json({ error: "This is an older calendar. Make changes on your current one." });
-  const idx = parseItemIndex(calendar, req.params.index);
-  if (idx === null) return res.status(400).json({ error: "Invalid item index." });
-  const item = calendar.items[idx];
-  if (item.isHistory) return res.status(400).json({ error: "This is a past period of this filing. Choose the current one instead." });
-  const selected = req.body?.selected !== false;
-
-  if (!selected) {
-    if (item.paymentStatus === "Paid" || item.clientStatus === "Filed") {
-      return res.status(400).json({ error: "This service is already paid for or filed, so it can't be removed. Message us if something's wrong." });
-    }
-    // A price that came automatically from the price list can be undone
-    // with the selection; a price staff sent personally can't.
-    if ((item.paymentStatus === "Invoiced" || item.paymentStatus === "Overdue") && item.quotedBy !== PRICE_LIST_ACTOR) {
-      return res.status(400).json({ error: "We've already sent you a price for this service. Message us if you'd like to cancel it." });
-    }
-  }
-  if (item.selectedByClient === selected) return res.json({ calendar: await clientView(calendar) });
-
-  item.selectedByClient = selected;
-  item.selectedAt = selected ? new Date() : null;
-  if (selected && item.clientStatus === "Not Started") item.clientStatus = "Awaiting Documents";
-  if (!selected && item.clientStatus === "Awaiting Documents") item.clientStatus = "Not Started";
-  const priced = selected ? applyListPrice(item) : (removeListPrice(item), false);
-  await calendar.save();
-
-  res.json({ calendar: await clientView(calendar) });
-
-  notifyStaff({
-    clientOrgId: calendar.clientOrgId,
-    calendarId: calendar._id,
-    itemIndex: idx,
-    type: selected ? "service_selected" : "service_deselected",
-    title: `${req.clientOrg.name} ${selected ? "selected" : "removed"} ${item.compliance_name}`,
-    body: selected
-      ? (priced
-          ? `They want ComplyGlobally to handle this filing. The list price of ${formatUSD(item.feeAmountCents)} was applied automatically.`
-          : "They want ComplyGlobally to handle this filing. It has no fixed list price, so send them a price once their documents are in.")
-      : "They no longer want this filing handled.",
-    link: staffLink(calendar._id),
-    actorName: req.user.name || req.user.email,
-    email: false, // selections are frequent; the bell is enough, uploads/payments still email
-  });
-});
-
-// POST /api/portal/calendars/:id/items/:index/upload — client uploads a
-// document as proof/support for one compliance item.
-router.post("/calendars/:id/items/:index/upload", requireCompleteContact, upload.single("file"), async (req, res) => {
-  const calendar = await findOwnApprovedCalendar(req, req.params.id);
-  if (!calendar) return res.status(404).json({ error: "Not found." });
-  if (calendar.supersededAt) return res.status(400).json({ error: "This is an older calendar. Upload on your current one." });
-  const idx = parseItemIndex(calendar, req.params.index);
-  if (idx === null) return res.status(400).json({ error: "Invalid item index." });
-  if (!req.file) return res.status(400).json({ error: "No file uploaded (field name must be 'file')." });
-
-  try {
-    const { fileKey, fileUrl } = await storage.saveFile({
-      buffer: req.file.buffer,
-      fileName: req.file.originalname,
-      contentType: req.file.mimetype,
-    });
-    const item = calendar.items[idx];
-    // requirementLabel says WHICH checklist row this upload satisfies (see
-    // lib/requiredDocuments.js). A display/matching hint, not an access-
-    // control value, so an unknown label never blocks the upload.
-    const requirementLabel = typeof req.body.requirementLabel === "string" ? req.body.requirementLabel.slice(0, 200) : "";
-    item.documents.push({
-      fileKey,
-      fileUrl,
-      fileName: req.file.originalname,
-      uploadedBy: req.user.email,
-      type: "client_upload",
-      requirementLabel,
-      reviewStatus: "pending",
-    });
-    // Nobody uploads paperwork for a filing they don't want done.
-    if (!item.selectedByClient) {
-      item.selectedByClient = true;
-      item.selectedAt = new Date();
-    }
-    applyListPrice(item);
-    if (item.clientStatus === "Not Started" || item.clientStatus === "Awaiting Documents") {
-      item.clientStatus = "Under Review";
-    }
-    await calendar.save();
-    res.status(201).json({ calendar: await clientView(calendar) });
-
-    logActivity({
-      action: "document_uploaded",
-      actor: req.user,
-      clientOrgId: calendar.clientOrgId,
-      calendarId: calendar._id,
-      itemIndex: idx,
-      summary: `Uploaded "${req.file.originalname}" for ${item.compliance_name}.`,
-    });
-    notifyStaff({
-      clientOrgId: calendar.clientOrgId,
-      calendarId: calendar._id,
-      itemIndex: idx,
-      type: "document_uploaded",
-      title: `New document for ${item.compliance_name}`,
-      body:
-        `${req.user.name || req.user.email} uploaded "${req.file.originalname}"` +
-        (requirementLabel ? ` (${requirementLabel})` : "") +
-        `. It's waiting for someone to verify it.` +
-        (item.feeAmountCents ? "" : " This filing has no fixed price yet; send the client a price once everything is in."),
-      link: staffLink(calendar._id),
-      actorName: req.user.name || req.user.email,
-    });
-  } catch (err) {
-    console.error("Client upload error:", err);
-    res.status(500).json({ error: "Could not save the uploaded file." });
-  }
-});
-
-// GET /api/portal/calendars/:id/items/:index/documents/:docIndex/download
-router.get("/calendars/:id/items/:index/documents/:docIndex/download", async (req, res) => {
-  const calendar = await findOwnApprovedCalendar(req, req.params.id);
-  if (!calendar) return res.status(404).json({ error: "Not found." });
-  const idx = parseItemIndex(calendar, req.params.index);
-  const docIdx = parseInt(req.params.docIndex, 10);
-  const doc = idx !== null ? calendar.items[idx].documents[docIdx] : null;
-  if (!doc) return res.status(404).json({ error: "Document not found." });
-
-  await sendStoredFile(req, res, doc, { audience: "client", backHref: `/portal.html?calendar=${calendar._id}` });
-});
-
-// ---------------------------------------------------------------------
-// Regenerate
-// ---------------------------------------------------------------------
-
-// Research calls cost real money (Claude + web search), so a client can
-// regenerate a few times a day, not in a loop. Per org, in memory — the
-// same trade-off as the staff limiter in calendar.routes.js.
-const REGEN_LIMIT_PER_DAY = 3;
-const regenHits = new Map();
-function regenRateLimited(orgId) {
+// When Razorpay refuses to create an order, the team hears about it once
+// per reason per hour (bell + email) instead of finding out from a client.
+const lastAlert = new Map();
+function alertTeamOnce(key, fn) {
   const now = Date.now();
-  const arr = (regenHits.get(orgId) || []).filter((t) => now - t < 24 * 60 * 60 * 1000);
-  if (arr.length >= REGEN_LIMIT_PER_DAY) return true;
-  arr.push(now);
-  regenHits.set(orgId, arr);
-  return false;
+  if (now - (lastAlert.get(key) || 0) < 60 * 60 * 1000) return;
+  lastAlert.set(key, now);
+  fn();
 }
 
-const EDITABLE_PROFILE_FIELDS = [
-  "companyName", "entityType", "taxStatus", "incorpDate", "fyStart", "fyEnd",
-  "hasForeignParent", "odiDone", "odiInvestorType", "employeeStates", "quarterlyGrossReceipts",
-];
-
-function nameKey(name) {
-  return String(name || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+function safeEqualHex(a, b) {
+  if (typeof a !== "string" || typeof b !== "string" || a.length !== b.length) return false;
+  try {
+    return crypto.timingSafeEqual(Buffer.from(a, "hex"), Buffer.from(b, "hex"));
+  } catch {
+    return false;
+  }
 }
 
-// Carry the client's work over from the calendar being replaced: for any
-// filing that still exists in the new calendar (same name), keep what they
-// selected, what they uploaded, and anything already paid or filed. The
-// old calendar itself is left untouched in history.
-function carryOverProgress(oldCalendar, newItems) {
-  const byName = new Map();
-  // Current periods only (history items of the same name are older).
-  oldCalendar.items.filter((it) => !it.isHistory).forEach((it) => byName.set(nameKey(it.compliance_name), it));
-  let carried = 0;
-  const items = newItems.map((it) => {
-    const prev = byName.get(nameKey(it.compliance_name));
-    if (!prev) return it;
-    carried++;
-    const p = prev.toObject ? prev.toObject() : prev;
-    return {
-      ...it,
-      selectedByClient: p.selectedByClient,
-      selectedAt: p.selectedAt,
-      clientStatus: p.clientStatus,
-      documents: p.documents || [],
-      feeAmountCents: p.feeAmountCents,
-      quoteNote: p.quoteNote,
-      quotedBy: p.quotedBy,
-      quotedAt: p.quotedAt,
-      paymentStatus: p.paymentStatus,
-      paidAt: p.paidAt,
-      razorpayPaymentId: p.paymentStatus === "Paid" ? p.razorpayPaymentId : null,
-      // An unpaid Razorpay order stays attached to the OLD item so the
-      // webhook can still find it; the client gets a fresh order here.
-      razorpayOrderId: null,
-      paymentEvents: p.paymentEvents || [],
-      // A date staff typed in is kept; automatic dates are recomputed for
-      // the new calendar's details.
-      ...(p.dueDateSource === "staff" ? { dueDateActual: p.dueDateActual, dueDateSource: "staff" } : {}),
-      remindersSent: p.remindersSent || [],
-    };
+function hmacHex(secret, data) {
+  return crypto.createHmac("sha256", secret).update(data).digest("hex");
+}
+
+// Every order id this item has ever had, with the amount it was created for.
+function ordersForItem(item) {
+  const orders = new Map();
+  (item.paymentEvents || []).forEach((e) => {
+    if ((e.event === "order_created" || e.event === "order_reused") && e.razorpayOrderId) {
+      orders.set(e.razorpayOrderId, { amountCents: e.amountCents, currency: e.currency });
+    }
   });
-  return { items, carried };
+  if (item.razorpayOrderId && !orders.has(item.razorpayOrderId)) {
+    let fallback = { amountCents: item.feeAmountCents, currency: CURRENCY };
+    try { const c = chargeFor(item.feeAmountCents); fallback = { amountCents: c.amount, currency: c.currency }; } catch {}
+    orders.set(item.razorpayOrderId, fallback);
+  }
+  return orders;
 }
 
-// POST /api/portal/calendars/regenerate  { calendarId, profile: { ...changes } }
-router.post("/calendars/regenerate", requireCompleteContact, async (req, res) => {
-  const base = await findOwnApprovedCalendar(req, req.body?.calendarId);
-  if (!base) return res.status(404).json({ error: "Calendar not found." });
-  if (base.supersededAt) return res.status(400).json({ error: "Regenerate from your current calendar." });
-  if (regenRateLimited(String(req.user.clientOrgId))) {
-    return res.status(429).json({ error: `You can regenerate up to ${REGEN_LIMIT_PER_DAY} times a day. Try again tomorrow, or message us.` });
+function alreadyRecorded(item, eventName, paymentId) {
+  return (item.paymentEvents || []).some((e) => e.event === eventName && e.razorpayPaymentId === paymentId);
+}
+
+/**
+ * Record a confirmed payment on an item. Returns "paid" | "duplicate" | "mismatch".
+ * Does NOT save — caller saves the calendar.
+ */
+function applyCapturedPayment(item, { orderId, paymentId, amountCents, currency, source }) {
+  if (item.paymentStatus === "Paid" && item.razorpayPaymentId === paymentId) return "duplicate";
+
+  const expected = ordersForItem(item).get(orderId);
+  const expectedAmount = expected?.amountCents ?? item.feeAmountCents;
+  const expectedCurrency = (expected?.currency || CURRENCY).toUpperCase();
+  const amountOk =
+    typeof amountCents !== "number" || // amount unknown (Razorpay API unreachable) — rely on signature
+    (amountCents === expectedAmount && (!currency || currency.toUpperCase() === expectedCurrency));
+
+  if (!amountOk) {
+    if (!alreadyRecorded(item, "amount_mismatch", paymentId)) {
+      item.paymentEvents.push({ event: "amount_mismatch", razorpayOrderId: orderId, razorpayPaymentId: paymentId, amountCents, currency });
+    }
+    return "mismatch";
   }
 
-  const baseProfile = base.profile.toObject ? base.profile.toObject() : { ...base.profile };
-  const changes = req.body?.profile || {};
-  const profile = { ...baseProfile };
-  EDITABLE_PROFILE_FIELDS.forEach((f) => {
-    if (changes[f] !== undefined) profile[f] = changes[f];
-  });
-  // Country / state define a different legal entity — that's a new
-  // calendar from the public tool, not a regeneration of this one.
-
-  try {
-    const { items, sourceMode } = await generateCompanyCalendar(profile);
-    if (!items.length) {
-      return res.status(502).json({ error: "The research came back empty. Try again in a few minutes." });
+  if (item.paymentStatus === "Paid" && item.razorpayPaymentId && item.razorpayPaymentId !== paymentId) {
+    // A SECOND successful payment for the same item (e.g. two tabs). Money
+    // was taken twice — record it so staff can refund, don't overwrite.
+    if (!alreadyRecorded(item, "duplicate_payment", paymentId)) {
+      item.paymentEvents.push({ event: "duplicate_payment", razorpayOrderId: orderId, razorpayPaymentId: paymentId, amountCents, currency });
     }
-    const { items: mergedItems, carried } = carryOverProgress(base, items);
+    return "mismatch";
+  }
 
-    // Auto-approved, the same way a calendar claimed through "Start
-    // filing" is (routes/auth.routes.js) — the client keeps working
-    // without a gap. Staff are notified and can still edit or reject it.
-    const calendar = await Calendar.create({
-      createdBy: req.user.email,
-      source: "client",
-      clientOrgId: req.user.clientOrgId,
-      profile,
-      items: mergedItems,
-      status: "approved",
-      reviewedBy: "auto",
-      reviewedAt: new Date(),
-      sourceMode,
-      supersedes: base._id,
-    });
-    base.supersededAt = new Date();
-    await base.save();
+  item.paymentStatus = "Paid";
+  item.razorpayPaymentId = paymentId;
+  item.razorpayOrderId = orderId;
+  item.paidAt = item.paidAt || new Date();
+  if (!alreadyRecorded(item, source, paymentId)) {
+    item.paymentEvents.push({ event: source, razorpayOrderId: orderId, razorpayPaymentId: paymentId, amountCents, currency });
+  }
+  return "paid";
+}
 
-    res.status(201).json({ calendar: await clientView(calendar), carried });
+// If the client regenerated their calendar after creating an order, the
+// order lives on the OLD calendar. Mirror the payment onto the same
+// filing in the calendar(s) that replaced it, so the portal shows Paid.
+async function propagateToNewerCalendars(calendar, item) {
+  let current = calendar;
+  for (let hops = 0; hops < 10; hops++) {
+    const newer = await Calendar.findOne({ supersedes: current._id });
+    if (!newer) return;
+    const match = newer.items.find(
+      (it) => it.compliance_name.toLowerCase().trim() === item.compliance_name.toLowerCase().trim()
+    );
+    if (match && match.paymentStatus !== "Paid") {
+      match.paymentStatus = "Paid";
+      match.razorpayPaymentId = item.razorpayPaymentId;
+      match.paidAt = item.paidAt;
+      match.feeAmountCents = match.feeAmountCents || item.feeAmountCents;
+      match.paymentEvents.push({ event: "paid_on_previous_calendar", razorpayOrderId: item.razorpayOrderId, razorpayPaymentId: item.razorpayPaymentId });
+      await newer.save();
+    }
+    current = newer;
+  }
+}
 
-    const who = req.user.name || req.user.email;
+async function announcePayment(calendar, item, outcome) {
+  const org = await ClientOrg.findById(calendar.clientOrgId).select("name").lean().catch(() => null);
+  const company = org?.name || calendar.profile?.companyName || "A client";
+  if (outcome === "paid") {
+    const amount = item.feeAmountCents ? formatUSD(item.feeAmountCents) : "";
     logActivity({
-      action: "calendar_regenerated",
-      actor: req.user,
+      action: "payment_captured",
+      actor: null,
       clientOrgId: calendar.clientOrgId,
       calendarId: calendar._id,
-      summary: `Regenerated the compliance calendar for ${profile.companyName || "their company"} (${items.length} items, ${carried} carried over).`,
+      summary: `Payment captured for ${item.compliance_name}${amount ? ` (${amount})` : ""}.`,
+      meta: { razorpayOrderId: item.razorpayOrderId, razorpayPaymentId: item.razorpayPaymentId },
     });
     notifyStaff({
       clientOrgId: calendar.clientOrgId,
       calendarId: calendar._id,
-      type: "calendar_regenerated",
-      title: `${req.clientOrg.name} regenerated their calendar`,
-      body: `${who} regenerated the calendar: ${items.length} items, ${carried} carried over from the previous version. Please give it a quick check.`,
-      link: staffLink(calendar._id),
-      actorName: who,
+      type: "payment_received",
+      title: `${company} paid ${amount} for ${item.compliance_name}`,
+      body: `Razorpay payment ${item.razorpayPaymentId}. The filing can go ahead.`,
+      link: `/calendar.html?id=${calendar._id}`,
     });
     notifyClient({
       clientOrgId: calendar.clientOrgId,
       calendarId: calendar._id,
-      type: "calendar_regenerated",
-      title: "Your compliance calendar was regenerated",
-      body: `Your new calendar has ${items.length} items. We kept your selections, documents and payments for the ${carried} filings that are still on it. Your previous calendar is still available under "Calendar history".`,
+      type: "payment_received",
+      title: `Payment received: ${amount} for ${item.compliance_name}`,
+      body: `Thank you — we've received your payment of ${amount} for ${item.compliance_name} (payment reference ${item.razorpayPaymentId}). We'll start on the filing and keep you posted.`,
       link: `/portal.html?calendar=${calendar._id}`,
-      actorName: who,
     });
+  } else if (outcome === "mismatch") {
+    logActivity({
+      action: "payment_amount_mismatch",
+      actor: null,
+      clientOrgId: calendar.clientOrgId,
+      calendarId: calendar._id,
+      summary: `A Razorpay payment for ${item.compliance_name} didn't match the invoiced amount, or was a second payment for an already-paid item. Check Razorpay and refund if needed.`,
+      meta: { events: item.paymentEvents.slice(-3) },
+    });
+    notifyStaff({
+      clientOrgId: calendar.clientOrgId,
+      calendarId: calendar._id,
+      type: "payment_failed",
+      title: `Check payment for ${item.compliance_name} (${company})`,
+      body: "Razorpay reported a payment that doesn't match the invoice, or a second payment for an item that was already paid. It has NOT been marked paid automatically. Check the Razorpay dashboard and refund if needed.",
+      link: `/calendar.html?id=${calendar._id}`,
+    });
+  }
+}
+
+// ---------------------------------------------------------------------
+// Client routes
+// ---------------------------------------------------------------------
+
+const router = express.Router();
+router.use(requireAuth, requireClientRole);
+
+function findOwnApprovedCalendar(req, calendarId) {
+  return Calendar.findOne({ _id: calendarId, clientOrgId: req.user.clientOrgId, status: "approved" }).catch(() => null);
+}
+
+function getItemOr404(res, calendar, indexParam) {
+  const idx = parseInt(indexParam, 10);
+  if (isNaN(idx) || idx < 0 || idx >= calendar.items.length) {
+    res.status(400).json({ error: "Invalid item index." });
+    return null;
+  }
+  return { idx, item: calendar.items[idx] };
+}
+
+// POST /api/portal/payments/calendars/:id/items/:index/create-order
+// No amount in the request body on purpose — see principle 1.
+router.post("/calendars/:id/items/:index/create-order", async (req, res) => {
+  try {
+    const calendar = await findOwnApprovedCalendar(req, req.params.id);
+    if (!calendar) return res.status(404).json({ error: "Not found." });
+    if (calendar.supersededAt) return res.status(400).json({ error: "This is an older calendar. Pay from your current one." });
+    const found = getItemOr404(res, calendar, req.params.index);
+    if (!found) return;
+    const { idx, item } = found;
+
+    if (!item.feeAmountCents || item.feeAmountCents <= 0) {
+      return res.status(400).json({ error: "We haven't sent a price for this service yet." });
+    }
+    if (item.paymentStatus === "Paid") return res.status(400).json({ error: "This service is already paid." });
+    if (item.paymentStatus !== "Invoiced" && item.paymentStatus !== "Overdue") {
+      return res.status(400).json({ error: "This service hasn't been invoiced yet." });
+    }
+    if (!hasAllRequiredDocuments(item, calendar, await missingKeysFor(calendar))) {
+      return res.status(400).json({ error: "Please upload all required documents for this service before paying." });
+    }
+    const org = await ClientOrg.findById(req.user.clientOrgId).lean();
+    if (!org?.primaryContactEmail || !org?.primaryContactPhone) {
+      return res.status(409).json({ error: "Please add your email and phone number before paying.", code: "CONTACT_INCOMPLETE" });
+    }
+
+    const prefill = { name: org.primaryContactName || req.user.name || "", email: org.primaryContactEmail, contact: org.primaryContactPhone };
+    const charge = chargeFor(item.feeAmountCents);
+    const payload = (orderId, amount, currency) => ({
+      orderId,
+      amount,
+      currency,
+      displayAmount: formatCharge(amount, currency),
+      // e.g. "$125 = ₹10,438 at ₹83.5 per $" so the client isn't surprised
+      conversionNote: charge.rate ? `${formatCharge(item.feeAmountCents, "USD")} is charged as ${formatCharge(amount, currency)} (₹${charge.rate} per US$).` : "",
+      keyId: process.env.RAZORPAY_KEY_ID, // public key — safe to send to the browser
+      description: item.compliance_name,
+      prefill,
+    });
+
+    // Reuse the open order if it's for the same amount, instead of
+    // creating a new order on every click (principle 4 still covers the
+    // case where a new one IS created).
+    if (item.razorpayOrderId) {
+      const known = ordersForItem(item).get(item.razorpayOrderId);
+      if (known && known.amountCents === charge.amount && (known.currency || CURRENCY) === charge.currency) {
+        try {
+          const existing = await razorpay.orders.fetch(item.razorpayOrderId);
+          if (existing.status === "paid") {
+            // The payment went through but neither /verify nor the webhook
+            // recorded it (closed tab + webhook not configured). Reconcile now.
+            const payments = await razorpay.orders.fetchPayments(item.razorpayOrderId);
+            const captured = (payments.items || []).find((p) => p.status === "captured");
+            if (captured) {
+              const outcome = applyCapturedPayment(item, {
+                orderId: item.razorpayOrderId, paymentId: captured.id,
+                amountCents: captured.amount, currency: captured.currency, source: "reconciled",
+              });
+              await calendar.save();
+              announcePayment(calendar, item, outcome).catch(() => {});
+              return res.status(409).json({ error: "This service is already paid.", calendar: await toView(calendar) });
+            }
+          } else if (existing.amount === charge.amount && existing.currency === charge.currency) {
+            item.paymentEvents.push({ event: "order_reused", razorpayOrderId: existing.id, amountCents: existing.amount, currency: existing.currency });
+            await calendar.save();
+            return res.json(payload(existing.id, existing.amount, existing.currency));
+          }
+        } catch (err) {
+          console.warn("[payments] could not re-check existing order, creating a new one:", err.message);
+        }
+      }
+    }
+
+    const order = await razorpay.orders.create({
+      amount: charge.amount,
+      currency: charge.currency,
+      receipt: `cal_${calendar._id}_i${idx}_${Date.now().toString(36)}`.slice(0, 40), // Razorpay caps receipt at 40 chars
+      notes: {
+        calendarId: String(calendar._id),
+        itemIndex: String(idx),
+        complianceName: item.compliance_name.slice(0, 250),
+        clientOrgId: String(calendar.clientOrgId),
+        priceUsdCents: String(item.feeAmountCents),
+        ...(charge.rate ? { usdToInrRate: String(charge.rate) } : {}),
+      },
+    });
+
+    item.razorpayOrderId = order.id;
+    item.paymentEvents.push({ event: "order_created", razorpayOrderId: order.id, amountCents: order.amount, currency: order.currency });
+    await calendar.save();
+
+    res.json(payload(order.id, order.amount, order.currency));
   } catch (err) {
-    console.error("Client regenerate error:", err);
-    res.status(502).json({ error: "We couldn't finish the research just now. Please try again in a few minutes." });
+    const why = explainRazorpayError(err);
+    // One readable line in the logs, with Razorpay's own words.
+    console.error(`[payments] create-order FAILED (${why.status || "-"} ${why.code}): ${why.description} | ${why.reason} | Fix: ${why.fix}`);
+    alertTeamOnce(why.code + why.description, () => {
+      notifyStaff({
+        type: "payment_failed",
+        title: "Online payments are failing",
+        body: `A client tried to pay and Razorpay refused. ${why.reason}\n\nHow to fix: ${why.fix}\n\nRazorpay's message: ${why.description}`,
+        link: "/admin.html",
+      });
+    });
+    const temporary = why.reason.startsWith("The server couldn't reach Razorpay");
+    res.status(temporary ? 503 : 500).json({
+      error: temporary
+        ? "The payment service didn't respond. Please try again in a minute."
+        : "Online payment isn't available for this right now. Our team has been notified and will contact you shortly; you haven't been charged.",
+      code: "PAYMENT_UNAVAILABLE",
+    });
   }
 });
 
-// GET /api/portal/contact — who to reach for help.
-router.get("/contact", async (req, res) => {
-  const org = await ClientOrg.findById(req.user.clientOrgId).populate("assignedStaff", "name email");
-  res.json({
-    yourContact: org?.assignedStaff ? { name: org.assignedStaff.name, email: org.assignedStaff.email } : null,
-    company: {
-      name: "ComplyGlobally",
-      email: process.env.SUPPORT_EMAIL || "support@complyglobally.com",
-      phone: process.env.SUPPORT_PHONE || "",
-    },
-  });
+// POST /api/portal/payments/calendars/:id/items/:index/verify
+// Called by the browser right after Checkout succeeds. Fast path for the
+// UI; the webhook confirms independently.
+router.post("/calendars/:id/items/:index/verify", async (req, res) => {
+  try {
+    const calendar = await findOwnApprovedCalendar(req, req.params.id);
+    if (!calendar) return res.status(404).json({ error: "Not found." });
+    const found = getItemOr404(res, calendar, req.params.index);
+    if (!found) return;
+    const { item } = found;
+
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body || {};
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.status(400).json({ error: "Missing Razorpay payment fields." });
+    }
+    if (!ordersForItem(item).has(razorpay_order_id)) {
+      return res.status(400).json({ error: "This payment doesn't belong to this service." });
+    }
+    if (!process.env.RAZORPAY_KEY_SECRET) return res.status(500).json({ error: "Payments are not configured." });
+
+    const expected = hmacHex(process.env.RAZORPAY_KEY_SECRET, `${razorpay_order_id}|${razorpay_payment_id}`);
+    if (!safeEqualHex(expected, razorpay_signature)) {
+      return res.status(400).json({ error: "Signature verification failed." });
+    }
+
+    // Ask Razorpay what actually happened (principles 3 and 6). If the API
+    // is unreachable, the valid signature is still proof of payment and
+    // the webhook will fill in the rest.
+    let amountCents, currency, source = "verify_ok";
+    try {
+      let payment = await razorpay.payments.fetch(razorpay_payment_id);
+      if (payment.order_id && payment.order_id !== razorpay_order_id) {
+        return res.status(400).json({ error: "Payment and order don't match." });
+      }
+      if (payment.status === "authorized") {
+        payment = await razorpay.payments.capture(razorpay_payment_id, payment.amount, payment.currency);
+        source = "verify_captured";
+      }
+      if (payment.status !== "captured") {
+        item.paymentEvents.push({ event: "verify_not_captured", razorpayOrderId: razorpay_order_id, razorpayPaymentId: razorpay_payment_id });
+        await calendar.save();
+        return res.status(202).json({ pending: true, message: "Your payment is being processed. We'll confirm it here and by email shortly.", calendar: await toView(calendar) });
+      }
+      amountCents = payment.amount;
+      currency = payment.currency;
+    } catch (err) {
+      console.warn("[payments] could not fetch payment from Razorpay (relying on signature):", err.message);
+    }
+
+    const outcome = applyCapturedPayment(item, {
+      orderId: razorpay_order_id, paymentId: razorpay_payment_id, amountCents, currency, source,
+    });
+    await calendar.save();
+    if (outcome !== "duplicate") {
+      announcePayment(calendar, item, outcome).catch(() => {});
+      if (outcome === "paid") propagateToNewerCalendars(calendar, item).catch(() => {});
+    }
+    if (outcome === "mismatch") {
+      return res.status(409).json({ error: "We received your payment but it needs a quick check by our team. We'll be in touch — no need to pay again.", calendar: await toView(calendar) });
+    }
+    res.json({ ok: true, calendar: await toView(calendar) });
+  } catch (err) {
+    console.error("[payments] verify error:", err);
+    res.status(500).json({ error: "We couldn't confirm the payment yet. If you were charged, don't pay again — we'll confirm it shortly." });
+  }
 });
 
 module.exports = router;
-module.exports.carryOverProgress = carryOverProgress;
+
+// ---------------------------------------------------------------------
+// Webhook — no session, raw body. See server.js.
+// Configure in Razorpay Dashboard → Webhooks: URL <APP_URL>/api/webhooks/razorpay,
+// events payment.captured, payment.failed, order.paid.
+// ---------------------------------------------------------------------
+async function findCalendarAndItemForOrder(orderId) {
+  const calendar = await Calendar.findOne({
+    $or: [{ "items.razorpayOrderId": orderId }, { "items.paymentEvents.razorpayOrderId": orderId }],
+  });
+  if (!calendar) return {};
+  const item =
+    calendar.items.find((it) => it.razorpayOrderId === orderId) ||
+    calendar.items.find((it) => (it.paymentEvents || []).some((e) => e.razorpayOrderId === orderId));
+  return { calendar, item };
+}
+
+async function razorpayWebhookHandler(req, res) {
+  try {
+    if (!process.env.RAZORPAY_WEBHOOK_SECRET) {
+      console.error("[razorpay webhook] RAZORPAY_WEBHOOK_SECRET not set — rejecting.");
+      return res.status(500).json({ error: "Webhook not configured." });
+    }
+    const raw = Buffer.isBuffer(req.body) ? req.body : Buffer.from(typeof req.body === "string" ? req.body : "");
+    const expected = hmacHex(process.env.RAZORPAY_WEBHOOK_SECRET, raw);
+    if (!safeEqualHex(expected, req.headers["x-razorpay-signature"])) {
+      console.warn("[razorpay webhook] signature mismatch — possible spoofed request.");
+      return res.status(400).json({ error: "Invalid signature." });
+    }
+
+    let event;
+    try {
+      event = JSON.parse(raw.toString("utf8"));
+    } catch {
+      return res.status(400).json({ error: "Invalid JSON." });
+    }
+
+    const payment = event?.payload?.payment?.entity;
+    const handled = ["payment.captured", "payment.failed", "order.paid"];
+    if (!handled.includes(event.event) || !payment?.order_id) {
+      return res.status(200).json({ received: true });
+    }
+
+    const orderId = payment.order_id;
+    const { calendar, item } = await findCalendarAndItemForOrder(orderId);
+    if (!calendar || !item) {
+      console.warn(`[razorpay webhook] no calendar item found for order ${orderId}`);
+      return res.status(200).json({ received: true }); // ack — Razorpay retries on non-2xx
+    }
+
+    if (event.event === "payment.failed") {
+      if (!alreadyRecorded(item, "webhook_failed", payment.id)) {
+        item.paymentEvents.push({ event: "webhook_failed", razorpayOrderId: orderId, razorpayPaymentId: payment.id, amountCents: payment.amount, currency: payment.currency });
+        await calendar.save();
+        logActivity({
+          action: "payment_failed",
+          actor: null,
+          clientOrgId: calendar.clientOrgId,
+          calendarId: calendar._id,
+          summary: `Payment attempt failed for ${item.compliance_name}${payment.error_description ? `: ${payment.error_description}` : ""}.`,
+          meta: { razorpayOrderId: orderId, razorpayPaymentId: payment.id },
+        });
+      }
+      return res.status(200).json({ received: true });
+    }
+
+    // payment.captured / order.paid
+    if (payment.status && payment.status !== "captured") return res.status(200).json({ received: true });
+    const outcome = applyCapturedPayment(item, {
+      orderId, paymentId: payment.id, amountCents: payment.amount, currency: payment.currency, source: "webhook_captured",
+    });
+    if (outcome !== "duplicate") {
+      await calendar.save();
+      await announcePayment(calendar, item, outcome).catch(() => {});
+      if (outcome === "paid") await propagateToNewerCalendars(calendar, item).catch(() => {});
+    }
+    res.status(200).json({ received: true });
+  } catch (err) {
+    console.error("[razorpay webhook] error:", err);
+    res.status(500).json({ error: "Webhook processing failed." });
+  }
+}
+module.exports.razorpayWebhookHandler = razorpayWebhookHandler;
+module.exports._internals = { applyCapturedPayment, ordersForItem, safeEqualHex, hmacHex };
