@@ -3,291 +3,978 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Client Portal — ComplyGlobally</title>
+<title>Calendar — Compliance Calendar Generator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/shared.css">
 <style>
-  .status-pill { display:inline-block; padding:2px 10px; border-radius:999px; font-size:12px; font-weight:500; white-space:nowrap; }
-  .status-Not-Started { background:var(--grey-bg); color:var(--grey-dot); }
-  .status-Awaiting-Documents { background:var(--seal-gold-bg); color:var(--seal-gold); }
-  .status-Under-Review { background:var(--teal-bg); color:var(--teal); }
-  .status-Filed { background:var(--teal-bg); color:var(--teal); }
-  .status-Overdue { background:var(--stamp-red-bg); color:var(--stamp-red); }
-  .item-row { border-bottom:1px solid var(--rule); padding:16px 0; }
-  .item-row:last-child { border-bottom:none; }
-  .item-header { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; }
-  .item-toggle { background:none; border:none; padding:0; text-align:left; cursor:pointer; font:inherit; color:inherit; flex:1; min-width:220px; }
-  .item-toggle:focus-visible { outline:2px solid var(--brand); outline-offset:3px; border-radius:4px; }
-  .item-name { font-weight:600; font-size:15px; }
-  .item-meta { color:var(--ink-soft); font-size:13px; margin-top:2px; }
-  .item-side { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
-  .select-btn { font-size:12.5px; font-weight:600; padding:6px 12px; border-radius:999px; cursor:pointer; border:1px solid var(--brand); background:var(--card); color:var(--brand-dark); }
-  .select-btn.on { background:var(--brand); color:#fff; }
-  .select-btn:disabled { opacity:.6; cursor:default; }
-  .pay-btn { display:inline-block; padding:9px 18px; border-radius:6px; background:var(--teal); color:#fff; font-size:13.5px; font-weight:600; border:none; cursor:pointer; }
-  .pay-btn:disabled { opacity:0.5; cursor:not-allowed; }
-  .pay-note { font-size:12.5px; color:var(--ink-soft); margin-top:6px; }
-  .checklist { margin-top:12px; border:1px solid var(--rule); border-radius:8px; padding:10px 12px; }
-  .checklist-title { font-size:12px; font-weight:600; color:var(--ink-soft); margin-bottom:6px; }
-  .check-row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:5px 0; font-size:13px; }
-  .check-dot { display:inline-flex; width:18px; height:18px; border-radius:50%; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; background:var(--rule); color:var(--ink-soft); }
-  .check-dot.accepted { background:var(--teal); color:#fff; }
-  .check-dot.pending { background:var(--teal-bg); color:var(--teal); }
-  .check-dot.rejected { background:var(--stamp-red-bg); color:var(--stamp-red); }
-  .check-sub { font-size:11.5px; color:var(--ink-soft); margin-left:26px; }
-  .price-box { margin-top:12px; padding:12px 14px; border-radius:8px; background:var(--paper); display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; }
-  .price-box .price-line { font-size:14px; }
-  .price-box .price-line b { font-size:16px; }
-  .group-title { font-family:var(--serif); font-weight:700; font-size:17px; margin:28px 0 2px; }
-  .group-sub { font-size:13px; color:var(--ink-soft); margin-bottom:6px; }
-  .banner { margin-top:16px; padding:14px 16px; border-radius:var(--radius); font-size:13.5px; }
-  .banner.warn { background:var(--seal-gold-bg); color:#6b4a14; border:1px solid #efd9b3; }
-  .banner.info { background:var(--teal-bg); color:var(--brand-dark); border:1px solid #c7e9e5; }
-  .toolbar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:4px; }
-  .toolbar select { width:auto; font-size:13.5px; padding:7px 10px; border:1px solid var(--rule); border-radius:6px; background:var(--card); max-width:100%; }
-  .stat-row { display:flex; flex-wrap:wrap; gap:22px; margin-top:14px; font-size:13px; color:var(--ink-soft); }
-  .stat-row b { display:block; font-size:20px; color:var(--ink); font-family:var(--serif); }
-  dialog.sheet { border:none; border-radius:var(--radius-lg); padding:0; width:min(560px, calc(100vw - 32px)); box-shadow:var(--shadow); }
-  dialog.sheet::backdrop { background:rgba(27,42,46,.35); }
-  .sheet-body { padding:24px 26px; }
-  .sheet-body h2 { font-family:var(--serif); margin:0 0 6px; font-size:20px; }
-  .sheet-body input, .sheet-body select { width:100%; }
-  .req { color:var(--stamp-red); }
-  .due-late { color:var(--stamp-red); font-weight:700; }
-  .due-soon { color:var(--seal-gold); font-weight:700; }
-  .stat-late b { color:var(--stamp-red); }
-  .history-block { margin-top:28px; }
-  .history-block summary { cursor:pointer; font-family:var(--serif); font-weight:700; font-size:17px; }
-  .proof-card { margin-top:12px; padding:12px 14px; border-radius:8px; background:var(--teal-bg); border:1px solid #c7e9e5; }
-  .proof-title { font-weight:700; font-size:14px; color:var(--brand-dark); margin-bottom:6px; }
-  .proof-title span { font-weight:500; color:var(--ink-soft); font-size:13px; }
-  .proof-item { padding:6px 0; border-top:1px solid #d6efec; }
-  .proof-item:first-of-type { border-top:none; }
-  .price-list { padding:10px 16px; }
-  .price-row { display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid var(--rule-soft); font-size:13px; }
-  .price-row:last-of-type { border-bottom:none; }
-  .price-name { color:var(--ink); overflow-wrap:anywhere; }
-  .price-val { font-weight:600; white-space:nowrap; text-align:right; }
-  .price-sel { font-size:10.5px; font-weight:700; color:var(--brand-dark); background:var(--teal-bg); padding:1px 6px; border-radius:999px; margin-left:4px; }
-  @media (max-width:640px) { .item-side { width:100%; } }
+  .sel-badge { font-size: 11.5px; padding: 2px 9px; border-radius: 999px; background: var(--grey-bg); color: var(--ink-soft); white-space: nowrap; }
+  .sel-badge.on { background: var(--teal-bg); color: var(--brand-dark); font-weight: 600; }
+  .ws-stats { display: flex; flex-wrap: wrap; gap: 8px 26px; font-size: 12.5px; color: var(--ink-soft); margin: 4px 0 16px; }
+  .ws-stats b { display: block; font-family: var(--serif); font-size: 21px; color: var(--ink); }
+  .ws-stats .attn b { color: var(--seal-gold); }
+  .ws-stats .late b { color: var(--stamp-red); }
+  .ws-tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--rule); margin-bottom: 4px; flex-wrap: wrap; }
+  .ws-tab { background: none; border: none; border-bottom: 2px solid transparent; padding: 8px 12px; font: 500 13.5px var(--sans); color: var(--ink-soft); cursor: pointer; margin-bottom: -1px; }
+  .ws-tab span { font-size: 11.5px; background: var(--grey-bg); border-radius: 999px; padding: 1px 7px; margin-left: 4px; }
+  .ws-tab.on { color: var(--brand-dark); border-bottom-color: var(--brand); }
+  .ws-tab:focus-visible, .ws-card-head:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .ws-card.muted { background: var(--paper); box-shadow: none; }
+  .ws-card-head { all: unset; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; width: 100%; cursor: pointer; box-sizing: border-box; }
+  .ws-label { font-size: 11.5px; font-weight: 600; color: var(--ink-soft); margin-bottom: 6px; }
+  .ws-checklist { margin-top: 14px; border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; }
+  .ws-check { display: grid; grid-template-columns: 12px 1fr auto auto; gap: 10px; align-items: center; font-size: 13px; padding: 4px 0; }
+  .ws-check a { font-size: 12px; }
+  .ws-check-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--rule); }
+  .ws-check.accepted .ws-check-dot { background: var(--brand); }
+  .ws-check.pending .ws-check-dot { background: var(--seal-gold); }
+  .ws-check.rejected .ws-check-dot { background: var(--stamp-red); }
+  .ws-check-state { font-size: 11.5px; color: var(--ink-soft); }
+  .ws-quote { margin-top: 14px; padding: 12px 14px; background: var(--paper); border-radius: 8px; }
+  .ws-quote.paid { background: var(--teal-bg); color: var(--brand-dark); font-size: 13.5px; }
+  .ws-quote-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .ws-quote-row .quoteAmount { width: 110px; }
+  .ws-quote-row .quoteNote { flex: 1; min-width: 180px; }
+  .ws-dollar { font-weight: 600; color: var(--ink-soft); }
+  .doc-row { padding: 10px 12px; border: 1px solid var(--rule); border-radius: 8px; margin-bottom: 8px; }
+  .doc-row.lost { border-color: #f1c4bf; background: var(--stamp-red-bg); }
+  .doc-row-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .doc-name { font-weight: 600; font-size: 13.5px; overflow-wrap: anywhere; }
+  .doc-meta { font-size: 11.5px; color: var(--ink-soft); margin-top: 2px; }
+  .doc-note { font-size: 12.5px; color: var(--stamp-red); margin-top: 4px; }
+  .doc-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+  .doc-actions .rejectNote { flex: 1 1 180px; min-width: 0; font-size: 12.5px; padding: 6px 8px; }
+  .doc-btn { font: 600 12.5px var(--sans); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--rule); background: var(--card); color: var(--brand-dark); text-decoration: none; cursor: pointer; }
+  .doc-btn:hover { border-color: var(--brand); }
+  .doc-btn.verify { border-color: var(--brand); background: var(--brand); color: #fff; }
+  .doc-btn.reject { color: var(--stamp-red); }
+  .doc-btn.reject:hover { border-color: var(--stamp-red); }
+  button.primary.small { padding: 6px 12px; font-size: 12.5px; }
+  /* Calendar table: never wider than the screen */
+  table.cal { table-layout: fixed; }
+  table.cal th:nth-child(1), table.cal td.due { width: 17%; }
+  table.cal th:nth-child(2), table.cal td.name { width: 30%; }
+  table.cal th:nth-child(3), table.cal td.applies { width: 16%; }
+  table.cal td { overflow-wrap: anywhere; }
+  table.cal td.due, table.cal td.applies { white-space: normal; }
+  @media (max-width: 760px) {
+    table.cal, table.cal tbody, table.cal tr, table.cal td { display: block; width: 100% !important; }
+    table.cal thead { display: none; }
+    table.cal tr { border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; }
+    table.cal td { border: 0; padding: 3px 0; }
+    table.cal td[data-label]::before { content: attr(data-label) ": "; font-weight: 600; color: var(--ink-soft); }
+    table.cal td[data-label]:empty { display: none !important; }
+    table.cal th:nth-child(3), table.cal td:nth-child(3) { display: block; }
+    table.cal td.edit-cell { text-align: left; }
+  }
+  .proof-box { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--rule); border-radius: 8px; }
+  .proof-box.done { border-color: #bfe3de; background: #f5fbfa; }
+  .proof-done { font-size: 13px; font-weight: 600; color: var(--brand-dark); margin-bottom: 8px; }
+  .proof-row { padding: 10px 0; border-bottom: 1px solid var(--rule-soft); }
+  .proof-form { margin-top: 8px; }
+  .proof-form summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--brand-dark); padding: 4px 0; }
+  .proof-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; margin-top: 10px; }
+  .proof-grid .span2 { grid-column: 1 / -1; }
+  .proof-grid .field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .proof-grid label { font-size: 12px; font-weight: 600; }
+  .proof-grid input[type=file] { font-size: 12.5px; max-width: 100%; }
+  .proof-check { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .proof-check input { width: auto; }
+  @media (max-width: 640px) { .proof-grid { grid-template-columns: 1fr; } }
+  .contact-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .contact-btn { font-size: 12.5px; font-weight: 600; text-decoration: none; padding: 6px 12px; border: 1px solid var(--rule); border-radius: 6px; color: var(--brand-dark); }
+  .contact-btn:hover { border-color: var(--brand); }
+  @media (max-width: 640px) { .ws-check { grid-template-columns: 12px 1fr; } .ws-check-state, .ws-check a { grid-column: 2; } }
 </style>
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
 <div class="topbar">
-  <div class="brand">ComplyGlobally <strong>Client Portal</strong></div>
+  <div class="brand"><a href="/app.html">Compliance Calendar <strong>Generator</strong></a></div>
+  <div class="nav-links" id="navLinks">
+    <a href="/app.html">Generate</a>
+    <a href="/review.html">Review Queue</a>
+  </div>
   <div class="nav-user" id="navUser"></div>
 </div>
 
 <div class="wrap">
-  <div class="page-grid">
-    <div class="main-col">
-      <div id="contactGate"></div>
-      <div class="card" style="margin-top:28px;">
-        <div class="card-head" style="padding-bottom:22px;">
-          <div class="card-eyebrow">Your compliance calendar</div>
-          <h1 id="calTitle">Loading…</h1>
-          <p class="sub" id="calSub" style="margin-bottom:8px;"></p>
-          <div class="toolbar" id="calToolbar"></div>
-          <div id="calStats"></div>
-        </div>
-      </div>
-      <div id="calBanner"></div>
-      <div id="itemsList" style="margin-top:8px;"><div class="empty-state">Loading…</div></div>
-    </div>
-    <div class="side-col">
-      <div id="detailsPanel"></div>
-      <div id="pricesPanel"></div>
-      <div id="contactPanel"></div>
-      <div id="chatPanel"></div>
-    </div>
-  </div>
+  <div id="slot"><div class="empty-state">Loading…</div></div>
 </div>
-
-<dialog class="sheet" id="regenDialog">
-  <form method="dialog" class="sheet-body" id="regenForm">
-    <h2>Update details and regenerate</h2>
-    <p class="section-sub" style="margin-bottom:16px;">We'll research your calendar again with these details. Your selected services, uploaded documents and payments carry over to every filing that's still on the new calendar, and the current version stays under "Calendar history".</p>
-    <div class="edit-grid">
-      <div class="field span2"><label for="rgCompany">Company name</label><input id="rgCompany" type="text"></div>
-      <div class="field"><label for="rgEntity">Entity type</label>
-        <select id="rgEntity"><option>Corporation</option><option>LLC</option><option>Partnership</option><option>Disregarded Entity</option></select></div>
-      <div class="field"><label for="rgTax">Tax status</label><input id="rgTax" type="text" placeholder="e.g. C-Corp"></div>
-      <div class="field"><label for="rgIncorp">Date of incorporation</label><input id="rgIncorp" type="date"></div>
-      <div class="field"><label for="rgFyEnd">Financial year end</label><input id="rgFyEnd" type="text" placeholder="e.g. December"></div>
-      <div class="field span2"><label for="rgEmp">Other states with employees</label><input id="rgEmp" type="text" placeholder="Comma-separated, e.g. California, New York"></div>
-      <div class="field span2" style="flex-direction:row;align-items:center;gap:8px;"><input id="rgForeign" type="checkbox" style="width:auto;"><label for="rgForeign" style="margin:0;">Has a foreign parent company</label></div>
-    </div>
-    <div class="submit-row">
-      <span class="hint" id="regenHint"></span>
-      <button type="button" class="ghost" id="regenCancel">Cancel</button>
-      <button type="submit" class="primary" id="regenSubmit">Regenerate calendar</button>
-    </div>
-  </form>
-</dialog>
 
 <script>
   function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
-  function statusClass(s) { return 'status-' + (s || '').replace(/\s+/g, '-'); }
-  function money(cents) { const d = cents / 100; return '$' + d.toLocaleString('en-US', { minimumFractionDigits: d % 1 ? 2 : 0, maximumFractionDigits: 2 }); }
-
-  let me = null;
-  let profile = null;
-  let calendars = [];
-  let calendar = null;
-  const expandedItems = new Set();
-
-  async function api(url, opts) {
-    const res = await fetch(url, opts);
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) { const e = new Error(data.error || 'Something went wrong.'); e.data = data; e.status = res.status; throw e; }
-    return data;
-  }
+  function fmtDateTime(s) { return s ? new Date(s).toLocaleString() : '—'; }
 
   async function loadUser() {
-    const res = await fetch('/api/auth/me');
-    if (!res.ok) { location.href = '/login.html?next=/portal.html'; return false; }
-    const { user } = await res.json();
-    if (user.role !== 'client') { location.href = '/dashboard.html'; return false; }
-    me = user;
-    document.getElementById('navUser').innerHTML = `<span>${escapeHtml(user.name || user.email)}</span><button id="logoutBtn">Log out</button>`;
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
-      await fetch('/api/auth/logout', { method: 'POST' });
-      location.href = '/login.html';
-    });
-    return true;
-  }
-
-  // ---------------- Contact details (email + phone required) ----------------
-  async function loadProfile() {
-    try { profile = (await api('/api/portal/profile')).profile; } catch { profile = null; }
-    renderContactGate();
-    renderDetailsPanel();
-  }
-  function contactComplete() { return profile && !profile.missing.length; }
-
-  function contactFormHtml(prefix) {
-    return `
-      <div class="edit-grid">
-        <div class="field"><label for="${prefix}Name">Your name</label><input id="${prefix}Name" type="text" autocomplete="name" value="${escapeHtml(profile.contactName)}"></div>
-        <div class="field"><label for="${prefix}Company">Company name</label><input id="${prefix}Company" type="text" autocomplete="organization" value="${escapeHtml(profile.companyName)}"></div>
-        <div class="field"><label for="${prefix}Email">Email <span class="req">*</span></label><input id="${prefix}Email" type="email" autocomplete="email" required value="${escapeHtml(profile.email || profile.loginEmail)}"></div>
-        <div class="field"><label for="${prefix}Phone">Phone, with country code <span class="req">*</span></label><input id="${prefix}Phone" type="tel" autocomplete="tel" required placeholder="+1 415 555 0100" value="${escapeHtml(profile.phone)}"></div>
-      </div>
-      <div class="submit-row" style="margin-top:14px;"><span class="hint" id="${prefix}Hint"></span><button class="primary" id="${prefix}Save">Save details</button></div>`;
-  }
-  function wireContactForm(prefix) {
-    document.getElementById(prefix + 'Save').addEventListener('click', async (e) => {
-      e.preventDefault();
-      const hint = document.getElementById(prefix + 'Hint');
-      hint.textContent = 'Saving…'; hint.classList.remove('err');
-      try {
-        profile = (await api('/api/portal/profile', {
-          method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contactName: document.getElementById(prefix + 'Name').value,
-            companyName: document.getElementById(prefix + 'Company').value,
-            email: document.getElementById(prefix + 'Email').value,
-            phone: document.getElementById(prefix + 'Phone').value,
-          }),
-        })).profile;
-        renderContactGate(); renderDetailsPanel(); if (calendar) renderItems();
-      } catch (err) { hint.textContent = err.message; hint.classList.add('err'); }
-    });
-  }
-  function renderContactGate() {
-    const el = document.getElementById('contactGate');
-    if (!profile || contactComplete()) { el.innerHTML = ''; return; }
-    el.innerHTML = `
-      <div class="card" style="border-color:var(--seal-gold);">
-        <div class="card-head" style="padding-bottom:24px;">
-          <div class="card-eyebrow" style="color:var(--seal-gold);">One more step</div>
-          <h1 style="font-size:21px;">Add your ${escapeHtml(profile.missing.join(' and '))} to get started</h1>
-          <p class="sub">We need an email and a phone number so our team can reach you about documents, prices and deadlines. You can pick services, upload documents and pay once these are saved.</p>
-          ${contactFormHtml('gate')}
-        </div>
-      </div>`;
-    wireContactForm('gate');
-  }
-  function renderDetailsPanel() {
-    const el = document.getElementById('detailsPanel');
-    if (!profile) { el.innerHTML = ''; return; }
-    el.innerHTML = `
-      <div class="list-section" style="margin-top:28px;">
-        <div class="section-title">Your details</div>
-        <div class="contact-card">
-          <div class="contact-card-row"><b>${escapeHtml(profile.companyName || '—')}</b></div>
-          <div class="contact-card-row">${escapeHtml(profile.contactName || '—')}</div>
-          <div class="contact-card-row">${escapeHtml(profile.email || 'Email missing')}</div>
-          <div class="contact-card-row">${escapeHtml(profile.phone || 'Phone missing')}</div>
-          <button class="ghost" id="editDetailsBtn" style="margin-top:10px;padding:6px 12px;font-size:12.5px;">Edit details</button>
-          <div id="detailsForm" hidden style="margin-top:14px;"></div>
-        </div>
-      </div>`;
-    document.getElementById('editDetailsBtn').addEventListener('click', () => {
-      const f = document.getElementById('detailsForm');
-      f.hidden = !f.hidden;
-      if (!f.hidden) { f.innerHTML = contactFormHtml('side'); wireContactForm('side'); }
-    });
-  }
-
-  // ---------------- Support contact + chat ----------------
-  async function loadContact() {
-    const el = document.getElementById('contactPanel');
     try {
-      const data = await api('/api/portal/contact');
-      const person = data.yourContact;
-      const company = data.company || {};
-      const email = person ? person.email : company.email;
-      el.innerHTML = `
-        <div class="list-section">
-          <div class="section-title">Your contact at ComplyGlobally</div>
-          <div class="contact-card">
-            <div class="contact-card-label">${person ? 'Your account contact' : 'General support'}</div>
-            <div class="contact-card-row">${escapeHtml(person ? (person.name || person.email) : company.name || 'ComplyGlobally')}</div>
-            <div class="contact-card-row">${email ? `<a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a>` : '—'}</div>
-            ${company.phone ? `<div class="contact-card-row"><a href="tel:${escapeHtml(company.phone.replace(/[^\d+]/g, ''))}">${escapeHtml(company.phone)}</a></div>` : ''}
+      const res = await fetch('/api/auth/me');
+      if (!res.ok) { location.href = '/login.html?next=' + encodeURIComponent(location.pathname + location.search); return; }
+      const { user } = await res.json();
+      const el = document.getElementById('navUser');
+      el.innerHTML = `<span>${escapeHtml(user.name || user.email)}</span><button id="logoutBtn">Log out</button>`;
+      if (user.role === 'admin' || user.role === 'super_admin') {
+        const navLinks = document.getElementById('navLinks');
+        if (navLinks && !navLinks.querySelector('a[href="/admin.html"]')) {
+          navLinks.insertAdjacentHTML('beforeend', '<a href="/admin.html">Admin</a>');
+        }
+      }
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await fetch('/api/auth/logout', { method: 'POST' });
+        location.href = '/login.html';
+      });
+    } catch (e) { location.href = '/login.html'; }
+  }
+  loadUser();
+
+  const CATEGORY_ORDER = ["Mandatory Annual","Conditional","Transfer Pricing","Foreign Reporting (ODI/FEMA)","Event-Based"];
+  const CATEGORIES = CATEGORY_ORDER;
+  const SOURCE_LABEL = { cache: 'From cached state data', live: 'Freshly researched', mixed: 'Cache + live research' };
+  const CLIENT_STATUS_OPTIONS = ["Not Started","Awaiting Documents","Under Review","Filed","Overdue"];
+  const PAYMENT_STATUS_OPTIONS = ["Not Invoiced","Invoiced","Paid","Overdue","Partially Refunded","Refunded"];
+  // Invoices, credit notes and refundable amounts per service (routes/invoices.routes.js).
+  let billing = { items: {}, canRefund: false };
+  async function loadBilling() {
+    try {
+      const r = await fetch(`/api/invoices/calendar/${id}`);
+      if (r.ok) billing = await r.json();
+    } catch { /* billing panel just stays empty */ }
+  }
+
+  const id = new URLSearchParams(location.search).get('id');
+  if (!id) {
+    document.getElementById('slot').innerHTML = '<div class="empty-state">No calendar id given.</div>';
+  }
+
+  let calendar = null;
+
+  // "https://www.irs.gov/forms-pubs/about-form-941" -> "irs.gov"
+  function sourceHost(url) { try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return 'link'; } }
+  function fmtDue(d) { return new Date(d).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }); }
+  function staffDueLine(item) {
+    if (!item.dueDateActual) {
+      return item.recurrence === 'event' ? `As triggered: ${escapeHtml(item.due_date)}`
+        : `<span style="color:var(--stamp-red);font-weight:600;">No due date. Set one below.</span> (${escapeHtml(item.due_date)})`;
+    }
+    const d = item.daysUntil, done = item.clientStatus === 'Filed';
+    const rel = done || d === null ? '' : d < 0 ? ` · <b style="color:var(--stamp-red);">${-d} day${d === -1 ? '' : 's'} overdue</b>`
+      : d <= 7 ? ` · <b style="color:var(--seal-gold);">${d === 0 ? 'due today' : d === 1 ? 'due tomorrow' : 'in ' + d + ' days'}</b>` : ` · in ${d} days`;
+    const src = item.dueDateSource === 'staff' ? ' · set by staff' : '';
+    return `Due <b>${fmtDue(item.dueDateActual)}</b>${rel}${src}${item.dueDateNote ? ` <span title="${escapeHtml(item.dueDateNote)}" style="cursor:help;">ⓘ</span>` : ''}`;
+  }
+  function money(cents) { const d = cents / 100; return '$' + d.toLocaleString('en-US', { minimumFractionDigits: d % 1 ? 2 : 0, maximumFractionDigits: 2 }); }
+  function priceTag(item) {
+    const pr = item.price || {};
+    if (item.paymentStatus === 'Paid') return `<span class="price-tag paid">Paid ${escapeHtml(pr.label || '')}</span>`;
+    const prefix = pr.kind === 'invoiced' ? (item.quotedBy === 'price-list' ? '' : 'Quoted ') : '';
+    return `<span class="price-tag ${escapeHtml(pr.kind || 'quote')}">${prefix}${escapeHtml(pr.label || 'Quote needed')}</span>`;
+  }
+  let workspaceFilter = 'selected';
+  const openCards = new Set();
+  const closedCards = new Set();
+
+  function groupByCategory(items) {
+    const groups = {};
+    items.forEach((it, i) => {
+      const cat = it.category || 'Other';
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push({ ...it, __index: i });
+    });
+    return groups;
+  }
+
+  function itemEditForm(it, idx) {
+    return `
+      <tr class="edit-row" id="editRow-${idx}">
+        <td colspan="4">
+          <div class="edit-grid">
+            <div class="field">
+              <label>Category</label>
+              <select data-f="category">
+                ${CATEGORIES.map(c => `<option value="${escapeHtml(c)}" ${c===it.category?'selected':''}>${escapeHtml(c)}</option>`).join('')}
+              </select>
+            </div>
+            <div class="field">
+              <label>Confidence</label>
+              <select data-f="confidence">
+                ${['high','medium','low'].map(c => `<option value="${c}" ${c===it.confidence?'selected':''}>${c}</option>`).join('')}
+              </select>
+            </div>
+            <div class="field">
+              <label>Compliance Name</label>
+              <input type="text" data-f="compliance_name" value="${escapeHtml(it.compliance_name)}">
+            </div>
+            <div class="field">
+              <label>Due Date</label>
+              <input type="text" data-f="due_date" value="${escapeHtml(it.due_date)}">
+            </div>
+            <div class="field">
+              <label>Applies To</label>
+              <input type="text" data-f="applicable_to" value="${escapeHtml(it.applicable_to)}">
+            </div>
+            <div class="field">
+              <label>Authority</label>
+              <input type="text" data-f="authority" value="${escapeHtml(it.authority)}">
+            </div>
+            <div class="field span2">
+              <label>Description</label>
+              <textarea data-f="description">${escapeHtml(it.description)}</textarea>
+            </div>
+            <div class="field span2">
+              <label>Source URL</label>
+              <input type="text" data-f="source_url" value="${escapeHtml(it.source_url)}">
+            </div>
+          </div>
+          <div class="edit-row-actions">
+            <button class="primary" onclick="saveItem(${idx})">Save</button>
+            <button class="ghost" onclick="closeEdit(${idx})">Cancel</button>
+          </div>
+        </td>
+      </tr>`;
+  }
+
+  function render() {
+    const slot = document.getElementById('slot');
+    const { profile, items, status, sourceMode, createdAt, createdBy, reviewedBy, reviewedAt, reviewNotes } = calendar;
+    const editable = status === 'pending_review';
+
+    const groups = groupByCategory(items);
+    const counts = { high: 0, medium: 0, low: 0 };
+    items.forEach(it => { if (counts[it.confidence] !== undefined) counts[it.confidence]++; });
+
+    let catHtml = '';
+    CATEGORY_ORDER.forEach(cat => {
+      if (!groups[cat] || !groups[cat].length) return;
+      catHtml += `<div class="cat-block">
+        <div class="cat-title">${escapeHtml(cat)}</div>
+        <table class="cal">
+          <thead><tr><th>Due Date</th><th>Compliance</th><th>Applies To</th><th>Description &amp; Source</th>${editable ? '<th></th>' : ''}</tr></thead>
+          <tbody>
+          ${groups[cat].map(it => `
+            <tr id="row-${it.__index}">
+              <td class="due" data-label="Due">${it.dueDateActual ? `<b>${fmtDue(it.dueDateActual)}</b><div style="font-weight:400;font-size:11.5px;color:var(--ink-soft);">${escapeHtml(it.due_date)}</div>` : escapeHtml(it.due_date)}</td>
+              <td class="name"><span class="dot ${escapeHtml(it.confidence||'medium')}"></span>${escapeHtml(it.compliance_name)}${it.editedByReviewer ? '<span class="edited-flag">edited</span>' : ''}
+                <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">${priceTag(it)}${calendar.clientOrgId ? (it.selectedByClient ? '<span class="sel-badge on">Client selected</span>' : '<span class="sel-badge">Not selected</span>') : ''}</div></td>
+              <td class="applies" data-label="Applies to">${escapeHtml(it.applicable_to)}</td>
+              <td class="desc">${escapeHtml(it.description)} — <span style="color:var(--ink-soft)">${escapeHtml(it.authority||'')}</span>
+                ${it.source_url ? `<a class="src-link" href="${escapeHtml(it.source_url)}" target="_blank" rel="noopener">Source: ${escapeHtml(sourceHost(it.source_url))} ↗</a>` : ''}
+              </td>
+              ${editable ? `<td class="edit-cell"><button class="row-edit-btn" onclick="openEdit(${it.__index})">Edit</button></td>` : ''}
+            </tr>
+            ${editable ? `<tr id="editSlot-${it.__index}" style="display:none;"></tr>` : ''}
+          `).join('')}
+          </tbody>
+        </table>
+      </div>`;
+    });
+
+    const reviewInfo = status !== 'pending_review'
+      ? `<div class="review-panel">
+          <h3>${status === 'approved' ? 'Approved' : 'Rejected'}</h3>
+          <p style="font-size:13.5px; color:var(--ink-soft);">By ${escapeHtml(reviewedBy || '—')} on ${fmtDateTime(reviewedAt)}${reviewNotes ? ' — “' + escapeHtml(reviewNotes) + '”' : ''}</p>
+        </div>`
+      : `<div class="review-panel">
+          <h3>Review this calendar</h3>
+          <p style="font-size:13px; color:var(--ink-soft); margin:0 0 12px;">Edit any line item above first if something needs correcting, then approve or reject.</p>
+          <div class="field span2" style="margin-bottom:14px;">
+            <label for="reviewNotes">Notes (optional)</label>
+            <textarea id="reviewNotes" placeholder="e.g. Verified franchise tax fee against DE Secretary of State site."></textarea>
+          </div>
+          <div class="case-actions">
+            <button class="primary" onclick="doAction('approve')">Approve →</button>
+            <button class="danger" onclick="doAction('reject')">Reject</button>
           </div>
         </div>`;
-    } catch { el.innerHTML = ''; }
+
+    slot.innerHTML = `
+      <div class="page-grid">
+        <div class="main-col">
+          <div class="case">
+            <div class="case-header">
+              <div>
+                <div class="case-title">${escapeHtml(profile.companyName || 'Unnamed Company')}</div>
+                <div class="case-sub">${escapeHtml(profile.entityType)} (${escapeHtml(profile.taxStatus||'')}) · ${escapeHtml(profile.state)} · FY ${escapeHtml(profile.fyStart||'')}–${escapeHtml(profile.fyEnd||'')} · Generated ${fmtDateTime(createdAt)} by ${escapeHtml(createdBy || '—')}</div>
+                ${(profile.employeeStates && profile.employeeStates.length) ? `<div class="case-sub">Employees also in: ${escapeHtml(profile.employeeStates.join(', '))}</div>` : ''}
+                ${(profile.quarterlyGrossReceipts !== undefined && profile.quarterlyGrossReceipts !== null && profile.quarterlyGrossReceipts !== '') ? `<div class="case-sub">Avg. Quarterly Gross Receipts: $${escapeHtml(Number(profile.quarterlyGrossReceipts).toLocaleString('en-US'))}</div>` : ''}
+              </div>
+              <div class="case-summary">
+                <span class="badge ${status}">${status.replace('_',' ')}</span>
+                <span class="badge ${sourceMode}">${escapeHtml(SOURCE_LABEL[sourceMode] || sourceMode)}</span><br>
+                ${items.length} items · ${counts.high} verified · ${counts.medium} review · ${counts.low} unverified
+              </div>
+            </div>
+            <div class="case-actions">
+              <a class="ghost" style="text-decoration:none; padding:10px 18px; display:inline-block;" href="/api/calendars/${id}/pdf">Download PDF ↓</a>
+              <a class="ghost" style="text-decoration:none; padding:10px 18px; display:inline-block;" href="/review.html">← Back to queue</a>
+            </div>
+            ${catHtml}
+            <div class="legend">
+              <span><span class="dot high"></span> High confidence — clearly stated on an official source</span>
+              <span><span class="dot medium"></span> Medium — needs a quick human check</span>
+              <span><span class="dot low"></span> Low — could not fully verify, don't rely on this yet</span>
+            </div>
+            <div class="disclaimer">${status === 'approved' ? 'Reviewed and approved — treat as the current source of truth, subject to periodic re-check of medium/low confidence items.' : 'Research result — not yet a verified compliance rule. Confirm anything marked medium/low confidence before relying on it.'}</div>
+            ${reviewInfo}
+          </div>
+          <div id="clientItemsHost"></div>
+        </div>
+        <div class="side-col">
+          <div id="contactPanel"></div>
+          <div id="chatPanel"></div>
+        </div>
+      </div>`;
+
+    renderClientWorkspace();
   }
 
+  window.openEdit = function (idx) {
+    const it = calendar.items[idx];
+    document.getElementById(`editSlot-${idx}`).outerHTML = itemEditForm(it, idx);
+    document.getElementById(`editSlot-${idx}`)?.remove();
+  };
+  window.closeEdit = function (idx) {
+    load();
+  };
+
+  window.saveItem = async function (idx) {
+    const row = document.getElementById(`editRow-${idx}`);
+    const updates = {};
+    row.querySelectorAll('[data-f]').forEach(el => { updates[el.getAttribute('data-f')] = el.value; });
+    try {
+      const res = await fetch(`/api/calendars/${id}/items/${idx}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Save failed.');
+      calendar = data.calendar;
+      render();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  window.doAction = async function (action) {
+    const notes = document.getElementById('reviewNotes')?.value || '';
+    if (action === 'reject' && !confirm('Reject this calendar? It will be marked rejected and won\'t appear in the approved library.')) return;
+    try {
+      const res = await fetch(`/api/calendars/${id}/${action}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notes }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `${action} failed.`);
+      calendar = data.calendar;
+      render();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  // -----------------------------------------------------------------
+  // Client workspace: contact panel + (once approved) per-item document
+  // review / status controls, plus a staff↔client chat thread. Only
+  // rendered when this calendar is actually linked to a client company
+  // (calendar.clientOrgId) — an internal/test calendar generated with no
+  // client attached shows none of this.
+  // -----------------------------------------------------------------
+  function renderClientWorkspace() {
+    const itemsHost = document.getElementById('clientItemsHost');
+    const contactHost = document.getElementById('contactPanel');
+    const chatHost = document.getElementById('chatPanel');
+    if (!calendar.clientOrgId) {
+      if (itemsHost) itemsHost.innerHTML = '';
+      if (contactHost) contactHost.innerHTML = '';
+      if (chatHost) chatHost.innerHTML = '';
+      return;
+    }
+
+    if (itemsHost) {
+      itemsHost.innerHTML = calendar.status === 'approved' ? `
+        <div class="list-section">
+          <div class="section-title">Client services &amp; documents</div>
+          <div class="section-sub">The services ${escapeHtml(calendar.profile.companyName || 'the client')} chose, the documents they've sent, and the price for each. Verify documents, send the price, and upload the filed certificate back.</div>
+          <div id="workspaceSummary"></div>
+          <div class="ws-tabs" role="tablist" id="workspaceTabs"></div>
+          <div id="clientItemsList"><div class="empty-state">Loading…</div></div>
+        </div>` : '';
+    }
+
+    loadContact();
+    if (calendar.status === 'approved') renderClientItems();
+    loadChat();
+  }
+
+  async function loadContact() {
+    const el = document.getElementById('contactPanel');
+    if (!el) return;
+    try {
+      const res = await fetch(`/api/calendars/${id}/client-contact`);
+      const data = await res.json().catch(() => ({}));
+      const org = data.clientOrg;
+      if (!org) { el.innerHTML = ''; return; }
+      const phone = org.primaryContactPhone || '';
+      const dial = phone.replace(/[^\d+]/g, '');
+      const wa = phone.replace(/\D/g, '');
+      const email = org.primaryContactEmail || '';
+      const missing = [!email && 'email', !phone && 'phone number'].filter(Boolean);
+      el.innerHTML = `
+        <div class="list-section">
+          <div class="section-title">Contact the client</div>
+          <div class="contact-card">
+            <div class="contact-card-label">${escapeHtml(org.name)}</div>
+            <div class="contact-card-row"><b>${escapeHtml(org.primaryContactName || '—')}</b></div>
+            <div class="contact-card-row">${email ? `<a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a>` : '<span style="color:var(--stamp-red);">No email on file</span>'}</div>
+            <div class="contact-card-row">${phone ? escapeHtml(phone) : '<span style="color:var(--stamp-red);">No phone on file</span>'}</div>
+            ${missing.length ? `<div style="font-size:12px;color:var(--ink-soft);margin-top:6px;">The client is asked for their ${missing.join(' and ')} the next time they open the portal.</div>` : ''}
+            <div class="contact-actions">
+              ${email ? `<a class="contact-btn" href="mailto:${escapeHtml(email)}?subject=${encodeURIComponent('Your compliance filings with ComplyGlobally')}">Email</a>` : ''}
+              ${dial ? `<a class="contact-btn" href="tel:${escapeHtml(dial)}">Call</a>` : ''}
+              ${dial ? `<a class="contact-btn" href="sms:${escapeHtml(dial)}">Text</a>` : ''}
+              ${wa ? `<a class="contact-btn" href="https://wa.me/${escapeHtml(wa)}" target="_blank" rel="noopener">WhatsApp</a>` : ''}
+            </div>
+          </div>
+          <div class="contact-card" style="margin-top:10px;">
+            <div class="contact-card-label">Assigned to</div>
+            ${org.assignedStaff
+              ? `<div class="contact-card-row">${escapeHtml(org.assignedStaff.name || org.assignedStaff.email)}</div>
+                 <div class="contact-card-row"><a href="mailto:${escapeHtml(org.assignedStaff.email)}">${escapeHtml(org.assignedStaff.email)}</a></div>`
+              : `<div class="contact-card-row" style="color:var(--ink-soft);">Nobody assigned yet. Set this from Admin → Client companies.</div>`}
+          </div>
+        </div>`;
+    } catch (err) {
+      el.innerHTML = '';
+    }
+  }
+
+  function renderWorkspaceHeader() {
+    const sm = calendar.summary || {};
+    const sumEl = document.getElementById('workspaceSummary');
+    if (sumEl) sumEl.innerHTML = `
+      <div class="ws-stats">
+        <div><b>${sm.selected ?? 0}</b>selected by client</div>
+        <div><b>${sm.notSelected ?? 0}</b>not selected</div>
+        ${sm.overdue ? `<div class="late"><b>${sm.overdue}</b>overdue</div>` : ''}
+        <div><b>${sm.dueSoon ?? 0}</b>due in 30 days</div>
+        <div class="${sm.documentsPendingReview ? 'attn' : ''}"><b>${sm.documentsPendingReview ?? 0}</b>documents to verify</div>
+        <div class="${sm.readyToQuote ? 'attn' : ''}"><b>${sm.readyToQuote ?? 0}</b>ready for a price</div>
+        <div><b>${sm.awaitingPayment ?? 0}</b>awaiting payment</div>
+      </div>`;
+    const tabs = document.getElementById('workspaceTabs');
+    if (tabs) {
+      const t = (key, label, n) => `<button role="tab" class="ws-tab ${workspaceFilter === key ? 'on' : ''}" aria-selected="${workspaceFilter === key}" data-filter="${key}">${label} <span>${n}</span></button>`;
+      tabs.innerHTML = t('selected', 'Selected by client', sm.selected ?? 0) + t('unselected', 'Not selected', sm.notSelected ?? 0) + t('all', 'All filings', sm.totalItems ?? calendar.items.length)
+        + (sm.historyItems ? t('history', 'Previous periods', sm.historyItems) : '');
+      tabs.querySelectorAll('[data-filter]').forEach(b => b.addEventListener('click', () => { workspaceFilter = b.dataset.filter; renderClientItems(); }));
+    }
+  }
+
+  function checklistHtml(item) {
+    const rows = item.checklist || [];
+    if (!rows.length) return '';
+    const label = { accepted: 'Verified', pending: 'Uploaded, verify it', rejected: 'Rejected, waiting for new file', missing: 'Not uploaded' };
+    return `
+      <div class="ws-checklist">
+        <div class="ws-label">Documents required (${item.checklistSummary.provided}/${item.checklistSummary.total} provided)</div>
+        ${rows.map(r => `
+          <div class="ws-check ${r.state}">
+            <span class="ws-check-dot" aria-hidden="true"></span>
+            <span class="ws-check-name">${escapeHtml(r.label)}</span>
+            <span class="ws-check-state">${r.state === 'missing' && r.lost ? '<span style="color:var(--stamp-red);">File lost, ask the client again</span>' : label[r.state]}${r.reused ? ` · from "${escapeHtml(r.fromItem)}"` : ''}</span>
+            ${r.fileName && r.itemIndex !== undefined ? `<a href="/api/calendars/${id}/items/${r.itemIndex}/documents/${r.docIndex}/download">Download</a>` : ''}
+          </div>`).join('')}
+      </div>`;
+  }
+
+  function billingHtml(item, idx) {
+    const b = billing.items[idx] || { payments: [], refunds: [], documents: [] };
+    const docs = (b.documents || []).map(d => `
+      <a class="doc-btn" href="${escapeHtml(d.pdf)}" target="_blank" rel="noopener" title="${d.kind === 'invoice' ? 'Invoice' : 'Credit note'}">
+        ${d.kind === 'invoice' ? 'Invoice' : 'Credit note'} ${escapeHtml(d.number)}${d.status === 'void' ? ' (void)' : ''}</a>`).join('');
+    const refundRows = (b.refunds || []).map(r => `
+      <div class="doc-meta" style="margin-top:4px;">Refund ${escapeHtml(r.amount)} · <b style="color:${r.status === 'failed' ? 'var(--stamp-red)' : r.status === 'processed' ? 'var(--brand-dark)' : 'var(--seal-gold)'};">${escapeHtml(r.status)}</b>
+        · ${new Date(r.at).toLocaleDateString()} · ${escapeHtml(r.by || '')} · “${escapeHtml(r.reason || '')}”</div>`).join('');
+    const refundForms = billing.canRefund ? (b.payments || []).filter(p => p.remainingMinor > 0).map(p => `
+      <details class="proof-form" style="margin-top:8px;">
+        <summary>${p.main ? 'Refund this payment' : `Refund duplicate payment ${escapeHtml(p.paymentId)}`} <span style="font-weight:400;color:var(--ink-soft);">(up to ${escapeHtml(p.remaining)})</span></summary>
+        <div class="proof-grid">
+          <div class="field">
+            <label for="ra-${idx}-${p.paymentId}">Amount (${escapeHtml(p.currency)}), empty = full ${escapeHtml(p.remaining)}</label>
+            <input id="ra-${idx}-${p.paymentId}" type="number" min="0.01" step="0.01" class="refundAmount" data-idx="${idx}" data-pid="${escapeHtml(p.paymentId)}" placeholder="${(p.remainingMinor / 100).toFixed(2)}">
+          </div>
+          <div class="field">
+            <label for="rr-${idx}-${p.paymentId}">Reason (the client sees this)</label>
+            <input id="rr-${idx}-${p.paymentId}" type="text" maxlength="250" class="refundReason" data-idx="${idx}" data-pid="${escapeHtml(p.paymentId)}" value="${p.main ? '' : 'Duplicate payment'}" placeholder="e.g. Cancelled before work started">
+          </div>
+        </div>
+        <div class="submit-row" style="margin-top:8px;">
+          <span class="hint" data-refund-hint="${idx}-${escapeHtml(p.paymentId)}"></span>
+          <button class="danger" data-refund="${idx}" data-pid="${escapeHtml(p.paymentId)}" data-remaining="${escapeHtml(p.remaining)}">Refund</button>
+        </div>
+      </details>`).join('') : '';
+    const dup = (b.payments || []).some(p => !p.main && p.remainingMinor > 0);
+    return `
+      ${docs ? `<div class="doc-actions" style="margin-top:8px;">${docs}</div>` : ''}
+      ${dup ? '<div class="doc-note">This client paid twice for this service. Refund the duplicate below.</div>' : ''}
+      ${refundRows}
+      ${refundForms}`;
+  }
+
+  function quoteHtml(item, idx) {
+    if (['Paid', 'Partially Refunded', 'Refunded'].includes(item.paymentStatus)) {
+      const label = item.paymentStatus === 'Paid' ? 'Paid' : item.paymentStatus;
+      return `<div class="ws-quote paid">${escapeHtml(label)} <b>${escapeHtml(item.price?.label || '')}</b>${item.paidAt ? ` on ${new Date(item.paidAt).toLocaleDateString()}` : ''}${item.razorpayPaymentId ? ` · Razorpay ${escapeHtml(item.razorpayPaymentId)}` : ''}
+        ${billingHtml(item, idx)}</div>`;
+    }
+    const sf = item.suggestedFee;
+    const current = item.feeAmountCents ? item.feeAmountCents / 100 : (sf && sf.amountCents ? sf.amountCents / 100 : '');
+    const listLine = sf
+      ? (sf.kind === 'fixed'
+          ? `Price list: <b>${escapeHtml(sf.label)}</b>. Applied automatically when the client selects this service.`
+          : sf.kind === 'included'
+            ? `Price list: <b>${escapeHtml(sf.label)}</b>.`
+            : `${sf.kind === 'from' ? `Price list: <b>${escapeHtml(sf.label)}</b>.` : '<b>No price in the list.</b>'} The client has been told you'll contact them with the price once they upload their documents.`)
+        + (sf.note ? `<div style="margin-top:2px;">Internal note: ${escapeHtml(sf.note)}</div>` : '')
+      : (item.feeAmountCents
+          ? (item.quotedBy === 'price-list'
+              ? `Price <b>${money(item.feeAmountCents)}</b> applied automatically from the price list${item.quotedAt ? ` on ${new Date(item.quotedAt).toLocaleDateString()}` : ''}. Change it below if needed.`
+              : `Price <b>${money(item.feeAmountCents)}</b> sent${item.quotedAt ? ` on ${new Date(item.quotedAt).toLocaleDateString()}` : ''}${item.quotedBy ? ` by ${escapeHtml(item.quotedBy)}` : ''}.`)
+          : '');
+    const docsReady = item.checklistSummary?.allProvided;
+    return `
+      <div class="ws-quote">
+        <div class="ws-label">Price for the client</div>
+        <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:8px;">${listLine}</div>
+        <div class="ws-quote-row">
+          <label class="sr-only" for="q-${idx}">Price in USD</label>
+          <span class="ws-dollar">$</span><input id="q-${idx}" type="number" min="1" step="0.01" class="quoteAmount" data-idx="${idx}" value="${escapeHtml(String(current))}" placeholder="Amount">
+          <label class="sr-only" for="qn-${idx}">Note to client</label>
+          <input id="qn-${idx}" type="text" class="quoteNote" data-idx="${idx}" value="${escapeHtml(item.quoteNote || '')}" placeholder="Note to the client (optional), e.g. includes 2 extra states">
+          <button class="primary" data-quote-idx="${idx}">${item.paymentStatus === 'Invoiced' || item.paymentStatus === 'Overdue' ? 'Update price' : 'Send price to client'}</button>
+        </div>
+        ${!docsReady ? '<div style="font-size:12px;color:var(--seal-gold);margin-top:6px;">Some documents are still missing. You can send the price now; the client can only pay once every document is uploaded.</div>' : ''}
+        <span class="hint" data-quote-hint="${idx}" style="display:block;"></span>
+      </div>`;
+  }
+
+  // Proof of completion: whoever did the work (often finance) uploads the
+  // certificate / acknowledgment / receipt with a reference and a note.
+  function proofHtml(item, idx, certs, dl) {
+    const today = new Date().toISOString().slice(0, 10);
+    const done = item.clientStatus === 'Filed';
+    const unpaid = item.paymentStatus !== 'Paid';
+    const list = certs.map(d => `
+      <div class="proof-row">
+        <div class="doc-row-top">
+          <span class="doc-name">${escapeHtml(d.fileName)}</span>
+          ${d.fileMissing ? '<span class="status-pill-cw" style="color:var(--stamp-red);background:var(--stamp-red-bg);">File missing</span>' : ''}
+        </div>
+        <div class="doc-meta">
+          ${d.completedOn ? 'Done ' + new Date(d.completedOn).toLocaleDateString() + ' · ' : ''}uploaded by ${escapeHtml(d.uploadedByName || d.uploadedBy)}${d.uploadedByDepartment ? ' (' + escapeHtml(d.uploadedByDepartment) + ')' : ''}
+          ${d.referenceNumber ? ` · Ref <b>${escapeHtml(d.referenceNumber)}</b>` : ''}
+        </div>
+        ${d.proofNote ? `<div class="doc-meta" style="color:var(--ink);margin-top:4px;">“${escapeHtml(d.proofNote)}”</div>` : ''}
+        <div class="doc-actions">
+          ${d.fileMissing ? '<span class="doc-note">Upload this proof again below.</span>' : `
+            ${/\.(pdf|png|jpe?g|gif|webp|txt)$/i.test(d.fileName || '') ? `<a class="doc-btn" href="${dl(d)}?view=1" target="_blank" rel="noopener">Open</a>` : ''}
+            <a class="doc-btn" href="${dl(d)}">Download</a>`}
+          <button class="doc-btn reject" data-remove-proof="${idx}" data-doc="${d.di}">Remove</button>
+        </div>
+      </div>`).join('');
+    return `
+      <div class="proof-box ${done ? 'done' : ''}">
+        <div class="ws-label">Proof of completion${certs.length ? ` (${certs.length})` : ''}</div>
+        ${done && item.completedAt ? `<div class="proof-done">✓ Marked done ${new Date(item.completedAt).toLocaleDateString()}${item.completedByName ? ' by ' + escapeHtml(item.completedByName) : ''}</div>` : ''}
+        ${list}
+        <details class="proof-form" ${certs.length ? '' : 'open'}>
+          <summary>${certs.length ? 'Add more proof' : 'Upload proof that this service is done'}</summary>
+          <div class="proof-grid">
+            <div class="field span2">
+              <label for="pf-${idx}">Files <span style="font-weight:400;color:var(--ink-soft);">(certificate, acknowledgment, receipt… up to 10, 15 MB each)</span></label>
+              <input id="pf-${idx}" type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,.doc,.docx,.xls,.xlsx" class="proofFiles" data-idx="${idx}">
+            </div>
+            <div class="field">
+              <label for="pr-${idx}">Reference / confirmation number</label>
+              <input id="pr-${idx}" type="text" maxlength="120" class="proofRef" data-idx="${idx}" placeholder="e.g. IRS acknowledgment no.">
+            </div>
+            <div class="field">
+              <label for="pd-${idx}">Date completed</label>
+              <input id="pd-${idx}" type="date" max="${today}" value="${today}" class="proofDate" data-idx="${idx}">
+            </div>
+            <div class="field span2">
+              <label for="pn-${idx}">Note to the client (optional)</label>
+              <textarea id="pn-${idx}" rows="2" maxlength="1000" class="proofNote" data-idx="${idx}" placeholder="e.g. Filed with the Delaware Division of Corporations; next due 1 March 2027."></textarea>
+            </div>
+            <label class="proof-check span2"><input type="checkbox" class="proofDone" data-idx="${idx}" ${done ? '' : 'checked'}> Mark this service as done and notify the client</label>
+          </div>
+          ${unpaid ? `<div class="doc-note" style="color:var(--seal-gold);">Heads up: this service ${item.paymentStatus === 'Not Invoiced' ? 'has no price yet' : 'is not paid yet'} (${escapeHtml(item.paymentStatus)}).</div>` : ''}
+          <div class="submit-row" style="margin-top:8px;">
+            <span class="hint" data-proof-hint="${idx}"></span>
+            <button class="primary" data-upload-proof="${idx}">Upload proof</button>
+          </div>
+        </details>
+      </div>`;
+  }
+
+  function itemCardHtml(item, idx) {
+    const clientDocs = (item.documents || []).map((d, di) => ({ ...d, di })).filter(d => d.type === 'client_upload');
+    const certs = (item.documents || []).map((d, di) => ({ ...d, di })).filter(d => d.type === 'certificate');
+    const pendingCount = clientDocs.filter(d => d.reviewStatus === 'pending').length;
+    const isOpen = !closedCards.has(idx) && (openCards.has(idx) || (item.selectedByClient && workspaceFilter !== 'all'));
+    const dl = (d) => `/api/calendars/${id}/items/${idx}/documents/${d.di}/download`;
+    return `
+      <div class="card ws-card ${item.selectedByClient ? '' : 'muted'}" id="ws-item-${idx}" style="margin-top:12px;">
+        <div class="card-body" style="padding:16px 20px;">
+          <button class="ws-card-head" data-card-idx="${idx}" aria-expanded="${isOpen}">
+            <div>
+              <div style="font-weight:600;">${escapeHtml(item.compliance_name)}</div>
+              <div style="color:var(--ink-soft);font-size:12.5px;">${staffDueLine(item)}${item.selectedAt ? ` · selected ${new Date(item.selectedAt).toLocaleDateString()}` : ''}</div>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center;">
+              ${priceTag(item)}
+              ${pendingCount ? `<span class="status-pill-cw" style="background:var(--seal-gold-bg);color:var(--seal-gold);">${pendingCount} to verify</span>` : ''}
+              <span class="status-pill-cw">${item.selectedByClient ? escapeHtml(item.clientStatus) : 'Not selected'}</span>
+              ${item.paymentStatus !== 'Not Invoiced' ? `<span class="status-pill-cw">${escapeHtml(item.paymentStatus)}</span>` : ''}
+            </div>
+          </button>
+          <div ${isOpen ? '' : 'hidden'}>
+            ${checklistHtml(item)}
+            <div style="margin-top:12px;">
+              <div class="ws-label">Uploaded by the client (${clientDocs.length})</div>
+              ${clientDocs.length ? clientDocs.map(d => {
+                const badge = d.fileMissing && d.reviewStatus !== 'rejected'
+                  ? `<span class="status-pill-cw" style="color:var(--stamp-red);background:var(--stamp-red-bg);">File missing</span>`
+                  : d.reviewStatus === 'accepted'
+                    ? `<span class="status-pill-cw" style="color:var(--brand-dark);background:var(--teal-bg);">Verified${d.reviewedBy ? ' by ' + escapeHtml(d.reviewedBy) : ''}</span>`
+                    : d.reviewStatus === 'rejected'
+                      ? `<span class="status-pill-cw" style="color:var(--stamp-red);">Sent back to client</span>`
+                      : `<span class="status-pill-cw" style="background:var(--seal-gold-bg);color:var(--seal-gold);">Needs verifying</span>`;
+                const canView = /\.(pdf|png|jpe?g|gif|webp|txt)$/i.test(d.fileName || '');
+                return `
+                  <div class="doc-row${d.fileMissing && d.reviewStatus !== 'rejected' ? ' lost' : ''}">
+                    <div class="doc-row-top">
+                      <span class="doc-name">${escapeHtml(d.fileName)}</span>${badge}
+                    </div>
+                    <div class="doc-meta">${d.requirementLabel ? escapeHtml(d.requirementLabel) + ' · ' : ''}uploaded ${new Date(d.uploadedAt).toLocaleString()}</div>
+                    ${d.reviewStatus === 'rejected' ? `<div class="doc-note">${escapeHtml(d.reviewNote)}</div>` : ''}
+                    ${d.fileMissing && d.reviewStatus !== 'rejected' ? `
+                      <div class="doc-note">This file can't be found in storage (most likely uploaded before cloud storage was connected). Ask the client to upload it again; they'll get an email and a portal notification.</div>
+                      <div class="doc-actions">
+                        <button class="primary small" data-reupload-idx="${idx}" data-doc="${d.di}">Ask client to re-upload</button>
+                      </div>` : `
+                      <div class="doc-actions">
+                        ${canView ? `<a class="doc-btn" href="${dl(d)}?view=1" target="_blank" rel="noopener">Open</a>` : ''}
+                        <a class="doc-btn" href="${dl(d)}">Download</a>
+                        ${d.reviewStatus === 'pending' ? `
+                          <button class="doc-btn verify" data-review-action="accept" data-idx="${idx}" data-doc="${d.di}">Verify</button>
+                          <input type="text" class="rejectNote" data-idx="${idx}" data-doc="${d.di}" aria-label="Reason for sending back" placeholder="What's wrong? (to send it back)">
+                          <button class="doc-btn reject" data-review-action="reject" data-idx="${idx}" data-doc="${d.di}">Send back</button>` : ''}
+                      </div>`}
+                    <span class="hint" data-review-hint="${idx}-${d.di}" style="display:block;font-size:11.5px;"></span>
+                  </div>`;
+              }).join('') : `<div style="font-size:12.5px;color:var(--ink-soft);">Nothing uploaded yet.</div>`}
+            </div>
+            ${quoteHtml(item, idx)}
+            ${proofHtml(item, idx, certs, dl)}
+            <div class="edit-grid" style="margin-top:14px;">
+              <div class="field">
+                <label>Filing status</label>
+                <select data-idx="${idx}" class="clientStatusSelect">
+                  ${CLIENT_STATUS_OPTIONS.map(s => `<option value="${s}" ${s===item.clientStatus?'selected':''}>${s}</option>`).join('')}
+                </select>
+              </div>
+              <div class="field">
+                <label>Payment status</label>
+                <select data-idx="${idx}" class="paymentStatusSelect">
+                  ${PAYMENT_STATUS_OPTIONS.map(s => `<option value="${s}" ${s===item.paymentStatus?'selected':''}>${s}</option>`).join('')}
+                </select>
+              </div>
+              <div class="field span2">
+                <label for="dd-${idx}">Due date <span style="font-weight:400;color:var(--ink-soft);">${item.dueDateSource === 'staff' ? '(set by staff)' : item.dueDateActual ? '(automatic)' : '(not set)'}</span></label>
+                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                  <input id="dd-${idx}" type="date" class="dueDateInput" data-idx="${idx}" value="${item.dueDateActual ? new Date(item.dueDateActual).toISOString().slice(0,10) : ''}" style="max-width:190px;">
+                  ${item.dueDateSource === 'staff' ? `<button class="doc-btn" data-reset-due="${idx}" type="button">Use automatic date</button>` : ''}
+                </div>
+              </div>
+            </div>
+            <div class="submit-row" style="margin-top:10px;">
+              <span class="hint" data-status-hint="${idx}"></span>
+              <button class="ghost" data-idx="${idx}" data-action="saveStatus">Save status</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  let jumpedToHash = false;
+  let billingLoaded = false;
+  async function renderClientItems() {
+    const el = document.getElementById('clientItemsList');
+    if (!el) return;
+    if (!billingLoaded) { billingLoaded = true; await loadBilling(); }
+    // Links like /calendar.html?id=…#item-3 (from the finance screen) open
+    // that service's card and scroll to it, once.
+    const hashIdx = !jumpedToHash && /^#item-(\d+)$/.test(location.hash) ? +location.hash.slice(6) : null;
+    if (hashIdx !== null && calendar.items[hashIdx]) {
+      jumpedToHash = true;
+      openCards.add(hashIdx); closedCards.delete(hashIdx);
+      if (!calendar.items[hashIdx].selectedByClient) workspaceFilter = 'all';
+      setTimeout(() => document.getElementById(`ws-item-${hashIdx}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+    }
+    renderWorkspaceHeader();
+    const all = calendar.items.map((it, idx) => ({ it, idx }));
+    const byDue = (a, b) => (a.it.dueDateActual ? new Date(a.it.dueDateActual) : Infinity) - (b.it.dueDateActual ? new Date(b.it.dueDateActual) : Infinity);
+    const shown = all.filter(x => workspaceFilter === 'history' ? x.it.isHistory
+      : x.it.isHistory ? false
+      : workspaceFilter === 'all' ? true : workspaceFilter === 'selected' ? x.it.selectedByClient : !x.it.selectedByClient)
+      .sort(byDue);
+    if (!shown.length) {
+      el.innerHTML = `<div class="empty-state">${workspaceFilter === 'selected'
+        ? 'The client hasn\'t selected any services yet. They\'ll appear here as soon as they pick one or upload a document, and you\'ll get a notification.'
+        : 'Nothing here.'}</div>`;
+      return;
+    }
+    el.innerHTML = shown.map(x => itemCardHtml(x.it, x.idx)).join('');
+
+    el.querySelectorAll('[data-card-idx]').forEach(b => b.addEventListener('click', () => {
+      const idx = +b.dataset.cardIdx;
+      const body = b.nextElementSibling;
+      const nowOpen = body.hidden;
+      body.hidden = !nowOpen; b.setAttribute('aria-expanded', String(nowOpen));
+      if (nowOpen) { openCards.add(idx); closedCards.delete(idx); } else { openCards.delete(idx); closedCards.add(idx); }
+    }));
+
+    el.querySelectorAll('[data-review-action]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = btn.dataset.idx;
+        const docIdx = btn.dataset.doc;
+        const action = btn.dataset.reviewAction;
+        const hint = el.querySelector(`[data-review-hint="${idx}-${docIdx}"]`);
+        const noteInput = el.querySelector(`.rejectNote[data-idx="${idx}"][data-doc="${docIdx}"]`);
+        const note = noteInput ? noteInput.value.trim() : '';
+        if (action === 'reject' && !note) { hint.textContent = 'Write what needs fixing, so the client knows what to upload.'; hint.classList.add('err'); noteInput?.focus(); return; }
+        hint.textContent = 'Saving…'; hint.classList.remove('err');
+        try {
+          const res = await fetch(`/api/calendars/${id}/items/${idx}/documents/${docIdx}/review`, {
+            method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reviewStatus: action === 'accept' ? 'accepted' : 'rejected', note }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || 'Could not save.');
+          calendar = data.calendar; openCards.add(+idx);
+          renderClientItems();
+          if (action === 'reject') refreshChatThread();
+        } catch (err) { hint.textContent = err.message; hint.classList.add('err'); }
+      });
+    });
+
+    el.querySelectorAll('[data-refund]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = btn.dataset.refund, pid = btn.dataset.pid;
+        const hint = el.querySelector(`[data-refund-hint="${idx}-${pid}"]`);
+        const amount = el.querySelector(`.refundAmount[data-idx="${idx}"][data-pid="${pid}"]`).value.trim();
+        const reason = el.querySelector(`.refundReason[data-idx="${idx}"][data-pid="${pid}"]`).value.trim();
+        if (reason.length < 3) { hint.textContent = 'Give a short reason; the client sees it.'; hint.classList.add('err'); return; }
+        const shown = amount ? amount : `the full ${btn.dataset.remaining}`;
+        if (!confirm(`Refund ${shown} to the client's original payment method?\n\nThis sends money back through Razorpay and can't be undone.`)) return;
+        btn.disabled = true; hint.textContent = 'Refunding…'; hint.classList.remove('err');
+        try {
+          const res = await fetch(`/api/invoices/calendar/${id}/items/${idx}/refund`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount: amount || undefined, reason, paymentId: pid }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || 'Refund failed.');
+          const fresh = await fetch(`/api/calendars/${id}`).then(r => r.json()).catch(() => null);
+          if (fresh && fresh.calendar) calendar = fresh.calendar;
+          await loadBilling();
+          openCards.add(+idx); renderClientItems();
+        } catch (err) { hint.textContent = err.message; hint.classList.add('err'); btn.disabled = false; }
+      });
+    });
+
+    el.querySelectorAll('[data-reupload-idx]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = btn.dataset.reuploadIdx, docIdx = btn.dataset.doc;
+        const hint = el.querySelector(`[data-review-hint="${idx}-${docIdx}"]`);
+        btn.disabled = true; hint.textContent = 'Sending…'; hint.classList.remove('err');
+        try {
+          const res = await fetch(`/api/calendars/${id}/items/${idx}/documents/${docIdx}/review`, {
+            method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reviewStatus: 'rejected', note: "We couldn't open this file on our side. Sorry for the trouble; please upload it again." }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || 'Could not send.');
+          calendar = data.calendar; openCards.add(+idx);
+          renderClientItems(); refreshChatThread();
+        } catch (err) { hint.textContent = err.message; hint.classList.add('err'); btn.disabled = false; }
+      });
+    });
+
+    el.querySelectorAll('[data-quote-idx]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = btn.dataset.quoteIdx;
+        const hint = el.querySelector(`[data-quote-hint="${idx}"]`);
+        const amount = el.querySelector(`.quoteAmount[data-idx="${idx}"]`).value;
+        const note = el.querySelector(`.quoteNote[data-idx="${idx}"]`).value;
+        if (!amount || Number(amount) <= 0) { hint.textContent = 'Enter the price in USD.'; hint.classList.add('err'); return; }
+        btn.disabled = true; hint.textContent = 'Sending…'; hint.classList.remove('err');
+        try {
+          const res = await fetch(`/api/calendars/${id}/items/${idx}/quote`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ feeAmountUSD: Number(amount), note }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || 'Could not send the price.');
+          calendar = data.calendar; openCards.add(+idx);
+          renderClientItems(); refreshChatThread();
+          const fresh = el.querySelector(`[data-quote-hint="${idx}"]`);
+          if (fresh) fresh.textContent = 'Price sent. The client was notified in the portal and by email.';
+        } catch (err) { hint.textContent = err.message; hint.classList.add('err'); btn.disabled = false; }
+      });
+    });
+
+    el.querySelectorAll('[data-upload-proof]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = btn.dataset.uploadProof;
+        const hint = el.querySelector(`[data-proof-hint="${idx}"]`);
+        const files = el.querySelector(`.proofFiles[data-idx="${idx}"]`).files;
+        if (!files.length) { hint.textContent = 'Choose at least one file.'; hint.classList.add('err'); return; }
+        const item = calendar.items[idx];
+        const markDone = el.querySelector(`.proofDone[data-idx="${idx}"]`).checked;
+        if (markDone && item.paymentStatus !== 'Paid' &&
+            !confirm(`${item.compliance_name} is not paid yet (${item.paymentStatus}). Mark it done anyway?`)) return;
+        const fd = new FormData();
+        Array.from(files).forEach(f => fd.append('files', f));
+        fd.append('referenceNumber', el.querySelector(`.proofRef[data-idx="${idx}"]`).value);
+        fd.append('completedOn', el.querySelector(`.proofDate[data-idx="${idx}"]`).value);
+        fd.append('note', el.querySelector(`.proofNote[data-idx="${idx}"]`).value);
+        fd.append('markDone', markDone ? 'true' : 'false');
+        btn.disabled = true; hint.textContent = `Uploading ${files.length} file${files.length > 1 ? 's' : ''}…`; hint.classList.remove('err');
+        try {
+          const res = await fetch(`/api/calendars/${id}/items/${idx}/certificate`, { method: 'POST', body: fd });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || 'Upload failed.');
+          calendar = data.calendar; openCards.add(+idx);
+          renderClientItems();
+          const h = el.querySelector(`[data-proof-hint="${idx}"]`);
+          if (h) h.textContent = markDone ? 'Uploaded. The service is marked done and the client has been notified.' : 'Uploaded. The client can see it in their portal.';
+        } catch (err) { hint.textContent = err.message; hint.classList.add('err'); btn.disabled = false; }
+      });
+    });
+
+    el.querySelectorAll('[data-remove-proof]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = btn.dataset.removeProof, docIdx = btn.dataset.doc;
+        const doc = calendar.items[idx].documents[docIdx];
+        if (!confirm(`Remove "${doc.fileName}"? The client will no longer see it. This is recorded in the activity log.`)) return;
+        btn.disabled = true;
+        try {
+          const res = await fetch(`/api/calendars/${id}/items/${idx}/certificate/${docIdx}`, { method: 'DELETE' });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || 'Could not remove.');
+          calendar = data.calendar; openCards.add(+idx);
+          renderClientItems();
+        } catch (err) { alert(err.message); btn.disabled = false; }
+      });
+    });
+
+    el.querySelectorAll('[data-reset-due]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = btn.dataset.resetDue;
+        btn.disabled = true;
+        try {
+          const res = await fetch(`/api/calendars/${id}/items/${idx}/status`, {
+            method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dueDateActual: '' }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || 'Could not reset.');
+          calendar = data.calendar; openCards.add(+idx); renderClientItems();
+        } catch (err) { alert(err.message); btn.disabled = false; }
+      });
+    });
+
+    el.querySelectorAll('[data-action="saveStatus"]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = btn.dataset.idx;
+        const hint = el.querySelector(`[data-status-hint="${idx}"]`);
+        const clientStatus = el.querySelector(`.clientStatusSelect[data-idx="${idx}"]`).value;
+        const paymentStatus = el.querySelector(`.paymentStatusSelect[data-idx="${idx}"]`).value;
+        const body = { clientStatus, paymentStatus };
+        const ddInput = el.querySelector(`.dueDateInput[data-idx="${idx}"]`);
+        const it0 = calendar.items[idx];
+        const currentDue = it0.dueDateActual ? new Date(it0.dueDateActual).toISOString().slice(0, 10) : '';
+        if (ddInput && ddInput.value && ddInput.value !== currentDue) body.dueDateActual = ddInput.value;
+        const feeVal = el.querySelector(`.quoteAmount[data-idx="${idx}"]`)?.value;
+        if (paymentStatus === 'Invoiced' && feeVal) body.feeAmountUSD = Number(feeVal);
+        hint.textContent = 'Saving…'; hint.classList.remove('err');
+        try {
+          const res = await fetch(`/api/calendars/${id}/items/${idx}/status`, {
+            method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            let msg = data.error || 'Could not save.';
+            if (data.suggestedFee && data.suggestedFee.label) msg += ` Price list: ${data.suggestedFee.label}.`;
+            throw new Error(msg);
+          }
+          calendar = data.calendar; openCards.add(+idx);
+          renderClientItems();
+          const freshHint = el.querySelector(`[data-status-hint="${idx}"]`);
+          if (freshHint) { freshHint.textContent = 'Saved ✓'; setTimeout(() => { if (freshHint.textContent === 'Saved ✓') freshHint.textContent = ''; }, 4000); }
+        } catch (err) { hint.textContent = err.message; hint.classList.add('err'); }
+      });
+    });
+  }
+
+  // ---- Chat ----
   async function loadChat() {
     const el = document.getElementById('chatPanel');
-    if (!me || !me.clientOrgId) return;
+    if (!el || !calendar.clientOrgId) return;
     el.innerHTML = `
       <div class="list-section">
         <div class="section-title">Messages</div>
-        <div class="section-sub">Questions about a filing, a document or a price — send them here so everything stays in one place.</div>
+        <div class="section-sub">Talk directly with ${escapeHtml(calendar.profile.companyName || 'the client')} about this engagement.</div>
         <div class="chat-box">
           <div class="chat-thread" id="chatThread"><div class="empty-state">Loading…</div></div>
           <div class="chat-compose">
-            <textarea id="chatInput" placeholder="Write a message…" aria-label="Message"></textarea>
+            <textarea id="chatInput" placeholder="Write a message…"></textarea>
             <button class="primary" id="chatSendBtn">Send</button>
           </div>
           <span class="hint" id="chatHint" style="display:block;padding:0 18px 12px;"></span>
         </div>
       </div>`;
     document.getElementById('chatSendBtn').addEventListener('click', sendChatMessage);
-    document.getElementById('chatInput').addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) sendChatMessage(); });
+    document.getElementById('chatInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) sendChatMessage();
+    });
     await refreshChatThread();
   }
+
   async function refreshChatThread() {
     const thread = document.getElementById('chatThread');
     if (!thread) return;
     try {
-      const data = await api(`/api/messages/${me.clientOrgId}`);
+      const res = await fetch(`/api/messages/${calendar.clientOrgId}`);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Could not load messages.');
       const messages = data.messages || [];
-      if (!messages.length) { thread.innerHTML = '<div class="empty-state">No messages yet. Send the first one.</div>'; return; }
+      if (!messages.length) {
+        thread.innerHTML = '<div class="empty-state">No messages yet — say hello.</div>';
+        return;
+      }
       thread.innerHTML = messages.map(m => `
         <div class="chat-msg ${m.senderRole === 'client' ? 'from-client' : 'from-staff'}">
-          <div class="chat-msg-meta">${escapeHtml(m.senderName)} · ${new Date(m.createdAt).toLocaleString()}${m.itemLabel ? ` · <span class="chat-tag">${escapeHtml(m.itemLabel)}</span>` : ''}</div>
+          <div class="chat-msg-meta">${escapeHtml(m.senderName)} · ${fmtDateTime(m.createdAt)}${m.itemLabel ? ` · <span class="chat-tag">${escapeHtml(m.itemLabel)}</span>` : ''}</div>
           <div class="chat-msg-body">${escapeHtml(m.body)}</div>
         </div>`).join('');
       thread.scrollTop = thread.scrollHeight;
-    } catch (err) { thread.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`; }
+    } catch (err) {
+      thread.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
+    }
   }
+
   async function sendChatMessage() {
     const input = document.getElementById('chatInput');
     const hint = document.getElementById('chatHint');
@@ -295,401 +982,44 @@
     if (!text) return;
     hint.textContent = 'Sending…'; hint.classList.remove('err');
     try {
-      await api(`/api/messages/${me.clientOrgId}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ body: text }) });
-      input.value = ''; hint.textContent = '';
+      const res = await fetch(`/api/messages/${calendar.clientOrgId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ body: text }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Could not send.');
+      input.value = '';
+      hint.textContent = '';
       await refreshChatThread();
-    } catch (err) { hint.textContent = err.message; hint.classList.add('err'); }
-  }
-
-  // ---------------- Calendars ----------------
-  async function loadCalendars(preferId) {
-    const data = await api('/api/portal/calendars').catch(() => ({ calendars: [] }));
-    calendars = data.calendars || [];
-    if (!calendars.length) {
-      const pending = ((await api('/api/portal/calendars/pending').catch(() => ({}))).calendars || [])[0];
-      document.getElementById('calToolbar').innerHTML = `<a class="ghost" href="/?new=1" style="text-decoration:none;padding:8px 14px;border:1px solid var(--rule);border-radius:6px;font-size:13px;">Generate a calendar</a>`;
-      if (pending) {
-        document.getElementById('calTitle').textContent = pending.profile.companyName || 'Your compliance calendar';
-        document.getElementById('calSub').textContent = `${pending.profile.entityType || ''} · ${pending.profile.state || ''} · Submitted ${new Date(pending.createdAt).toLocaleDateString()}`;
-        document.getElementById('itemsList').innerHTML = `
-          <div class="banner info"><b>Our team is verifying your ${escapeHtml(String(pending.items?.length || ''))}-item calendar.</b> You'll get a notification here and by email as soon as it's ready, and then you can pick services and upload documents.</div>`;
-        return;
-      }
-      document.getElementById('calTitle').textContent = 'No calendar yet';
-      document.getElementById('calSub').textContent = 'Generate your compliance calendar to see every filing your company owes, with prices, and choose the ones you want us to handle.';
-      document.getElementById('itemsList').innerHTML = '';
-      return;
-    }
-    const wanted = preferId || new URLSearchParams(location.search).get('calendar') || (calendar && calendar._id);
-    calendar = calendars.find(c => c._id === wanted) || calendars[0];
-    renderHeader();
-    renderItems();
-  }
-
-  function renderHeader() {
-    const p = calendar.profile || {};
-    document.getElementById('calTitle').textContent = p.companyName || 'Your compliance calendar';
-    document.getElementById('calSub').textContent = [p.entityType, p.state, p.country && p.country !== 'United States' ? p.country : '', (p.fyStart || p.fyEnd) ? `FY ${p.fyStart || ''}–${p.fyEnd || ''}` : '', `Generated ${new Date(calendar.createdAt).toLocaleDateString()}`].filter(Boolean).join(' · ');
-
-    const current = calendars.filter(c => !c.supersededAt);
-    const older = calendars.filter(c => c.supersededAt);
-    const opt = (c) => `<option value="${c._id}" ${c._id === calendar._id ? 'selected' : ''}>${escapeHtml(c.profile.companyName || 'Calendar')} · ${c.supersededAt ? `previous version, replaced ${new Date(c.supersededAt).toLocaleDateString()}` : `generated ${new Date(c.createdAt).toLocaleDateString()}`}</option>`;
-    const picker = calendars.length > 1 ? `
-      <label class="sr-only" for="calPicker">Choose calendar</label>
-      <select id="calPicker">
-        <optgroup label="Current">${current.map(opt).join('')}</optgroup>
-        ${older.length ? `<optgroup label="Calendar history">${older.map(opt).join('')}</optgroup>` : ''}
-      </select>` : '';
-    document.getElementById('calToolbar').innerHTML = `
-      ${picker}
-      ${calendar.supersededAt ? '' : `<button class="ghost" id="regenBtn" style="padding:8px 14px;font-size:13px;">Update details &amp; regenerate</button>`}
-      <a href="/?new=1" style="font-size:13px;">Calendar for another company</a>`;
-    document.getElementById('calPicker')?.addEventListener('change', (e) => {
-      calendar = calendars.find(c => c._id === e.target.value);
-      window.history.replaceState(null, '', `/portal.html?calendar=${calendar._id}`);
-      expandedItems.clear(); renderHeader(); renderItems();
-    });
-    document.getElementById('regenBtn')?.addEventListener('click', openRegen);
-
-    const s = calendar.summary || {};
-    document.getElementById('calStats').innerHTML = `
-      <div class="stat-row">
-        <div><b>${s.totalItems ?? calendar.items.length}</b>filings apply to you</div>
-        ${s.overdue ? `<div class="stat-late"><b>${s.overdue}</b>overdue</div>` : ''}
-        <div><b>${s.dueSoon ?? 0}</b>due in the next 30 days</div>
-        <div><b>${s.selected ?? 0}</b>selected for us to handle</div>
-        <div><b>${s.awaitingPayment ?? 0}</b>awaiting payment</div>
-        ${s.selectedInvoicedCents ? `<div><b>${money(s.selectedInvoicedCents)}</b>priced so far</div>` : ''}
-      </div>`;
-    document.getElementById('calBanner').innerHTML = calendar.supersededAt
-      ? `<div class="banner warn">This is an older version of your calendar, kept for your records. Documents and certificates here can still be downloaded. To make changes, switch to your current calendar above.</div>`
-      : '';
-  }
-
-  // "Prices" section: every filing on this calendar with its price, so the
-  // client sees all costs in one place before choosing anything.
-  function renderPrices() {
-    const el = document.getElementById('pricesPanel');
-    if (!calendar || !calendar.items.length) { el.innerHTML = ''; return; }
-    const rows = calendar.items.map((it, idx) => ({ it, idx })).filter(x => !x.it.isHistory)
-      .sort((a, b) => (b.it.selectedByClient ? 1 : 0) - (a.it.selectedByClient ? 1 : 0));
-    const onRequest = calendar.items.some(it => (it.price || {}).kind === 'quote' || (it.price || {}).kind === 'from');
-    el.innerHTML = `
-      <div class="list-section">
-        <div class="section-title">Prices</div>
-        <div class="section-sub">What each filing costs if you'd like us to handle it.</div>
-        <div class="contact-card price-list">
-          ${rows.map(({ it }) => `
-            <div class="price-row">
-              <span class="price-name">${escapeHtml(it.compliance_name)}${it.selectedByClient ? ' <span class="price-sel">selected</span>' : ''}</span>
-              <span class="price-val">${it.paymentStatus === 'Paid' ? 'Paid ' : ''}${escapeHtml((it.price || {}).label || 'Price on request')}</span>
-            </div>`).join('')}
-          ${onRequest ? `<div class="pay-note" style="margin-top:10px;">Where it says "Price on request" or "From", we'll contact you with the exact price as soon as you upload your documents.</div>` : ''}
-        </div>
-      </div>`;
-  }
-
-  // "Due 15 Apr 2027 · in 34 days", red when overdue, amber inside a week.
-  function fmtDue(d) { return new Date(d).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }); }
-  function dueLine(item) {
-    if (!item.dueDateActual) return `Due ${escapeHtml(item.due_date)}`;
-    const days = item.daysUntil;
-    const done = item.clientStatus === 'Filed';
-    let rel = '';
-    if (!done && days !== null) {
-      rel = days < 0 ? `<span class="due-late">${-days} day${days === -1 ? '' : 's'} overdue</span>`
-        : days === 0 ? '<span class="due-soon">due today</span>'
-        : days === 1 ? '<span class="due-soon">due tomorrow</span>'
-        : days <= 7 ? `<span class="due-soon">in ${days} days</span>` : `in ${days} days`;
-    }
-    const note = item.dueDateNote ? ` title="${escapeHtml(item.dueDateNote)}"` : '';
-    return `<span${note}>Due ${fmtDue(item.dueDateActual)}</span>${rel ? ' · ' + rel : ''}${item.recurrenceLabel ? ' · ' + escapeHtml(item.recurrenceLabel) : ''}`;
-  }
-  const byDue = (a, b) => (a.it.dueDateActual ? new Date(a.it.dueDateActual) : Infinity) - (b.it.dueDateActual ? new Date(b.it.dueDateActual) : Infinity);
-
-  function priceTag(item) {
-    const pr = item.price || {};
-    if (item.paymentStatus === 'Paid') return `<span class="price-tag paid">Paid ${escapeHtml(pr.label || '')}</span>`;
-    return `<span class="price-tag ${escapeHtml(pr.kind || 'quote')}" title="${escapeHtml(pr.message || 'Price')}">${escapeHtml(pr.label || 'Price on request')}</span>`;
-  }
-
-  function itemHtml(item, idx) {
-    const readOnly = !!calendar.supersededAt;
-    const clientDocs = (item.documents || []).map((d, di) => ({ ...d, di })).filter(d => d.type === 'client_upload');
-    const certs = (item.documents || []).map((d, di) => ({ ...d, di })).filter(d => d.type === 'certificate');
-    const cs = item.checklistSummary || { total: 0, provided: 0, allProvided: true };
-    const isOpen = expandedItems.has(idx);
-    const lockSelect = item.paymentStatus === 'Paid' || item.clientStatus === 'Filed' || ((item.paymentStatus === 'Invoiced' || item.paymentStatus === 'Overdue') && item.quotedBy !== 'price-list');
-    const dl = (d) => `/api/portal/calendars/${calendar._id}/items/${idx}/documents/${d.di}/download`;
-
-    const checklist = (item.checklist || []).map(r => {
-      const icon = r.state === 'accepted' ? '✓' : r.state === 'pending' ? '•' : r.state === 'rejected' ? '!' : '';
-      const label = r.state === 'accepted' ? 'Verified' : r.state === 'pending' ? 'Uploaded, being verified' : r.state === 'rejected' ? 'Please upload again' : r.lost ? 'Please upload again' : 'Needed';
-      const canUpload = !readOnly && (r.state === 'missing' || r.state === 'rejected');
-      return `
-        <div>
-          <div class="check-row">
-            <div style="display:flex;align-items:center;gap:8px;"><span class="check-dot ${r.state}" aria-hidden="true">${icon}</span><span>${escapeHtml(r.label)}</span></div>
-            <div style="display:flex;align-items:center;gap:10px;">
-              <span style="font-size:11.5px;color:var(--ink-soft);">${label}</span>
-              ${canUpload ? `<label class="upload-btn" style="cursor:pointer;white-space:nowrap;">Upload<input type="file" class="uploadInput" data-idx="${idx}" data-label="${escapeHtml(r.label)}" style="display:none;"></label>` : ''}
-            </div>
-          </div>
-          ${r.reused ? `<div class="check-sub">Using the file you gave us for "${escapeHtml(r.fromItem)}", no need to upload again</div>` : ''}
-          ${r.lost && r.state === 'missing' ? `<div class="check-sub" style="color:var(--stamp-red);">We couldn't find the file you sent earlier on our side, sorry. Please upload it once more.</div>` : ''}
-        </div>`;
-    }).join('');
-
-    let payArea = '';
-    if (item.paymentStatus === 'Paid') {
-      payArea = `<div class="price-line">Paid <b>${escapeHtml(item.price?.label || '')}</b>${item.paidAt ? ` on ${new Date(item.paidAt).toLocaleDateString()}` : ''}</div>`;
-    } else if (item.paymentStatus === 'Invoiced' || item.paymentStatus === 'Overdue') {
-      payArea = `
-        <div><div class="price-line">Price: <b>${escapeHtml(item.price?.label || '')}</b></div>${item.quoteNote ? `<div class="pay-note">${escapeHtml(item.quoteNote)}</div>` : ''}<div class="pay-note">${escapeHtml(item.price?.message || '')}</div></div>
-        <div>${!readOnly && cs.allProvided
-          ? `<button class="pay-btn" data-pay-idx="${idx}">Pay ${escapeHtml(item.price?.label || '')}</button><div class="pay-note" style="font-size:11.5px;">By paying you agree to our <a href="/terms" target="_blank" rel="noopener">Terms</a> and <a href="/refund-policy" target="_blank" rel="noopener">Cancellation &amp; Refunds</a> policy.</div>`
-          : `<button class="pay-btn" disabled>Pay ${escapeHtml(item.price?.label || '')}</button><div class="pay-note">Upload every document above to unlock payment.</div>`}</div>`;
-    } else {
-      const pr = item.price || {};
-      payArea = `<div><div class="price-line">Price: <b>${escapeHtml(pr.label || 'Price on request')}</b></div><div class="pay-note">${escapeHtml(pr.message || '')}</div></div>`;
-    }
-
-    return `
-      <div class="item-row">
-        <div class="item-header">
-          <button class="item-toggle" data-toggle-idx="${idx}" aria-expanded="${isOpen}">
-            <div class="item-name">${escapeHtml(item.compliance_name)}</div>
-            <div class="item-meta">${dueLine(item)}${item.selectedByClient && cs.total && item.clientStatus !== 'Filed' ? ` · ${cs.provided}/${cs.total} documents provided` : ''}</div>
-          </button>
-          <div class="item-side">
-            ${priceTag(item)}
-            ${item.selectedByClient ? `<span class="status-pill ${statusClass(item.clientStatus)}">${escapeHtml(item.clientStatus)}</span>` : ''}
-            ${readOnly || item.isHistory ? '' : `<button class="select-btn ${item.selectedByClient ? 'on' : ''}" data-select-idx="${idx}" data-selected="${item.selectedByClient ? '1' : '0'}" ${item.selectedByClient && lockSelect ? 'disabled title="We\'ve already sent you a price for this. Message us to cancel."' : ''}>${item.selectedByClient ? 'Selected' : 'Add to my services'}</button>`}
-          </div>
-        </div>
-        <div class="item-body" ${isOpen ? '' : 'hidden'} style="margin-top:10px;">
-          <p style="font-size:14px;color:var(--ink-soft);margin:8px 0;">${escapeHtml(item.description)}</p>
-          ${item.authority ? `<div style="font-size:12.5px;color:var(--ink-soft);">Authority: ${escapeHtml(item.authority)}</div>` : ''}
-          ${certs.length ? `
-            <div class="proof-card">
-              <div class="proof-title">${item.clientStatus === 'Filed' ? '✓ Done' : 'Documents from us'}${item.completedAt ? ` <span>on ${new Date(item.completedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</span>` : ''}</div>
-              ${certs.map(d => `
-                <div class="proof-item">
-                  ${d.fileMissing
-                    ? `<div class="pay-note">We're re-uploading "${escapeHtml(d.fileName)}". It will be back here shortly.</div>`
-                    : `<a class="doc-chip" href="${dl(d)}">${escapeHtml(d.fileName)} ↓</a>`}
-                  ${d.referenceNumber ? `<div class="pay-note">Reference: <b>${escapeHtml(d.referenceNumber)}</b></div>` : ''}
-                  ${d.proofNote ? `<div class="pay-note" style="color:var(--ink);">${escapeHtml(d.proofNote)}</div>` : ''}
-                </div>`).join('')}
-            </div>` : ''}
-          ${item.selectedByClient || clientDocs.length ? `
-            ${(item.checklist || []).length ? `<div class="checklist"><div class="checklist-title">Documents we need</div>${checklist}</div>` : ''}
-            ${clientDocs.length ? `<div style="margin-top:10px;"><div class="checklist-title">Your uploads</div>${clientDocs.map(d => `
-              <div style="margin-bottom:6px;">
-                ${d.fileMissing ? `<span class="doc-chip" style="opacity:.6;">${escapeHtml(d.fileName)}</span>` : `<a class="doc-chip" href="${dl(d)}">${escapeHtml(d.fileName)} ↓</a>`}
-                <span class="status-pill ${d.fileMissing || d.reviewStatus === 'rejected' ? 'status-Overdue' : d.reviewStatus === 'accepted' ? 'status-Filed' : 'status-Not-Started'}">${d.fileMissing && d.reviewStatus !== 'rejected' ? 'Lost, please upload again' : d.reviewStatus === 'accepted' ? 'Verified' : d.reviewStatus === 'rejected' ? 'Please upload again' : 'Being verified'}</span>
-                ${d.reviewStatus === 'rejected' ? `<div style="font-size:12.5px;color:var(--stamp-red);margin:2px 0 0 2px;">${escapeHtml(d.reviewNote || 'Please upload a corrected file.')}</div>` : ''}
-              </div>`).join('')}</div>` : ''}
-          ` : `<div class="pay-note" style="margin-top:10px;">Add this to your services to see the documents we'll need.</div>`}
-          <div class="price-box">${payArea}</div>
-          <span class="hint" data-hint-idx="${idx}" style="display:block;margin-top:6px;"></span>
-        </div>
-      </div>`;
-  }
-
-  function renderItems() {
-    const el = document.getElementById('itemsList');
-    if (!calendar.items.length) { el.innerHTML = '<div class="empty-state">No filings on this calendar.</div>'; return; }
-    const withIdx = calendar.items.map((it, idx) => ({ it, idx }));
-    const history = withIdx.filter(x => x.it.isHistory).sort((a, b) => byDue(b, a));
-    const currentItems = withIdx.filter(x => !x.it.isHistory);
-    const selected = currentItems.filter(x => x.it.selectedByClient).sort(byDue);
-    const others = currentItems.filter(x => !x.it.selectedByClient).sort(byDue);
-    el.innerHTML = `
-      <div class="group-title">Your selected services</div>
-      <div class="group-sub">${selected.length ? 'Upload the documents for each one. Listed prices are added straight away; for the rest we\'ll contact you with the price once your documents are in. You pay here.' : 'Nothing selected yet. Add the filings you want us to handle from the list below.'}</div>
-      ${selected.length ? `<div class="card" style="margin-top:8px;"><div class="card-body" style="padding:4px 24px;">${selected.map(x => itemHtml(x.it, x.idx)).join('')}</div></div>` : ''}
-      ${others.length ? `
-        <div class="group-title">Other filings that apply to you</div>
-        <div class="group-sub">Everything else your company owes. Prices are shown so you can decide what to hand over to us.</div>
-        <div class="card" style="margin-top:8px;"><div class="card-body" style="padding:4px 24px;">${others.map(x => itemHtml(x.it, x.idx)).join('')}</div></div>` : ''}
-      ${history.length ? `
-        <details class="history-block">
-          <summary>Previous periods (${history.length})</summary>
-          <div class="group-sub">Filings we've completed for earlier years or quarters, with their proof and receipts.</div>
-          <div class="card" style="margin-top:8px;"><div class="card-body" style="padding:4px 24px;">${history.map(x => itemHtml(x.it, x.idx)).join('')}</div></div>
-        </details>` : ''}`;
-
-    el.querySelectorAll('[data-toggle-idx]').forEach(b => b.addEventListener('click', () => {
-      const idx = +b.dataset.toggleIdx;
-      expandedItems.has(idx) ? expandedItems.delete(idx) : expandedItems.add(idx);
-      renderItems();
-    }));
-    el.querySelectorAll('[data-select-idx]').forEach(b => b.addEventListener('click', () => toggleSelect(+b.dataset.selectIdx, b.dataset.selected !== '1', b)));
-    el.querySelectorAll('[data-pay-idx]').forEach(b => b.addEventListener('click', () => payForItem(+b.dataset.payIdx, b)));
-    el.querySelectorAll('.uploadInput').forEach(input => input.addEventListener('change', () => uploadFor(input)));
-    renderPrices();
-  }
-
-  function needContact(err) {
-    if (err.data && err.data.code === 'CONTACT_INCOMPLETE') {
-      loadProfile().then(() => document.getElementById('contactGate').scrollIntoView({ behavior: 'smooth' }));
-      return true;
-    }
-    return false;
-  }
-  function hintFor(idx) { return document.querySelector(`[data-hint-idx="${idx}"]`); }
-  function replaceCalendar(updated) {
-    const i = calendars.findIndex(c => c._id === updated._id);
-    if (i >= 0) calendars[i] = updated;
-    calendar = updated;
-    renderHeader(); renderItems();
-  }
-
-  async function toggleSelect(idx, selected, btn) {
-    btn.disabled = true;
-    try {
-      const data = await api(`/api/portal/calendars/${calendar._id}/items/${idx}/select`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ selected }),
-      });
-      if (selected) expandedItems.add(idx);
-      replaceCalendar(data.calendar);
     } catch (err) {
-      btn.disabled = false;
-      if (!needContact(err)) alert(err.message);
-    }
-  }
-
-  async function uploadFor(input) {
-    const idx = +input.dataset.idx;
-    const hint = hintFor(idx);
-    const file = input.files[0];
-    if (!file) return;
-    hint.textContent = `Uploading ${file.name}…`; hint.classList.remove('err');
-    const formData = new FormData();
-    formData.append('requirementLabel', input.dataset.label || '');
-    formData.append('file', file);
-    try {
-      const data = await api(`/api/portal/calendars/${calendar._id}/items/${idx}/upload`, { method: 'POST', body: formData });
-      replaceCalendar(data.calendar);
-      const h = hintFor(idx); if (h) h.textContent = 'Uploaded. We\'ll verify it and let you know.';
-    } catch (err) {
-      if (!needContact(err)) { hint.textContent = err.message; hint.classList.add('err'); }
-    }
-  }
-
-  async function payForItem(idx, btn) {
-    const hint = hintFor(idx);
-    btn.disabled = true; hint.textContent = ''; hint.classList.remove('err');
-    try {
-      if (typeof Razorpay === 'undefined') {
-        throw new Error("The payment window couldn't load. If you use an ad or tracker blocker, allow checkout.razorpay.com and reload the page.");
-      }
-      const order = await api(`/api/portal/payments/calendars/${calendar._id}/items/${idx}/create-order`, { method: 'POST' });
-      if (order.conversionNote) hint.textContent = order.conversionNote;
-      const rzp = new Razorpay({
-        key: order.keyId,
-        amount: order.amount,
-        currency: order.currency,
-        name: 'ComplyGlobally',
-        description: order.description || 'Compliance filing fee',
-        order_id: order.orderId,
-        prefill: order.prefill || {},
-        handler: async function (response) {
-          hint.textContent = 'Confirming payment…';
-          try {
-            const res = await fetch(`/api/portal/payments/calendars/${calendar._id}/items/${idx}/verify`, {
-              method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(response),
-            });
-            const result = await res.json().catch(() => ({}));
-            if (result.calendar) replaceCalendar(result.calendar);
-            const h = hintFor(idx);
-            if (res.status === 202 || res.status === 409) { if (h) h.textContent = result.message || result.error; }
-            else if (!res.ok) throw new Error(result.error || 'Payment verification failed.');
-            else if (h) h.textContent = 'Payment received. Thank you!';
-          } catch (err) {
-            const h = hintFor(idx) || hint;
-            h.textContent = `${err.message} If you were charged, don't pay again. We'll confirm it shortly.`;
-            h.classList.add('err');
-          }
-        },
-        modal: { ondismiss: function () { btn.disabled = false; } },
-        theme: { color: '#34A9A1' },
-      });
-      rzp.on('payment.failed', function (response) {
-        hint.textContent = `Payment failed: ${response.error.description}. You haven't been charged — try again or use another card.`;
-        hint.classList.add('err');
-        btn.disabled = false;
-      });
-      rzp.open();
-    } catch (err) {
-      if (err.data && err.data.calendar) replaceCalendar(err.data.calendar);
-      if (!needContact(err)) { const h = hintFor(idx) || hint; h.textContent = err.message; h.classList.add('err'); }
-      btn.disabled = false;
-    }
-  }
-
-  // ---------------- Regenerate ----------------
-  const regenDialog = document.getElementById('regenDialog');
-  function openRegen() {
-    if (!contactComplete()) { document.getElementById('contactGate').scrollIntoView({ behavior: 'smooth' }); return; }
-    const p = calendar.profile || {};
-    document.getElementById('rgCompany').value = p.companyName || '';
-    document.getElementById('rgEntity').value = p.entityType || 'Corporation';
-    document.getElementById('rgTax').value = p.taxStatus || '';
-    document.getElementById('rgIncorp').value = (p.incorpDate || '').slice(0, 10);
-    document.getElementById('rgFyEnd').value = p.fyEnd || '';
-    document.getElementById('rgEmp').value = (p.employeeStates || []).join(', ');
-    document.getElementById('rgForeign').checked = !!p.hasForeignParent;
-    document.getElementById('regenHint').textContent = '';
-    regenDialog.showModal();
-  }
-  document.getElementById('regenCancel').addEventListener('click', () => regenDialog.close());
-  document.getElementById('regenForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('regenSubmit');
-    const hint = document.getElementById('regenHint');
-    btn.disabled = true; hint.classList.remove('err');
-    hint.textContent = 'Researching your filings from official sources. This usually takes one to two minutes; keep this window open.';
-    try {
-      const data = await api('/api/portal/calendars/regenerate', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          calendarId: calendar._id,
-          profile: {
-            companyName: document.getElementById('rgCompany').value.trim(),
-            entityType: document.getElementById('rgEntity').value,
-            taxStatus: document.getElementById('rgTax').value.trim(),
-            incorpDate: document.getElementById('rgIncorp').value,
-            fyEnd: document.getElementById('rgFyEnd').value.trim(),
-            employeeStates: document.getElementById('rgEmp').value.split(',').map(s => s.trim()).filter(Boolean),
-            hasForeignParent: document.getElementById('rgForeign').checked,
-          },
-        }),
-      });
-      regenDialog.close();
-      expandedItems.clear();
-      await loadCalendars(data.calendar._id);
-      window.history.replaceState(null, '', `/portal.html?calendar=${data.calendar._id}`);
-    } catch (err) {
-      if (needContact(err)) regenDialog.close();
       hint.textContent = err.message; hint.classList.add('err');
-    } finally { btn.disabled = false; }
+    }
+  }
+
+  async function load() {
+    try {
+      const res = await fetch(`/api/calendars/${id}`);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Could not load calendar.');
+      calendar = data.calendar;
+      render();
+    } catch (err) {
+      document.getElementById('slot').innerHTML = `<div class="error-case">${escapeHtml(err.message)}</div>`;
+    }
+  }
+  if (id) load();
+  // A client action (upload, selection, payment) shows up without a reload.
+  document.addEventListener('cc:notifications', () => {
+    if (!id) return;
+    fetch(`/api/calendars/${id}`).then(r => r.ok ? r.json() : null).then(d => {
+      if (!d) return;
+      calendar = d.calendar;
+      if (calendar.status === 'approved' && calendar.clientOrgId) loadBilling().then(renderClientItems);
+      refreshChatThread();
+    }).catch(() => {});
   });
-
-  // New notification (quote sent, document verified, payment confirmed…)
-  // → refresh what's on screen so the client never has to reload.
-  document.addEventListener('cc:notifications', () => { loadCalendars(); refreshChatThread(); });
-
-  (async () => {
-    if (!(await loadUser())) return;
-    await loadProfile();
-    await loadCalendars();
-    loadContact();
-    loadChat();
-  })();
 </script>
 <script src="/js/notifications.js" defer></script>
-<!--SITE_FOOTER-->
 </body>
 </html>
