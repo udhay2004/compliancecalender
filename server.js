@@ -42,6 +42,9 @@ const PORT = process.env.PORT || 3000;
 // this, express-rate-limit either throws on the X-Forwarded-For header
 // or (worse) silently rate-limits every visitor as one shared IP.
 app.set("trust proxy", 1);
+app.disable("x-powered-by"); // don't advertise the framework
+// Browser security headers on every response (lib/securityHeaders.js).
+app.use(require("./lib/securityHeaders").securityHeaders);
 
 const REQUIRED_ENV = ["ANTHROPIC_API_KEY", "MONGODB_URI", "JWT_SECRET"];
 const missing = REQUIRED_ENV.filter((k) => !process.env[k]);
@@ -187,6 +190,20 @@ async function start() {
   setTimeout(() => {
     backfillDueDates().catch((err) => console.error("[deadlines] Backfill failed:", err.message));
   }, 5000);
+
+  // Nightly database backup to R2 (lib/backup.js). 02:30 UTC by default.
+  if (process.env.DISABLE_BACKUPS !== "true") {
+    const { runBackup } = require("./lib/backup");
+    const storage = require("./lib/storage");
+    const backupCron = process.env.BACKUP_CRON || "30 2 * * *";
+    cron.schedule(backupCron, () => {
+      runBackup({ reason: "scheduled" }).catch(() => {}); // failures are logged + the team is alerted
+    });
+    console.log(`[backup] Nightly database backup scheduled ("${backupCron}") to ${storage.describe()}.`);
+    if (storage.DRIVER === "local" && process.env.NODE_ENV === "production") {
+      console.warn("[backup] WARNING: backups are going to local disk, which is wiped on redeploy. Set the R2_* settings.");
+    }
+  }
 
   if (process.env.DISABLE_REMINDERS !== "true") {
     const schedule = process.env.REMINDER_CRON || "0 8 * * *";
