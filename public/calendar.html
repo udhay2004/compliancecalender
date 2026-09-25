@@ -3,482 +3,951 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard — Compliance Calendar</title>
+<title>Calendar — Compliance Calendar Generator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/shared.css">
 <style>
-  .hero { padding-top: 40px; }
-  .hero h1 { font-family: var(--serif); font-size: 28px; margin: 0 0 6px; letter-spacing: -0.01em; }
-  .hero p { color: var(--ink-soft); font-size: 14px; margin: 0; }
-  .role-pill {
-    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .07em;
-    text-transform: uppercase; padding: 4px 10px; border-radius: 999px;
-    background: var(--teal-bg); color: var(--brand-dark); margin-bottom: 10px;
+  .sel-badge { font-size: 11.5px; padding: 2px 9px; border-radius: 999px; background: var(--grey-bg); color: var(--ink-soft); white-space: nowrap; }
+  .sel-badge.on { background: var(--teal-bg); color: var(--brand-dark); font-weight: 600; }
+  .ws-stats { display: flex; flex-wrap: wrap; gap: 8px 26px; font-size: 12.5px; color: var(--ink-soft); margin: 4px 0 16px; }
+  .ws-stats b { display: block; font-family: var(--serif); font-size: 21px; color: var(--ink); }
+  .ws-stats .attn b { color: var(--seal-gold); }
+  .ws-stats .late b { color: var(--stamp-red); }
+  .ws-tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--rule); margin-bottom: 4px; flex-wrap: wrap; }
+  .ws-tab { background: none; border: none; border-bottom: 2px solid transparent; padding: 8px 12px; font: 500 13.5px var(--sans); color: var(--ink-soft); cursor: pointer; margin-bottom: -1px; }
+  .ws-tab span { font-size: 11.5px; background: var(--grey-bg); border-radius: 999px; padding: 1px 7px; margin-left: 4px; }
+  .ws-tab.on { color: var(--brand-dark); border-bottom-color: var(--brand); }
+  .ws-tab:focus-visible, .ws-card-head:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .ws-card.muted { background: var(--paper); box-shadow: none; }
+  .ws-card-head { all: unset; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; width: 100%; cursor: pointer; box-sizing: border-box; }
+  .ws-label { font-size: 11.5px; font-weight: 600; color: var(--ink-soft); margin-bottom: 6px; }
+  .ws-checklist { margin-top: 14px; border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; }
+  .ws-check { display: grid; grid-template-columns: 12px 1fr auto auto; gap: 10px; align-items: center; font-size: 13px; padding: 4px 0; }
+  .ws-check a { font-size: 12px; }
+  .ws-check-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--rule); }
+  .ws-check.accepted .ws-check-dot { background: var(--brand); }
+  .ws-check.pending .ws-check-dot { background: var(--seal-gold); }
+  .ws-check.rejected .ws-check-dot { background: var(--stamp-red); }
+  .ws-check-state { font-size: 11.5px; color: var(--ink-soft); }
+  .ws-quote { margin-top: 14px; padding: 12px 14px; background: var(--paper); border-radius: 8px; }
+  .ws-quote.paid { background: var(--teal-bg); color: var(--brand-dark); font-size: 13.5px; }
+  .ws-quote-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .ws-quote-row .quoteAmount { width: 110px; }
+  .ws-quote-row .quoteNote { flex: 1; min-width: 180px; }
+  .ws-dollar { font-weight: 600; color: var(--ink-soft); }
+  .doc-row { padding: 10px 12px; border: 1px solid var(--rule); border-radius: 8px; margin-bottom: 8px; }
+  .doc-row.lost { border-color: #f1c4bf; background: var(--stamp-red-bg); }
+  .doc-row-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .doc-name { font-weight: 600; font-size: 13.5px; overflow-wrap: anywhere; }
+  .doc-meta { font-size: 11.5px; color: var(--ink-soft); margin-top: 2px; }
+  .doc-note { font-size: 12.5px; color: var(--stamp-red); margin-top: 4px; }
+  .doc-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+  .doc-actions .rejectNote { flex: 1 1 180px; min-width: 0; font-size: 12.5px; padding: 6px 8px; }
+  .doc-btn { font: 600 12.5px var(--sans); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--rule); background: var(--card); color: var(--brand-dark); text-decoration: none; cursor: pointer; }
+  .doc-btn:hover { border-color: var(--brand); }
+  .doc-btn.verify { border-color: var(--brand); background: var(--brand); color: #fff; }
+  .doc-btn.reject { color: var(--stamp-red); }
+  .doc-btn.reject:hover { border-color: var(--stamp-red); }
+  button.primary.small { padding: 6px 12px; font-size: 12.5px; }
+  /* Calendar table: never wider than the screen */
+  table.cal { table-layout: fixed; }
+  table.cal th:nth-child(1), table.cal td.due { width: 17%; }
+  table.cal th:nth-child(2), table.cal td.name { width: 30%; }
+  table.cal th:nth-child(3), table.cal td.applies { width: 16%; }
+  table.cal td { overflow-wrap: anywhere; }
+  table.cal td.due, table.cal td.applies { white-space: normal; }
+  @media (max-width: 760px) {
+    table.cal, table.cal tbody, table.cal tr, table.cal td { display: block; width: 100% !important; }
+    table.cal thead { display: none; }
+    table.cal tr { border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; }
+    table.cal td { border: 0; padding: 3px 0; }
+    table.cal td[data-label]::before { content: attr(data-label) ": "; font-weight: 600; color: var(--ink-soft); }
+    table.cal td[data-label]:empty { display: none !important; }
+    table.cal th:nth-child(3), table.cal td:nth-child(3) { display: block; }
+    table.cal td.edit-cell { text-align: left; }
   }
-  .role-pill.owner { background: var(--seal-gold-bg); color: var(--seal-gold); }
-
-  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin-top: 22px; }
-  .stat {
-    background: var(--card); border: 1px solid var(--rule); border-radius: var(--radius);
-    padding: 18px 20px; box-shadow: var(--shadow-sm);
-  }
-  .stat-label { font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-soft); }
-  .stat-value { font-family: var(--serif); font-size: 30px; font-weight: 700; margin: 8px 0 4px; letter-spacing: -0.02em; }
-  .stat-value.good { color: var(--brand-dark); }
-  .stat-value.warn { color: var(--seal-gold); }
-  .stat-value.bad  { color: var(--stamp-red); }
-  .stat-hint { font-size: 12px; color: var(--grey-dot); line-height: 1.5; }
-
-  .panel { margin-top: 40px; }
-  .panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
-  .panel-head h2 { font-family: var(--serif); font-size: 19px; margin: 0; letter-spacing: -0.01em; }
-  .panel-head .panel-sub { font-size: 13px; color: var(--ink-soft); }
-
-  table.data { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; }
-  table.data th {
-    text-align: left; font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
-    color: var(--ink-soft); padding: 12px 16px; border-bottom: 1px solid var(--rule); background: var(--grey-bg);
-  }
-  table.data td { padding: 13px 16px; font-size: 13.5px; border-bottom: 1px solid var(--rule-soft); vertical-align: middle; }
-  table.data tr:last-child td { border-bottom: 0; }
-  table.data td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .table-scroll { overflow-x: auto; }
-
-  .bar-row { display: flex; align-items: center; gap: 12px; padding: 9px 0; }
-  .bar-label { flex: 0 0 160px; font-size: 13.5px; color: var(--ink); }
-  .bar-track { flex: 1; height: 9px; background: var(--grey-bg); border-radius: 999px; overflow: hidden; }
-  .bar-fill { height: 100%; background: var(--brand); border-radius: 999px; transition: width .4s ease; }
-  .bar-count { flex: 0 0 46px; text-align: right; font-size: 13px; font-variant-numeric: tabular-nums; color: var(--ink-soft); }
-
-  .muted { color: var(--grey-dot); font-size: 13.5px; padding: 26px 0; text-align: center; }
-  .ghost-btn {
-    background: none; border: 1px solid var(--rule); border-radius: var(--radius-sm);
-    padding: 6px 12px; font-size: 12.5px; font-family: var(--sans); cursor: pointer; color: var(--ink-soft);
-  }
-  .ghost-btn:hover { border-color: var(--stamp-red); color: var(--stamp-red); }
-  .feed { list-style: none; padding: 0; margin: 0; }
-  .feed li { padding: 12px 0; border-bottom: 1px solid var(--rule-soft); font-size: 13.5px; line-height: 1.55; }
-  .feed li:last-child { border-bottom: 0; }
-  .feed .feed-meta { color: var(--grey-dot); font-size: 12px; margin-top: 3px; }
-  .skeleton { color: var(--grey-dot); padding: 60px 0; text-align: center; font-size: 14px; }
-  .section-heading { margin: 48px 0 -8px; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--brand-dark); border-top: 1px solid var(--rule); padding-top: 18px; }
-  .fin-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 28px; margin-top: 8px; align-items: start; }
-  .fin-col { min-width: 0; }
-  .fin-panel { margin-top: 32px; }
-  .fin-head h2 { font-family: var(--serif); font-size: 18px; margin: 0; }
-  .fin-head p { font-size: 13px; color: var(--ink-soft); margin: 4px 0 12px; line-height: 1.5; }
-  .fin-list { background: var(--card); border: 1px solid var(--rule); border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden; }
-  .fin-row { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 13px 16px; border-bottom: 1px solid var(--rule-soft); text-decoration: none; color: inherit; }
-  .fin-row:last-child { border-bottom: 0; }
-  .fin-row:hover { background: var(--paper); }
-  .fin-row:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
-  .fin-main { min-width: 0; }
-  .fin-title { font-weight: 600; font-size: 14px; color: var(--brand-dark); overflow-wrap: anywhere; }
-  .fin-sub { font-size: 12.5px; color: var(--ink-soft); margin-top: 2px; overflow-wrap: anywhere; }
-  .fin-side { text-align: right; flex-shrink: 0; max-width: 45%; }
-  .fin-amt { font-family: var(--serif); font-weight: 700; font-size: 16px; font-variant-numeric: tabular-nums; }
-  .fin-amt.good { color: var(--brand-dark); }
-  .fin-amt.bad { color: var(--stamp-red); }
-  .fin-pill { display: inline-block; font-family: var(--sans); font-size: 11.5px; font-weight: 600; padding: 2px 9px; border-radius: 999px; background: var(--grey-bg); color: var(--ink-soft); }
-  .fin-pill.ready { background: var(--seal-gold-bg); color: var(--seal-gold); }
-  .fin-pill.bad { background: var(--stamp-red-bg); color: var(--stamp-red); }
-  .fin-pill.done { background: var(--teal-bg); color: var(--brand-dark); }
-  .fin-empty { background: var(--card); border: 1px dashed var(--rule); border-radius: var(--radius); padding: 22px 16px; text-align: center; color: var(--ink-soft); font-size: 13.5px; }
-  .fin-list.price { padding: 4px 16px; }
-  .fin-price-row { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--rule-soft); font-size: 13px; }
-  .fin-price-row:last-child { border-bottom: 0; }
-  .fin-price-row b { white-space: nowrap; text-align: right; }
-  .fin-price-row b.quote, .fin-price-row b.included, .fin-price-row b.from { font-weight: 500; color: var(--ink-soft); white-space: normal; max-width: 50%; }
-  @media (max-width: 1020px) { .fin-grid { grid-template-columns: minmax(0, 1fr); gap: 0; } }
-  @media (max-width: 720px) {
-    .bar-label { flex-basis: 120px; }
-    table.data, table.data tbody, table.data tr, table.data td { display: block; width: 100%; }
-    table.data thead { display: none; }
-    table.data tr { border-bottom: 1px solid var(--rule); padding: 8px 0; }
-    table.data td { border: 0; padding: 4px 14px; text-align: left !important; }
-    table.data td[data-label]:not([data-label=""])::before { content: attr(data-label); display: block; font-size: 10.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-soft); }
-    .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-    .stat { padding: 14px 14px; }
-    .stat-label { font-size: 10.5px; }
-    .stat-value { font-size: 22px; margin: 6px 0 2px; }
-    .stat-hint { font-size: 11px; }
-    .hero h1 { font-size: 23px; }
-  }
+  .proof-box { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--rule); border-radius: 8px; }
+  .proof-box.done { border-color: #bfe3de; background: #f5fbfa; }
+  .proof-done { font-size: 13px; font-weight: 600; color: var(--brand-dark); margin-bottom: 8px; }
+  .proof-row { padding: 10px 0; border-bottom: 1px solid var(--rule-soft); }
+  .proof-form { margin-top: 8px; }
+  .proof-form summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--brand-dark); padding: 4px 0; }
+  .proof-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; margin-top: 10px; }
+  .proof-grid .span2 { grid-column: 1 / -1; }
+  .proof-grid .field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .proof-grid label { font-size: 12px; font-weight: 600; }
+  .proof-grid input[type=file] { font-size: 12.5px; max-width: 100%; }
+  .proof-check { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .proof-check input { width: auto; }
+  @media (max-width: 640px) { .proof-grid { grid-template-columns: 1fr; } }
+  .contact-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .contact-btn { font-size: 12.5px; font-weight: 600; text-decoration: none; padding: 6px 12px; border: 1px solid var(--rule); border-radius: 6px; color: var(--brand-dark); }
+  .contact-btn:hover { border-color: var(--brand); }
+  @media (max-width: 640px) { .ws-check { grid-template-columns: 12px 1fr; } .ws-check-state, .ws-check a { grid-column: 2; } }
 </style>
 </head>
 <body>
 <div class="topbar">
-  <div class="brand"><a href="/dashboard.html">Compliance Calendar <strong>Generator</strong></a></div>
-  <div class="nav-links" id="navLinks"></div>
-  <div class="nav-user">
-    <span id="navUser"></span>
-    <button type="button" id="logoutBtn">Log out</button>
+  <div class="brand"><a href="/app.html">Compliance Calendar <strong>Generator</strong></a></div>
+  <div class="nav-links" id="navLinks">
+    <a href="/app.html">Generate</a>
+    <a href="/review.html">Review Queue</a>
   </div>
+  <div class="nav-user" id="navUser"></div>
 </div>
 
 <div class="wrap">
-  <div id="root"><div class="skeleton">Loading your dashboard…</div></div>
+  <div id="slot"><div class="empty-state">Loading…</div></div>
 </div>
 
 <script>
-(function () {
-  'use strict';
+  function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
+  function fmtDateTime(s) { return s ? new Date(s).toLocaleString() : '—'; }
 
-  function $(id) { return document.getElementById(id); }
-
-  // Everything from the server is escaped before it reaches the DOM.
-  // Company names, filing names and audit summaries are all
-  // user-supplied somewhere upstream, so dropping them into innerHTML
-  // raw would be a stored-XSS hole — and on an admin page, XSS means
-  // whoever planted it acts as the super admin.
-  function esc(value) {
-    return String(value === null || value === undefined ? '' : value)
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-  }
-
-  function money(amount) {
-    return '$' + Number(amount || 0).toLocaleString('en-US', {
-      minimumFractionDigits: 2, maximumFractionDigits: 2
-    });
-  }
-
-  function when(value) {
-    if (!value) return '—';
-    var d = new Date(value);
-    if (isNaN(d.getTime())) return '—';
-    return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
-  }
-
-  var ROLE_LABEL = {
-    staff: 'Staff', admin: 'Administrator', super_admin: 'Super admin'
-  };
-  var DEPT_LABEL = { tech: 'Tech', finance: 'Finance' };
-
-  function statCards(cards) {
-    return '<div class="stat-grid">' + cards.map(function (c) {
-      var value = c.money ? money(c.value) : esc(c.value);
-      return '<div class="stat">' +
-        '<div class="stat-label">' + esc(c.label) + '</div>' +
-        '<div class="stat-value ' + esc(c.tone || '') + '">' + value + '</div>' +
-        '<div class="stat-hint">' + esc(c.hint || '') + '</div>' +
-      '</div>';
-    }).join('') + '</div>';
-  }
-
-  function panel(title, sub, body) {
-    return '<section class="panel">' +
-      '<div class="panel-head"><h2>' + esc(title) + '</h2>' +
-      (sub ? '<span class="panel-sub">' + esc(sub) + '</span>' : '') + '</div>' +
-      body + '</section>';
-  }
-
-  function table(headers, rows, emptyMessage) {
-    if (!rows.length) return '<div class="muted">' + esc(emptyMessage) + '</div>';
-    return '<div class="table-scroll"><table class="data"><thead><tr>' +
-      headers.map(function (h) {
-        return '<th' + (h.num ? ' style="text-align:right"' : '') + '>' + esc(h.label) + '</th>';
-      }).join('') +
-      '</tr></thead><tbody>' + rows.join('') + '</tbody></table></div>';
-  }
-
-  function bars(items) {
-    var max = items.reduce(function (m, i) { return Math.max(m, i.value); }, 0) || 1;
-    return '<div>' + items.map(function (i) {
-      return '<div class="bar-row">' +
-        '<div class="bar-label">' + esc(i.label) + '</div>' +
-        '<div class="bar-track"><div class="bar-fill" style="width:' + ((i.value / max) * 100).toFixed(1) + '%"></div></div>' +
-        '<div class="bar-count">' + esc(i.value) + '</div>' +
-      '</div>';
-    }).join('') + '</div>';
-  }
-
-  // ------------------------------------------------------------------
-  function renderTech(tech) {
-    var html = statCards(tech.cards);
-
-    html += finPanel('Deadlines', 'Services clients chose that are overdue or due in the next 30 days. Dates are worked out automatically, including weekends and US holidays.',
-      rows(tech.deadlines, function (r) {
-        var d = new Date(r.dueDate);
-        var label = r.days < 0 ? (-r.days) + ' day' + (r.days === -1 ? '' : 's') + ' overdue' : r.days === 0 ? 'due today' : r.days === 1 ? 'due tomorrow' : 'in ' + r.days + ' days';
-        return row('/calendar.html?id=' + encodeURIComponent(r.calendarId) + '#item-' + encodeURIComponent(r.itemIndex),
-          esc(r.company), esc(r.task) + ' \u00b7 ' + esc(r.status),
-          d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }),
-          '<span class="fin-pill ' + (r.days < 0 ? 'bad' : r.days <= 7 ? 'ready' : '') + '">' + esc(label) + '</span>',
-          r.days < 0 ? 'bad' : '');
-      }, 'Nothing overdue or due in the next 30 days.'));
-
-    if (tech.needsDate && tech.needsDate.length) {
-      html += finPanel('Needs a due date', 'The due date for these couldn\u2019t be worked out automatically. Open each one and set the date by hand.',
-        rows(tech.needsDate, function (r) {
-          return row('/calendar.html?id=' + encodeURIComponent(r.calendarId) + '#item-' + encodeURIComponent(r.itemIndex),
-            esc(r.company), esc(r.task), '<span class="fin-pill">Set date</span>', esc(r.dueText || ''));
-        }, ''));
-    }
-
-    html += panel('Documents waiting for verification', 'Oldest first. Open the calendar to download, verify or reject.',
-      table(
-        [{ label: 'Company' }, { label: 'Service' }, { label: 'Document' }, { label: 'Uploaded' }],
-        (tech.pendingDocuments || []).map(function (d) {
-          return '<tr>' +
-            '<td><a href="/calendar.html?id=' + encodeURIComponent(d.calendarId) + '">' + esc(d.company) + '</a></td>' +
-            '<td>' + esc(d.task) + '</td>' +
-            '<td>' + esc(d.fileName) + (d.requirement ? '<div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">' + esc(d.requirement) + '</div>' : '') + '</td>' +
-            '<td>' + esc(when(d.uploadedAt)) + '</td>' +
-          '</tr>';
-        }),
-        'Nothing to verify right now.'
-      ));
-
-    html += panel('Clients', 'Services each client selected, and what is waiting on the team',
-      table(
-        [{ label: 'Company' }, { label: 'Selected' }, { label: 'To verify' }, { label: 'Ready for a price' }, { label: 'Awaiting payment' }],
-        (tech.clientWork || []).map(function (c) {
-          return '<tr>' +
-            '<td><a href="/calendar.html?id=' + encodeURIComponent(c.calendarId) + '">' + esc(c.company) + '</a>' +
-              (c.hasPhone ? '' : '<div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">No phone on file</div>') + '</td>' +
-            '<td>' + esc(c.selected) + ' of ' + esc(c.total) + '</td>' +
-            '<td>' + (c.toVerify ? '<b>' + esc(c.toVerify) + '</b>' : '0') + '</td>' +
-            '<td>' + (c.readyToQuote ? '<b>' + esc(c.readyToQuote) + '</b>' : '0') + '</td>' +
-            '<td>' + esc(c.awaitingPayment) + '</td>' +
-          '</tr>';
-        }),
-        'No client calendars yet.'
-      ));
-
-    html += panel('Where every filing stands', 'Across all client organisations',
-      bars(tech.filingStatus));
-
-    html += panel('Recently generated calendars', '',
-      table(
-        [{ label: 'Company' }, { label: 'Status' }, { label: 'Generated by' }, { label: 'When' }],
-        tech.recentCalendars.map(function (c) {
-          return '<tr>' +
-            '<td><a href="/calendar.html?id=' + encodeURIComponent(c.id) + '">' + esc(c.company) + '</a></td>' +
-            '<td><span class="badge ' + esc(c.status) + '">' + esc(c.status.replace(/_/g, ' ')) + '</span></td>' +
-            '<td>' + esc(c.createdBy) + '</td>' +
-            '<td>' + esc(when(c.createdAt)) + '</td>' +
-          '</tr>';
-        }),
-        'No calendars generated yet.'
-      ));
-    return html;
-  }
-
-  // Finance: compact rows instead of wide tables, so nothing ever needs a
-  // sideways scroll; each row opens that client's calendar.
-  function daysAgo(value) {
-    if (!value) return '';
-    var d = Math.floor((Date.now() - new Date(value).getTime()) / 86400000);
-    return d <= 0 ? 'today' : d === 1 ? '1 day ago' : d + ' days ago';
-  }
-  function calLink(id) { return '/calendar.html?id=' + encodeURIComponent(id); }
-  function rows(list, fn, empty) {
-    if (!list || !list.length) return '<div class="fin-empty">' + esc(empty) + '</div>';
-    return '<div class="fin-list">' + list.map(fn).join('') + '</div>';
-  }
-  function row(href, title, sub, right, rightSub, tone) {
-    return '<a class="fin-row" href="' + href + '">' +
-      '<div class="fin-main"><div class="fin-title">' + title + '</div><div class="fin-sub">' + sub + '</div></div>' +
-      '<div class="fin-side"><div class="fin-amt ' + (tone || '') + '">' + right + '</div>' + (rightSub ? '<div class="fin-sub">' + rightSub + '</div>' : '') + '</div>' +
-    '</a>';
-  }
-  function finPanel(title, sub, body) {
-    return '<section class="fin-panel"><div class="fin-head"><h2>' + esc(title) + '</h2>' +
-      (sub ? '<p>' + esc(sub) + '</p>' : '') + '</div>' + body + '</section>';
-  }
-
-  function renderFinance(finance) {
-    var html = statCards(finance.cards);
-    html += '<div class="fin-grid">';
-
-    html += '<div class="fin-col">';
-    html += finPanel('Needs a price', 'Services clients chose that have no price in your list. Clients were told you\u2019ll contact them once their documents are in.',
-      rows(finance.needsPrice, function (r) {
-        return row(calLink(r.calendarId),
-          esc(r.company),
-          esc(r.task),
-          r.ready ? '<span class="fin-pill ready">Documents in</span>' : '<span class="fin-pill">' + esc(r.docsProvided) + '/' + esc(r.docsTotal) + ' documents</span>',
-          r.listLabel && r.listLabel !== 'Price on request' ? 'List: ' + esc(r.listLabel) : 'Not in price list');
-      }, 'Every selected service has a price. Nothing to do here.'));
-
-    html += finPanel('Ready to complete', 'Paid services still to be done. Open one, do the work, then upload the proof: that marks it done and notifies the client.',
-      rows(finance.readyToComplete, function (r) {
-        return row(calLink(r.calendarId) + '#item-' + encodeURIComponent(r.itemIndex),
-          esc(r.company),
-          esc(r.task) + (r.dueDate ? ' \u00b7 due ' + esc(r.dueDate) : ''),
-          '<span class="fin-pill ready">Upload proof</span>',
-          'paid ' + esc(daysAgo(r.paidAt)) + (r.amount ? ' \u00b7 ' + money(r.amount) : ''));
-      }, 'Nothing waiting. Every paid service has been completed.'));
-
-    html += finPanel('Waiting for payment', 'Overdue first, then the longest waiting.',
-      rows(finance.outstanding, function (r) {
-        var overdue = r.paymentStatus === 'Overdue';
-        return row(calLink(r.calendarId),
-          esc(r.company),
-          esc(r.task) + ' \u00b7 due ' + esc(r.dueDate || '\u2014'),
-          money(r.amount),
-          (overdue ? '<span class="fin-pill bad">Overdue</span> ' : '') + (r.quotedAt ? 'priced ' + esc(daysAgo(r.quotedAt)) : '') + (r.autoPriced ? ' \u00b7 from list' : ''),
-          overdue ? 'bad' : '');
-      }, 'Nothing outstanding. Everything priced has been paid.'));
-    html += '</div>';
-
-    html += '<div class="fin-col">';
-    html += finPanel('Recent payments', '',
-      rows(finance.recentPaid, function (r) {
-        return row(calLink(r.calendarId), esc(r.company), esc(r.task), money(r.amount), esc(when(r.paidAt)), 'good');
-      }, 'No payments recorded yet.'));
-
-    html += finPanel('Recently completed', '',
-      rows(finance.recentlyCompleted, function (r) {
-        return row(calLink(r.calendarId) + '#item-' + encodeURIComponent(r.itemIndex), esc(r.company), esc(r.task),
-          '<span class="fin-pill done">Done</span>',
-          esc(when(r.completedAt)) + (r.completedByName ? ' \u00b7 ' + esc(r.completedByName) : '') + ' \u00b7 ' + esc(r.proofs) + ' proof' + (r.proofs === 1 ? '' : 's'));
-      }, 'Nothing completed yet.'));
-
-    html += finPanel('Price list', 'Fixed prices are added automatically when a client selects the service. Edit them in lib/complianceFees.js.',
-      '<div class="fin-list price">' + (finance.priceList || []).map(function (p) {
-        return '<div class="fin-price-row"><span>' + esc(p.service) + '</span><b class="' + esc(p.kind) + '">' + esc(p.label) + '</b></div>';
-      }).join('') + '</div>');
-    html += '</div>';
-
-    html += '</div>';
-    return html;
-  }
-
-  // Tables elsewhere on the dashboard: label each cell so they can stack
-  // into cards on a phone instead of scrolling sideways.
-  function labelTableCells(root) {
-    root.querySelectorAll('table.data').forEach(function (t) {
-      var heads = Array.prototype.map.call(t.querySelectorAll('thead th'), function (th) { return th.textContent.trim(); });
-      t.querySelectorAll('tbody tr').forEach(function (tr) {
-        Array.prototype.forEach.call(tr.children, function (td, i) { if (heads[i]) td.setAttribute('data-label', heads[i]); });
-      });
-    });
-  }
-
-  function renderOwner(owner) {
-    var html = statCards(owner.cards);
-
-    html += panel('Team accounts', 'Only you can see or reset these',
-      table(
-        [{ label: 'Person' }, { label: 'Role' }, { label: 'Team' }, { label: 'Last signed in' }, { label: '' }],
-        owner.team.map(function (u) {
-          var status = !u.active
-            ? '<span class="badge rejected">deactivated</span>'
-            : (u.mustSetPassword ? '<span class="badge pending_review">setup pending</span>' : '');
-          return '<tr>' +
-            '<td>' + esc(u.name || u.email) + '<div class="stat-hint">' + esc(u.email) + '</div></td>' +
-            '<td>' + esc(ROLE_LABEL[u.role] || u.role) + ' ' + status + '</td>' +
-            '<td>' + esc(DEPT_LABEL[u.department] || '—') + '</td>' +
-            '<td>' + esc(when(u.lastLoginAt)) + '</td>' +
-            '<td class="num"><button type="button" class="ghost-btn" data-reset="' + esc(u.id) + '">Force re-setup</button></td>' +
-          '</tr>';
-        }),
-        'No team accounts yet.'
-      ));
-
-    html += panel('Security and activity log', 'Most recent 15 events',
-      owner.audit.length
-        ? '<ul class="feed">' + owner.audit.map(function (a) {
-            return '<li>' + esc(a.summary) +
-              '<div class="feed-meta">' + esc(a.actor) + ' · ' + esc(a.action.replace(/_/g, ' ')) + ' · ' + esc(when(a.at)) + '</div>' +
-            '</li>';
-          }).join('') + '</ul>'
-        : '<div class="muted">Nothing logged yet.</div>');
-
-    return html;
-  }
-
-  // ------------------------------------------------------------------
-  function render(data) {
-    var user = data.user;
-    var isOwner = user.role === 'super_admin';
-    var teamName = user.department ? DEPT_LABEL[user.department] : ROLE_LABEL[user.role];
-
-    var html = '<div class="hero">' +
-      '<div class="role-pill' + (isOwner ? ' owner' : '') + '">' +
-        esc(ROLE_LABEL[user.role] || user.role) + (user.department ? ' · ' + esc(DEPT_LABEL[user.department]) : '') +
-      '</div>' +
-      '<h1>' + esc(user.name || teamName) + '\u2019s dashboard</h1>' +
-      '<p>Signed in as ' + esc(user.email) + '. Last sign-in ' + esc(when(user.lastLoginAt)) + '. ' +
-        (user.twoFactorEnabled ? '<a href="/two-factor.html">Two-factor login: on</a>' : '<a href="/two-factor.html">Set up two-factor login</a>') + '</p>' +
-    '</div>';
-
-    // Order matters for the mixed roles: an admin sees delivery work
-    // first because that's the day job, money second.
-    var many = [data.tech, data.finance, data.owner].filter(Boolean).length > 1;
-    function heading(t) { return many ? '<div class="section-heading">' + esc(t) + '</div>' : ''; }
-    if (data.tech) html += heading('Client work') + renderTech(data.tech);
-    if (data.finance) html += heading('Finance') + renderFinance(data.finance);
-    if (data.owner) html += heading('Team & security') + renderOwner(data.owner);
-
-    $('root').innerHTML = html;
-    labelTableCells($('root'));
-
-    $('navUser').textContent = user.email;
-    var links = [
-      { href: '/app.html', label: 'Generate' },
-      { href: '/review.html', label: 'Review queue' }
-    ];
-    if (user.role === 'admin' || user.role === 'super_admin') {
-      links.push({ href: '/admin.html', label: 'Administration' });
-    }
-    $('navLinks').innerHTML = links.map(function (l) {
-      return '<a href="' + esc(l.href) + '">' + esc(l.label) + '</a>';
-    }).join('');
-
-    // Wired after innerHTML, since the buttons don't exist before it.
-    var resets = document.querySelectorAll('[data-reset]');
-    for (var i = 0; i < resets.length; i++) {
-      resets[i].addEventListener('click', onReset);
-    }
-  }
-
-  function onReset() {
-    var id = this.getAttribute('data-reset');
-    if (!confirm('This signs that person out everywhere and clears their password. They will have to sign in with an email code and choose a new one. Continue?')) return;
-    var btn = this;
-    btn.disabled = true;
-    fetch('/api/dashboard/team/' + encodeURIComponent(id) + '/reset', {
-      method: 'PATCH',
-      credentials: 'same-origin'
-    })
-      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) {
-        if (!r.ok) throw new Error(d.error || 'Reset failed.');
-        return d;
-      }); })
-      .then(function (d) { alert(d.message); load(); })
-      .catch(function (err) { alert(err.message); btn.disabled = false; });
-  }
-
-  function load() {
-    fetch('/api/dashboard/summary', { credentials: 'same-origin' })
-      .then(function (res) {
-        // A 401 here means the session died while the tab was open —
-        // send them back to sign in rather than showing a broken page.
-        if (res.status === 401 || res.status === 403) {
-          location.href = '/login.html?reason=session_expired';
-          throw new Error('redirecting');
+  async function loadUser() {
+    try {
+      const res = await fetch('/api/auth/me');
+      if (!res.ok) { location.href = '/login.html?next=' + encodeURIComponent(location.pathname + location.search); return; }
+      const { user } = await res.json();
+      const el = document.getElementById('navUser');
+      el.innerHTML = `<span>${escapeHtml(user.name || user.email)}</span><button id="logoutBtn">Log out</button>`;
+      if (user.role === 'admin' || user.role === 'super_admin') {
+        const navLinks = document.getElementById('navLinks');
+        if (navLinks && !navLinks.querySelector('a[href="/admin.html"]')) {
+          navLinks.insertAdjacentHTML('beforeend', '<a href="/admin.html">Admin</a>');
         }
-        return res.json();
-      })
-      .then(render)
-      .catch(function (err) {
-        if (err.message === 'redirecting') return;
-        $('root').innerHTML = '<div class="muted">Couldn\u2019t load the dashboard. Please refresh.</div>';
+      }
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await fetch('/api/auth/logout', { method: 'POST' });
+        location.href = '/login.html';
       });
+    } catch (e) { location.href = '/login.html'; }
+  }
+  loadUser();
+
+  const CATEGORY_ORDER = ["Mandatory Annual","Conditional","Transfer Pricing","Foreign Reporting (ODI/FEMA)","Event-Based"];
+  const CATEGORIES = CATEGORY_ORDER;
+  const SOURCE_LABEL = { cache: 'From cached state data', live: 'Freshly researched', mixed: 'Cache + live research' };
+  const CLIENT_STATUS_OPTIONS = ["Not Started","Awaiting Documents","Under Review","Filed","Overdue"];
+  const PAYMENT_STATUS_OPTIONS = ["Not Invoiced","Invoiced","Paid","Overdue"];
+
+  const id = new URLSearchParams(location.search).get('id');
+  if (!id) {
+    document.getElementById('slot').innerHTML = '<div class="empty-state">No calendar id given.</div>';
   }
 
-  document.addEventListener('cc:notifications', function () { load(); });
-  $('logoutBtn').addEventListener('click', function () {
-    fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' })
-      .then(function () { location.href = '/login.html'; });
-  });
+  let calendar = null;
 
-  load();
-})();
+  // "https://www.irs.gov/forms-pubs/about-form-941" -> "irs.gov"
+  function sourceHost(url) { try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return 'link'; } }
+  function fmtDue(d) { return new Date(d).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }); }
+  function staffDueLine(item) {
+    if (!item.dueDateActual) {
+      return item.recurrence === 'event' ? `As triggered: ${escapeHtml(item.due_date)}`
+        : `<span style="color:var(--stamp-red);font-weight:600;">No due date. Set one below.</span> (${escapeHtml(item.due_date)})`;
+    }
+    const d = item.daysUntil, done = item.clientStatus === 'Filed';
+    const rel = done || d === null ? '' : d < 0 ? ` · <b style="color:var(--stamp-red);">${-d} day${d === -1 ? '' : 's'} overdue</b>`
+      : d <= 7 ? ` · <b style="color:var(--seal-gold);">${d === 0 ? 'due today' : d === 1 ? 'due tomorrow' : 'in ' + d + ' days'}</b>` : ` · in ${d} days`;
+    const src = item.dueDateSource === 'staff' ? ' · set by staff' : '';
+    return `Due <b>${fmtDue(item.dueDateActual)}</b>${rel}${src}${item.dueDateNote ? ` <span title="${escapeHtml(item.dueDateNote)}" style="cursor:help;">ⓘ</span>` : ''}`;
+  }
+  function money(cents) { const d = cents / 100; return '$' + d.toLocaleString('en-US', { minimumFractionDigits: d % 1 ? 2 : 0, maximumFractionDigits: 2 }); }
+  function priceTag(item) {
+    const pr = item.price || {};
+    if (item.paymentStatus === 'Paid') return `<span class="price-tag paid">Paid ${escapeHtml(pr.label || '')}</span>`;
+    const prefix = pr.kind === 'invoiced' ? (item.quotedBy === 'price-list' ? '' : 'Quoted ') : '';
+    return `<span class="price-tag ${escapeHtml(pr.kind || 'quote')}">${prefix}${escapeHtml(pr.label || 'Quote needed')}</span>`;
+  }
+  let workspaceFilter = 'selected';
+  const openCards = new Set();
+  const closedCards = new Set();
+
+  function groupByCategory(items) {
+    const groups = {};
+    items.forEach((it, i) => {
+      const cat = it.category || 'Other';
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push({ ...it, __index: i });
+    });
+    return groups;
+  }
+
+  function itemEditForm(it, idx) {
+    return `
+      <tr class="edit-row" id="editRow-${idx}">
+        <td colspan="4">
+          <div class="edit-grid">
+            <div class="field">
+              <label>Category</label>
+              <select data-f="category">
+                ${CATEGORIES.map(c => `<option value="${escapeHtml(c)}" ${c===it.category?'selected':''}>${escapeHtml(c)}</option>`).join('')}
+              </select>
+            </div>
+            <div class="field">
+              <label>Confidence</label>
+              <select data-f="confidence">
+                ${['high','medium','low'].map(c => `<option value="${c}" ${c===it.confidence?'selected':''}>${c}</option>`).join('')}
+              </select>
+            </div>
+            <div class="field">
+              <label>Compliance Name</label>
+              <input type="text" data-f="compliance_name" value="${escapeHtml(it.compliance_name)}">
+            </div>
+            <div class="field">
+              <label>Due Date</label>
+              <input type="text" data-f="due_date" value="${escapeHtml(it.due_date)}">
+            </div>
+            <div class="field">
+              <label>Applies To</label>
+              <input type="text" data-f="applicable_to" value="${escapeHtml(it.applicable_to)}">
+            </div>
+            <div class="field">
+              <label>Authority</label>
+              <input type="text" data-f="authority" value="${escapeHtml(it.authority)}">
+            </div>
+            <div class="field span2">
+              <label>Description</label>
+              <textarea data-f="description">${escapeHtml(it.description)}</textarea>
+            </div>
+            <div class="field span2">
+              <label>Source URL</label>
+              <input type="text" data-f="source_url" value="${escapeHtml(it.source_url)}">
+            </div>
+          </div>
+          <div class="edit-row-actions">
+            <button class="primary" onclick="saveItem(${idx})">Save</button>
+            <button class="ghost" onclick="closeEdit(${idx})">Cancel</button>
+          </div>
+        </td>
+      </tr>`;
+  }
+
+  function render() {
+    const slot = document.getElementById('slot');
+    const { profile, items, status, sourceMode, createdAt, createdBy, reviewedBy, reviewedAt, reviewNotes } = calendar;
+    const editable = status === 'pending_review';
+
+    const groups = groupByCategory(items);
+    const counts = { high: 0, medium: 0, low: 0 };
+    items.forEach(it => { if (counts[it.confidence] !== undefined) counts[it.confidence]++; });
+
+    let catHtml = '';
+    CATEGORY_ORDER.forEach(cat => {
+      if (!groups[cat] || !groups[cat].length) return;
+      catHtml += `<div class="cat-block">
+        <div class="cat-title">${escapeHtml(cat)}</div>
+        <table class="cal">
+          <thead><tr><th>Due Date</th><th>Compliance</th><th>Applies To</th><th>Description &amp; Source</th>${editable ? '<th></th>' : ''}</tr></thead>
+          <tbody>
+          ${groups[cat].map(it => `
+            <tr id="row-${it.__index}">
+              <td class="due" data-label="Due">${it.dueDateActual ? `<b>${fmtDue(it.dueDateActual)}</b><div style="font-weight:400;font-size:11.5px;color:var(--ink-soft);">${escapeHtml(it.due_date)}</div>` : escapeHtml(it.due_date)}</td>
+              <td class="name"><span class="dot ${escapeHtml(it.confidence||'medium')}"></span>${escapeHtml(it.compliance_name)}${it.editedByReviewer ? '<span class="edited-flag">edited</span>' : ''}
+                <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">${priceTag(it)}${calendar.clientOrgId ? (it.selectedByClient ? '<span class="sel-badge on">Client selected</span>' : '<span class="sel-badge">Not selected</span>') : ''}</div></td>
+              <td class="applies" data-label="Applies to">${escapeHtml(it.applicable_to)}</td>
+              <td class="desc">${escapeHtml(it.description)} — <span style="color:var(--ink-soft)">${escapeHtml(it.authority||'')}</span>
+                ${it.source_url ? `<a class="src-link" href="${escapeHtml(it.source_url)}" target="_blank" rel="noopener">Source: ${escapeHtml(sourceHost(it.source_url))} ↗</a>` : ''}
+              </td>
+              ${editable ? `<td class="edit-cell"><button class="row-edit-btn" onclick="openEdit(${it.__index})">Edit</button></td>` : ''}
+            </tr>
+            ${editable ? `<tr id="editSlot-${it.__index}" style="display:none;"></tr>` : ''}
+          `).join('')}
+          </tbody>
+        </table>
+      </div>`;
+    });
+
+    const reviewInfo = status !== 'pending_review'
+      ? `<div class="review-panel">
+          <h3>${status === 'approved' ? 'Approved' : 'Rejected'}</h3>
+          <p style="font-size:13.5px; color:var(--ink-soft);">By ${escapeHtml(reviewedBy || '—')} on ${fmtDateTime(reviewedAt)}${reviewNotes ? ' — “' + escapeHtml(reviewNotes) + '”' : ''}</p>
+        </div>`
+      : `<div class="review-panel">
+          <h3>Review this calendar</h3>
+          <p style="font-size:13px; color:var(--ink-soft); margin:0 0 12px;">Edit any line item above first if something needs correcting, then approve or reject.</p>
+          <div class="field span2" style="margin-bottom:14px;">
+            <label for="reviewNotes">Notes (optional)</label>
+            <textarea id="reviewNotes" placeholder="e.g. Verified franchise tax fee against DE Secretary of State site."></textarea>
+          </div>
+          <div class="case-actions">
+            <button class="primary" onclick="doAction('approve')">Approve →</button>
+            <button class="danger" onclick="doAction('reject')">Reject</button>
+          </div>
+        </div>`;
+
+    slot.innerHTML = `
+      <div class="page-grid">
+        <div class="main-col">
+          <div class="case">
+            <div class="case-header">
+              <div>
+                <div class="case-title">${escapeHtml(profile.companyName || 'Unnamed Company')}</div>
+                <div class="case-sub">${escapeHtml(profile.entityType)} (${escapeHtml(profile.taxStatus||'')}) · ${escapeHtml(profile.state)} · FY ${escapeHtml(profile.fyStart||'')}–${escapeHtml(profile.fyEnd||'')} · Generated ${fmtDateTime(createdAt)} by ${escapeHtml(createdBy || '—')}</div>
+                ${(profile.employeeStates && profile.employeeStates.length) ? `<div class="case-sub">Employees also in: ${escapeHtml(profile.employeeStates.join(', '))}</div>` : ''}
+                ${(profile.quarterlyGrossReceipts !== undefined && profile.quarterlyGrossReceipts !== null && profile.quarterlyGrossReceipts !== '') ? `<div class="case-sub">Avg. Quarterly Gross Receipts: $${escapeHtml(Number(profile.quarterlyGrossReceipts).toLocaleString('en-US'))}</div>` : ''}
+              </div>
+              <div class="case-summary">
+                <span class="badge ${status}">${status.replace('_',' ')}</span>
+                <span class="badge ${sourceMode}">${escapeHtml(SOURCE_LABEL[sourceMode] || sourceMode)}</span><br>
+                ${items.length} items · ${counts.high} verified · ${counts.medium} review · ${counts.low} unverified
+              </div>
+            </div>
+            <div class="case-actions">
+              <a class="ghost" style="text-decoration:none; padding:10px 18px; display:inline-block;" href="/api/calendars/${id}/pdf">Download PDF ↓</a>
+              <a class="ghost" style="text-decoration:none; padding:10px 18px; display:inline-block;" href="/review.html">← Back to queue</a>
+            </div>
+            ${catHtml}
+            <div class="legend">
+              <span><span class="dot high"></span> High confidence — clearly stated on an official source</span>
+              <span><span class="dot medium"></span> Medium — needs a quick human check</span>
+              <span><span class="dot low"></span> Low — could not fully verify, don't rely on this yet</span>
+            </div>
+            <div class="disclaimer">${status === 'approved' ? 'Reviewed and approved — treat as the current source of truth, subject to periodic re-check of medium/low confidence items.' : 'Research result — not yet a verified compliance rule. Confirm anything marked medium/low confidence before relying on it.'}</div>
+            ${reviewInfo}
+          </div>
+          <div id="clientItemsHost"></div>
+        </div>
+        <div class="side-col">
+          <div id="contactPanel"></div>
+          <div id="chatPanel"></div>
+        </div>
+      </div>`;
+
+    renderClientWorkspace();
+  }
+
+  window.openEdit = function (idx) {
+    const it = calendar.items[idx];
+    document.getElementById(`editSlot-${idx}`).outerHTML = itemEditForm(it, idx);
+    document.getElementById(`editSlot-${idx}`)?.remove();
+  };
+  window.closeEdit = function (idx) {
+    load();
+  };
+
+  window.saveItem = async function (idx) {
+    const row = document.getElementById(`editRow-${idx}`);
+    const updates = {};
+    row.querySelectorAll('[data-f]').forEach(el => { updates[el.getAttribute('data-f')] = el.value; });
+    try {
+      const res = await fetch(`/api/calendars/${id}/items/${idx}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Save failed.');
+      calendar = data.calendar;
+      render();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  window.doAction = async function (action) {
+    const notes = document.getElementById('reviewNotes')?.value || '';
+    if (action === 'reject' && !confirm('Reject this calendar? It will be marked rejected and won\'t appear in the approved library.')) return;
+    try {
+      const res = await fetch(`/api/calendars/${id}/${action}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notes }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `${action} failed.`);
+      calendar = data.calendar;
+      render();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  // -----------------------------------------------------------------
+  // Client workspace: contact panel + (once approved) per-item document
+  // review / status controls, plus a staff↔client chat thread. Only
+  // rendered when this calendar is actually linked to a client company
+  // (calendar.clientOrgId) — an internal/test calendar generated with no
+  // client attached shows none of this.
+  // -----------------------------------------------------------------
+  function renderClientWorkspace() {
+    const itemsHost = document.getElementById('clientItemsHost');
+    const contactHost = document.getElementById('contactPanel');
+    const chatHost = document.getElementById('chatPanel');
+    if (!calendar.clientOrgId) {
+      if (itemsHost) itemsHost.innerHTML = '';
+      if (contactHost) contactHost.innerHTML = '';
+      if (chatHost) chatHost.innerHTML = '';
+      return;
+    }
+
+    if (itemsHost) {
+      itemsHost.innerHTML = calendar.status === 'approved' ? `
+        <div class="list-section">
+          <div class="section-title">Client services &amp; documents</div>
+          <div class="section-sub">The services ${escapeHtml(calendar.profile.companyName || 'the client')} chose, the documents they've sent, and the price for each. Verify documents, send the price, and upload the filed certificate back.</div>
+          <div id="workspaceSummary"></div>
+          <div class="ws-tabs" role="tablist" id="workspaceTabs"></div>
+          <div id="clientItemsList"><div class="empty-state">Loading…</div></div>
+        </div>` : '';
+    }
+
+    loadContact();
+    if (calendar.status === 'approved') renderClientItems();
+    loadChat();
+  }
+
+  async function loadContact() {
+    const el = document.getElementById('contactPanel');
+    if (!el) return;
+    try {
+      const res = await fetch(`/api/calendars/${id}/client-contact`);
+      const data = await res.json().catch(() => ({}));
+      const org = data.clientOrg;
+      if (!org) { el.innerHTML = ''; return; }
+      const phone = org.primaryContactPhone || '';
+      const dial = phone.replace(/[^\d+]/g, '');
+      const wa = phone.replace(/\D/g, '');
+      const email = org.primaryContactEmail || '';
+      const missing = [!email && 'email', !phone && 'phone number'].filter(Boolean);
+      el.innerHTML = `
+        <div class="list-section">
+          <div class="section-title">Contact the client</div>
+          <div class="contact-card">
+            <div class="contact-card-label">${escapeHtml(org.name)}</div>
+            <div class="contact-card-row"><b>${escapeHtml(org.primaryContactName || '—')}</b></div>
+            <div class="contact-card-row">${email ? `<a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a>` : '<span style="color:var(--stamp-red);">No email on file</span>'}</div>
+            <div class="contact-card-row">${phone ? escapeHtml(phone) : '<span style="color:var(--stamp-red);">No phone on file</span>'}</div>
+            ${missing.length ? `<div style="font-size:12px;color:var(--ink-soft);margin-top:6px;">The client is asked for their ${missing.join(' and ')} the next time they open the portal.</div>` : ''}
+            <div class="contact-actions">
+              ${email ? `<a class="contact-btn" href="mailto:${escapeHtml(email)}?subject=${encodeURIComponent('Your compliance filings with ComplyGlobally')}">Email</a>` : ''}
+              ${dial ? `<a class="contact-btn" href="tel:${escapeHtml(dial)}">Call</a>` : ''}
+              ${dial ? `<a class="contact-btn" href="sms:${escapeHtml(dial)}">Text</a>` : ''}
+              ${wa ? `<a class="contact-btn" href="https://wa.me/${escapeHtml(wa)}" target="_blank" rel="noopener">WhatsApp</a>` : ''}
+            </div>
+          </div>
+          <div class="contact-card" style="margin-top:10px;">
+            <div class="contact-card-label">Assigned to</div>
+            ${org.assignedStaff
+              ? `<div class="contact-card-row">${escapeHtml(org.assignedStaff.name || org.assignedStaff.email)}</div>
+                 <div class="contact-card-row"><a href="mailto:${escapeHtml(org.assignedStaff.email)}">${escapeHtml(org.assignedStaff.email)}</a></div>`
+              : `<div class="contact-card-row" style="color:var(--ink-soft);">Nobody assigned yet. Set this from Admin → Client companies.</div>`}
+          </div>
+        </div>`;
+    } catch (err) {
+      el.innerHTML = '';
+    }
+  }
+
+  function renderWorkspaceHeader() {
+    const sm = calendar.summary || {};
+    const sumEl = document.getElementById('workspaceSummary');
+    if (sumEl) sumEl.innerHTML = `
+      <div class="ws-stats">
+        <div><b>${sm.selected ?? 0}</b>selected by client</div>
+        <div><b>${sm.notSelected ?? 0}</b>not selected</div>
+        ${sm.overdue ? `<div class="late"><b>${sm.overdue}</b>overdue</div>` : ''}
+        <div><b>${sm.dueSoon ?? 0}</b>due in 30 days</div>
+        <div class="${sm.documentsPendingReview ? 'attn' : ''}"><b>${sm.documentsPendingReview ?? 0}</b>documents to verify</div>
+        <div class="${sm.readyToQuote ? 'attn' : ''}"><b>${sm.readyToQuote ?? 0}</b>ready for a price</div>
+        <div><b>${sm.awaitingPayment ?? 0}</b>awaiting payment</div>
+      </div>`;
+    const tabs = document.getElementById('workspaceTabs');
+    if (tabs) {
+      const t = (key, label, n) => `<button role="tab" class="ws-tab ${workspaceFilter === key ? 'on' : ''}" aria-selected="${workspaceFilter === key}" data-filter="${key}">${label} <span>${n}</span></button>`;
+      tabs.innerHTML = t('selected', 'Selected by client', sm.selected ?? 0) + t('unselected', 'Not selected', sm.notSelected ?? 0) + t('all', 'All filings', sm.totalItems ?? calendar.items.length)
+        + (sm.historyItems ? t('history', 'Previous periods', sm.historyItems) : '');
+      tabs.querySelectorAll('[data-filter]').forEach(b => b.addEventListener('click', () => { workspaceFilter = b.dataset.filter; renderClientItems(); }));
+    }
+  }
+
+  function checklistHtml(item) {
+    const rows = item.checklist || [];
+    if (!rows.length) return '';
+    const label = { accepted: 'Verified', pending: 'Uploaded, verify it', rejected: 'Rejected, waiting for new file', missing: 'Not uploaded' };
+    return `
+      <div class="ws-checklist">
+        <div class="ws-label">Documents required (${item.checklistSummary.provided}/${item.checklistSummary.total} provided)</div>
+        ${rows.map(r => `
+          <div class="ws-check ${r.state}">
+            <span class="ws-check-dot" aria-hidden="true"></span>
+            <span class="ws-check-name">${escapeHtml(r.label)}</span>
+            <span class="ws-check-state">${r.state === 'missing' && r.lost ? '<span style="color:var(--stamp-red);">File lost, ask the client again</span>' : label[r.state]}${r.reused ? ` · from "${escapeHtml(r.fromItem)}"` : ''}</span>
+            ${r.fileName && r.itemIndex !== undefined ? `<a href="/api/calendars/${id}/items/${r.itemIndex}/documents/${r.docIndex}/download">Download</a>` : ''}
+          </div>`).join('')}
+      </div>`;
+  }
+
+  function quoteHtml(item, idx) {
+    if (item.paymentStatus === 'Paid') {
+      return `<div class="ws-quote paid">Paid <b>${escapeHtml(item.price?.label || '')}</b>${item.paidAt ? ` on ${new Date(item.paidAt).toLocaleDateString()}` : ''}${item.razorpayPaymentId ? ` · Razorpay ${escapeHtml(item.razorpayPaymentId)}` : ''}</div>`;
+    }
+    const sf = item.suggestedFee;
+    const current = item.feeAmountCents ? item.feeAmountCents / 100 : (sf && sf.amountCents ? sf.amountCents / 100 : '');
+    const listLine = sf
+      ? (sf.kind === 'fixed'
+          ? `Price list: <b>${escapeHtml(sf.label)}</b>. Applied automatically when the client selects this service.`
+          : sf.kind === 'included'
+            ? `Price list: <b>${escapeHtml(sf.label)}</b>.`
+            : `${sf.kind === 'from' ? `Price list: <b>${escapeHtml(sf.label)}</b>.` : '<b>No price in the list.</b>'} The client has been told you'll contact them with the price once they upload their documents.`)
+        + (sf.note ? `<div style="margin-top:2px;">Internal note: ${escapeHtml(sf.note)}</div>` : '')
+      : (item.feeAmountCents
+          ? (item.quotedBy === 'price-list'
+              ? `Price <b>${money(item.feeAmountCents)}</b> applied automatically from the price list${item.quotedAt ? ` on ${new Date(item.quotedAt).toLocaleDateString()}` : ''}. Change it below if needed.`
+              : `Price <b>${money(item.feeAmountCents)}</b> sent${item.quotedAt ? ` on ${new Date(item.quotedAt).toLocaleDateString()}` : ''}${item.quotedBy ? ` by ${escapeHtml(item.quotedBy)}` : ''}.`)
+          : '');
+    const docsReady = item.checklistSummary?.allProvided;
+    return `
+      <div class="ws-quote">
+        <div class="ws-label">Price for the client</div>
+        <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:8px;">${listLine}</div>
+        <div class="ws-quote-row">
+          <label class="sr-only" for="q-${idx}">Price in USD</label>
+          <span class="ws-dollar">$</span><input id="q-${idx}" type="number" min="1" step="0.01" class="quoteAmount" data-idx="${idx}" value="${escapeHtml(String(current))}" placeholder="Amount">
+          <label class="sr-only" for="qn-${idx}">Note to client</label>
+          <input id="qn-${idx}" type="text" class="quoteNote" data-idx="${idx}" value="${escapeHtml(item.quoteNote || '')}" placeholder="Note to the client (optional), e.g. includes 2 extra states">
+          <button class="primary" data-quote-idx="${idx}">${item.paymentStatus === 'Invoiced' || item.paymentStatus === 'Overdue' ? 'Update price' : 'Send price to client'}</button>
+        </div>
+        ${!docsReady ? '<div style="font-size:12px;color:var(--seal-gold);margin-top:6px;">Some documents are still missing. You can send the price now; the client can only pay once every document is uploaded.</div>' : ''}
+        <span class="hint" data-quote-hint="${idx}" style="display:block;"></span>
+      </div>`;
+  }
+
+  // Proof of completion: whoever did the work (often finance) uploads the
+  // certificate / acknowledgment / receipt with a reference and a note.
+  function proofHtml(item, idx, certs, dl) {
+    const today = new Date().toISOString().slice(0, 10);
+    const done = item.clientStatus === 'Filed';
+    const unpaid = item.paymentStatus !== 'Paid';
+    const list = certs.map(d => `
+      <div class="proof-row">
+        <div class="doc-row-top">
+          <span class="doc-name">${escapeHtml(d.fileName)}</span>
+          ${d.fileMissing ? '<span class="status-pill-cw" style="color:var(--stamp-red);background:var(--stamp-red-bg);">File missing</span>' : ''}
+        </div>
+        <div class="doc-meta">
+          ${d.completedOn ? 'Done ' + new Date(d.completedOn).toLocaleDateString() + ' · ' : ''}uploaded by ${escapeHtml(d.uploadedByName || d.uploadedBy)}${d.uploadedByDepartment ? ' (' + escapeHtml(d.uploadedByDepartment) + ')' : ''}
+          ${d.referenceNumber ? ` · Ref <b>${escapeHtml(d.referenceNumber)}</b>` : ''}
+        </div>
+        ${d.proofNote ? `<div class="doc-meta" style="color:var(--ink);margin-top:4px;">“${escapeHtml(d.proofNote)}”</div>` : ''}
+        <div class="doc-actions">
+          ${d.fileMissing ? '<span class="doc-note">Upload this proof again below.</span>' : `
+            ${/\.(pdf|png|jpe?g|gif|webp|txt)$/i.test(d.fileName || '') ? `<a class="doc-btn" href="${dl(d)}?view=1" target="_blank" rel="noopener">Open</a>` : ''}
+            <a class="doc-btn" href="${dl(d)}">Download</a>`}
+          <button class="doc-btn reject" data-remove-proof="${idx}" data-doc="${d.di}">Remove</button>
+        </div>
+      </div>`).join('');
+    return `
+      <div class="proof-box ${done ? 'done' : ''}">
+        <div class="ws-label">Proof of completion${certs.length ? ` (${certs.length})` : ''}</div>
+        ${done && item.completedAt ? `<div class="proof-done">✓ Marked done ${new Date(item.completedAt).toLocaleDateString()}${item.completedByName ? ' by ' + escapeHtml(item.completedByName) : ''}</div>` : ''}
+        ${list}
+        <details class="proof-form" ${certs.length ? '' : 'open'}>
+          <summary>${certs.length ? 'Add more proof' : 'Upload proof that this service is done'}</summary>
+          <div class="proof-grid">
+            <div class="field span2">
+              <label for="pf-${idx}">Files <span style="font-weight:400;color:var(--ink-soft);">(certificate, acknowledgment, receipt… up to 10, 15 MB each)</span></label>
+              <input id="pf-${idx}" type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,.doc,.docx,.xls,.xlsx" class="proofFiles" data-idx="${idx}">
+            </div>
+            <div class="field">
+              <label for="pr-${idx}">Reference / confirmation number</label>
+              <input id="pr-${idx}" type="text" maxlength="120" class="proofRef" data-idx="${idx}" placeholder="e.g. IRS acknowledgment no.">
+            </div>
+            <div class="field">
+              <label for="pd-${idx}">Date completed</label>
+              <input id="pd-${idx}" type="date" max="${today}" value="${today}" class="proofDate" data-idx="${idx}">
+            </div>
+            <div class="field span2">
+              <label for="pn-${idx}">Note to the client (optional)</label>
+              <textarea id="pn-${idx}" rows="2" maxlength="1000" class="proofNote" data-idx="${idx}" placeholder="e.g. Filed with the Delaware Division of Corporations; next due 1 March 2027."></textarea>
+            </div>
+            <label class="proof-check span2"><input type="checkbox" class="proofDone" data-idx="${idx}" ${done ? '' : 'checked'}> Mark this service as done and notify the client</label>
+          </div>
+          ${unpaid ? `<div class="doc-note" style="color:var(--seal-gold);">Heads up: this service ${item.paymentStatus === 'Not Invoiced' ? 'has no price yet' : 'is not paid yet'} (${escapeHtml(item.paymentStatus)}).</div>` : ''}
+          <div class="submit-row" style="margin-top:8px;">
+            <span class="hint" data-proof-hint="${idx}"></span>
+            <button class="primary" data-upload-proof="${idx}">Upload proof</button>
+          </div>
+        </details>
+      </div>`;
+  }
+
+  function itemCardHtml(item, idx) {
+    const clientDocs = (item.documents || []).map((d, di) => ({ ...d, di })).filter(d => d.type === 'client_upload');
+    const certs = (item.documents || []).map((d, di) => ({ ...d, di })).filter(d => d.type === 'certificate');
+    const pendingCount = clientDocs.filter(d => d.reviewStatus === 'pending').length;
+    const isOpen = !closedCards.has(idx) && (openCards.has(idx) || (item.selectedByClient && workspaceFilter !== 'all'));
+    const dl = (d) => `/api/calendars/${id}/items/${idx}/documents/${d.di}/download`;
+    return `
+      <div class="card ws-card ${item.selectedByClient ? '' : 'muted'}" id="ws-item-${idx}" style="margin-top:12px;">
+        <div class="card-body" style="padding:16px 20px;">
+          <button class="ws-card-head" data-card-idx="${idx}" aria-expanded="${isOpen}">
+            <div>
+              <div style="font-weight:600;">${escapeHtml(item.compliance_name)}</div>
+              <div style="color:var(--ink-soft);font-size:12.5px;">${staffDueLine(item)}${item.selectedAt ? ` · selected ${new Date(item.selectedAt).toLocaleDateString()}` : ''}</div>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center;">
+              ${priceTag(item)}
+              ${pendingCount ? `<span class="status-pill-cw" style="background:var(--seal-gold-bg);color:var(--seal-gold);">${pendingCount} to verify</span>` : ''}
+              <span class="status-pill-cw">${item.selectedByClient ? escapeHtml(item.clientStatus) : 'Not selected'}</span>
+              ${item.paymentStatus !== 'Not Invoiced' ? `<span class="status-pill-cw">${escapeHtml(item.paymentStatus)}</span>` : ''}
+            </div>
+          </button>
+          <div ${isOpen ? '' : 'hidden'}>
+            ${checklistHtml(item)}
+            <div style="margin-top:12px;">
+              <div class="ws-label">Uploaded by the client (${clientDocs.length})</div>
+              ${clientDocs.length ? clientDocs.map(d => {
+                const badge = d.fileMissing && d.reviewStatus !== 'rejected'
+                  ? `<span class="status-pill-cw" style="color:var(--stamp-red);background:var(--stamp-red-bg);">File missing</span>`
+                  : d.reviewStatus === 'accepted'
+                    ? `<span class="status-pill-cw" style="color:var(--brand-dark);background:var(--teal-bg);">Verified${d.reviewedBy ? ' by ' + escapeHtml(d.reviewedBy) : ''}</span>`
+                    : d.reviewStatus === 'rejected'
+                      ? `<span class="status-pill-cw" style="color:var(--stamp-red);">Sent back to client</span>`
+                      : `<span class="status-pill-cw" style="background:var(--seal-gold-bg);color:var(--seal-gold);">Needs verifying</span>`;
+                const canView = /\.(pdf|png|jpe?g|gif|webp|txt)$/i.test(d.fileName || '');
+                return `
+                  <div class="doc-row${d.fileMissing && d.reviewStatus !== 'rejected' ? ' lost' : ''}">
+                    <div class="doc-row-top">
+                      <span class="doc-name">${escapeHtml(d.fileName)}</span>${badge}
+                    </div>
+                    <div class="doc-meta">${d.requirementLabel ? escapeHtml(d.requirementLabel) + ' · ' : ''}uploaded ${new Date(d.uploadedAt).toLocaleString()}</div>
+                    ${d.reviewStatus === 'rejected' ? `<div class="doc-note">${escapeHtml(d.reviewNote)}</div>` : ''}
+                    ${d.fileMissing && d.reviewStatus !== 'rejected' ? `
+                      <div class="doc-note">This file can't be found in storage (most likely uploaded before cloud storage was connected). Ask the client to upload it again; they'll get an email and a portal notification.</div>
+                      <div class="doc-actions">
+                        <button class="primary small" data-reupload-idx="${idx}" data-doc="${d.di}">Ask client to re-upload</button>
+                      </div>` : `
+                      <div class="doc-actions">
+                        ${canView ? `<a class="doc-btn" href="${dl(d)}?view=1" target="_blank" rel="noopener">Open</a>` : ''}
+                        <a class="doc-btn" href="${dl(d)}">Download</a>
+                        ${d.reviewStatus === 'pending' ? `
+                          <button class="doc-btn verify" data-review-action="accept" data-idx="${idx}" data-doc="${d.di}">Verify</button>
+                          <input type="text" class="rejectNote" data-idx="${idx}" data-doc="${d.di}" aria-label="Reason for sending back" placeholder="What's wrong? (to send it back)">
+                          <button class="doc-btn reject" data-review-action="reject" data-idx="${idx}" data-doc="${d.di}">Send back</button>` : ''}
+                      </div>`}
+                    <span class="hint" data-review-hint="${idx}-${d.di}" style="display:block;font-size:11.5px;"></span>
+                  </div>`;
+              }).join('') : `<div style="font-size:12.5px;color:var(--ink-soft);">Nothing uploaded yet.</div>`}
+            </div>
+            ${quoteHtml(item, idx)}
+            ${proofHtml(item, idx, certs, dl)}
+            <div class="edit-grid" style="margin-top:14px;">
+              <div class="field">
+                <label>Filing status</label>
+                <select data-idx="${idx}" class="clientStatusSelect">
+                  ${CLIENT_STATUS_OPTIONS.map(s => `<option value="${s}" ${s===item.clientStatus?'selected':''}>${s}</option>`).join('')}
+                </select>
+              </div>
+              <div class="field">
+                <label>Payment status</label>
+                <select data-idx="${idx}" class="paymentStatusSelect">
+                  ${PAYMENT_STATUS_OPTIONS.map(s => `<option value="${s}" ${s===item.paymentStatus?'selected':''}>${s}</option>`).join('')}
+                </select>
+              </div>
+              <div class="field span2">
+                <label for="dd-${idx}">Due date <span style="font-weight:400;color:var(--ink-soft);">${item.dueDateSource === 'staff' ? '(set by staff)' : item.dueDateActual ? '(automatic)' : '(not set)'}</span></label>
+                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                  <input id="dd-${idx}" type="date" class="dueDateInput" data-idx="${idx}" value="${item.dueDateActual ? new Date(item.dueDateActual).toISOString().slice(0,10) : ''}" style="max-width:190px;">
+                  ${item.dueDateSource === 'staff' ? `<button class="doc-btn" data-reset-due="${idx}" type="button">Use automatic date</button>` : ''}
+                </div>
+              </div>
+            </div>
+            <div class="submit-row" style="margin-top:10px;">
+              <span class="hint" data-status-hint="${idx}"></span>
+              <button class="ghost" data-idx="${idx}" data-action="saveStatus">Save status</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  let jumpedToHash = false;
+  async function renderClientItems() {
+    const el = document.getElementById('clientItemsList');
+    if (!el) return;
+    // Links like /calendar.html?id=…#item-3 (from the finance screen) open
+    // that service's card and scroll to it, once.
+    const hashIdx = !jumpedToHash && /^#item-(\d+)$/.test(location.hash) ? +location.hash.slice(6) : null;
+    if (hashIdx !== null && calendar.items[hashIdx]) {
+      jumpedToHash = true;
+      openCards.add(hashIdx); closedCards.delete(hashIdx);
+      if (!calendar.items[hashIdx].selectedByClient) workspaceFilter = 'all';
+      setTimeout(() => document.getElementById(`ws-item-${hashIdx}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+    }
+    renderWorkspaceHeader();
+    const all = calendar.items.map((it, idx) => ({ it, idx }));
+    const byDue = (a, b) => (a.it.dueDateActual ? new Date(a.it.dueDateActual) : Infinity) - (b.it.dueDateActual ? new Date(b.it.dueDateActual) : Infinity);
+    const shown = all.filter(x => workspaceFilter === 'history' ? x.it.isHistory
+      : x.it.isHistory ? false
+      : workspaceFilter === 'all' ? true : workspaceFilter === 'selected' ? x.it.selectedByClient : !x.it.selectedByClient)
+      .sort(byDue);
+    if (!shown.length) {
+      el.innerHTML = `<div class="empty-state">${workspaceFilter === 'selected'
+        ? 'The client hasn\'t selected any services yet. They\'ll appear here as soon as they pick one or upload a document, and you\'ll get a notification.'
+        : 'Nothing here.'}</div>`;
+      return;
+    }
+    el.innerHTML = shown.map(x => itemCardHtml(x.it, x.idx)).join('');
+
+    el.querySelectorAll('[data-card-idx]').forEach(b => b.addEventListener('click', () => {
+      const idx = +b.dataset.cardIdx;
+      const body = b.nextElementSibling;
+      const nowOpen = body.hidden;
+      body.hidden = !nowOpen; b.setAttribute('aria-expanded', String(nowOpen));
+      if (nowOpen) { openCards.add(idx); closedCards.delete(idx); } else { openCards.delete(idx); closedCards.add(idx); }
+    }));
+
+    el.querySelectorAll('[data-review-action]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = btn.dataset.idx;
+        const docIdx = btn.dataset.doc;
+        const action = btn.dataset.reviewAction;
+        const hint = el.querySelector(`[data-review-hint="${idx}-${docIdx}"]`);
+        const noteInput = el.querySelector(`.rejectNote[data-idx="${idx}"][data-doc="${docIdx}"]`);
+        const note = noteInput ? noteInput.value.trim() : '';
+        if (action === 'reject' && !note) { hint.textContent = 'Write what needs fixing, so the client knows what to upload.'; hint.classList.add('err'); noteInput?.focus(); return; }
+        hint.textContent = 'Saving…'; hint.classList.remove('err');
+        try {
+          const res = await fetch(`/api/calendars/${id}/items/${idx}/documents/${docIdx}/review`, {
+            method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reviewStatus: action === 'accept' ? 'accepted' : 'rejected', note }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || 'Could not save.');
+          calendar = data.calendar; openCards.add(+idx);
+          renderClientItems();
+          if (action === 'reject') refreshChatThread();
+        } catch (err) { hint.textContent = err.message; hint.classList.add('err'); }
+      });
+    });
+
+    el.querySelectorAll('[data-reupload-idx]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = btn.dataset.reuploadIdx, docIdx = btn.dataset.doc;
+        const hint = el.querySelector(`[data-review-hint="${idx}-${docIdx}"]`);
+        btn.disabled = true; hint.textContent = 'Sending…'; hint.classList.remove('err');
+        try {
+          const res = await fetch(`/api/calendars/${id}/items/${idx}/documents/${docIdx}/review`, {
+            method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reviewStatus: 'rejected', note: "We couldn't open this file on our side. Sorry for the trouble; please upload it again." }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || 'Could not send.');
+          calendar = data.calendar; openCards.add(+idx);
+          renderClientItems(); refreshChatThread();
+        } catch (err) { hint.textContent = err.message; hint.classList.add('err'); btn.disabled = false; }
+      });
+    });
+
+    el.querySelectorAll('[data-quote-idx]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = btn.dataset.quoteIdx;
+        const hint = el.querySelector(`[data-quote-hint="${idx}"]`);
+        const amount = el.querySelector(`.quoteAmount[data-idx="${idx}"]`).value;
+        const note = el.querySelector(`.quoteNote[data-idx="${idx}"]`).value;
+        if (!amount || Number(amount) <= 0) { hint.textContent = 'Enter the price in USD.'; hint.classList.add('err'); return; }
+        btn.disabled = true; hint.textContent = 'Sending…'; hint.classList.remove('err');
+        try {
+          const res = await fetch(`/api/calendars/${id}/items/${idx}/quote`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ feeAmountUSD: Number(amount), note }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || 'Could not send the price.');
+          calendar = data.calendar; openCards.add(+idx);
+          renderClientItems(); refreshChatThread();
+          const fresh = el.querySelector(`[data-quote-hint="${idx}"]`);
+          if (fresh) fresh.textContent = 'Price sent. The client was notified in the portal and by email.';
+        } catch (err) { hint.textContent = err.message; hint.classList.add('err'); btn.disabled = false; }
+      });
+    });
+
+    el.querySelectorAll('[data-upload-proof]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = btn.dataset.uploadProof;
+        const hint = el.querySelector(`[data-proof-hint="${idx}"]`);
+        const files = el.querySelector(`.proofFiles[data-idx="${idx}"]`).files;
+        if (!files.length) { hint.textContent = 'Choose at least one file.'; hint.classList.add('err'); return; }
+        const item = calendar.items[idx];
+        const markDone = el.querySelector(`.proofDone[data-idx="${idx}"]`).checked;
+        if (markDone && item.paymentStatus !== 'Paid' &&
+            !confirm(`${item.compliance_name} is not paid yet (${item.paymentStatus}). Mark it done anyway?`)) return;
+        const fd = new FormData();
+        Array.from(files).forEach(f => fd.append('files', f));
+        fd.append('referenceNumber', el.querySelector(`.proofRef[data-idx="${idx}"]`).value);
+        fd.append('completedOn', el.querySelector(`.proofDate[data-idx="${idx}"]`).value);
+        fd.append('note', el.querySelector(`.proofNote[data-idx="${idx}"]`).value);
+        fd.append('markDone', markDone ? 'true' : 'false');
+        btn.disabled = true; hint.textContent = `Uploading ${files.length} file${files.length > 1 ? 's' : ''}…`; hint.classList.remove('err');
+        try {
+          const res = await fetch(`/api/calendars/${id}/items/${idx}/certificate`, { method: 'POST', body: fd });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || 'Upload failed.');
+          calendar = data.calendar; openCards.add(+idx);
+          renderClientItems();
+          const h = el.querySelector(`[data-proof-hint="${idx}"]`);
+          if (h) h.textContent = markDone ? 'Uploaded. The service is marked done and the client has been notified.' : 'Uploaded. The client can see it in their portal.';
+        } catch (err) { hint.textContent = err.message; hint.classList.add('err'); btn.disabled = false; }
+      });
+    });
+
+    el.querySelectorAll('[data-remove-proof]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = btn.dataset.removeProof, docIdx = btn.dataset.doc;
+        const doc = calendar.items[idx].documents[docIdx];
+        if (!confirm(`Remove "${doc.fileName}"? The client will no longer see it. This is recorded in the activity log.`)) return;
+        btn.disabled = true;
+        try {
+          const res = await fetch(`/api/calendars/${id}/items/${idx}/certificate/${docIdx}`, { method: 'DELETE' });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || 'Could not remove.');
+          calendar = data.calendar; openCards.add(+idx);
+          renderClientItems();
+        } catch (err) { alert(err.message); btn.disabled = false; }
+      });
+    });
+
+    el.querySelectorAll('[data-reset-due]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = btn.dataset.resetDue;
+        btn.disabled = true;
+        try {
+          const res = await fetch(`/api/calendars/${id}/items/${idx}/status`, {
+            method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dueDateActual: '' }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || 'Could not reset.');
+          calendar = data.calendar; openCards.add(+idx); renderClientItems();
+        } catch (err) { alert(err.message); btn.disabled = false; }
+      });
+    });
+
+    el.querySelectorAll('[data-action="saveStatus"]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = btn.dataset.idx;
+        const hint = el.querySelector(`[data-status-hint="${idx}"]`);
+        const clientStatus = el.querySelector(`.clientStatusSelect[data-idx="${idx}"]`).value;
+        const paymentStatus = el.querySelector(`.paymentStatusSelect[data-idx="${idx}"]`).value;
+        const body = { clientStatus, paymentStatus };
+        const ddInput = el.querySelector(`.dueDateInput[data-idx="${idx}"]`);
+        const it0 = calendar.items[idx];
+        const currentDue = it0.dueDateActual ? new Date(it0.dueDateActual).toISOString().slice(0, 10) : '';
+        if (ddInput && ddInput.value && ddInput.value !== currentDue) body.dueDateActual = ddInput.value;
+        const feeVal = el.querySelector(`.quoteAmount[data-idx="${idx}"]`)?.value;
+        if (paymentStatus === 'Invoiced' && feeVal) body.feeAmountUSD = Number(feeVal);
+        hint.textContent = 'Saving…'; hint.classList.remove('err');
+        try {
+          const res = await fetch(`/api/calendars/${id}/items/${idx}/status`, {
+            method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            let msg = data.error || 'Could not save.';
+            if (data.suggestedFee && data.suggestedFee.label) msg += ` Price list: ${data.suggestedFee.label}.`;
+            throw new Error(msg);
+          }
+          calendar = data.calendar; openCards.add(+idx);
+          renderClientItems();
+          const freshHint = el.querySelector(`[data-status-hint="${idx}"]`);
+          if (freshHint) { freshHint.textContent = 'Saved ✓'; setTimeout(() => { if (freshHint.textContent === 'Saved ✓') freshHint.textContent = ''; }, 4000); }
+        } catch (err) { hint.textContent = err.message; hint.classList.add('err'); }
+      });
+    });
+  }
+
+  // ---- Chat ----
+  async function loadChat() {
+    const el = document.getElementById('chatPanel');
+    if (!el || !calendar.clientOrgId) return;
+    el.innerHTML = `
+      <div class="list-section">
+        <div class="section-title">Messages</div>
+        <div class="section-sub">Talk directly with ${escapeHtml(calendar.profile.companyName || 'the client')} about this engagement.</div>
+        <div class="chat-box">
+          <div class="chat-thread" id="chatThread"><div class="empty-state">Loading…</div></div>
+          <div class="chat-compose">
+            <textarea id="chatInput" placeholder="Write a message…"></textarea>
+            <button class="primary" id="chatSendBtn">Send</button>
+          </div>
+          <span class="hint" id="chatHint" style="display:block;padding:0 18px 12px;"></span>
+        </div>
+      </div>`;
+    document.getElementById('chatSendBtn').addEventListener('click', sendChatMessage);
+    document.getElementById('chatInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) sendChatMessage();
+    });
+    await refreshChatThread();
+  }
+
+  async function refreshChatThread() {
+    const thread = document.getElementById('chatThread');
+    if (!thread) return;
+    try {
+      const res = await fetch(`/api/messages/${calendar.clientOrgId}`);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Could not load messages.');
+      const messages = data.messages || [];
+      if (!messages.length) {
+        thread.innerHTML = '<div class="empty-state">No messages yet — say hello.</div>';
+        return;
+      }
+      thread.innerHTML = messages.map(m => `
+        <div class="chat-msg ${m.senderRole === 'client' ? 'from-client' : 'from-staff'}">
+          <div class="chat-msg-meta">${escapeHtml(m.senderName)} · ${fmtDateTime(m.createdAt)}${m.itemLabel ? ` · <span class="chat-tag">${escapeHtml(m.itemLabel)}</span>` : ''}</div>
+          <div class="chat-msg-body">${escapeHtml(m.body)}</div>
+        </div>`).join('');
+      thread.scrollTop = thread.scrollHeight;
+    } catch (err) {
+      thread.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
+    }
+  }
+
+  async function sendChatMessage() {
+    const input = document.getElementById('chatInput');
+    const hint = document.getElementById('chatHint');
+    const text = input.value.trim();
+    if (!text) return;
+    hint.textContent = 'Sending…'; hint.classList.remove('err');
+    try {
+      const res = await fetch(`/api/messages/${calendar.clientOrgId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ body: text }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Could not send.');
+      input.value = '';
+      hint.textContent = '';
+      await refreshChatThread();
+    } catch (err) {
+      hint.textContent = err.message; hint.classList.add('err');
+    }
+  }
+
+  async function load() {
+    try {
+      const res = await fetch(`/api/calendars/${id}`);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Could not load calendar.');
+      calendar = data.calendar;
+      render();
+    } catch (err) {
+      document.getElementById('slot').innerHTML = `<div class="error-case">${escapeHtml(err.message)}</div>`;
+    }
+  }
+  if (id) load();
+  // A client action (upload, selection, payment) shows up without a reload.
+  document.addEventListener('cc:notifications', () => {
+    if (!id) return;
+    fetch(`/api/calendars/${id}`).then(r => r.ok ? r.json() : null).then(d => {
+      if (!d) return;
+      calendar = d.calendar;
+      if (calendar.status === 'approved' && calendar.clientOrgId) renderClientItems();
+      refreshChatThread();
+    }).catch(() => {});
+  });
 </script>
 <script src="/js/notifications.js" defer></script>
 </body>
