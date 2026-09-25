@@ -74,6 +74,17 @@ const userSchema = new mongoose.Schema(
     // open — the thing a 30-day cookie would otherwise prevent, and
     // what Facebook/Instagram do when you reset a password.
     tokenVersion: { type: Number, default: 0 },
+    // --- Two-factor login (staff; lib/totp.js, routes/auth.routes.js) ---
+    // Secrets are stored encrypted. totpLastUsedStep stops a code being
+    // used twice; failed attempts lock the code step for 15 minutes.
+    totpEnabled: { type: Boolean, default: false },
+    totpSecret: { type: String, default: null },
+    totpPendingSecret: { type: String, default: null },
+    totpLastUsedStep: { type: Number, default: -1 },
+    totpRecoveryCodes: { type: [String], default: [] }, // hashed, one-time
+    totpEnabledAt: { type: Date, default: null },
+    totpFailedAttempts: { type: Number, default: 0 },
+    totpLockedUntil: { type: Date, default: null },
     passwordUpdatedAt: { type: Date, default: null },
     lastLoginAt: { type: Date, default: null },
     // Brute-force brake for the OTP step, per account rather than per
@@ -141,6 +152,7 @@ userSchema.methods.toSafeJSON = function () {
     name: this.name,
     role: this.role,
     department: this.department,
+    twoFactorEnabled: Boolean(this.totpEnabled),
     clientOrgId: this.clientOrgId,
     active: this.active,
     mustSetPassword: this.mustSetPassword,
