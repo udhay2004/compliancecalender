@@ -30,6 +30,7 @@ const paymentsRoutes = require("./routes/payments.routes");
 const messagesRoutes = require("./routes/messages.routes");
 const dashboardRoutes = require("./routes/dashboard.routes");
 const notificationsRoutes = require("./routes/notifications.routes");
+const invoicesRoutes = require("./routes/invoices.routes");
 const legalRoutes = require("./routes/legal.routes");
 const { sendPageWithFooter } = legalRoutes;
 const { runReminderSweep, backfillDueDates } = require("./lib/reminders");
@@ -167,6 +168,7 @@ app.use("/api/public", publicRoutes);
 app.use("/api/messages", messagesRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/notifications", notificationsRoutes);
+app.use("/api/invoices", invoicesRoutes);
 
 app.get("/healthz", (req, res) => res.json({ ok: true }));
 
@@ -189,6 +191,7 @@ async function start() {
   // no reminders are sent by this).
   setTimeout(() => {
     backfillDueDates().catch((err) => console.error("[deadlines] Backfill failed:", err.message));
+    require("./lib/invoices").backfillInvoices().catch((err) => console.error("[invoices] Backfill failed:", err.message));
   }, 5000);
 
   // Nightly database backup to R2 (lib/backup.js). 02:30 UTC by default.
