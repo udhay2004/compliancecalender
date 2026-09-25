@@ -150,10 +150,17 @@ async function propagateToNewerCalendars(calendar, item) {
 }
 
 async function announcePayment(calendar, item, outcome) {
-  const org = await ClientOrg.findById(calendar.clientOrgId).select("name").lean().catch(() => null);
+  const org = await ClientOrg.findById(calendar.clientOrgId).lean().catch(() => null);
   const company = org?.name || calendar.profile?.companyName || "A client";
   if (outcome === "paid") {
     const amount = item.feeAmountCents ? formatUSD(item.feeAmountCents) : "";
+    // Every confirmed payment gets exactly one invoice (lib/invoices.js).
+    let invoice = null;
+    try {
+      invoice = await require("../lib/invoices").ensureInvoiceForPayment({ calendar, item, itemIndex: calendar.items.indexOf(item), org });
+    } catch (err) {
+      console.error("[invoices] could not create invoice (non-fatal; created at next start-up):", err.message);
+    }
     logActivity({
       action: "payment_captured",
       actor: null,
@@ -175,7 +182,8 @@ async function announcePayment(calendar, item, outcome) {
       calendarId: calendar._id,
       type: "payment_received",
       title: `Payment received: ${amount} for ${item.compliance_name}`,
-      body: `Thank you — we've received your payment of ${amount} for ${item.compliance_name} (payment reference ${item.razorpayPaymentId}). We'll start on the filing and keep you posted.`,
+      body: `Thank you — we've received your payment of ${amount} for ${item.compliance_name} (payment reference ${item.razorpayPaymentId}). We'll start on the filing and keep you posted.` +
+        (invoice ? `\n\nYour invoice ${invoice.number} is ready to download: ${process.env.APP_URL || ""}/api/portal/invoices/${invoice._id}/pdf` : ""),
       link: `/portal.html?calendar=${calendar._id}`,
     });
   } else if (outcome === "mismatch") {
@@ -417,6 +425,55 @@ async function findCalendarAndItemForOrder(orderId) {
   return { calendar, item };
 }
 
+async function handleRefundEvent(event) {
+  const refunds = require("../lib/refunds");
+  const invoices = require("../lib/invoices");
+  const entity = event?.payload?.refund?.entity;
+  const r = await refunds.applyRefundEvent(Calendar, entity, event.event);
+  if (!r) {
+    console.warn(`[razorpay webhook] ${event.event} for unknown payment ${entity?.payment_id}`);
+    return;
+  }
+  const { calendar, item, itemIndex, refund, changed, created } = r;
+  if (!changed) return;
+  const org = await ClientOrg.findById(calendar.clientOrgId).lean().catch(() => null);
+  const company = org?.name || calendar.profile?.companyName || "A client";
+  const amount = invoices.money(refund.amountMinor, refund.currency);
+  if (created && refund.razorpayPaymentId === item.razorpayPaymentId) {
+    // Refund made in the Razorpay dashboard: issue the credit note here.
+    const invoice = await invoices.ensureInvoiceForPayment({ calendar, item, itemIndex, org }).catch(() => null);
+    if (invoice) {
+      const note = await invoices.issueCreditNote({ invoice, refund: { id: refund.razorpayRefundId, amount: refund.amountMinor }, reason: refund.reason, by: "razorpay-dashboard" }).catch(() => null);
+      if (note) refund.creditNoteNumber = note.number;
+    }
+  }
+  if (refund.status === "failed") await invoices.voidCreditNoteForRefund(refund.razorpayRefundId).catch(() => {});
+  await calendar.save();
+
+  logActivity({
+    action: refund.status === "failed" ? "payment_failed" : "refund_updated",
+    actor: null,
+    clientOrgId: calendar.clientOrgId,
+    calendarId: calendar._id,
+    summary: `Refund ${refund.razorpayRefundId} of ${amount} for ${item.compliance_name}: ${refund.status}${created ? " (made in the Razorpay dashboard)" : ""}.`,
+  });
+  if (refund.status === "failed") {
+    notifyStaff({
+      clientOrgId: calendar.clientOrgId, calendarId: calendar._id, type: "payment_failed",
+      title: `Refund FAILED: ${amount} to ${company}`,
+      body: `Razorpay could not complete the refund of ${amount} for ${item.compliance_name} (${refund.razorpayRefundId}). The credit note has been voided. Check the Razorpay dashboard, then try again from the service's page.`,
+      link: `/calendar.html?id=${calendar._id}#item-${itemIndex}`,
+    });
+  } else if (refund.status === "processed") {
+    notifyClient({
+      clientOrgId: calendar.clientOrgId, calendarId: calendar._id, type: "payment_received", email: false,
+      title: `Refund of ${amount} is on its way`,
+      body: `Razorpay has processed your refund of ${amount} for ${item.compliance_name}. Your bank may take a few days to show it.`,
+      link: `/portal.html?calendar=${calendar._id}`,
+    });
+  }
+}
+
 async function razorpayWebhookHandler(req, res) {
   try {
     if (!process.env.RAZORPAY_WEBHOOK_SECRET) {
@@ -435,6 +492,12 @@ async function razorpayWebhookHandler(req, res) {
       event = JSON.parse(raw.toString("utf8"));
     } catch {
       return res.status(400).json({ error: "Invalid JSON." });
+    }
+
+    // Refunds (made in the app or directly in the Razorpay dashboard).
+    if (/^refund\.(created|processed|failed)$/.test(event.event)) {
+      await handleRefundEvent(event);
+      return res.status(200).json({ received: true });
     }
 
     const payment = event?.payload?.payment?.entity;
