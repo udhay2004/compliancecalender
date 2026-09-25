@@ -89,6 +89,59 @@ router.get("/payments-health", async (req, res) => {
   res.json(report);
 });
 
+// ---------------------------------------------------------------------
+// Backups (lib/backup.js)
+// ---------------------------------------------------------------------
+let backupInProgress = false;
+
+// GET /api/admin/backups
+router.get("/backups", async (req, res) => {
+  const backup = require("../lib/backup");
+  const storage = require("../lib/storage");
+  let backups = [];
+  let listError = null;
+  try { backups = (await backup.listBackups()).slice(0, 60); } catch (err) { listError = err.message; }
+  res.json({
+    storage: storage.describe(),
+    durable: storage.DRIVER === "s3",
+    schedule: process.env.DISABLE_BACKUPS === "true" ? null : (process.env.BACKUP_CRON || "30 2 * * *"),
+    lastRun: backup.lastRun(),
+    inProgress: backupInProgress,
+    canDownload: req.user.role === "super_admin",
+    backups,
+    listError,
+  });
+});
+
+// POST /api/admin/backups — take one now.
+router.post("/backups", async (req, res) => {
+  if (backupInProgress) return res.status(409).json({ error: "A backup is already running." });
+  backupInProgress = true;
+  try {
+    const r = await require("../lib/backup").runBackup({ reason: `manual by ${req.user.email}` });
+    res.json({ ok: true, backup: r });
+  } catch (err) {
+    res.status(500).json({ error: `Backup failed: ${err.message}` });
+  } finally {
+    backupInProgress = false;
+  }
+});
+
+// GET /api/admin/backups/download?key=backups/… — owner only: a backup
+// contains everything, including password hashes.
+router.get("/backups/download", async (req, res) => {
+  if (req.user.role !== "super_admin") return res.status(403).json({ error: "Only the owner account can download backups." });
+  const key = String(req.query.key || "");
+  if (!/^backups\/[0-9TZ-]+\.ndjson\.gz$/.test(key)) return res.status(400).json({ error: "Invalid backup name." });
+  const f = await require("../lib/storage").getFile(key);
+  if (!f) return res.status(404).json({ error: "Backup not found." });
+  logActivity({ action: "backup_created", actor: req.user, summary: `${req.user.email} downloaded backup ${key}.` });
+  res.setHeader("Content-Type", "application/gzip");
+  res.setHeader("Content-Disposition", `attachment; filename="${key.slice(8)}"`);
+  res.setHeader("Cache-Control", "no-store");
+  f.stream.pipe(res);
+});
+
 // GET /api/admin/storage-health — "is document storage actually working?"
 // Uploads, reads back and deletes a tiny test file, then lists client
 // documents whose files are missing (e.g. uploaded while files were still
@@ -240,6 +293,28 @@ router.get("/users", async (req, res) => {
   if (req.query.clientOrgId) filter.clientOrgId = req.query.clientOrgId;
   const users = await User.find(filter).sort({ createdAt: -1 });
   res.json({ users: users.map((u) => u.toSafeJSON()) });
+});
+
+// POST /api/admin/users/:id/reset-2fa — for a lost phone: turns
+// two-factor off for that person and signs them out everywhere; they set
+// it up again at their next sign-in. Same seniority rule as other edits.
+router.post("/users/:id/reset-2fa", async (req, res) => {
+  const target = await User.findById(req.params.id);
+  if (!target) return res.status(404).json({ error: "User not found." });
+  if (String(target._id) === String(req.user._id)) {
+    return res.status(400).json({ error: "Use one of your recovery codes, or ask another admin to reset yours." });
+  }
+  if (!canManageTargetRole(req.user.role, target.role)) {
+    return res.status(403).json({ error: "You can't change this account." });
+  }
+  Object.assign(target, {
+    totpEnabled: false, totpSecret: null, totpPendingSecret: null, totpRecoveryCodes: [],
+    totpLastUsedStep: -1, totpEnabledAt: null, totpFailedAttempts: 0, totpLockedUntil: null,
+    tokenVersion: (target.tokenVersion || 0) + 1,
+  });
+  await target.save();
+  logActivity({ action: "two_factor_reset", actor: req.user, summary: `${req.user.email} reset two-factor login for ${target.email}.` });
+  res.json({ user: target.toSafeJSON() });
 });
 
 // PATCH /api/admin/users/:id — deactivate/reactivate, change name, reset password.
