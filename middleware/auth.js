@@ -17,6 +17,16 @@ const COOKIE_NAME = "cc_session";
 // already hold a fully privileged session and could simply navigate
 // away from the password screen and use the app.
 const SETUP_COOKIE_NAME = "cc_setup";
+// Short-lived "password OK, code still needed" cookie for staff with
+// two-factor login switched on. Never grants access by itself.
+const MFA_COOKIE_NAME = "cc_mfa";
+const MFA_TTL = "10m";
+
+// Two-factor is required for every internal account unless explicitly
+// turned off (TWO_FACTOR_REQUIRED=false, e.g. local development).
+function twoFactorRequired() {
+  return (process.env.TWO_FACTOR_REQUIRED || "true").toLowerCase() !== "false";
+}
 const TOKEN_TTL = "30d";
 const SETUP_TOKEN_TTL = "15m";
 
@@ -39,9 +49,10 @@ function isInternal(user) {
 //   v — the account's tokenVersion at issue time. Bumped on every
 //       password change, which is what makes "changing your password
 //       signs out every other device" true rather than aspirational.
-function signToken(user) {
+//   m — 1 if this session passed the two-factor code step.
+function signToken(user, { mfaPassed = false } = {}) {
   return jwt.sign(
-    { id: user._id.toString(), p: "session", v: user.tokenVersion || 0 },
+    { id: user._id.toString(), p: "session", v: user.tokenVersion || 0, m: mfaPassed ? 1 : 0 },
     process.env.JWT_SECRET,
     { expiresIn: isInternal(user) ? STAFF_TOKEN_TTL : TOKEN_TTL }
   );
@@ -65,13 +76,47 @@ function cookieOptions(maxAge) {
   };
 }
 
-function setSessionCookie(res, user) {
+// EVERY way of signing in (password, emailed code, Google, first password)
+// ends here, so this is where two-factor is enforced: a staff member with
+// two-factor switched on gets only a 10-minute "code needed" cookie, and
+// every staff page sends them to /two-factor.html until they enter a code.
+// Returns "mfa" in that case, "session" otherwise.
+function setSessionCookie(res, user, { mfaPassed = false } = {}) {
   res.clearCookie(SETUP_COOKIE_NAME, { path: "/" });
+  if (isInternal(user) && user.totpEnabled && !mfaPassed) {
+    res.clearCookie(COOKIE_NAME, { path: "/" });
+    res.cookie(
+      MFA_COOKIE_NAME,
+      jwt.sign({ id: user._id.toString(), p: "mfa", v: user.tokenVersion || 0 }, process.env.JWT_SECRET, { expiresIn: MFA_TTL }),
+      cookieOptions(10 * 60 * 1000)
+    );
+    return "mfa";
+  }
+  res.clearCookie(MFA_COOKIE_NAME, { path: "/" });
   res.cookie(
     COOKIE_NAME,
-    signToken(user),
+    signToken(user, { mfaPassed }),
     cookieOptions(isInternal(user) ? STAFF_MAX_AGE_MS : CLIENT_MAX_AGE_MS)
   );
+  return "session";
+}
+
+// The user behind a "code needed" cookie (POST /api/auth/2fa/verify only).
+async function loadUserFromMfaToken(req) {
+  const token = req.cookies?.[MFA_COOKIE_NAME];
+  if (!token) throw new Error("No two-factor sign-in in progress.");
+  const payload = jwt.verify(token, process.env.JWT_SECRET);
+  if (payload.p !== "mfa") throw new Error("Wrong token type.");
+  const user = await User.findById(payload.id);
+  if (!user || !user.active || !user.totpEnabled) throw new Error("Sign-in invalid.");
+  if ((payload.v ?? 0) !== (user.tokenVersion || 0)) throw new Error("Sign-in superseded.");
+  return user;
+}
+
+// Staff who must still set up two-factor may only reach these.
+const MFA_SETUP_ALLOWED = /^\/api\/(auth|notifications)(\/|$)/;
+function needsMfaSetup(user) {
+  return isInternal(user) && twoFactorRequired() && !user.totpEnabled;
 }
 
 function setSetupCookie(res, user) {
@@ -100,6 +145,9 @@ async function loadUserFromRequest(req) {
   // working session — it can only have got here by finishing the OTP
   // step and then abandoning the password screen.
   if (user.mustSetPassword) throw new Error("Password setup incomplete.");
+  // Two-factor is on but this session never passed the code step (e.g.
+  // it was issued before two-factor was switched on): not valid.
+  if (isInternal(user) && user.totpEnabled && payload.m !== 1) throw new Error("Two-factor code required.");
   return user;
 }
 
@@ -123,9 +171,17 @@ function requireAuth(req, res, next) {
   loadUserFromRequest(req)
     .then((user) => {
       req.user = user;
+      if (needsMfaSetup(user) && !MFA_SETUP_ALLOWED.test(req.originalUrl)) {
+        return res.status(403).json({ error: "Set up two-factor login first.", code: "MFA_SETUP_REQUIRED" });
+      }
       next();
     })
-    .catch(() => res.status(401).json({ error: "Not logged in or session expired." }));
+    .catch(() => {
+      if (req.cookies?.[MFA_COOKIE_NAME]) {
+        return res.status(401).json({ error: "Enter your two-factor code to finish signing in.", code: "MFA_REQUIRED" });
+      }
+      res.status(401).json({ error: "Not logged in or session expired." });
+    });
 }
 
 // requireRole("admin") = "admin or more senior" (admin, super_admin).
@@ -158,9 +214,13 @@ function requirePageAuth(req, res, next) {
   loadUserFromRequest(req)
     .then((user) => {
       req.user = user;
+      if (needsMfaSetup(user)) return res.redirect("/two-factor.html?setup=1");
       next();
     })
-    .catch(() => res.redirect("/login.html?reason=session_expired"));
+    .catch(() => {
+      if (req.cookies?.[MFA_COOKIE_NAME]) return res.redirect(`/two-factor.html?next=${encodeURIComponent(req.originalUrl)}`);
+      res.redirect("/login.html?reason=session_expired");
+    });
 }
 
 function requirePageRole(minRole) {
@@ -197,6 +257,11 @@ function requirePageClientRole(req, res, next) {
 }
 
 module.exports = {
+  MFA_COOKIE_NAME,
+  loadUserFromMfaToken,
+  needsMfaSetup,
+  twoFactorRequired,
+  isInternal,
   COOKIE_NAME,
   SETUP_COOKIE_NAME,
   loadUserFromRequest,
