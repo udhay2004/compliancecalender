@@ -36,6 +36,8 @@ const auditLogSchema = new mongoose.Schema(
         "two_factor_codes_regenerated",
         "two_factor_reset",
         "backup_created",
+        "refund_created",
+        "refund_updated",
         "backup_failed",
         "proof_removed",
         "user_deactivated",
