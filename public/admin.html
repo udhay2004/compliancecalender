@@ -41,6 +41,19 @@
     </div>
   </div>
 
+  <div class="card" style="margin-top:14px;" id="backupsCard">
+    <div class="card-body" style="padding:18px 24px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div>
+          <h2 style="margin:0;font-size:16px;">Database backups</h2>
+          <div class="section-sub" style="margin:2px 0 0;">A full copy of the database is saved every night. Kept: every backup for 7 days, one a day for 30 days, one a month for a year.</div>
+        </div>
+        <button class="primary" id="backupNowBtn">Back up now</button>
+      </div>
+      <div id="backupsResult" aria-live="polite"><p class="hint" style="margin-top:10px;">Loading…</p></div>
+    </div>
+  </div>
+
   <div class="card" style="margin-top:14px;" id="legalCard">
     <div class="card-body" style="padding:18px 24px;">
       <h2 style="margin:0;font-size:16px;">Legal pages &amp; Razorpay website check</h2>
@@ -127,6 +140,45 @@
 <script>
   function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
   let me = null;
+
+  async function loadBackups() {
+    const out = document.getElementById('backupsResult');
+    try {
+      const res = await fetch('/api/admin/backups');
+      const r = await res.json();
+      if (!res.ok) throw new Error(r.error || 'Could not load backups.');
+      const kb = (n) => n >= 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB';
+      const latest = r.backups[0];
+      const ageH = latest ? (Date.now() - new Date(latest.createdAt)) / 3600000 : null;
+      const healthy = r.durable && latest && ageH < 30 && (!r.lastRun || r.lastRun.ok);
+      let html = `<div style="margin-top:12px;padding:12px 14px;border-radius:8px;background:${healthy ? 'var(--teal-bg)' : 'var(--stamp-red-bg)'};font-size:13.5px;line-height:1.6;">`;
+      html += healthy ? `<b>✓ Backups are running.</b> Latest: ${new Date(latest.createdAt).toLocaleString()} (${kb(latest.size)}).`
+        : !r.durable ? `<b>✗ Backups are going to the server's disk</b>, which is wiped on every deploy. Add the R2 settings (see Document storage above).`
+        : r.lastRun && !r.lastRun.ok ? `<b>✗ The last backup failed:</b> ${escapeHtml(r.lastRun.error)}`
+        : !latest ? `<b>No backups yet.</b> The first one runs tonight, or click "Back up now".`
+        : `<b>✗ The latest backup is ${Math.round(ageH)} hours old.</b> Check the server is running, or click "Back up now".`;
+      html += `<div style="font-size:12.5px;color:var(--ink-soft);margin-top:4px;">Saved to ${escapeHtml(r.storage)}${r.schedule ? ` · schedule "${escapeHtml(r.schedule)}" (UTC)` : ' · nightly backups are OFF (DISABLE_BACKUPS)'}</div></div>`;
+      if (r.listError) html += `<p class="hint err" style="margin-top:8px;">${escapeHtml(r.listError)}</p>`;
+      if (r.backups.length) {
+        html += `<details style="margin-top:10px;"><summary style="cursor:pointer;font-size:13px;">All backups (${r.backups.length})</summary><div style="margin-top:8px;display:grid;grid-template-columns:1fr auto auto;gap:4px 14px;font-size:13px;">` +
+          r.backups.map(b => `<span>${new Date(b.createdAt).toLocaleString()}</span><span style="color:var(--ink-soft);">${kb(b.size)}</span>${r.canDownload ? `<a href="/api/admin/backups/download?key=${encodeURIComponent(b.key)}">Download</a>` : '<span></span>'}`).join('') +
+          `</div>${r.canDownload ? '' : '<p style="font-size:12px;color:var(--ink-soft);margin-top:6px;">Only the owner account can download backups.</p>'}</details>`;
+      }
+      out.innerHTML = html;
+    } catch (err) { out.innerHTML = `<p class="hint err" style="margin-top:10px;">${escapeHtml(err.message)}</p>`; }
+  }
+  loadBackups();
+  document.getElementById('backupNowBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('backupNowBtn');
+    btn.disabled = true; btn.textContent = 'Backing up…';
+    try {
+      const res = await fetch('/api/admin/backups', { method: 'POST' });
+      const r = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(r.error || 'Backup failed.');
+    } catch (err) { alert(err.message); }
+    btn.disabled = false; btn.textContent = 'Back up now';
+    loadBackups();
+  });
 
   (async () => {
     const out = document.getElementById('legalResult');
@@ -383,11 +435,24 @@
             <div>
               <div style="font-weight:500;">${escapeHtml(u.name || u.email)} <span class="ts" style="color:var(--ink-soft);">(${escapeHtml(u.role)})</span></div>
               <div class="ts" style="color:var(--ink-soft);font-size:13px;">${escapeHtml(u.email)}${org ? ' · ' + escapeHtml(org.name) : ''} ${u.active ? '' : '· deactivated'}</div>
+              ${u.role !== 'client' ? `<div class="ts" style="font-size:12px;margin-top:2px;color:${u.twoFactorEnabled ? 'var(--brand-dark)' : 'var(--seal-gold)'};">${u.twoFactorEnabled ? '✓ Two-factor on' : 'Two-factor not set up yet'}</div>` : ''}
             </div>
-            <button data-id="${u.id}" data-active="${u.active}" class="toggleActiveBtn">${u.active ? 'Deactivate' : 'Reactivate'}</button>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;">
+              ${u.role !== 'client' && u.twoFactorEnabled && u.id !== (me && me.id) ? `<button data-id="${u.id}" data-email="${escapeHtml(u.email)}" class="reset2faBtn">Reset two-factor</button>` : ''}
+              <button data-id="${u.id}" data-active="${u.active}" class="toggleActiveBtn">${u.active ? 'Deactivate' : 'Reactivate'}</button>
+            </div>
           </div>
         </div>`;
     }).join('')}</div>`;
+    el.querySelectorAll('.reset2faBtn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm(`Reset two-factor login for ${btn.dataset.email}? They'll be signed out everywhere and asked to set it up again at their next sign-in. Only do this if they've lost their phone and recovery codes.`)) return;
+        const res = await fetch(`/api/admin/users/${btn.dataset.id}/reset-2fa`, { method: 'POST' });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) alert(data.error || 'Could not reset.');
+        await loadUsers();
+      });
+    });
     el.querySelectorAll('.toggleActiveBtn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const active = btn.dataset.active !== 'true';
