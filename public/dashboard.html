@@ -330,6 +330,14 @@
         return row(calLink(r.calendarId), esc(r.company), esc(r.task), money(r.amount), esc(when(r.paidAt)), 'good');
       }, 'No payments recorded yet.'));
 
+    html += finPanel('Invoices & credit notes', 'Every payment gets an invoice; every refund a credit note. Click to open the PDF.',
+      rows(finance.recentDocuments, function (d) {
+        return '<a class="fin-row" href="/api/invoices/' + encodeURIComponent(d.id) + '/pdf" target="_blank" rel="noopener">' +
+          '<div class="fin-main"><div class="fin-title">' + esc(d.number) + '</div><div class="fin-sub">' + esc(d.customer) + ' \u00b7 ' + esc(d.description) + '</div></div>' +
+          '<div class="fin-side"><div class="fin-amt ' + (d.kind === 'credit_note' ? 'bad' : '') + '">' + (d.kind === 'credit_note' ? '\u2212 ' : '') + esc(d.amount) + '</div>' +
+          '<div class="fin-sub">' + esc(when(d.issuedAt)) + (d.status === 'void' ? ' \u00b7 void' : d.status === 'partially_refunded' ? ' \u00b7 part refunded' : d.status === 'refunded' ? ' \u00b7 refunded' : '') + '</div></div></a>';
+      }, 'No invoices yet. They are created automatically when clients pay.'));
+
     html += finPanel('Recently completed', '',
       rows(finance.recentlyCompleted, function (r) {
         return row(calLink(r.calendarId) + '#item-' + encodeURIComponent(r.itemIndex), esc(r.company), esc(r.task),
