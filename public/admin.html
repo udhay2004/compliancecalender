@@ -41,6 +41,14 @@
     </div>
   </div>
 
+  <div class="card" style="margin-top:14px;" id="legalCard">
+    <div class="card-body" style="padding:18px 24px;">
+      <h2 style="margin:0;font-size:16px;">Legal pages &amp; Razorpay website check</h2>
+      <div class="section-sub" style="margin:2px 0 0;">Razorpay asks for these page links when reviewing your website (Account &amp; Settings → Business website details).</div>
+      <div id="legalResult" aria-live="polite"><p class="hint" style="margin-top:10px;">Loading…</p></div>
+    </div>
+  </div>
+
   <div class="card" style="margin-top:14px;" id="paymentsCard">
     <div class="card-body" style="padding:18px 24px;">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
@@ -119,6 +127,23 @@
 <script>
   function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
   let me = null;
+
+  (async () => {
+    const out = document.getElementById('legalResult');
+    try {
+      const res = await fetch('/api/admin/legal-status');
+      const r = await res.json();
+      if (!res.ok) throw new Error(r.error || 'Could not load.');
+      let html = r.missing.length
+        ? `<div style="margin-top:12px;padding:12px 14px;border-radius:8px;background:var(--stamp-red-bg);font-size:13.5px;line-height:1.6;">
+             <b>✗ ${r.missing.length} business detail${r.missing.length === 1 ? ' is' : 's are'} missing</b> from the pages. Add ${r.missing.length === 1 ? 'it' : 'them'} in Railway → Variables (or in <code>lib/businessInfo.js</code>) and redeploy:
+             <ul style="margin:6px 0 0 18px;padding:0;">${r.missing.map(m => `<li><code>${escapeHtml(m.key)}</code>: ${escapeHtml(m.label)}</li>`).join('')}</ul>
+           </div>`
+        : `<div style="margin-top:12px;padding:12px 14px;border-radius:8px;background:var(--teal-bg);font-size:13.5px;"><b>✓ All required business details are filled in</b> (${escapeHtml(r.businessName)}).</div>`;
+      html += `<div style="margin-top:12px;display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13px;">${r.pages.map(p => `<span style="color:var(--ink-soft);">${escapeHtml(p.label)}</span><a href="${escapeHtml(p.url)}" target="_blank" rel="noopener" style="overflow-wrap:anywhere;">${escapeHtml(p.url)}</a>`).join('')}</div>`;
+      out.innerHTML = html;
+    } catch (err) { out.innerHTML = `<p class="hint err" style="margin-top:10px;">${escapeHtml(err.message)}</p>`; }
+  })();
 
   document.getElementById('paymentsCheckBtn').addEventListener('click', async () => {
     const btn = document.getElementById('paymentsCheckBtn');
