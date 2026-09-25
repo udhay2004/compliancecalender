@@ -20,6 +20,9 @@ const path = require("node:path");
 
 process.env.JWT_SECRET = "test-secret-not-used-anywhere-real";
 process.env.NODE_ENV = "test";
+// These tests cover passwords and sessions; two-factor enforcement has
+// its own tests in tests/security.test.js.
+process.env.TWO_FACTOR_REQUIRED = "false";
 
 // ---------------------------------------------------------------------
 // In-memory stand-ins, injected through the require cache before the
