@@ -14,6 +14,8 @@ const clientOrgSchema = new mongoose.Schema(
     primaryContactName: { type: String, trim: true, default: "" },
     primaryContactEmail: { type: String, trim: true, lowercase: true, default: "" },
     primaryContactPhone: { type: String, trim: true, default: "" },
+    // Printed on invoices (optional; the client can add it in the portal).
+    billingAddress: { type: String, trim: true, default: "" },
     notes: { type: String, default: "" },
     // Who on your team created this org record — an internal
     // staff/admin User's email, for accountability, not a foreign key.
