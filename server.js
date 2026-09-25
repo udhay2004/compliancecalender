@@ -30,6 +30,8 @@ const paymentsRoutes = require("./routes/payments.routes");
 const messagesRoutes = require("./routes/messages.routes");
 const dashboardRoutes = require("./routes/dashboard.routes");
 const notificationsRoutes = require("./routes/notifications.routes");
+const legalRoutes = require("./routes/legal.routes");
+const { sendPageWithFooter } = legalRoutes;
 const { runReminderSweep, backfillDueDates } = require("./lib/reminders");
 
 const app = express();
@@ -120,7 +122,14 @@ app.get("/dashboard.html", requirePageAuth, requirePageRole("staff"), (req, res)
 });
 
 app.get("/portal.html", requirePageAuth, requirePageClientRole, (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "portal.html"));
+  sendPageWithFooter(res, "portal.html");
+});
+
+// Company and policy pages (/terms, /privacy, /refund-policy, /pricing …):
+// public, server-rendered and linked from the footer of every public page.
+app.use(legalRoutes);
+["login.html", "signup.html"].forEach((file) => {
+  app.get(`/${file}`, (req, res) => sendPageWithFooter(res, file));
 });
 
 // "/" routes by role rather than always going to the staff app, since a
@@ -135,7 +144,7 @@ app.get("/", tryPageAuth, (req, res) => {
   if (req.user && !(req.user.role === "client" && req.query.new === "1")) {
     return res.redirect(req.user.role === "client" ? "/portal.html" : "/dashboard.html");
   }
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  sendPageWithFooter(res, "index.html");
 });
 
 // ---------------------------------------------------------------------
