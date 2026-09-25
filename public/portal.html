@@ -447,7 +447,7 @@
       payArea = `
         <div><div class="price-line">Price: <b>${escapeHtml(item.price?.label || '')}</b></div>${item.quoteNote ? `<div class="pay-note">${escapeHtml(item.quoteNote)}</div>` : ''}<div class="pay-note">${escapeHtml(item.price?.message || '')}</div></div>
         <div>${!readOnly && cs.allProvided
-          ? `<button class="pay-btn" data-pay-idx="${idx}">Pay ${escapeHtml(item.price?.label || '')}</button>`
+          ? `<button class="pay-btn" data-pay-idx="${idx}">Pay ${escapeHtml(item.price?.label || '')}</button><div class="pay-note" style="font-size:11.5px;">By paying you agree to our <a href="/terms" target="_blank" rel="noopener">Terms</a> and <a href="/refund-policy" target="_blank" rel="noopener">Cancellation &amp; Refunds</a> policy.</div>`
           : `<button class="pay-btn" disabled>Pay ${escapeHtml(item.price?.label || '')}</button><div class="pay-note">Upload every document above to unlock payment.</div>`}</div>`;
     } else {
       const pr = item.price || {};
@@ -690,5 +690,6 @@
   })();
 </script>
 <script src="/js/notifications.js" defer></script>
+<!--SITE_FOOTER-->
 </body>
 </html>
