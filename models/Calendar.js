@@ -46,7 +46,7 @@ const itemSchema = new mongoose.Schema(
     },
     paymentStatus: {
       type: String,
-      enum: ["Not Invoiced", "Invoiced", "Paid", "Overdue"],
+      enum: ["Not Invoiced", "Invoiced", "Paid", "Overdue", "Partially Refunded", "Refunded"],
       default: "Not Invoiced",
     },
     // --- Which services the client actually wants us to handle -----
@@ -165,6 +165,29 @@ const itemSchema = new mongoose.Schema(
     // only cover items staff has dated; payment reminders (see
     // lib/reminders.js) don't depend on this at all and work today.
     dueDateActual: { type: Date, default: null },
+    // --- Refunds (routes/calendar.routes.js → Razorpay) ---------------
+    // One entry per refund. status follows Razorpay: "pending" until the
+    // money is on its way ("processed"), or "failed".
+    refunds: {
+      type: [
+        new mongoose.Schema(
+          {
+            razorpayRefundId: String,
+            razorpayPaymentId: String,
+            amountMinor: Number,
+            currency: String,
+            reason: String,
+            status: { type: String, default: "pending" },
+            creditNoteNumber: String,
+            by: String,
+            at: { type: Date, default: Date.now },
+            processedAt: Date,
+          },
+          { _id: false }
+        ),
+      ],
+      default: [],
+    },
     // --- Real deadlines (lib/deadlines.js) ---------------------------
     // Computed automatically from `schedule` (structured, from the AI) or
     // from the due_date text, moved to the next business day where US
