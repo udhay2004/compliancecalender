@@ -402,7 +402,8 @@
         esc(ROLE_LABEL[user.role] || user.role) + (user.department ? ' · ' + esc(DEPT_LABEL[user.department]) : '') +
       '</div>' +
       '<h1>' + esc(user.name || teamName) + '\u2019s dashboard</h1>' +
-      '<p>Signed in as ' + esc(user.email) + '. Last sign-in ' + esc(when(user.lastLoginAt)) + '.</p>' +
+      '<p>Signed in as ' + esc(user.email) + '. Last sign-in ' + esc(when(user.lastLoginAt)) + '. ' +
+        (user.twoFactorEnabled ? '<a href="/two-factor.html">Two-factor login: on</a>' : '<a href="/two-factor.html">Set up two-factor login</a>') + '</p>' +
     '</div>';
 
     // Order matters for the mixed roles: an admin sees delivery work
