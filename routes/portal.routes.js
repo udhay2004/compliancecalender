@@ -82,6 +82,7 @@ function profilePayload(org, user) {
     contactName: org?.primaryContactName || user.name || "",
     email: org?.primaryContactEmail || "",
     phone: org?.primaryContactPhone || "",
+    billingAddress: org?.billingAddress || "",
     loginEmail: user.email,
     missing: missingContactFields(org),
   };
@@ -97,7 +98,7 @@ router.get("/profile", async (req, res) => {
 router.patch("/profile", async (req, res) => {
   const org = await ClientOrg.findById(req.user.clientOrgId);
   if (!org) return res.status(404).json({ error: "Company not found." });
-  const { companyName, contactName, email, phone } = req.body || {};
+  const { companyName, contactName, email, phone, billingAddress } = req.body || {};
   const changed = [];
 
   if (companyName !== undefined) {
@@ -118,6 +119,10 @@ router.patch("/profile", async (req, res) => {
     const v = normalizePhone(String(phone));
     if (!v) return res.status(400).json({ error: "Enter a valid phone number, including the country code (e.g. +1 415 555 0100)." });
     if (v !== org.primaryContactPhone) { org.primaryContactPhone = v; changed.push("phone"); }
+  }
+  if (billingAddress !== undefined) {
+    const v = String(billingAddress).trim().slice(0, 500);
+    if (v !== (org.billingAddress || "")) { org.billingAddress = v; changed.push("billing address"); }
   }
   // Belt and braces: never let an update leave the org without an email
   // or phone — this route is the only way a client can change them.
@@ -451,6 +456,33 @@ router.post("/calendars/regenerate", requireCompleteContact, async (req, res) =>
     console.error("Client regenerate error:", err);
     res.status(502).json({ error: "We couldn't finish the research just now. Please try again in a few minutes." });
   }
+});
+
+// ---------------------------------------------------------------------
+// Invoices, receipts and credit notes (this company's only)
+// ---------------------------------------------------------------------
+// GET /api/portal/invoices
+router.get("/invoices", async (req, res) => {
+  const Invoice = require("../models/Invoice");
+  const { money } = require("../lib/invoices");
+  const rows = await Invoice.find({ clientOrgId: req.user.clientOrgId, status: { $ne: "void" } }).sort({ issuedAt: -1 }).limit(200);
+  res.json({
+    invoices: rows.map((inv) => ({
+      id: String(inv._id), kind: inv.kind, number: inv.number, issuedAt: inv.issuedAt, status: inv.status,
+      amount: money(inv.amountMinor, inv.currency), refunded: inv.refundedMinor ? money(inv.refundedMinor, inv.currency) : "",
+      description: inv.description, calendarId: inv.calendarId ? String(inv.calendarId) : null, itemIndex: inv.itemIndex,
+      invoiceNumber: inv.invoiceNumber || "", pdf: `/api/portal/invoices/${inv._id}/pdf`,
+    })),
+  });
+});
+
+// GET /api/portal/invoices/:id/pdf — ownership is part of the query.
+router.get("/invoices/:id/pdf", async (req, res) => {
+  const Invoice = require("../models/Invoice");
+  if (!mongoose.isValidObjectId(req.params.id)) return res.status(404).json({ error: "Not found." });
+  const inv = await Invoice.findOne({ _id: req.params.id, clientOrgId: req.user.clientOrgId });
+  if (!inv) return res.status(404).json({ error: "Not found." });
+  await require("./invoices.routes").sendPdf(res, inv);
 });
 
 // GET /api/portal/contact — who to reach for help.
