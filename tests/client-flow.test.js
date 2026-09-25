@@ -64,7 +64,7 @@ function makeCalendarDoc(data) {
     category: "Mandatory Annual", due_date: "31 March (Annually)", description: "", authority: "",
     clientStatus: "Not Started", paymentStatus: "Not Invoiced", feeAmountCents: null,
     razorpayOrderId: null, razorpayPaymentId: null, paidAt: null, paymentEvents: [], documents: [],
-    selectedByClient: false, selectedAt: null, quoteNote: "",
+    selectedByClient: false, selectedAt: null, quoteNote: "", refunds: [],
     ...it,
   }));
   Object.defineProperty(doc, "save", { value: async () => doc, enumerable: false });
@@ -77,8 +77,10 @@ function makeCalendarDoc(data) {
 function matches(doc, q) {
   return Object.entries(q).every(([k, v]) => {
     if (k === "$or") return v.some((sub) => matches(doc, sub));
-    if (k === "items.razorpayOrderId") return doc.items.some((it) => it.razorpayOrderId === v);
-    if (k === "items.paymentEvents.razorpayOrderId") return doc.items.some((it) => it.paymentEvents.some((e) => e.razorpayOrderId === v));
+    // Nested lookups like MongoDB: "items.x" and "items.<array>.x".
+    const parts = k.split(".");
+    if (parts[0] === "items" && parts.length === 2) return doc.items.some((it) => it[parts[1]] === v);
+    if (parts[0] === "items" && parts.length === 3) return doc.items.some((it) => (it[parts[1]] || []).some((e) => e[parts[2]] === v));
     const actual = doc[k];
     if (v === null) return actual === null || actual === undefined;
     return String(actual) === String(v);
@@ -116,7 +118,7 @@ const fakeAuth = {
 };
 
 // Razorpay fake: remembers orders/payments; tests can set payment state.
-const rzp = { orders: {}, payments: {}, created: 0, captured: [] };
+const rzp = { orders: {}, payments: {}, created: 0, captured: [], refunds: [], refundSeq: 0 };
 const fakeRazorpay = {
   orders: {
     create: async ({ amount, currency }) => { if (rzp.failWith) throw rzp.failWith; rzp.created++; const id = `order_${rzp.created}`; rzp.orders[id] = { id, amount, currency, status: "created" }; return rzp.orders[id]; },
@@ -127,6 +129,12 @@ const fakeRazorpay = {
   payments: {
     fetch: async (id) => rzp.payments[id],
     capture: async (id) => { rzp.captured.push(id); rzp.payments[id].status = "captured"; return rzp.payments[id]; },
+    refund: async (pid, { amount }) => {
+      if (rzp.refundFail) throw rzp.refundFail;
+      const r = { id: `rfnd_${++rzp.refundSeq}`, payment_id: pid, amount, currency: "USD", status: "pending" };
+      rzp.refunds.push(r);
+      return r;
+    },
   },
 };
 
@@ -157,6 +165,33 @@ stub("lib/notify.js", {
 stub("lib/auditLog.js", { logActivity: (e) => audit.push(e) });
 stub("models/Message.js", { create: async (m) => { messages.push(m); return m; } });
 
+// In-memory invoices and counters (models/Invoice.js, models/Counter.js).
+let invoiceDocs = [];
+const counters = {};
+function makeInvoiceDoc(data) {
+  const doc = { _id: oid(), refundedMinor: 0, ...data };
+  if (data.clientOrgId) doc.clientOrgId = data.clientOrgId;
+  Object.defineProperty(doc, "save", { value: async () => doc, enumerable: false });
+  return doc;
+}
+const matchInv = (d, q) => Object.entries(q).every(([k, v]) => {
+  if (v && typeof v === "object" && "$ne" in v) return d[k] !== v.$ne;
+  return String(d[k]) === String(v);
+});
+const FakeInvoice = {
+  findOne: (q) => query(() => invoiceDocs.find((d) => matchInv(d, q)) || null),
+  findById: (id) => query(() => invoiceDocs.find((d) => String(d._id) === String(id)) || null),
+  find: (q) => query(() => invoiceDocs.filter((d) => matchInv(d, q)).sort((a, b) => b.issuedAt - a.issuedAt)),
+  exists: async (q) => invoiceDocs.some((d) => matchInv(d, q)),
+  create: async (data) => {
+    if (data.kind === "invoice" && invoiceDocs.some((d) => d.kind === "invoice" && d.razorpayPaymentId === data.razorpayPaymentId)) { const e = new Error("dup"); e.code = 11000; throw e; }
+    if (invoiceDocs.some((d) => d.number === data.number)) { const e = new Error("dup number"); e.code = 11000; throw e; }
+    const d = makeInvoiceDoc(data); invoiceDocs.push(d); return d;
+  },
+};
+stub("models/Invoice.js", FakeInvoice);
+stub("models/Counter.js", { next: async (name) => (counters[name] = (counters[name] || 0) + 1) });
+
 const express = require("express");
 const portalRoutes = require("../routes/portal.routes");
 const paymentsRoutes = require("../routes/payments.routes");
@@ -170,6 +205,7 @@ app.use(express.json());
 app.use("/api/portal", portalRoutes);
 app.use("/api/portal/payments", paymentsRoutes);
 app.use("/api/calendars", calendarRoutes);
+app.use("/api/invoices", require("../routes/invoices.routes"));
 app.use("/api/admin", require("../routes/admin.routes"));
 app.use(errorHandler);
 
@@ -194,7 +230,7 @@ async function call(method, url, { user = "client", body, form, headers = {} } =
 // Fresh client with one approved calendar for each test.
 function setup({ phone = "+1 415 555 0100", items } = {}) {
   calendars = []; orgs = []; notifications.length = 0; audit.length = 0;
-  rzp.orders = {}; rzp.payments = {}; rzp.captured = []; rzp.created = 0; rzp.failWith = null; lostKeys.clear();
+  rzp.orders = {}; rzp.payments = {}; rzp.captured = []; rzp.created = 0; rzp.failWith = null; rzp.refunds = []; rzp.refundSeq = 0; rzp.refundFail = null; invoiceDocs = []; Object.keys(counters).forEach((k) => delete counters[k]); lostKeys.clear();
   const org = makeOrg({ primaryContactEmail: "jane@acme.com", primaryContactPhone: phone, primaryContactName: "Jane" });
   users.client = { _id: oid(), email: "jane@acme.com", name: "Jane", role: "client", clientOrgId: org._id };
   users.other = { _id: oid(), email: "eve@evil.com", name: "Eve", role: "client", clientOrgId: makeOrg({ name: "Evil" })._id };
@@ -928,4 +964,161 @@ test("an unexpected error in a route gets a clear 500 instead of hanging", async
     assert.strictEqual(r.status, 500);
     assert.match(r.body.error, /Something went wrong/);
   } finally { FakeCalendar.findById = orig; }
+});
+
+// =====================================================================
+// Invoices and refunds
+// =====================================================================
+const settle = () => new Promise((r) => setTimeout(r, 30));
+
+async function paidService() {
+  const { cal, org } = setup();
+  readyToPay(cal);
+  const { body: order } = await call("POST", `/api/portal/payments/calendars/${cal._id}/items/0/create-order`);
+  rzp.payments.pay_1 = { id: "pay_1", order_id: order.orderId, amount: 12500, currency: "USD", status: "captured" };
+  const v = await call("POST", `/api/portal/payments/calendars/${cal._id}/items/0/verify`, {
+    body: { razorpay_order_id: order.orderId, razorpay_payment_id: "pay_1", razorpay_signature: sign(order.orderId, "pay_1") },
+  });
+  assert.strictEqual(v.status, 200);
+  await settle();
+  return { cal, org, order };
+}
+
+test("every confirmed payment gets exactly one numbered invoice, and the client is sent the link", async () => {
+  const { cal, order } = await paidService();
+  const invs = invoiceDocs.filter((d) => d.kind === "invoice");
+  assert.strictEqual(invs.length, 1);
+  assert.match(invs[0].number, /^INV\/\d{4}-\d{2}\/0001$/);
+  assert.strictEqual(invs[0].amountMinor, 12500);
+  assert.strictEqual(invs[0].customer.name, "Acme Inc");
+  // The webhook for the same payment doesn't create a second one.
+  await webhook(captured(order.orderId, "pay_1"));
+  await settle();
+  assert.strictEqual(invoiceDocs.filter((d) => d.kind === "invoice").length, 1);
+  const n = notifications.find((x) => x.audience === "client" && x.type === "payment_received");
+  assert.match(n.body, /Your invoice INV\/.*\/0001 is ready/);
+
+  // The client sees it; another client can't open it.
+  const list = await call("GET", "/api/portal/invoices");
+  assert.strictEqual(list.body.invoices.length, 1);
+  const pdf = await fetch(`${base}${list.body.invoices[0].pdf}`, { headers: { "x-test-user": "client" } });
+  assert.strictEqual(pdf.status, 200);
+  assert.strictEqual(pdf.headers.get("content-type"), "application/pdf");
+  assert.strictEqual((await pdf.arrayBuffer()).byteLength > 1000, true);
+  const other = await call("GET", list.body.invoices[0].pdf, { user: "other" });
+  assert.strictEqual(other.status, 404, "another company's invoice is invisible");
+  assert.strictEqual((await call("GET", "/api/portal/invoices", { user: "other" })).body.invoices.length, 0);
+});
+
+test("finance can refund part of a payment: Razorpay called, credit note issued, client told", async () => {
+  const { cal } = await paidService();
+  users.fin = { _id: oid(), email: "fin@firm.com", name: "Rahul", role: "staff", department: "finance" };
+  const r = await call("POST", `/api/invoices/calendar/${cal._id}/items/0/refund`, { user: "fin", body: { amount: "25", reason: "Agent change not needed" } });
+  assert.strictEqual(r.status, 201, JSON.stringify(r.body));
+  assert.strictEqual(rzp.refunds[0].amount, 2500);
+  assert.strictEqual(rzp.refunds[0].payment_id, "pay_1");
+  assert.strictEqual(cal.items[0].paymentStatus, "Partially Refunded");
+  assert.match(r.body.creditNote.number, /^CN\/\d{4}-\d{2}\/0001$/);
+  const inv = invoiceDocs.find((d) => d.kind === "invoice");
+  assert.strictEqual(inv.status, "partially_refunded");
+  assert.strictEqual(inv.refundedMinor, 2500);
+  await settle();
+  assert.ok(notifications.some((n) => n.audience === "client" && /Refund of USD 25\.00/.test(n.title) && /Agent change not needed/.test(n.body)));
+
+  // Can't refund more than what's left.
+  const over = await call("POST", `/api/invoices/calendar/${cal._id}/items/0/refund`, { user: "fin", body: { amount: "200", reason: "Too much" } });
+  assert.strictEqual(over.status, 400);
+  assert.match(over.body.error, /at most USD 100\.00/);
+  // The rest, with no amount = everything left.
+  const rest = await call("POST", `/api/invoices/calendar/${cal._id}/items/0/refund`, { user: "fin", body: { reason: "Service cancelled" } });
+  assert.strictEqual(rest.status, 201);
+  assert.strictEqual(rzp.refunds[1].amount, 10000);
+  assert.strictEqual(cal.items[0].paymentStatus, "Refunded");
+  assert.strictEqual(inv.status, "refunded");
+  const again = await call("POST", `/api/invoices/calendar/${cal._id}/items/0/refund`, { user: "fin", body: { reason: "Once more" } });
+  assert.match(again.body.error, /already been refunded in full/);
+});
+
+test("only finance and admins can refund; a reason is required", async () => {
+  const { cal } = await paidService();
+  users.staff = { _id: oid(), email: "tech@firm.com", name: "Tech", role: "staff", department: "tech" };
+  users.fin = { _id: oid(), email: "fin@firm.com", name: "Rahul", role: "staff", department: "finance" };
+  let r = await call("POST", `/api/invoices/calendar/${cal._id}/items/0/refund`, { user: "staff", body: { reason: "Please" } });
+  assert.strictEqual(r.status, 403);
+  r = await call("POST", `/api/invoices/calendar/${cal._id}/items/0/refund`, { user: "fin", body: { reason: "" } });
+  assert.strictEqual(r.status, 400);
+  assert.strictEqual(rzp.refunds.length, 0, "nothing sent to Razorpay");
+  const billing = await call("GET", `/api/invoices/calendar/${cal._id}`, { user: "staff" });
+  assert.strictEqual(billing.body.canRefund, false);
+  assert.strictEqual(billing.body.items[0].payments[0].remaining, "USD 125.00");
+});
+
+test("if Razorpay refuses a refund, nothing is recorded", async () => {
+  const { cal } = await paidService();
+  users.fin = { _id: oid(), email: "fin@firm.com", name: "Rahul", role: "staff", department: "finance" };
+  rzp.refundFail = { statusCode: 400, error: { description: "The amount must be at least INR 1.00" } };
+  const r = await call("POST", `/api/invoices/calendar/${cal._id}/items/0/refund`, { user: "fin", body: { amount: "0.01", reason: "Tiny" } });
+  assert.strictEqual(r.status, 502);
+  assert.match(r.body.error, /Razorpay couldn't process the refund: The amount must be at least/);
+  assert.strictEqual(cal.items[0].refunds.length, 0);
+  assert.strictEqual(cal.items[0].paymentStatus, "Paid");
+  assert.strictEqual(invoiceDocs.filter((d) => d.kind === "credit_note").length, 0);
+});
+
+test("a duplicate payment can be refunded in full without touching the real one", async () => {
+  const { cal, order } = await paidService();
+  users.fin = { _id: oid(), email: "fin@firm.com", name: "Rahul", role: "staff", department: "finance" };
+  await webhook(captured(order.orderId, "pay_dup"));
+  assert.ok(cal.items[0].paymentEvents.some((e) => e.event === "duplicate_payment"));
+  const b = await call("GET", `/api/invoices/calendar/${cal._id}`, { user: "fin" });
+  assert.strictEqual(b.body.items[0].payments.length, 2);
+  const r = await call("POST", `/api/invoices/calendar/${cal._id}/items/0/refund`, { user: "fin", body: { paymentId: "pay_dup", reason: "Duplicate payment" } });
+  assert.strictEqual(r.status, 201, JSON.stringify(r.body));
+  assert.strictEqual(rzp.refunds[0].payment_id, "pay_dup");
+  assert.strictEqual(rzp.refunds[0].amount, 12500);
+  assert.strictEqual(cal.items[0].paymentStatus, "Paid", "the real payment is untouched");
+  assert.strictEqual(r.body.creditNote, null, "no invoice was issued for the duplicate, so no credit note");
+});
+
+function refundHook(eventName, entity) {
+  return webhook({ event: eventName, payload: { refund: { entity } } });
+}
+
+test("Razorpay refund updates: processed tells the client; failed voids the credit note", async () => {
+  const { cal } = await paidService();
+  users.fin = { _id: oid(), email: "fin@firm.com", name: "Rahul", role: "staff", department: "finance" };
+  const r = await call("POST", `/api/invoices/calendar/${cal._id}/items/0/refund`, { user: "fin", body: { amount: "50", reason: "Partial" } });
+  const rid = rzp.refunds[0].id;
+  let w = await refundHook("refund.processed", { id: rid, payment_id: "pay_1", amount: 5000, currency: "USD", status: "processed" });
+  assert.strictEqual(w.status, 200);
+  assert.strictEqual(cal.items[0].refunds[0].status, "processed");
+  await settle();
+  assert.ok(notifications.some((n) => n.audience === "client" && /on its way/.test(n.title)));
+
+  // A second refund fails at the bank.
+  await call("POST", `/api/invoices/calendar/${cal._id}/items/0/refund`, { user: "fin", body: { amount: "10", reason: "Another" } });
+  const rid2 = rzp.refunds[1].id;
+  await refundHook("refund.failed", { id: rid2, payment_id: "pay_1", amount: 1000, currency: "USD", status: "failed" });
+  assert.strictEqual(cal.items[0].refunds[1].status, "failed");
+  const note = invoiceDocs.find((d) => d.kind === "credit_note" && d.razorpayRefundId === rid2);
+  assert.strictEqual(note.status, "void");
+  const inv = invoiceDocs.find((d) => d.kind === "invoice");
+  assert.strictEqual(inv.refundedMinor, 5000, "failed refund no longer counted");
+  assert.strictEqual(cal.items[0].paymentStatus, "Partially Refunded");
+  await settle();
+  assert.ok(notifications.some((n) => n.audience === "staff" && /Refund FAILED/.test(n.title)));
+  assert.ok(r.body.ok);
+});
+
+test("a refund made directly in the Razorpay dashboard is recorded with a credit note", async () => {
+  const { cal } = await paidService();
+  await refundHook("refund.processed", { id: "rfnd_dash", payment_id: "pay_1", amount: 12500, currency: "USD", status: "processed", notes: {} });
+  assert.strictEqual(cal.items[0].refunds.length, 1);
+  assert.strictEqual(cal.items[0].refunds[0].by, "razorpay-dashboard");
+  assert.strictEqual(cal.items[0].paymentStatus, "Refunded");
+  assert.ok(invoiceDocs.some((d) => d.kind === "credit_note" && d.razorpayRefundId === "rfnd_dash"));
+  // Razorpay retries the webhook: nothing doubles.
+  await refundHook("refund.processed", { id: "rfnd_dash", payment_id: "pay_1", amount: 12500, currency: "USD", status: "processed" });
+  assert.strictEqual(cal.items[0].refunds.length, 1);
+  assert.strictEqual(invoiceDocs.filter((d) => d.kind === "credit_note").length, 1);
 });
