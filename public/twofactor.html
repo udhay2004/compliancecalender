@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Two-factor login · ComplyGlobally</title>
+<link rel="stylesheet" href="/shared.css">
+<style>
+  body { background: var(--paper); }
+  .tf-wrap { max-width: 520px; margin: 8vh auto 40px; padding: 0 20px; font-family: var(--sans); }
+  .tf-card { background: var(--card); border: 1px solid var(--rule); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 30px 32px; }
+  .tf-card h1 { font-family: var(--serif); font-size: 24px; margin: 0 0 6px; }
+  .tf-card p { color: var(--ink-soft); font-size: 14.5px; line-height: 1.6; margin: 0 0 14px; }
+  .tf-steps { counter-reset: s; list-style: none; padding: 0; margin: 18px 0; }
+  .tf-steps > li { counter-increment: s; position: relative; padding-left: 36px; margin-bottom: 18px; font-size: 14.5px; }
+  .tf-steps > li::before { content: counter(s); position: absolute; left: 0; top: -1px; width: 24px; height: 24px; border-radius: 50%; background: var(--teal-bg); color: var(--brand-dark); font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+  .tf-qr { display: inline-block; padding: 10px; background: #fff; border: 1px solid var(--rule); border-radius: 8px; margin-top: 8px; }
+  .tf-qr img, .tf-qr svg { display: block; width: 176px; height: 176px; }
+  .tf-secret { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 14px; letter-spacing: .05em; background: var(--paper); border-radius: 6px; padding: 8px 10px; display: inline-block; margin-top: 6px; user-select: all; word-break: break-all; }
+  .tf-code { font-size: 26px; letter-spacing: .35em; text-align: center; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; width: 100%; padding: 12px; }
+  .tf-actions { display: flex; gap: 10px; align-items: center; justify-content: space-between; margin-top: 14px; flex-wrap: wrap; }
+  .tf-link { background: none; border: none; color: var(--brand-dark); cursor: pointer; font-size: 13.5px; padding: 0; text-decoration: underline; }
+  .tf-codes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 15px; background: var(--paper); border-radius: 8px; padding: 14px 16px; margin: 12px 0; }
+  .tf-warn { background: var(--seal-gold-bg); color: #6b4a14; border-radius: 8px; padding: 10px 12px; font-size: 13.5px; }
+  .tf-ok { background: var(--teal-bg); color: var(--brand-dark); border-radius: 8px; padding: 10px 12px; font-size: 13.5px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="tf-wrap">
+  <div class="tf-card" id="loading"><p>Loading…</p></div>
+
+  <!-- 1. Code during sign-in -->
+  <form class="tf-card" id="verifyView" hidden>
+    <h1>Enter your code</h1>
+    <p id="verifyHelp">Open your authenticator app and enter the 6-digit code for ComplyGlobally.</p>
+    <label for="verifyCode" class="sr-only">Code</label>
+    <input id="verifyCode" class="tf-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" placeholder="000000" required>
+    <div class="tf-actions">
+      <button type="button" class="tf-link" id="useRecovery">Lost your phone? Use a recovery code</button>
+      <button type="submit" class="primary" id="verifyBtn">Continue</button>
+    </div>
+    <p class="hint" id="verifyHint" role="alert" style="margin-top:12px;"></p>
+    <p style="margin-top:18px;font-size:13px;"><a href="/login.html">Back to login</a></p>
+  </form>
+
+  <!-- 2. Set up -->
+  <div class="tf-card" id="setupView" hidden>
+    <h1>Set up two-factor login</h1>
+    <p>Staff accounts can see every client's documents, so signing in needs a code from your phone as well as your password. This takes about a minute.</p>
+    <ol class="tf-steps">
+      <li>Install an authenticator app on your phone: <strong>Google Authenticator</strong>, <strong>Microsoft Authenticator</strong>, Authy or 1Password.</li>
+      <li>In the app, add an account and scan this QR code:
+        <div><div class="tf-qr" id="qr" aria-label="QR code for your authenticator app"></div></div>
+        <div style="font-size:13px;color:var(--ink-soft);margin-top:8px;">Can't scan? Enter this key instead:<br><span class="tf-secret" id="secret"></span></div>
+      </li>
+      <li>Enter the 6-digit code the app shows:
+        <form id="enableForm" style="margin-top:8px;">
+          <label for="enableCode" class="sr-only">Code</label>
+          <input id="enableCode" class="tf-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" placeholder="000000" required>
+          <div class="tf-actions"><span></span><button type="submit" class="primary" id="enableBtn">Turn on two-factor</button></div>
+          <p class="hint" id="enableHint" role="alert"></p>
+        </form>
+      </li>
+    </ol>
+  </div>
+
+  <!-- 3. Recovery codes (shown once) -->
+  <div class="tf-card" id="codesView" hidden>
+    <h1>Save your recovery codes</h1>
+    <p>If you lose your phone, each of these codes lets you sign in <strong>once</strong>. Store them somewhere safe, like a password manager. You won't see them again.</p>
+    <div class="tf-codes" id="codes"></div>
+    <div class="tf-actions">
+      <span style="display:flex;gap:8px;">
+        <button type="button" class="ghost" id="copyCodes">Copy</button>
+        <button type="button" class="ghost" id="downloadCodes">Download</button>
+      </span>
+      <button type="button" class="primary" id="codesDone">I've saved them, continue</button>
+    </div>
+  </div>
+
+  <!-- 4. Manage -->
+  <div class="tf-card" id="manageView" hidden>
+    <h1>Two-factor login</h1>
+    <div class="tf-ok" id="manageStatus"></div>
+    <p style="margin-top:16px;">New phone? Ask an admin to reset your two-factor, then set it up again. To get a fresh set of recovery codes (old ones stop working), enter a current code:</p>
+    <form id="regenForm">
+      <label for="regenCode" class="sr-only">Code</label>
+      <input id="regenCode" class="tf-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" placeholder="000000" required>
+      <div class="tf-actions"><a href="/dashboard.html">Back to dashboard</a><button type="submit" class="primary">Make new recovery codes</button></div>
+      <p class="hint" id="regenHint" role="alert"></p>
+    </form>
+  </div>
+</div>
+
+<script src="/js/vendor/qrcode.js"></script>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const params = new URLSearchParams(location.search);
+  let afterCodes = '/dashboard.html';
+  let recoveryMode = false;
+
+  function show(id) {
+    ['loading', 'verifyView', 'setupView', 'codesView', 'manageView'].forEach(v => { $(v).hidden = v !== id; });
+    const first = $(id).querySelector('input');
+    if (first) setTimeout(() => first.focus(), 30);
+  }
+  async function post(url, body) {
+    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) { const e = new Error(data.error || 'Something went wrong.'); e.data = data; throw e; }
+    return data;
+  }
+  function showCodes(codes, next) {
+    afterCodes = next || '/dashboard.html';
+    $('codes').innerHTML = codes.map(c => `<span>${c}</span>`).join('');
+    $('codes').dataset.text = codes.join('\n');
+    show('codesView');
+  }
+
+  // --- verify (second step of signing in) ---
+  $('useRecovery').addEventListener('click', () => {
+    recoveryMode = !recoveryMode;
+    const input = $('verifyCode');
+    input.value = '';
+    if (recoveryMode) {
+      input.removeAttribute('maxlength'); input.removeAttribute('pattern'); input.setAttribute('inputmode', 'text');
+      input.placeholder = 'xxxxx-xxxxx'; input.style.letterSpacing = '.1em';
+      $('verifyHelp').textContent = 'Enter one of the recovery codes you saved when you set up two-factor login. Each works once.';
+      $('useRecovery').textContent = 'Use a code from my app instead';
+    } else {
+      input.setAttribute('maxlength', '6'); input.setAttribute('pattern', '[0-9]*'); input.setAttribute('inputmode', 'numeric');
+      input.placeholder = '000000'; input.style.letterSpacing = '';
+      $('verifyHelp').textContent = 'Open your authenticator app and enter the 6-digit code for ComplyGlobally.';
+      $('useRecovery').textContent = 'Lost your phone? Use a recovery code';
+    }
+    input.focus();
+  });
+  $('verifyView').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const hint = $('verifyHint'); hint.textContent = ''; hint.classList.remove('err');
+    $('verifyBtn').disabled = true;
+    try {
+      const data = await post('/api/auth/2fa/verify', { code: $('verifyCode').value, next: params.get('next') || '' });
+      if (data.usedRecovery) {
+        alert(`Signed in with a recovery code. You have ${data.recoveryCodesLeft} left.` + (data.recoveryCodesLeft <= 3 ? ' Make new ones from the two-factor page soon.' : ''));
+      }
+      location.href = data.redirect || '/dashboard.html';
+    } catch (err) {
+      hint.textContent = err.message; hint.classList.add('err');
+      if (err.data && err.data.code === 'MFA_EXPIRED') setTimeout(() => { location.href = '/login.html?reason=session_expired'; }, 1500);
+      $('verifyBtn').disabled = false; $('verifyCode').select();
+    }
+  });
+
+  // --- setup ---
+  async function startSetup() {
+    const data = await post('/api/auth/2fa/setup');
+    $('secret').textContent = data.secret;
+    try {
+      const qr = qrcode(0, 'M'); qr.addData(data.otpauthUrl); qr.make();
+      $('qr').innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+    } catch { $('qr').textContent = 'QR code unavailable. Use the key below.'; }
+    show('setupView');
+  }
+  $('enableForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const hint = $('enableHint'); hint.textContent = ''; hint.classList.remove('err');
+    $('enableBtn').disabled = true;
+    try {
+      const data = await post('/api/auth/2fa/enable', { code: $('enableCode').value });
+      showCodes(data.recoveryCodes, data.redirect);
+    } catch (err) { hint.textContent = err.message; hint.classList.add('err'); $('enableBtn').disabled = false; }
+  });
+
+  // --- recovery codes ---
+  $('copyCodes').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText($('codes').dataset.text); $('copyCodes').textContent = 'Copied ✓'; } catch { alert($('codes').dataset.text); }
+  });
+  $('downloadCodes').addEventListener('click', () => {
+    const blob = new Blob([`ComplyGlobally recovery codes (each works once)\n\n${$('codes').dataset.text}\n`], { type: 'text/plain' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'complyglobally-recovery-codes.txt'; a.click();
+  });
+  $('codesDone').addEventListener('click', () => { location.href = afterCodes; });
+
+  // --- manage ---
+  $('regenForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const hint = $('regenHint'); hint.textContent = ''; hint.classList.remove('err');
+    try {
+      const data = await post('/api/auth/2fa/recovery-codes', { code: $('regenCode').value });
+      showCodes(data.recoveryCodes, '/two-factor.html');
+    } catch (err) { hint.textContent = err.message; hint.classList.add('err'); }
+  });
+
+  // --- decide which screen ---
+  (async () => {
+    const res = await fetch('/api/auth/2fa/status');
+    const data = await res.json().catch(() => ({}));
+    if (res.status === 401) {
+      if (data.code === 'MFA_REQUIRED') return show('verifyView');
+      location.href = '/login.html'; return;
+    }
+    if (!res.ok) { location.href = '/login.html'; return; }
+    if (!data.enabled) {
+      if (!data.required && !params.get('setup')) { /* optional: still allow setup */ }
+      return startSetup().catch(err => { $('loading').innerHTML = `<p>${err.message}</p>`; });
+    }
+    $('manageStatus').textContent = `✓ Two-factor login is on${data.enabledAt ? ' since ' + new Date(data.enabledAt).toLocaleDateString() : ''}. ${data.recoveryCodesLeft} recovery code${data.recoveryCodesLeft === 1 ? '' : 's'} left.`;
+    show('manageView');
+  })();
+</script>
+</body>
+</html>
