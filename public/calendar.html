@@ -130,7 +130,15 @@
   const CATEGORIES = CATEGORY_ORDER;
   const SOURCE_LABEL = { cache: 'From cached state data', live: 'Freshly researched', mixed: 'Cache + live research' };
   const CLIENT_STATUS_OPTIONS = ["Not Started","Awaiting Documents","Under Review","Filed","Overdue"];
-  const PAYMENT_STATUS_OPTIONS = ["Not Invoiced","Invoiced","Paid","Overdue"];
+  const PAYMENT_STATUS_OPTIONS = ["Not Invoiced","Invoiced","Paid","Overdue","Partially Refunded","Refunded"];
+  // Invoices, credit notes and refundable amounts per service (routes/invoices.routes.js).
+  let billing = { items: {}, canRefund: false };
+  async function loadBilling() {
+    try {
+      const r = await fetch(`/api/invoices/calendar/${id}`);
+      if (r.ok) billing = await r.json();
+    } catch { /* billing panel just stays empty */ }
+  }
 
   const id = new URLSearchParams(location.search).get('id');
   if (!id) {
@@ -479,9 +487,45 @@
       </div>`;
   }
 
+  function billingHtml(item, idx) {
+    const b = billing.items[idx] || { payments: [], refunds: [], documents: [] };
+    const docs = (b.documents || []).map(d => `
+      <a class="doc-btn" href="${escapeHtml(d.pdf)}" target="_blank" rel="noopener" title="${d.kind === 'invoice' ? 'Invoice' : 'Credit note'}">
+        ${d.kind === 'invoice' ? 'Invoice' : 'Credit note'} ${escapeHtml(d.number)}${d.status === 'void' ? ' (void)' : ''}</a>`).join('');
+    const refundRows = (b.refunds || []).map(r => `
+      <div class="doc-meta" style="margin-top:4px;">Refund ${escapeHtml(r.amount)} · <b style="color:${r.status === 'failed' ? 'var(--stamp-red)' : r.status === 'processed' ? 'var(--brand-dark)' : 'var(--seal-gold)'};">${escapeHtml(r.status)}</b>
+        · ${new Date(r.at).toLocaleDateString()} · ${escapeHtml(r.by || '')} · “${escapeHtml(r.reason || '')}”</div>`).join('');
+    const refundForms = billing.canRefund ? (b.payments || []).filter(p => p.remainingMinor > 0).map(p => `
+      <details class="proof-form" style="margin-top:8px;">
+        <summary>${p.main ? 'Refund this payment' : `Refund duplicate payment ${escapeHtml(p.paymentId)}`} <span style="font-weight:400;color:var(--ink-soft);">(up to ${escapeHtml(p.remaining)})</span></summary>
+        <div class="proof-grid">
+          <div class="field">
+            <label for="ra-${idx}-${p.paymentId}">Amount (${escapeHtml(p.currency)}), empty = full ${escapeHtml(p.remaining)}</label>
+            <input id="ra-${idx}-${p.paymentId}" type="number" min="0.01" step="0.01" class="refundAmount" data-idx="${idx}" data-pid="${escapeHtml(p.paymentId)}" placeholder="${(p.remainingMinor / 100).toFixed(2)}">
+          </div>
+          <div class="field">
+            <label for="rr-${idx}-${p.paymentId}">Reason (the client sees this)</label>
+            <input id="rr-${idx}-${p.paymentId}" type="text" maxlength="250" class="refundReason" data-idx="${idx}" data-pid="${escapeHtml(p.paymentId)}" value="${p.main ? '' : 'Duplicate payment'}" placeholder="e.g. Cancelled before work started">
+          </div>
+        </div>
+        <div class="submit-row" style="margin-top:8px;">
+          <span class="hint" data-refund-hint="${idx}-${escapeHtml(p.paymentId)}"></span>
+          <button class="danger" data-refund="${idx}" data-pid="${escapeHtml(p.paymentId)}" data-remaining="${escapeHtml(p.remaining)}">Refund</button>
+        </div>
+      </details>`).join('') : '';
+    const dup = (b.payments || []).some(p => !p.main && p.remainingMinor > 0);
+    return `
+      ${docs ? `<div class="doc-actions" style="margin-top:8px;">${docs}</div>` : ''}
+      ${dup ? '<div class="doc-note">This client paid twice for this service. Refund the duplicate below.</div>' : ''}
+      ${refundRows}
+      ${refundForms}`;
+  }
+
   function quoteHtml(item, idx) {
-    if (item.paymentStatus === 'Paid') {
-      return `<div class="ws-quote paid">Paid <b>${escapeHtml(item.price?.label || '')}</b>${item.paidAt ? ` on ${new Date(item.paidAt).toLocaleDateString()}` : ''}${item.razorpayPaymentId ? ` · Razorpay ${escapeHtml(item.razorpayPaymentId)}` : ''}</div>`;
+    if (['Paid', 'Partially Refunded', 'Refunded'].includes(item.paymentStatus)) {
+      const label = item.paymentStatus === 'Paid' ? 'Paid' : item.paymentStatus;
+      return `<div class="ws-quote paid">${escapeHtml(label)} <b>${escapeHtml(item.price?.label || '')}</b>${item.paidAt ? ` on ${new Date(item.paidAt).toLocaleDateString()}` : ''}${item.razorpayPaymentId ? ` · Razorpay ${escapeHtml(item.razorpayPaymentId)}` : ''}
+        ${billingHtml(item, idx)}</div>`;
     }
     const sf = item.suggestedFee;
     const current = item.feeAmountCents ? item.feeAmountCents / 100 : (sf && sf.amountCents ? sf.amountCents / 100 : '');
@@ -664,9 +708,11 @@
   }
 
   let jumpedToHash = false;
+  let billingLoaded = false;
   async function renderClientItems() {
     const el = document.getElementById('clientItemsList');
     if (!el) return;
+    if (!billingLoaded) { billingLoaded = true; await loadBilling(); }
     // Links like /calendar.html?id=…#item-3 (from the finance screen) open
     // that service's card and scroll to it, once.
     const hashIdx = !jumpedToHash && /^#item-(\d+)$/.test(location.hash) ? +location.hash.slice(6) : null;
@@ -720,6 +766,31 @@
           renderClientItems();
           if (action === 'reject') refreshChatThread();
         } catch (err) { hint.textContent = err.message; hint.classList.add('err'); }
+      });
+    });
+
+    el.querySelectorAll('[data-refund]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = btn.dataset.refund, pid = btn.dataset.pid;
+        const hint = el.querySelector(`[data-refund-hint="${idx}-${pid}"]`);
+        const amount = el.querySelector(`.refundAmount[data-idx="${idx}"][data-pid="${pid}"]`).value.trim();
+        const reason = el.querySelector(`.refundReason[data-idx="${idx}"][data-pid="${pid}"]`).value.trim();
+        if (reason.length < 3) { hint.textContent = 'Give a short reason; the client sees it.'; hint.classList.add('err'); return; }
+        const shown = amount ? amount : `the full ${btn.dataset.remaining}`;
+        if (!confirm(`Refund ${shown} to the client's original payment method?\n\nThis sends money back through Razorpay and can't be undone.`)) return;
+        btn.disabled = true; hint.textContent = 'Refunding…'; hint.classList.remove('err');
+        try {
+          const res = await fetch(`/api/invoices/calendar/${id}/items/${idx}/refund`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount: amount || undefined, reason, paymentId: pid }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || 'Refund failed.');
+          const fresh = await fetch(`/api/calendars/${id}`).then(r => r.json()).catch(() => null);
+          if (fresh && fresh.calendar) calendar = fresh.calendar;
+          await loadBilling();
+          openCards.add(+idx); renderClientItems();
+        } catch (err) { hint.textContent = err.message; hint.classList.add('err'); btn.disabled = false; }
       });
     });
 
@@ -944,7 +1015,7 @@
     fetch(`/api/calendars/${id}`).then(r => r.ok ? r.json() : null).then(d => {
       if (!d) return;
       calendar = d.calendar;
-      if (calendar.status === 'approved' && calendar.clientOrgId) renderClientItems();
+      if (calendar.status === 'approved' && calendar.clientOrgId) loadBilling().then(renderClientItems);
       refreshChatThread();
     }).catch(() => {});
   });
