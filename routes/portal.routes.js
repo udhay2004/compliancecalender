@@ -186,6 +186,7 @@ router.post("/calendars/:id/items/:index/select", requireCompleteContact, async 
   const idx = parseItemIndex(calendar, req.params.index);
   if (idx === null) return res.status(400).json({ error: "Invalid item index." });
   const item = calendar.items[idx];
+  if (item.isHistory) return res.status(400).json({ error: "This is a past period of this filing. Choose the current one instead." });
   const selected = req.body?.selected !== false;
 
   if (!selected) {
@@ -341,7 +342,8 @@ function nameKey(name) {
 // old calendar itself is left untouched in history.
 function carryOverProgress(oldCalendar, newItems) {
   const byName = new Map();
-  oldCalendar.items.forEach((it) => byName.set(nameKey(it.compliance_name), it));
+  // Current periods only (history items of the same name are older).
+  oldCalendar.items.filter((it) => !it.isHistory).forEach((it) => byName.set(nameKey(it.compliance_name), it));
   let carried = 0;
   const items = newItems.map((it) => {
     const prev = byName.get(nameKey(it.compliance_name));
@@ -365,7 +367,10 @@ function carryOverProgress(oldCalendar, newItems) {
       // webhook can still find it; the client gets a fresh order here.
       razorpayOrderId: null,
       paymentEvents: p.paymentEvents || [],
-      dueDateActual: p.dueDateActual,
+      // A date staff typed in is kept; automatic dates are recomputed for
+      // the new calendar's details.
+      ...(p.dueDateSource === "staff" ? { dueDateActual: p.dueDateActual, dueDateSource: "staff" } : {}),
+      remindersSent: p.remindersSent || [],
     };
   });
   return { items, carried };
