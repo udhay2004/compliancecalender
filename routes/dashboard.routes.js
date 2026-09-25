@@ -208,7 +208,7 @@ async function buildFinanceSection() {
     Calendar.aggregate([
       { $match: REAL_WORK },
       { $unwind: "$items" },
-      { $match: { "items.paymentStatus": "Paid", "items.paidAt": { $ne: null } } },
+      { $match: { "items.paymentStatus": { $in: ["Paid", "Partially Refunded", "Refunded"] }, "items.paidAt": { $ne: null } } },
       { $sort: { "items.paidAt": -1 } },
       { $limit: 8 },
       {
@@ -280,7 +280,7 @@ async function buildFinanceSection() {
         if (it.completedAt) recentlyCompleted.push({ ...base, completedAt: it.completedAt, completedByName: it.completedByName || it.completedBy || "", proofs });
         return;
       }
-      if (it.paymentStatus === "Paid") {
+      if (it.paymentStatus === "Paid" || it.paymentStatus === "Partially Refunded") {
         readyToComplete.push({ ...base, paid: true, paidAt: it.paidAt, amountCents: it.feeAmountCents || 0, dueDate: it.due_date });
       }
     });
@@ -288,20 +288,39 @@ async function buildFinanceSection() {
   readyToComplete.sort((a, b) => new Date(a.paidAt || 0) - new Date(b.paidAt || 0));
   recentlyCompleted.sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
 
+  // Money actually kept comes from issued invoices (paid minus refunded),
+  // per currency charged; USD is the headline figure.
+  const Invoice = require("../models/Invoice");
+  const invMoney = await Invoice.aggregate([
+    { $match: { kind: "invoice" } },
+    { $group: { _id: "$currency", paid: { $sum: "$amountMinor" }, refunded: { $sum: { $ifNull: ["$refundedMinor", 0] } }, count: { $sum: 1 } } },
+  ]);
+  const cur = Object.fromEntries(invMoney.map((r) => [r._id, r]));
+  const usd = cur.USD || { paid: 0, refunded: 0, count: 0 };
+  const inr = cur.INR;
+  const recentDocs = await Invoice.find({}).sort({ issuedAt: -1 }).limit(10).lean();
+  const { money: fmtMoney } = require("../lib/invoices");
+
   const by = Object.fromEntries(payAgg.map((r) => [r._id, r]));
-  const paidCents = by.Paid?.cents || 0;
+  const paidCents = usd.paid - usd.refunded;
   const invoicedCents = by.Invoiced?.cents || 0;
   const overdueCents = by.Overdue?.cents || 0;
 
   return {
     currency: "USD",
     cards: [
-      { label: "Collected", value: money(paidCents), money: true, tone: "good", hint: `${by.Paid?.count || 0} paid filings` },
+      { label: "Collected", value: money(paidCents), money: true, tone: "good",
+        hint: `${usd.count} invoice${usd.count === 1 ? "" : "s"}${usd.refunded ? `, after ${fmtMoney(usd.refunded, "USD")} refunded` : ""}${inr ? ` · plus ${fmtMoney(inr.paid - inr.refunded, "INR")} in INR` : ""}` },
       { label: "Outstanding", value: money(invoicedCents), money: true, tone: "warn", hint: `${by.Invoiced?.count || 0} invoiced, not yet paid` },
       { label: "Overdue", value: money(overdueCents), money: true, tone: "bad", hint: `${by.Overdue?.count || 0} past their due date` },
       { label: "Need a price", value: needsPrice.length, tone: needsPrice.length ? "warn" : "neutral", hint: `${needsPrice.filter((n) => n.ready).length} with all documents in` },
     ],
     needsPrice: needsPrice.slice(0, 25),
+    recentDocuments: recentDocs.map((d) => ({
+      id: String(d._id), kind: d.kind, number: d.number, issuedAt: d.issuedAt, status: d.status,
+      amount: fmtMoney(d.amountMinor, d.currency), customer: d.customer?.name || "", description: d.description,
+      calendarId: d.calendarId ? String(d.calendarId) : null, itemIndex: d.itemIndex,
+    })),
     readyToComplete: readyToComplete.slice(0, 25).map((r) => ({ ...r, amount: (r.amountCents || 0) / 100 })),
     recentlyCompleted: recentlyCompleted.slice(0, 10),
     priceList: getPriceList(),
