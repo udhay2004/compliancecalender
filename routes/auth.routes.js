@@ -15,6 +15,9 @@ const ClientOrg = require("../models/ClientOrg");
 const Calendar = require("../models/Calendar");
 const {
   setSessionCookie,
+  loadUserFromMfaToken,
+  isInternal,
+  twoFactorRequired,
   setSetupCookie,
   clearSessionCookie,
   requireAuth,
@@ -86,8 +89,8 @@ router.post("/login", loginLimiter, async (req, res) => {
   user.failedOtpAttempts = 0;
   await user.save();
 
-  setSessionCookie(res, user);
-  return res.json({ user: user.toSafeJSON(), redirect: destinationFor(user) });
+  const step = setSessionCookie(res, user);
+  return res.json({ user: user.toSafeJSON(), redirect: step === "mfa" ? "/two-factor.html" : destinationFor(user), mfaRequired: step === "mfa" });
 });
 
 // POST /api/auth/logout-everywhere — invalidate every session this
@@ -283,12 +286,13 @@ router.post("/otp/verify", otpVerifyLimiter, async (req, res) => {
 
   user.lastLoginAt = new Date();
   await user.save();
-  setSessionCookie(res, user);
+  const step = setSessionCookie(res, user);
   return res.json({
     ok: true,
     setupRequired: false,
     user: user.toSafeJSON(),
-    redirect: destinationFor(user),
+    redirect: step === "mfa" ? "/two-factor.html" : destinationFor(user),
+    mfaRequired: step === "mfa",
   });
 });
 
@@ -347,7 +351,9 @@ router.post("/password/set", async (req, res) => {
 
   // Then immediately issue a fresh session so the person who just set
   // the password stays signed in on THIS device only.
-  setSessionCookie(res, user);
+  // Someone changing their password while signed in has already passed
+  // two-factor in this session; a first-time setup has not.
+  const step = setSessionCookie(res, user, { mfaPassed: !viaSetupToken });
 
   otp.sendPasswordChangedNotice({ to: user.email, name: user.name })
     .catch((err) => console.error("[otp] Password-change notice failed (non-fatal):", err.message));
@@ -363,7 +369,7 @@ router.post("/password/set", async (req, res) => {
   return res.json({
     ok: true,
     user: user.toSafeJSON(),
-    redirect: destinationFor(user),
+    redirect: step === "mfa" ? "/two-factor.html" : destinationFor(user),
   });
 });
 
@@ -484,7 +490,8 @@ router.get("/google/callback", async (req, res) => {
     return res.redirect("/login.html?reason=account_deactivated");
   }
 
-  setSessionCookie(res, user);
+  const loginStep = setSessionCookie(res, user);
+  if (loginStep === "mfa") return res.redirect("/two-factor.html");
 
   // Link the calendar they generated anonymously (before this login) to
   // the account they just created/signed into. Only ever touches a
@@ -546,4 +553,126 @@ router.get("/google/callback", async (req, res) => {
 module.exports = router;
 // Exposed for the test suite and for operational use; clearing a store
 // resets the per-IP counters for that endpoint.
+// ---------------------------------------------------------------------
+// Two-factor login (staff). See lib/totp.js and middleware/auth.js.
+// ---------------------------------------------------------------------
+const totp = require("../lib/totp");
+const MFA_MAX_FAILS = 5;
+const MFA_LOCK_MS = 15 * 60 * 1000;
+
+function issuer() {
+  return require("../lib/businessInfo").businessInfo().BRAND_NAME || "ComplyGlobally";
+}
+
+// GET /api/auth/2fa/status
+router.get("/2fa/status", requireAuth, (req, res) => {
+  const u = req.user;
+  res.json({
+    enabled: Boolean(u.totpEnabled),
+    required: isInternal(u) && twoFactorRequired(),
+    enabledAt: u.totpEnabledAt,
+    recoveryCodesLeft: (u.totpRecoveryCodes || []).length,
+  });
+});
+
+// POST /api/auth/2fa/setup — new secret for the authenticator app (not
+// active until confirmed with a code via /2fa/enable).
+router.post("/2fa/setup", requireAuth, async (req, res) => {
+  const u = req.user;
+  if (!isInternal(u)) return res.status(403).json({ error: "Two-factor login is for team accounts." });
+  if (u.totpEnabled) return res.status(400).json({ error: "Two-factor login is already on." });
+  const secret = totp.generateSecret();
+  u.totpPendingSecret = totp.encryptSecret(secret);
+  await u.save();
+  res.json({
+    secret: secret.replace(/(.{4})/g, "$1 ").trim(),
+    otpauthUrl: totp.otpauthUrl({ secret, account: u.email, issuer: issuer() }),
+  });
+});
+
+// POST /api/auth/2fa/enable { code } — confirm the app works, switch on,
+// hand out recovery codes (shown once).
+router.post("/2fa/enable", requireAuth, async (req, res) => {
+  const u = req.user;
+  if (u.totpEnabled) return res.status(400).json({ error: "Two-factor login is already on." });
+  if (!u.totpPendingSecret) return res.status(400).json({ error: "Start the setup again." });
+  const secret = totp.decryptSecret(u.totpPendingSecret);
+  const step = totp.verifyTotp(secret, req.body?.code);
+  if (step === null) return res.status(400).json({ error: "That code didn't match. Check the time on your phone is set automatically, then try the newest code." });
+  const codes = totp.generateRecoveryCodes();
+  u.totpSecret = u.totpPendingSecret;
+  u.totpPendingSecret = null;
+  u.totpEnabled = true;
+  u.totpEnabledAt = new Date();
+  u.totpLastUsedStep = step;
+  u.totpRecoveryCodes = codes.map(totp.hashRecoveryCode);
+  u.totpFailedAttempts = 0;
+  // Sign out every OTHER device: their sessions never passed a code.
+  u.tokenVersion = (u.tokenVersion || 0) + 1;
+  await u.save();
+  setSessionCookie(res, u, { mfaPassed: true });
+  logActivity({ action: "two_factor_enabled", actor: u, summary: `${u.email} turned on two-factor login.` });
+  res.json({ ok: true, recoveryCodes: codes, redirect: destinationFor(u) });
+});
+
+// POST /api/auth/2fa/verify { code } — second step of signing in.
+// Accepts a 6-digit code or a one-time recovery code.
+router.post("/2fa/verify", loginLimiter, async (req, res) => {
+  let u;
+  try {
+    u = await loadUserFromMfaToken(req);
+  } catch {
+    return res.status(401).json({ error: "Your sign-in expired. Please log in again.", code: "MFA_EXPIRED" });
+  }
+  if (u.totpLockedUntil && u.totpLockedUntil > new Date()) {
+    const mins = Math.ceil((u.totpLockedUntil - Date.now()) / 60000);
+    return res.status(429).json({ error: `Too many wrong codes. Try again in ${mins} minute${mins === 1 ? "" : "s"}.` });
+  }
+  const input = String(req.body?.code || "").trim();
+  let ok = false;
+  let usedRecovery = false;
+  if (/^\d{6}$/.test(input.replace(/\s+/g, ""))) {
+    const step = totp.verifyTotp(totp.decryptSecret(u.totpSecret), input, { lastUsedStep: u.totpLastUsedStep });
+    if (step !== null) { ok = true; u.totpLastUsedStep = step; }
+  } else if (input) {
+    const h = totp.hashRecoveryCode(input);
+    const idx = (u.totpRecoveryCodes || []).indexOf(h);
+    if (idx !== -1) { ok = true; usedRecovery = true; u.totpRecoveryCodes.splice(idx, 1); }
+  }
+  if (!ok) {
+    u.totpFailedAttempts = (u.totpFailedAttempts || 0) + 1;
+    if (u.totpFailedAttempts >= MFA_MAX_FAILS) {
+      u.totpLockedUntil = new Date(Date.now() + MFA_LOCK_MS);
+      u.totpFailedAttempts = 0;
+      logActivity({ action: "two_factor_locked", actor: u, summary: `Two-factor locked for 15 minutes after ${MFA_MAX_FAILS} wrong codes for ${u.email}.` });
+    }
+    await u.save();
+    return res.status(400).json({ error: "That code didn't work. Use the newest code in your authenticator app, or a recovery code." });
+  }
+  u.totpFailedAttempts = 0;
+  u.totpLockedUntil = null;
+  u.lastLoginAt = new Date();
+  await u.save();
+  setSessionCookie(res, u, { mfaPassed: true });
+  if (usedRecovery) {
+    logActivity({ action: "two_factor_recovery_used", actor: u, summary: `${u.email} signed in with a recovery code (${u.totpRecoveryCodes.length} left).` });
+  }
+  const next = typeof req.body?.next === "string" && req.body.next.startsWith("/") && !req.body.next.startsWith("//") ? req.body.next : null;
+  res.json({ ok: true, redirect: next || destinationFor(u), recoveryCodesLeft: u.totpRecoveryCodes.length, usedRecovery });
+});
+
+// POST /api/auth/2fa/recovery-codes { code } — new set (old ones stop working).
+router.post("/2fa/recovery-codes", requireAuth, async (req, res) => {
+  const u = req.user;
+  if (!u.totpEnabled) return res.status(400).json({ error: "Two-factor login isn't on." });
+  const step = totp.verifyTotp(totp.decryptSecret(u.totpSecret), req.body?.code, { lastUsedStep: u.totpLastUsedStep });
+  if (step === null) return res.status(400).json({ error: "Enter the current code from your authenticator app." });
+  const codes = totp.generateRecoveryCodes();
+  u.totpRecoveryCodes = codes.map(totp.hashRecoveryCode);
+  u.totpLastUsedStep = step;
+  await u.save();
+  logActivity({ action: "two_factor_codes_regenerated", actor: u, summary: `${u.email} made new recovery codes.` });
+  res.json({ recoveryCodes: codes });
+});
+
 module.exports.rateLimitStores = rateLimitStores;
