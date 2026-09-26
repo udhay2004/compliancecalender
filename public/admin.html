@@ -75,6 +75,19 @@
     </div>
   </div>
 
+  <div class="card" style="margin-top:14px;" id="whatsappCard">
+    <div class="card-body" style="padding:18px 24px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div>
+          <h2 style="margin:0;font-size:16px;">WhatsApp messages (Meta)</h2>
+          <div class="section-sub" style="margin:2px 0 0;">Checks your WhatsApp settings and message templates, and lets you send yourself a test.</div>
+        </div>
+        <button class="primary" id="whatsappCheckBtn">Check WhatsApp</button>
+      </div>
+      <div id="whatsappResult" aria-live="polite"></div>
+    </div>
+  </div>
+
   <div class="tabs">
     <button class="tab-btn active" id="tabOrgs">Client Companies</button>
     <button class="tab-btn" id="tabUsers">Accounts</button>
@@ -214,6 +227,57 @@
           ${!st.ok && st.fix ? `<div style="font-size:12.5px;margin-left:18px;"><b>How to fix:</b> ${escapeHtml(st.fix)}</div>` : ''}
         </li>`).join('') + '</ul></div>';
       out.innerHTML = html;
+    } catch (err) {
+      out.innerHTML = `<p class="hint err" style="margin-top:12px;">${escapeHtml(err.message)}</p>`;
+    } finally { btn.disabled = false; }
+  });
+
+  document.getElementById('whatsappCheckBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('whatsappCheckBtn');
+    const out = document.getElementById('whatsappResult');
+    btn.disabled = true; out.innerHTML = '<p class="hint" style="margin-top:12px;">Asking Meta… a few seconds.</p>';
+    try {
+      const res = await fetch('/api/admin/whatsapp-health');
+      const r = await res.json();
+      if (!res.ok) throw new Error(r.error || 'Check failed.');
+      let html = `<div style="margin-top:14px;padding:14px 16px;border-radius:8px;background:${r.ok ? 'var(--teal-bg)' : 'var(--stamp-red-bg)'};font-size:13.5px;line-height:1.6;">`;
+      html += `<div><b>${r.ok ? '✓ WhatsApp messages are working' : r.configured ? '✗ Something needs fixing' : 'WhatsApp is not set up yet (clients only get emails)'}</b></div>`;
+      html += `<div>${r.optedIn} client${r.optedIn === 1 ? ' has' : 's have'} switched WhatsApp on.</div>`;
+      html += '<ul style="margin:8px 0 0;padding:0;list-style:none;">' + r.steps.map(st => `
+        <li style="margin-top:6px;">${st.ok ? '✓' : '✗'} ${escapeHtml(st.name)}
+          ${st.detail ? `<div style="font-size:12.5px;color:${st.ok ? 'var(--ink-soft)' : 'var(--stamp-red)'};margin-left:18px;">${escapeHtml(st.detail)}</div>` : ''}
+          ${!st.ok && st.fix ? `<div style="font-size:12.5px;margin-left:18px;"><b>How to fix:</b> ${escapeHtml(st.fix)}</div>` : ''}
+        </li>`).join('') + '</ul></div>';
+      if (r.withProblems && r.withProblems.length) {
+        html += `<div style="margin-top:12px;font-size:13px;"><b>Clients whose last WhatsApp failed:</b>${r.withProblems.map(p => `<div style="margin-top:4px;">${escapeHtml(p.name)}: <span style="color:var(--stamp-red);">${escapeHtml(p.problem)}</span></div>`).join('')}</div>`;
+      }
+      html += `<details style="margin-top:14px;font-size:13px;"><summary style="cursor:pointer;font-weight:600;">The 3 message templates to create in WhatsApp Manager</summary>
+        <p style="margin:8px 0;color:var(--ink-soft);">WhatsApp Manager → Message templates → Create template. Category <b>Utility</b>, language <b>English</b>. Use exactly this name and text; add the sample values when asked.</p>
+        ${r.templates.map(t => `<div style="margin-top:10px;padding:10px 12px;border:1px solid var(--rule);border-radius:6px;">
+          <div><b>${escapeHtml(t.name)}</b>${t.status ? ` · <span style="color:${t.status === 'APPROVED' ? 'var(--brand-dark)' : 'var(--stamp-red)'};">${escapeHtml(t.status)}</span>` : ''}</div>
+          <div style="margin-top:4px;font-family:ui-monospace,monospace;font-size:12.5px;white-space:pre-wrap;overflow-wrap:anywhere;">${escapeHtml(t.body)}</div>
+          <div style="margin-top:4px;color:var(--ink-soft);font-size:12px;">Sample values: ${t.sample.map((v, i) => `{{${i + 1}}} = ${escapeHtml(v)}`).join(' · ')}</div>
+        </div>`).join('')}
+        <p style="margin:10px 0 0;color:var(--ink-soft);">Webhook URL for Meta (WhatsApp → Configuration): <b style="overflow-wrap:anywhere;">${escapeHtml(r.webhookUrl)}</b>, subscribe to <b>messages</b>.</p>
+      </details>`;
+      if (r.configured) {
+        html += `<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <label for="waTestPhone" style="font-size:13px;">Send a test to</label>
+          <input id="waTestPhone" type="tel" placeholder="+91 98765 43210" style="max-width:220px;">
+          <button class="ghost" id="waTestBtn">Send test</button>
+          <span class="hint" id="waTestHint"></span></div>`;
+      }
+      out.innerHTML = html;
+      document.getElementById('waTestBtn')?.addEventListener('click', async () => {
+        const hint = document.getElementById('waTestHint');
+        hint.textContent = 'Sending…'; hint.classList.remove('err');
+        try {
+          const res = await fetch('/api/admin/whatsapp-test', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone: document.getElementById('waTestPhone').value }) });
+          const d = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(d.error || 'Could not send.');
+          hint.textContent = `Sent to ${d.to}. Check that phone.`;
+        } catch (err) { hint.textContent = err.message; hint.classList.add('err'); }
+      });
     } catch (err) {
       out.innerHTML = `<p class="hint err" style="margin-top:12px;">${escapeHtml(err.message)}</p>`;
     } finally { btn.disabled = false; }

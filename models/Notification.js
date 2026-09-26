@@ -35,6 +35,7 @@ const TYPES = [
   "payment_failed",
   "profile_updated",
   "message",
+  "documents_requested",
 ];
 
 const notificationSchema = new mongoose.Schema(

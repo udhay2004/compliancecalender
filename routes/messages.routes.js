@@ -170,6 +170,12 @@ async function notifyOtherSide(org, sender, text, isFromClient) {
       logPrefix: "[messages]",
     });
   } else {
+    // WhatsApp too, for clients who switched it on (lib/whatsapp.js).
+    const whatsapp = require("../lib/whatsapp");
+    const events = (process.env.WHATSAPP_EVENTS || "message").split(",").map((s) => s.trim());
+    if (whatsapp.canMessage(org) && events.includes("message")) {
+      whatsapp.sendToOrg(org, "update", ["you have a new message from the ComplyGlobally team"]).catch(() => {});
+    }
     if (!org.primaryContactEmail) return;
     await sendEmail({
       to: org.primaryContactEmail,

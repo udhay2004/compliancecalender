@@ -25,6 +25,9 @@ const { sendStoredFile } = require("../lib/download");
 const { notifyStaff, notifyClient } = require("../lib/notify");
 const { applyListPrice, removeListPrice, PRICE_LIST_ACTOR, formatUSD } = require("../lib/complianceFees");
 const { logActivity } = require("../lib/auditLog");
+const whatsapp = require("../lib/whatsapp");
+const { orgIcs, feedLinksFor } = require("./feeds.routes");
+const { sendIcs } = require("../lib/ics");
 
 const router = express.Router();
 router.use(requireAuth, requireClientRole);
@@ -85,6 +88,15 @@ function profilePayload(org, user) {
     billingAddress: org?.billingAddress || "",
     loginEmail: user.email,
     missing: missingContactFields(org),
+    whatsapp: {
+      // The portal only offers WhatsApp once it's actually set up.
+      available: whatsapp.isConfigured(),
+      on: Boolean(org?.whatsappOptIn),
+      number: whatsapp.displayNumber(org?.whatsappNumber || ""),
+      // What we'd use if they switch it on now.
+      suggestedNumber: whatsapp.displayNumber(whatsapp.toWhatsAppNumber(org?.primaryContactPhone || "") || ""),
+      problem: org?.whatsappOptIn ? org?.whatsappLastError || "" : "",
+    },
   };
 }
 
@@ -98,8 +110,9 @@ router.get("/profile", async (req, res) => {
 router.patch("/profile", async (req, res) => {
   const org = await ClientOrg.findById(req.user.clientOrgId);
   if (!org) return res.status(404).json({ error: "Company not found." });
-  const { companyName, contactName, email, phone, billingAddress } = req.body || {};
+  const { companyName, contactName, email, phone, billingAddress, whatsappOn, whatsappNumber } = req.body || {};
   const changed = [];
+  let whatsappWelcome = false;
 
   if (companyName !== undefined) {
     const v = String(companyName).trim().slice(0, 200);
@@ -124,6 +137,31 @@ router.patch("/profile", async (req, res) => {
     const v = String(billingAddress).trim().slice(0, 500);
     if (v !== (org.billingAddress || "")) { org.billingAddress = v; changed.push("billing address"); }
   }
+  // WhatsApp: only the client can switch it on (their consent), for a
+  // number with a country code. Defaults to their contact phone.
+  if (whatsappOn === false && org.whatsappOptIn) {
+    org.whatsappOptIn = false;
+    org.whatsappOptOutAt = new Date();
+    changed.push("WhatsApp off");
+    logActivity({ action: "whatsapp_opt_out", actor: req.user, clientOrgId: org._id, summary: `${org.name} switched off WhatsApp messages in the portal.` });
+  } else if (whatsappOn === true) {
+    if (!whatsapp.isConfigured()) return res.status(400).json({ error: "WhatsApp messages aren't available yet." });
+    const raw = whatsappNumber !== undefined && String(whatsappNumber).trim() ? String(whatsappNumber) : org.primaryContactPhone;
+    const digits = whatsapp.toWhatsAppNumber(raw || "");
+    if (!digits) return res.status(400).json({ error: "Enter your WhatsApp number with the country code, starting with + (e.g. +1 415 555 0100)." });
+    const clash = await ClientOrg.findOne({ whatsappNumber: digits, _id: { $ne: org._id } });
+    if (clash) return res.status(409).json({ error: "That WhatsApp number is already used by another company account. Please use a different number or contact us." });
+    if (!org.whatsappOptIn || org.whatsappNumber !== digits) {
+      whatsappWelcome = true;
+      changed.push("WhatsApp on");
+      logActivity({ action: "whatsapp_opt_in", actor: req.user, clientOrgId: org._id, summary: `${org.name} switched on WhatsApp messages to +${digits} in the portal.`, meta: { number: digits } });
+    }
+    org.whatsappOptIn = true;
+    org.whatsappNumber = digits;
+    org.whatsappOptInAt = whatsappWelcome ? new Date() : org.whatsappOptInAt;
+    org.whatsappLastError = whatsappWelcome ? "" : org.whatsappLastError;
+  }
+
   // Belt and braces: never let an update leave the org without an email
   // or phone — this route is the only way a client can change them.
   const stillMissing = missingContactFields(org);
@@ -132,6 +170,12 @@ router.patch("/profile", async (req, res) => {
   }
 
   await org.save();
+  let whatsappTest = null;
+  if (whatsappWelcome) {
+    // A confirmation message, so they know it works (and we find out now
+    // if it doesn't, rather than on the day of a deadline).
+    whatsappTest = await whatsapp.sendToOrg(org, "update", [`WhatsApp reminders are now on for ${org.name}. Reply STOP at any time to turn them off`]);
+  }
   if (changed.length) {
     notifyStaff({
       clientOrgId: org._id,
@@ -143,7 +187,38 @@ router.patch("/profile", async (req, res) => {
       email: false,
     });
   }
-  res.json({ profile: profilePayload(org, req.user) });
+  res.json({
+    profile: profilePayload(org, req.user),
+    ...(whatsappTest ? { whatsappTest: { ok: Boolean(whatsappTest.ok), error: whatsappTest.ok ? "" : whatsappTest.error || "" } } : {}),
+  });
+});
+
+// ---------------------------------------------------------------------
+// Calendar export: .ics download and subscription link (lib/ics.js)
+// ---------------------------------------------------------------------
+
+// GET /api/portal/calendar.ics[?calendar=<id>] — download every deadline
+// (or one entity's) as a file for Google/Outlook/Apple Calendar.
+router.get("/calendar.ics", async (req, res) => {
+  const org = await ClientOrg.findById(req.user.clientOrgId);
+  if (!org) return res.status(404).json({ error: "Company not found." });
+  const calendarId = req.query.calendar && mongoose.isValidObjectId(req.query.calendar) ? req.query.calendar : null;
+  sendIcs(res, await orgIcs(org, { calendarId }), `${org.name}-deadlines`);
+});
+
+// GET /api/portal/calendar-feed — the private subscription link (created
+// the first time it's asked for).
+router.get("/calendar-feed", async (req, res) => {
+  const org = await ClientOrg.findById(req.user.clientOrgId);
+  if (!org) return res.status(404).json({ error: "Company not found." });
+  res.json({ feed: await feedLinksFor(org, { kind: "client", name: `${org.name} deadlines` }) });
+});
+
+// POST /api/portal/calendar-feed/reset — new link; the old one stops working.
+router.post("/calendar-feed/reset", async (req, res) => {
+  const org = await ClientOrg.findById(req.user.clientOrgId);
+  if (!org) return res.status(404).json({ error: "Company not found." });
+  res.json({ feed: await feedLinksFor(org, { kind: "client", name: `${org.name} deadlines`, reset: true }) });
 });
 
 // ---------------------------------------------------------------------

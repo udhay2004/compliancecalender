@@ -90,6 +90,85 @@ router.get("/payments-health", async (req, res) => {
 });
 
 // ---------------------------------------------------------------------
+// WhatsApp (lib/whatsapp.js)
+// ---------------------------------------------------------------------
+
+// GET /api/admin/whatsapp-health — is WhatsApp set up, does Meta accept
+// our settings, are the three message templates approved?
+router.get("/whatsapp-health", async (req, res) => {
+  const wa = require("../lib/whatsapp");
+  const c = wa.config();
+  const appUrl = process.env.APP_URL || "<APP_URL>";
+  const report = {
+    configured: wa.isConfigured(),
+    webhookUrl: `${appUrl}/api/webhooks/whatsapp`,
+    templates: Object.entries(wa.TEMPLATE_TEXT).map(([kind, t]) => ({ kind, name: c.templates[kind], language: c.lang, category: "Utility", body: t.body, sample: t.sample, status: null })),
+    optedIn: await ClientOrg.countDocuments({ whatsappOptIn: true }),
+    withProblems: (await ClientOrg.find({ whatsappOptIn: true, whatsappLastError: { $nin: ["", null] } }).select("name whatsappLastError").limit(10).lean())
+      .filter((o) => o.whatsappLastError)
+      .map((o) => ({ name: o.name, problem: o.whatsappLastError })),
+    number: null,
+    steps: [],
+    ok: false,
+  };
+  const add = (name, ok, detail = "", fix = "") => report.steps.push({ name, ok, detail, fix });
+
+  add("Access token and phone number ID are set", report.configured, "",
+    "In Meta: WhatsApp → API Setup. Put the Phone number ID in WHATSAPP_PHONE_NUMBER_ID and a permanent System User token in WHATSAPP_TOKEN, then redeploy.");
+  if (report.configured) {
+    try {
+      const r = await wa.graph("GET", `${c.phoneNumberId}?fields=display_phone_number,verified_name,quality_rating,code_verification_status,name_status`);
+      if (r.ok) {
+        report.number = r.data;
+        add("Meta accepts the token and number", true, `Sending from ${r.data.display_phone_number || "?"} as "${r.data.verified_name || "?"}"${r.data.quality_rating ? `, quality ${r.data.quality_rating}` : ""}.`);
+      } else {
+        add("Meta accepts the token and number", false, wa.explainError(r.data).message, "Check WHATSAPP_TOKEN and WHATSAPP_PHONE_NUMBER_ID.");
+      }
+    } catch (err) {
+      add("Meta accepts the token and number", false, `Couldn't reach Meta: ${err.message}`);
+    }
+    if (c.wabaId) {
+      try {
+        const r = await wa.graph("GET", `${c.wabaId}/message_templates?fields=name,status,language,category&limit=200`);
+        if (r.ok) {
+          const found = r.data.data || [];
+          report.templates.forEach((t) => {
+            const m = found.find((f) => f.name === t.name && (f.language === t.language || f.language?.startsWith(t.language)));
+            t.status = m ? m.status : "MISSING";
+          });
+          const bad = report.templates.filter((t) => t.status !== "APPROVED");
+          add("Message templates are approved", bad.length === 0,
+            bad.length ? bad.map((t) => `${t.name}: ${t.status}`).join(", ") : "All three templates are approved.",
+            bad.length ? "Create the missing templates in WhatsApp Manager → Message templates, exactly as shown below (category Utility). Approval usually takes minutes to a day." : "");
+        } else {
+          add("Message templates are approved", false, wa.explainError(r.data).message, "Check WHATSAPP_BUSINESS_ACCOUNT_ID (WhatsApp Business Account ID, under API Setup).");
+        }
+      } catch (err) {
+        add("Message templates are approved", false, `Couldn't reach Meta: ${err.message}`);
+      }
+    } else {
+      add("Message templates are approved", false, "Can't check without WHATSAPP_BUSINESS_ACCOUNT_ID.", "Optional: add WHATSAPP_BUSINESS_ACCOUNT_ID so this page can check the templates. Or send a test message below.");
+    }
+  }
+  add("Webhook security is set", Boolean(c.appSecret && c.verifyToken), c.appSecret && c.verifyToken ? "" : "Without it, STOP replies and client replies aren't received.",
+    `Set WHATSAPP_APP_SECRET (Meta app → App settings → Basic → App secret) and WHATSAPP_VERIFY_TOKEN (any long random text). Then in Meta: WhatsApp → Configuration → Webhook: URL ${report.webhookUrl}, verify token = your WHATSAPP_VERIFY_TOKEN, and subscribe to "messages".`);
+  report.ok = report.steps.every((s) => s.ok);
+  res.json(report);
+});
+
+// POST /api/admin/whatsapp-test  { phone } — send the "account update"
+// template to any number, to prove the whole setup works.
+router.post("/whatsapp-test", async (req, res) => {
+  const wa = require("../lib/whatsapp");
+  const to = wa.toWhatsAppNumber(String(req.body?.phone || ""));
+  if (!to) return res.status(400).json({ error: "Enter the number with its country code, starting with + (e.g. +91 98765 43210)." });
+  if (!wa.isConfigured()) return res.status(400).json({ error: "WhatsApp isn't set up yet: add WHATSAPP_TOKEN and WHATSAPP_PHONE_NUMBER_ID first." });
+  const r = await wa.sendTemplate({ to, kind: "update", params: [req.user.name || "there", "this is a test message from your admin page"] });
+  if (!r.ok) return res.status(502).json({ error: r.error });
+  res.json({ ok: true, to: wa.displayNumber(to), id: r.id });
+});
+
+// ---------------------------------------------------------------------
 // Backups (lib/backup.js)
 // ---------------------------------------------------------------------
 let backupInProgress = false;

@@ -105,6 +105,14 @@
     .stat-hint { font-size: 11px; }
     .hero h1 { font-size: 23px; }
   }
+  .feed-box { margin-top: 14px; background: var(--card); border: 1px solid var(--rule); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow-sm); max-width: 640px; }
+  .feed-title { font-weight: 700; margin-bottom: 4px; }
+  .feed-box p { margin: 4px 0 0; font-size: 13px; }
+  .feed-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .feed-btn { display: inline-block; font: inherit; font-size: 12.5px; font-weight: 600; padding: 7px 12px; border-radius: 6px; border: 1px solid var(--rule); background: var(--card); color: var(--ink); text-decoration: none; cursor: pointer; }
+  .feed-btn:hover { border-color: var(--brand); color: var(--brand); }
+  .feed-btn.solid { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .feed-note { font-size: 12px !important; }
 </style>
 </head>
 <body>
@@ -208,6 +216,23 @@
           '<span class="fin-pill ' + (r.days < 0 ? 'bad' : r.days <= 7 ? 'ready' : '') + '">' + esc(label) + '</span>',
           r.days < 0 ? 'bad' : '');
       }, 'Nothing overdue or due in the next 30 days.'));
+
+    html += finPanel('Waiting on client documents', 'Services clients chose where documents are still missing. Clients are reminded automatically (2, 5, 10 days after choosing, then weekly, and every 3 days in the last two weeks). After 3 reminders, give them a call. Open one to Chase now or pause reminders.',
+      rows(tech.waitingOnDocs, function (r) {
+        var due = r.dueDate ? new Date(r.dueDate).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : 'no date';
+        var missing = r.missing.slice(0, 3).join(', ') + (r.missing.length > 3 ? ' +' + (r.missing.length - 3) + ' more' : '');
+        var reminders = r.paused ? 'reminders paused' : r.remindersSent ? r.remindersSent + ' reminder' + (r.remindersSent === 1 ? '' : 's') + ' sent' : 'not reminded yet';
+        var tone = r.remindersSent >= 3 || (r.days !== null && r.days <= 7) ? 'bad' : '';
+        return row('/calendar.html?id=' + encodeURIComponent(r.calendarId) + '#item-' + encodeURIComponent(r.itemIndex),
+          esc(r.company) + (r.whatsapp ? ' <span class="fin-pill done">WhatsApp</span>' : ''),
+          esc(r.task) + ' \u00b7 missing: ' + esc(missing),
+          esc(due),
+          '<span class="fin-pill ' + (tone ? 'bad' : '') + '">' + esc(reminders) + '</span>' + (r.remindersSent >= 3 && r.phone ? '<div style="white-space:nowrap;margin-top:3px;">Call ' + esc(r.phone) + '</div>' : ''),
+          tone);
+      }, 'No client is holding up work with missing documents.'));
+    if (tech.waitingOnDocsTotal > (tech.waitingOnDocs || []).length) {
+      html += '<div class="fin-sub" style="margin:-8px 0 16px;">Showing the ' + tech.waitingOnDocs.length + ' most urgent of ' + tech.waitingOnDocsTotal + '.</div>';
+    }
 
     if (tech.needsDate && tech.needsDate.length) {
       html += finPanel('Needs a due date', 'The due date for these couldn\u2019t be worked out automatically. Open each one and set the date by hand.',
@@ -411,7 +436,9 @@
       '</div>' +
       '<h1>' + esc(user.name || teamName) + '\u2019s dashboard</h1>' +
       '<p>Signed in as ' + esc(user.email) + '. Last sign-in ' + esc(when(user.lastLoginAt)) + '. ' +
-        (user.twoFactorEnabled ? '<a href="/two-factor.html">Two-factor login: on</a>' : '<a href="/two-factor.html">Set up two-factor login</a>') + '</p>' +
+        (user.twoFactorEnabled ? '<a href="/two-factor.html">Two-factor login: on</a>' : '<a href="/two-factor.html">Set up two-factor login</a>') +
+        (data.tech ? ' \u00b7 <a href="#" id="teamFeedBtn">Add client deadlines to my calendar</a>' : '') + '</p>' +
+      '<div id="teamFeedBox" hidden class="feed-box"></div>' +
     '</div>';
 
     // Order matters for the mixed roles: an admin sees delivery work
@@ -437,11 +464,48 @@
       return '<a href="' + esc(l.href) + '">' + esc(l.label) + '</a>';
     }).join('');
 
+    var feedBtn = $('teamFeedBtn');
+    if (feedBtn) feedBtn.addEventListener('click', function (e) { e.preventDefault(); showTeamFeed(false); });
+
     // Wired after innerHTML, since the buttons don't exist before it.
     var resets = document.querySelectorAll('[data-reset]');
     for (var i = 0; i < resets.length; i++) {
       resets[i].addEventListener('click', onReset);
     }
+  }
+
+  // Private calendar link with every deadline we're handling (lib/ics.js).
+  function showTeamFeed(reset) {
+    var box = $('teamFeedBox');
+    box.hidden = false;
+    box.innerHTML = '<div class="muted">Loading\u2026</div>';
+    fetch('/api/dashboard/calendar-feed' + (reset ? '/reset' : ''), { method: reset ? 'POST' : 'GET' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        var f = d.feed;
+        if (!f) throw new Error(d.error || 'Could not load the link.');
+        box.innerHTML =
+          '<div class="feed-title">Client deadlines in your own calendar</div>' +
+          '<p>Every filing clients asked us to handle, as all-day events. It refreshes by itself every few hours.</p>' +
+          '<div class="feed-actions">' +
+            '<a class="feed-btn solid" href="' + esc(f.google) + '" target="_blank" rel="noopener">Google Calendar</a>' +
+            '<a class="feed-btn" href="' + esc(f.office365) + '" target="_blank" rel="noopener">Outlook (work)</a>' +
+            '<a class="feed-btn" href="' + esc(f.outlook) + '" target="_blank" rel="noopener">Outlook.com</a>' +
+            '<a class="feed-btn" href="' + esc(f.webcal) + '">Apple Calendar</a>' +
+            '<button class="feed-btn" id="copyTeamFeed">Copy link</button>' +
+          '</div>' +
+          '<p class="feed-note" id="teamFeedNote">This link is personal. Don\u2019t share it. <a href="#" id="resetTeamFeed">Get a new link</a></p>';
+        $('copyTeamFeed').addEventListener('click', function () {
+          (navigator.clipboard ? navigator.clipboard.writeText(f.url) : Promise.reject())
+            .then(function () { $('teamFeedNote').textContent = 'Copied. In your calendar app choose "Add calendar \u2192 From URL" and paste it.'; })
+            .catch(function () { window.prompt('Copy this link:', f.url); });
+        });
+        $('resetTeamFeed').addEventListener('click', function (e) {
+          e.preventDefault();
+          if (confirm('Make a new link? The old one stops working.')) showTeamFeed(true);
+        });
+      })
+      .catch(function (err) { box.innerHTML = '<div class="muted">' + esc(err.message) + '</div>'; });
   }
 
   function onReset() {

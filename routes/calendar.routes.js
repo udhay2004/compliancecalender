@@ -14,7 +14,7 @@ const { logActivity } = require("../lib/auditLog");
 const { toView, REAL_WORK_MATCH, missingKeysFor } = require("../lib/calendarView");
 const { sendStoredFile } = require("../lib/download");
 const { notifyClient } = require("../lib/notify");
-const { onFiled, onUnfiled } = require("../lib/reminders");
+const { onFiled, onUnfiled, chaseNow } = require("../lib/reminders");
 const { fmt: fmtDay } = require("../lib/deadlines");
 
 // Async because it checks storage for each uploaded file, so staff see
@@ -717,7 +717,66 @@ router.get("/:id/client-contact", async (req, res) => {
   if (!calendar) return res.status(404).json({ error: "Not found." });
   if (!calendar.clientOrgId) return res.json({ clientOrg: null });
   const org = await ClientOrg.findById(calendar.clientOrgId).populate("assignedStaff", "name email");
-  res.json({ clientOrg: org });
+  const wa = require("../lib/whatsapp");
+  res.json({
+    clientOrg: org,
+    whatsapp: org ? { on: Boolean(org.whatsappOptIn), number: wa.displayNumber(org.whatsappNumber), lastSentAt: org.whatsappLastSentAt, problem: org.whatsappLastError || "" } : null,
+  });
+});
+
+// POST /api/calendars/:id/items/:index/chase — "Chase now": remind the
+// client right away about this filing's missing documents (email, bell
+// and WhatsApp if they switched it on). At most once a day per filing.
+router.post("/:id/items/:index/chase", async (req, res) => {
+  const calendar = await Calendar.findById(req.params.id);
+  if (!calendar || calendar.status !== "approved" || !calendar.clientOrgId) return res.status(404).json({ error: "Client calendar not found." });
+  const idx = parseInt(req.params.index, 10);
+  if (isNaN(idx) || !calendar.items[idx]) return res.status(404).json({ error: "Filing not found." });
+  const result = await chaseNow(calendar, idx, { byName: req.user.name || req.user.email });
+  if (!result.ok) return res.status(result.status || 400).json({ error: result.error });
+  logActivity({
+    action: "documents_chased",
+    actor: req.user,
+    clientOrgId: calendar.clientOrgId,
+    calendarId: calendar._id,
+    itemIndex: idx,
+    summary: `Asked the client for documents for "${calendar.items[idx].compliance_name}" (${result.docs.length} missing).`,
+  });
+  res.json({ ok: true, docs: result.docs, sent: result.sent, count: result.count, calendar: await staffView(calendar) });
+});
+
+// PATCH /api/calendars/:id/items/:index/chase  { paused: true|false }
+// Stop (or restart) the automatic document reminders for one filing.
+router.patch("/:id/items/:index/chase", async (req, res) => {
+  const calendar = await Calendar.findById(req.params.id);
+  if (!calendar) return res.status(404).json({ error: "Not found." });
+  const idx = parseInt(req.params.index, 10);
+  const item = calendar.items[idx];
+  if (!item) return res.status(404).json({ error: "Filing not found." });
+  if (typeof req.body?.paused !== "boolean") return res.status(400).json({ error: "Send { paused: true } or { paused: false }." });
+  item.docChasePaused = req.body.paused;
+  await calendar.save();
+  logActivity({
+    action: "document_chasing_paused",
+    actor: req.user,
+    clientOrgId: calendar.clientOrgId,
+    calendarId: calendar._id,
+    itemIndex: idx,
+    summary: `${req.body.paused ? "Paused" : "Restarted"} automatic document reminders for "${item.compliance_name}".`,
+  });
+  res.json({ ok: true, paused: item.docChasePaused, calendar: await staffView(calendar) });
+});
+
+// GET /api/calendars/:id/ics — this calendar's deadlines as an .ics file.
+router.get("/:id/ics", async (req, res) => {
+  const calendar = await Calendar.findById(req.params.id);
+  if (!calendar) return res.status(404).json({ error: "Not found." });
+  const ics = require("../lib/ics");
+  const text = ics.buildIcs({
+    name: `${calendar.profile?.companyName || "Client"} — compliance deadlines`,
+    events: ics.sortEvents(ics.calendarEvents(calendar, { audience: "client" })),
+  });
+  ics.sendIcs(res, text, `${calendar.profile?.companyName || "calendar"}-deadlines`);
 });
 
 // GET /api/calendars/:id/pdf — download, works for any status (draft PDFs

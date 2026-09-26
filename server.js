@@ -56,6 +56,12 @@ if (missing.length) {
   );
   process.exit(1);
 }
+{
+  const wa = require("./lib/whatsapp");
+  console.log(wa.isConfigured()
+    ? "[whatsapp] WhatsApp messages are ON (Meta Cloud API)."
+    : "[whatsapp] WhatsApp is not set up (WHATSAPP_TOKEN / WHATSAPP_PHONE_NUMBER_ID); messages are only logged.");
+}
 if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET || !process.env.RAZORPAY_WEBHOOK_SECRET) {
   console.warn(
     "\n[startup warning] RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET / RAZORPAY_WEBHOOK_SECRET " +
@@ -96,6 +102,14 @@ app.post(
   paymentsRoutes.razorpayWebhookHandler
 );
 
+// WhatsApp (Meta) webhook: also signed over the raw bytes, so it's
+// registered before the JSON parser too. See routes/whatsapp.routes.js.
+{
+  const wa = require("./routes/whatsapp.routes");
+  app.get("/api/webhooks/whatsapp", wa.verifyHandler);
+  app.post("/api/webhooks/whatsapp", express.raw({ type: "*/*", limit: "1mb" }), wa.webhookHandler);
+}
+
 app.use(express.json({ limit: "1mb" }));
 app.use(cookieParser());
 
@@ -128,6 +142,9 @@ app.get("/dashboard.html", requirePageAuth, requirePageRole("staff"), (req, res)
 app.get("/portal.html", requirePageAuth, requirePageClientRole, (req, res) => {
   sendPageWithFooter(res, "portal.html");
 });
+
+// Calendar subscription links for Google/Outlook/Apple (public, token-protected).
+app.use(require("./routes/feeds.routes"));
 
 // Company and policy pages (/terms, /privacy, /refund-policy, /pricing …):
 // public, server-rendered and linked from the footer of every public page.

@@ -97,6 +97,9 @@ const userSchema = new mongoose.Schema(
     // client org.
     clientOrgId: { type: mongoose.Schema.Types.ObjectId, ref: "ClientOrg", default: null },
     active: { type: Boolean, default: true },
+    // Staff only: secret part of the "team deadlines" calendar subscription
+    // link (/feeds/team/<token>.ics). Reset from the dashboard.
+    calendarFeedToken: { type: String, default: undefined, index: { unique: true, sparse: true } },
   },
   { timestamps: true }
 );
