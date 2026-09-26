@@ -13,6 +13,9 @@
 // Run: npm install && npm start   (after copying .env.example to .env)
 
 require("dotenv").config();
+// Error alerts (Sentry) start first so they see everything that follows.
+const monitoring = require("./lib/monitoring");
+monitoring.init();
 const path = require("path");
 const express = require("express");
 // Must come before any routes: answers errors thrown in async handlers.
@@ -46,6 +49,26 @@ app.set("trust proxy", 1);
 app.disable("x-powered-by"); // don't advertise the framework
 // Browser security headers on every response (lib/securityHeaders.js).
 app.use(require("./lib/securityHeaders").securityHeaders);
+// Compress text responses (pages, scripts, JSON, CSV): typically 70-80%
+// smaller, so pages load faster on slow connections.
+app.use(require("compression")());
+
+// Health check for Railway (railway.json): 200 only when the database
+// answers, so a broken deploy is never switched live.
+app.get("/healthz", async (req, res) => {
+  res.set("Cache-Control", "no-store");
+  const mongoose = require("mongoose");
+  try {
+    if (mongoose.connection.readyState !== 1) throw new Error("not connected");
+    await Promise.race([
+      mongoose.connection.db.admin().ping(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 3000)),
+    ]);
+    res.json({ ok: true, db: "up", uptimeSeconds: Math.round(process.uptime()) });
+  } catch (err) {
+    res.status(503).json({ ok: false, db: "down" });
+  }
+});
 
 const REQUIRED_ENV = ["ANTHROPIC_API_KEY", "MONGODB_URI", "JWT_SECRET"];
 const missing = REQUIRED_ENV.filter((k) => !process.env[k]);
@@ -55,6 +78,15 @@ if (missing.length) {
     "Copy .env.example to .env and fill these in before starting the server.\n"
   );
   process.exit(1);
+}
+// Settings that are easy to forget and matter in production.
+if (process.env.NODE_ENV === "production") {
+  const warn = (msg) => console.warn(`[startup warning] ${msg}`);
+  if (!process.env.APP_URL) warn("APP_URL is not set: links in emails, webhooks and calendar feeds will be wrong.");
+  if (!process.env.MAIL_FROM && !process.env.SMTP_FROM) warn("MAIL_FROM is not set: emails are sent from a default address that may not be verified for your domain, and can land in spam.");
+  if (!process.env.TOTP_ENCRYPTION_KEY) warn("TOTP_ENCRYPTION_KEY is not set: staff two-factor secrets are protected with a key derived from JWT_SECRET. Set a separate key once and never change it.");
+  if (!process.env.TURNSTILE_SITE_KEY || !process.env.TURNSTILE_SECRET_KEY) warn("The \"verify you are human\" check is OFF (TURNSTILE_SITE_KEY / TURNSTILE_SECRET_KEY). The daily AI limit still applies.");
+  if (!process.env.SENTRY_DSN) warn("SENTRY_DSN is not set: errors are only written to the logs, nobody is alerted.");
 }
 {
   const wa = require("./lib/whatsapp");
@@ -89,6 +121,14 @@ if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET || !process
 // one bad document can't take the whole site down.
 process.on("unhandledRejection", (reason) => {
   console.error("[unhandled rejection]", reason);
+  monitoring.captureError(reason, { kind: "unhandledRejection" });
+});
+// A truly unexpected crash: report it, then exit so Railway restarts a
+// clean copy (continuing after one is unsafe).
+process.on("uncaughtException", (err) => {
+  console.error("[uncaught exception]", err);
+  monitoring.captureError(err, { kind: "uncaughtException" });
+  monitoring.flush(2000).finally(() => process.exit(1));
 });
 
 // MUST be registered before app.use(express.json()) below: Razorpay
@@ -171,7 +211,14 @@ app.get("/", tryPageAuth, (req, res) => {
 // ---------------------------------------------------------------------
 // Public static assets: login page, CSS/JS, etc.
 // ---------------------------------------------------------------------
-app.use(express.static(path.join(__dirname, "public"), { index: false }));
+// Pages always re-check for a newer version; scripts, styles and images are
+// cached by the browser for an hour (then re-checked cheaply via ETag).
+app.use(express.static(path.join(__dirname, "public"), {
+  index: false,
+  setHeaders(res, filePath) {
+    res.setHeader("Cache-Control", filePath.endsWith(".html") ? "no-cache" : "public, max-age=3600");
+  },
+}));
 
 // ---------------------------------------------------------------------
 // API
@@ -189,51 +236,85 @@ app.use("/api/invoices", invoicesRoutes);
 app.use("/api/pipeline", require("./routes/pipeline.routes"));
 app.use("/api/reports", require("./routes/reports.routes"));
 
-app.get("/healthz", (req, res) => res.json({ ok: true }));
-
 // Last: turns any unexpected error into a clear response (never a hang).
 app.use(errorHandler);
 
+// A typo in a schedule setting used to crash the whole app at start-up.
+function validCron(value, fallback, name) {
+  if (!value) return fallback;
+  if (cron.validate(value)) return value;
+  console.warn(`[startup warning] ${name}="${value}" isn't a valid schedule; using "${fallback}".`);
+  return fallback;
+}
+
 async function start() {
   await connectDB();
-  app.listen(PORT, () => {
+  const { track, addCronTask, installShutdown } = require("./lib/lifecycle");
+  const { runExclusive } = require("./lib/jobLock");
+  const today = () => new Date().toISOString().slice(0, 10);
+
+  const server = app.listen(PORT, () => {
     console.log(`Compliance Calendar Generator running at http://localhost:${PORT}`);
   });
+  // Slightly longer than Railway's proxy keep-alive, so idle connections
+  // are closed by the proxy first (avoids rare "connection reset" errors).
+  server.keepAliveTimeout = 65000;
+  server.headersTimeout = 66000;
 
-  // Daily reminders sweep — payment-overdue and due-date reminders, see
-  // lib/reminders.js. Runs at 8am server time by default; override with
-  // REMINDER_CRON (standard 5-field cron syntax) if that's wrong for
-  // your timezone/host. Set DISABLE_REMINDERS=true to turn this off
-  // entirely (e.g. in a local dev environment where you don't want test
-  // data emailing anyone).
-  // Give every existing filing a real due date (once, shortly after boot;
-  // no reminders are sent by this).
+  installShutdown(server, {
+    onClose: async () => {
+      require("./lib/mailer").closeMailer();
+      await monitoring.flush(2000);
+      await require("mongoose").disconnect().catch(() => {});
+    },
+  });
+
+  // Leftover upload temp files from a crash (normally removed per request).
+  require("./lib/tempCleanup").cleanOldTempFiles();
+
+  // Once per start-up (on one server only): give every filing a real due
+  // date and every past payment an invoice. No reminders are sent by this.
   setTimeout(() => {
-    backfillDueDates().catch((err) => console.error("[deadlines] Backfill failed:", err.message));
-    require("./lib/invoices").backfillInvoices().catch((err) => console.error("[invoices] Backfill failed:", err.message));
-  }, 5000);
+    track(runExclusive("startup-backfill", { ttlMs: 15 * 60 * 1000 }, async () => {
+      await backfillDueDates().catch((err) => console.error("[deadlines] Backfill failed:", err.message));
+      await require("./lib/invoices").backfillInvoices().catch((err) => console.error("[invoices] Backfill failed:", err.message));
+    }).catch((err) => monitoring.captureError(err, { job: "startup-backfill" })));
+  }, 5000).unref();
 
   // Nightly database backup to R2 (lib/backup.js). 02:30 UTC by default.
+  // runExclusive: exactly one backup per night, even with several servers.
   if (process.env.DISABLE_BACKUPS !== "true") {
     const { runBackup } = require("./lib/backup");
     const storage = require("./lib/storage");
-    const backupCron = process.env.BACKUP_CRON || "30 2 * * *";
-    cron.schedule(backupCron, () => {
-      runBackup({ reason: "scheduled" }).catch(() => {}); // failures are logged + the team is alerted
-    });
-    console.log(`[backup] Nightly database backup scheduled ("${backupCron}") to ${storage.describe()}.`);
+    const backupCron = validCron(process.env.BACKUP_CRON, "30 2 * * *", "BACKUP_CRON");
+    addCronTask(cron.schedule(backupCron, () => {
+      track(runExclusive("backup", { period: today(), ttlMs: 2 * 60 * 60 * 1000 }, () => runBackup({ reason: "scheduled" }))
+        .catch((err) => monitoring.captureError(err, { job: "backup" }))); // also logged + team alerted
+    }, { timezone: "Etc/UTC" }));
+    console.log(`[backup] Nightly database backup scheduled ("${backupCron}" UTC) to ${storage.describe()}.`);
     if (storage.DRIVER === "local" && process.env.NODE_ENV === "production") {
       console.warn("[backup] WARNING: backups are going to local disk, which is wiped on redeploy. Set the R2_* settings.");
     }
   }
 
+  // Daily reminders (lib/reminders.js): deadlines, document chasing,
+  // payments, WhatsApp. 08:00 UTC by default (1:30 pm India). Exactly once
+  // per day across all servers. DISABLE_REMINDERS=true turns it off.
   if (process.env.DISABLE_REMINDERS !== "true") {
-    const schedule = process.env.REMINDER_CRON || "0 8 * * *";
-    cron.schedule(schedule, () => {
-      runReminderSweep().catch((err) => console.error("[reminders] Sweep failed:", err));
-    });
-    console.log(`[reminders] Scheduled with cron "${schedule}" (set DISABLE_REMINDERS=true to turn off).`);
+    const schedule = validCron(process.env.REMINDER_CRON, "0 8 * * *", "REMINDER_CRON");
+    addCronTask(cron.schedule(schedule, () => {
+      track(runExclusive("reminders", { period: today(), ttlMs: 3 * 60 * 60 * 1000 }, () => runReminderSweep())
+        .catch((err) => {
+          console.error("[reminders] Sweep failed:", err);
+          monitoring.captureError(err, { job: "reminders" });
+        }));
+    }, { timezone: process.env.REMINDER_TIMEZONE || "Etc/UTC" }));
+    console.log(`[reminders] Scheduled with cron "${schedule}" (${process.env.REMINDER_TIMEZONE || "UTC"}); set DISABLE_REMINDERS=true to turn off.`);
   }
 }
 
-start();
+start().catch((err) => {
+  console.error("[startup] Failed to start:", err);
+  monitoring.captureError(err, { kind: "startup" });
+  monitoring.flush(2000).finally(() => process.exit(1));
+});

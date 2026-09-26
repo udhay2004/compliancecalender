@@ -147,7 +147,7 @@ stub("config/razorpay.js", fakeRazorpay);
 const lostKeys = new Set();
 const storedBodies = new Map();
 stub("lib/storage.js", {
-  saveFile: async ({ fileName, buffer }) => { const k = `k/${fileName}`; storedBodies.set(k, buffer); return { fileKey: k, fileUrl: "" }; },
+  saveFile: async ({ fileName, buffer, filePath }) => { const k = `k/${fileName}`; storedBodies.set(k, buffer || require("node:fs").readFileSync(filePath)); return { fileKey: k, fileUrl: "" }; },
   getFile: async (k) => {
     if (lostKeys.has(k)) return null;
     const { Readable } = require("node:stream");
@@ -809,7 +809,9 @@ test("Admin → Check payments pinpoints the problem", async () => {
 // =====================================================================
 function proofForm(files, fields = {}) {
   const f = new FormData();
-  files.forEach(([name, type]) => f.append("files", new Blob(["%PDF-1.4 proof"], { type }), name));
+  // Real file signatures: uploads are checked by content, not just by name.
+  const body = (type) => type === "image/png" ? new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0]) : "%PDF-1.4 proof";
+  files.forEach(([name, type]) => f.append("files", new Blob([body(type)], { type }), name));
   Object.entries(fields).forEach(([k, v]) => f.append(k, v));
   return f;
 }
@@ -869,7 +871,35 @@ test("proof upload validation: no file, future date, wrong file type", async () 
   assert.match(r.body.error, /future/);
   r = await call("POST", `/api/calendars/${cal._id}/items/0/certificate`, { user: "fin", form: proofForm([["evil.html", "text/html"]]) });
   assert.strictEqual(r.status, 400);
-  assert.match(r.body.error, /PDF, image/);
+  assert.match(r.body.error, /PDF, an image/);
+  // A file that only pretends to be a PDF (name and label say PDF, content doesn't).
+  const fake = new FormData();
+  fake.append("files", new Blob(["<script>alert(1)</script>"], { type: "application/pdf" }), "invoice.pdf");
+  r = await call("POST", `/api/calendars/${cal._id}/items/0/certificate`, { user: "fin", form: fake });
+  assert.strictEqual(r.status, 400);
+  assert.match(r.body.error, /doesn't look like a real PDF/);
+  // A PDF label on a .exe name.
+  const renamed = new FormData();
+  renamed.append("files", new Blob(["%PDF-1.4"], { type: "application/pdf" }), "tool.exe");
+  r = await call("POST", `/api/calendars/${cal._id}/items/0/certificate`, { user: "fin", form: renamed });
+  assert.strictEqual(r.status, 400);
+});
+
+test("client uploads are checked by content and the temporary file is removed", async () => {
+  const { cal } = setup();
+  const fs = require("node:fs");
+  const { TMP_DIR } = require("../middleware/upload");
+  const before = fs.readdirSync(TMP_DIR).length;
+  const bad = new FormData();
+  bad.append("requirementLabel", "Registered Agent Consent Letter");
+  bad.append("file", new Blob(["MZ\x90 not a pdf"], { type: "application/pdf" }), "consent.pdf");
+  let r = await call("POST", `/api/portal/calendars/${cal._id}/items/0/upload`, { form: bad });
+  assert.strictEqual(r.status, 400);
+  assert.match(r.body.error, /doesn't look like a real PDF/);
+  r = await call("POST", `/api/portal/calendars/${cal._id}/items/0/upload`, { form: pdfForm("Registered Agent Consent Letter") });
+  assert.strictEqual(r.status, 201);
+  await new Promise((res) => setTimeout(res, 50));
+  assert.strictEqual(fs.readdirSync(TMP_DIR).length, before, "temporary upload files are cleaned up");
 });
 
 test("removing the last proof un-marks the service as done, and is logged", async () => {

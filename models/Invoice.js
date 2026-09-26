@@ -69,6 +69,7 @@ const invoiceSchema = new mongoose.Schema(
 );
 
 // One invoice per payment; one credit note per refund.
+invoiceSchema.index({ issuedAt: -1 }); // reports and the finance dashboard
 invoiceSchema.index({ kind: 1, razorpayPaymentId: 1 }, { unique: true, partialFilterExpression: { kind: "invoice" } });
 invoiceSchema.index({ razorpayRefundId: 1 }, { unique: true, partialFilterExpression: { kind: "credit_note" } });
 

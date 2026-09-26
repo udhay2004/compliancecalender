@@ -645,6 +645,7 @@
           </div>
         </div>
 
+        <div id="humanCheck" style="margin-top:14px;min-height:0;"></div>
         <p class="status-hint" id="statusHint" aria-live="polite"></p>
         <div class="step-nav" style="margin-top:14px">
           <button class="btn btn-ghost btn-back" type="button" data-back><svg class="ic" aria-hidden="true"><use href="#i-arrow-left"/></svg>Back</button>
@@ -791,12 +792,40 @@
 
   // This page talks to the UNAUTHENTICATED public tier (routes/public.routes.js).
   // Contact info is sent WITH the generate call now — see that file for why.
+  // "Verify you are human" (Cloudflare Turnstile). Only shown when the
+  // server has it switched on (GET /api/public/config).
+  const human = { siteKey: null, widgetId: null, token: '' };
+  fetch('/api/public/config').then(r => r.json()).then(cfg => {
+    if (!cfg.humanCheck || !cfg.humanCheck.siteKey) return;
+    human.siteKey = cfg.humanCheck.siteKey;
+    window.__onTurnstileLoad = () => {
+      human.widgetId = window.turnstile.render('#humanCheck', {
+        sitekey: human.siteKey,
+        callback: (t) => { human.token = t; },
+        'expired-callback': () => { human.token = ''; },
+        'error-callback': () => { human.token = ''; },
+      });
+    };
+    const sc = document.createElement('script');
+    sc.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=__onTurnstileLoad';
+    sc.async = true; sc.defer = true;
+    document.head.appendChild(sc);
+  }).catch(() => {});
+  function resetHumanCheck() {
+    human.token = '';
+    if (human.widgetId !== null && window.turnstile) { try { window.turnstile.reset(human.widgetId); } catch (_) {} }
+  }
+
   async function callGenerate(profile, contact) {
+    if (human.siteKey && !human.token) {
+      throw new Error('Please tick the "verify you are human" box just above the Generate button, then try again.');
+    }
     const response = await fetch("/api/public/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ profile, contact })
+      body: JSON.stringify({ profile, contact, captchaToken: human.token || undefined })
     });
+    resetHumanCheck(); // each check can only be used once
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || `Server error ${response.status}`);
     return data; // { calendarId, itemCount, items: [ {locked:false, ...full} | {locked:true, category, daysUntil} ] }

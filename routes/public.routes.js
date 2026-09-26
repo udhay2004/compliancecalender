@@ -30,8 +30,18 @@ const { normalizePhone } = require("../lib/calendarView");
 const { notifyStaff, notifyClient } = require("../lib/notify");
 
 const router = express.Router();
+const { reserveAiRun, BudgetError, verifyHuman, humanCheckEnabled, turnstileKeys } = require("../lib/abuseGuard");
 
+// GET /api/public/config — what the public page needs to know before it
+// submits (the human-check site key is public by design).
+router.get("/config", (req, res) => {
+  res.set("Cache-Control", "no-store");
+  res.json({ humanCheck: humanCheckEnabled() ? { provider: "turnstile", siteKey: turnstileKeys().siteKey } : null });
+});
+
+const { mongoStore } = require("../lib/rateLimitStore");
 const generateLimiter = rateLimit({
+  store: mongoStore("public-generate"),
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 5,
   standardHeaders: true,
@@ -40,6 +50,7 @@ const generateLimiter = rateLimit({
 });
 
 const reviewLimiter = rateLimit({
+  store: mongoStore("public-review"),
   windowMs: 60 * 60 * 1000,
   max: 10,
   standardHeaders: true,
@@ -189,7 +200,15 @@ router.post("/generate", generateLimiter, async (req, res) => {
   }
   contact.phone = phone;
 
+  // Bots and runaway spend (lib/abuseGuard.js): human check first, then
+  // today's AI budget. Signed-in clients skip the human check.
+  if (!signedInClient) {
+    const human = await verifyHuman(req.body?.captchaToken, req.ip);
+    if (!human.ok) return res.status(400).json({ error: human.error, code: "HUMAN_CHECK" });
+  }
+
   try {
+    await reserveAiRun(signedInClient ? "client" : "public");
     const { items, sourceMode } = await generateCompanyCalendar(profile);
     if (!items.length) {
       return res.status(502).json({ error: "No calendar items returned — try again or refine the profile." });
@@ -258,8 +277,10 @@ router.post("/generate", generateLimiter, async (req, res) => {
       items: applyRevealPolicy(items, profile),
     });
   } catch (err) {
+    if (err instanceof BudgetError) return res.status(429).json({ error: err.message, code: "DAILY_LIMIT" });
     console.error("Public generate error:", err);
-    return res.status(502).json({ error: `Research request failed: ${err.message}` });
+    // Never show internal/provider error text to website visitors.
+    return res.status(502).json({ error: "We couldn't finish the research just now. Please try again in a few minutes." });
   }
 });
 

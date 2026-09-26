@@ -303,6 +303,25 @@ test("a backup restores exactly: ids, dates, nested data, every collection", asy
   assert.strictEqual(dst._cols.calendars.length, 1);
 });
 
+test("the nightly backup is written to disk bit by bit and restores the same", async () => {
+  const fs = require("fs");
+  const many = Array.from({ length: 1200 }, (_, i) => ({ _id: new mongoose.Types.ObjectId(), n: i, at: new Date(Date.UTC(2026, 0, 1 + (i % 28))) }));
+  const src = fakeDb({ notifications: many, users: [{ _id: new mongoose.Types.ObjectId(), email: "a@b.com" }] });
+  const dump = await backup.dumpDatabaseToFile(src);
+  try {
+    assert.deepStrictEqual(dump.manifest.collections, { notifications: 1200, users: 1 });
+    assert.ok(dump.bytes > 0 && dump.bytes < dump.rawBytes, "compressed");
+    // Same file format as before: old restore code reads it unchanged.
+    const parsed = backup.parseBackup(fs.readFileSync(dump.filePath));
+    assert.strictEqual(parsed.collections.notifications.length, 1200);
+    assert.strictEqual(parsed.collections.notifications[1199].n, 1199);
+    assert.ok(parsed.collections.notifications[5].at instanceof Date);
+  } finally {
+    dump.cleanup();
+  }
+  assert.strictEqual(fs.existsSync(dump.filePath), false, "temporary files removed");
+});
+
 test("a damaged or foreign file is refused", () => {
   const zlib = require("zlib");
   assert.throws(() => backup.parseBackup(zlib.gzipSync('{"hello":1}\n')), /isn't a ComplyGlobally backup/);

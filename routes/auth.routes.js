@@ -42,10 +42,13 @@ const router = express.Router();
 // default, so the counters can be inspected or cleared deliberately —
 // by the test suite, and by anyone who has to unblock a colleague who
 // locked themselves out on the office IP.
+// Counters live in MongoDB (lib/rateLimitStore.js) so they survive deploys
+// and are shared by every server copy.
+const { mongoStore } = require("../lib/rateLimitStore");
 const rateLimitStores = {
-  login: new rateLimit.MemoryStore(),
-  otpRequest: new rateLimit.MemoryStore(),
-  otpVerify: new rateLimit.MemoryStore(),
+  login: mongoStore("login"),
+  otpRequest: mongoStore("otp-request"),
+  otpVerify: mongoStore("otp-verify"),
 };
 
 const loginLimiter = rateLimit({

@@ -17,7 +17,7 @@ const mongoose = require("mongoose");
 const Calendar = require("../models/Calendar");
 const ClientOrg = require("../models/ClientOrg");
 const { requireAuth, requireClientRole } = require("../middleware/auth");
-const { upload } = require("../middleware/upload");
+const { upload, acceptUploads } = require("../middleware/upload");
 const storage = require("../lib/storage");
 const { generateCompanyCalendar } = require("../lib/claude");
 const { toView, missingContactFields, normalizePhone, missingKeysFor } = require("../lib/calendarView");
@@ -26,6 +26,7 @@ const { notifyStaff, notifyClient } = require("../lib/notify");
 const { applyListPrice, removeListPrice, PRICE_LIST_ACTOR, formatUSD } = require("../lib/complianceFees");
 const { logActivity } = require("../lib/auditLog");
 const whatsapp = require("../lib/whatsapp");
+const { reserveAiRun, BudgetError } = require("../lib/abuseGuard");
 const { orgIcs, feedLinksFor } = require("./feeds.routes");
 const { sendIcs } = require("../lib/ics");
 
@@ -309,7 +310,7 @@ router.post("/calendars/:id/items/:index/select", requireCompleteContact, async 
 
 // POST /api/portal/calendars/:id/items/:index/upload — client uploads a
 // document as proof/support for one compliance item.
-router.post("/calendars/:id/items/:index/upload", requireCompleteContact, upload.single("file"), async (req, res) => {
+router.post("/calendars/:id/items/:index/upload", requireCompleteContact, acceptUploads(upload.single("file"), { maxFilesMessage: "Upload one file at a time." }), async (req, res) => {
   const calendar = await findOwnApprovedCalendar(req, req.params.id);
   if (!calendar) return res.status(404).json({ error: "Not found." });
   if (calendar.supersededAt) return res.status(400).json({ error: "This is an older calendar. Upload on your current one." });
@@ -319,7 +320,7 @@ router.post("/calendars/:id/items/:index/upload", requireCompleteContact, upload
 
   try {
     const { fileKey, fileUrl } = await storage.saveFile({
-      buffer: req.file.buffer,
+      filePath: req.file.path,
       fileName: req.file.originalname,
       contentType: req.file.mimetype,
     });
@@ -394,18 +395,10 @@ router.get("/calendars/:id/items/:index/documents/:docIndex/download", async (re
 // ---------------------------------------------------------------------
 
 // Research calls cost real money (Claude + web search), so a client can
-// regenerate a few times a day, not in a loop. Per org, in memory — the
-// same trade-off as the staff limiter in calendar.routes.js.
+// regenerate a few times a day, not in a loop. Per company, counted in
+// MongoDB (lib/rateLimitStore.js) so it holds across deploys and servers.
 const REGEN_LIMIT_PER_DAY = 3;
-const regenHits = new Map();
-function regenRateLimited(orgId) {
-  const now = Date.now();
-  const arr = (regenHits.get(orgId) || []).filter((t) => now - t < 24 * 60 * 60 * 1000);
-  if (arr.length >= REGEN_LIMIT_PER_DAY) return true;
-  arr.push(now);
-  regenHits.set(orgId, arr);
-  return false;
-}
+const regenRateLimited = (orgId) => require("../lib/rateLimitStore").overLimit("regenerate", orgId, REGEN_LIMIT_PER_DAY, 24 * 60 * 60 * 1000);
 
 const EDITABLE_PROFILE_FIELDS = [
   "companyName", "entityType", "taxStatus", "incorpDate", "fyStart", "fyEnd",
@@ -465,7 +458,7 @@ router.post("/calendars/regenerate", requireCompleteContact, async (req, res) =>
   const base = await findOwnApprovedCalendar(req, req.body?.calendarId);
   if (!base) return res.status(404).json({ error: "Calendar not found." });
   if (base.supersededAt) return res.status(400).json({ error: "Regenerate from your current calendar." });
-  if (regenRateLimited(String(req.user.clientOrgId))) {
+  if (await regenRateLimited(String(req.user.clientOrgId))) {
     return res.status(429).json({ error: `You can regenerate up to ${REGEN_LIMIT_PER_DAY} times a day. Try again tomorrow, or message us.` });
   }
 
@@ -479,6 +472,7 @@ router.post("/calendars/regenerate", requireCompleteContact, async (req, res) =>
   // calendar from the public tool, not a regeneration of this one.
 
   try {
+    await reserveAiRun("client");
     const { items, sourceMode } = await generateCompanyCalendar(profile);
     if (!items.length) {
       return res.status(502).json({ error: "The research came back empty. Try again in a few minutes." });
@@ -532,6 +526,7 @@ router.post("/calendars/regenerate", requireCompleteContact, async (req, res) =>
       actorName: who,
     });
   } catch (err) {
+    if (err instanceof BudgetError) return res.status(429).json({ error: err.message, code: "DAILY_LIMIT" });
     console.error("Client regenerate error:", err);
     res.status(502).json({ error: "We couldn't finish the research just now. Please try again in a few minutes." });
   }

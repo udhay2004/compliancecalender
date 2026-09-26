@@ -27,6 +27,7 @@
 //     a few days — so /verify captures it explicitly before marking Paid.
 
 const express = require("express");
+const { withKeyLock, retryOnConflict } = require("../lib/keyedLock");
 const crypto = require("crypto");
 const razorpay = require("../config/razorpay");
 const Calendar = require("../models/Calendar");
@@ -389,18 +390,27 @@ router.post("/calendars/:id/items/:index/verify", async (req, res) => {
       console.warn("[payments] could not fetch payment from Razorpay (relying on signature):", err.message);
     }
 
-    const outcome = applyCapturedPayment(item, {
-      orderId: razorpay_order_id, paymentId: razorpay_payment_id, amountCents, currency, source,
-    });
-    await calendar.save();
+    // Record it once, even if Razorpay's webhook arrives at the same moment
+    // (lib/keyedLock.js): re-read the calendar inside the lock.
+    const idx = found.idx;
+    const recorded = await withKeyLock(`payment:${razorpay_payment_id}`, () => retryOnConflict(async () => {
+      const fresh = (await findOwnApprovedCalendar(req, req.params.id)) || calendar;
+      const freshItem = fresh.items[idx];
+      const outcome = applyCapturedPayment(freshItem, {
+        orderId: razorpay_order_id, paymentId: razorpay_payment_id, amountCents, currency, source,
+      });
+      if (outcome !== "duplicate") await fresh.save();
+      return { calendar: fresh, item: freshItem, outcome };
+    }));
+    const { outcome } = recorded;
     if (outcome !== "duplicate") {
-      announcePayment(calendar, item, outcome).catch(() => {});
-      if (outcome === "paid") propagateToNewerCalendars(calendar, item).catch(() => {});
+      announcePayment(recorded.calendar, recorded.item, outcome).catch(() => {});
+      if (outcome === "paid") propagateToNewerCalendars(recorded.calendar, recorded.item).catch(() => {});
     }
     if (outcome === "mismatch") {
-      return res.status(409).json({ error: "We received your payment but it needs a quick check by our team. We'll be in touch — no need to pay again.", calendar: await toView(calendar) });
+      return res.status(409).json({ error: "We received your payment but it needs a quick check by our team. We'll be in touch — no need to pay again.", calendar: await toView(recorded.calendar) });
     }
-    res.json({ ok: true, calendar: await toView(calendar) });
+    res.json({ ok: true, calendar: await toView(recorded.calendar) });
   } catch (err) {
     console.error("[payments] verify error:", err);
     res.status(500).json({ error: "We couldn't confirm the payment yet. If you were charged, don't pay again — we'll confirm it shortly." });
@@ -529,15 +539,22 @@ async function razorpayWebhookHandler(req, res) {
       return res.status(200).json({ received: true });
     }
 
-    // payment.captured / order.paid
+    // payment.captured / order.paid — recorded once, even when the client's
+    // browser confirms the same payment at the same moment (lib/keyedLock.js).
     if (payment.status && payment.status !== "captured") return res.status(200).json({ received: true });
-    const outcome = applyCapturedPayment(item, {
-      orderId, paymentId: payment.id, amountCents: payment.amount, currency: payment.currency, source: "webhook_captured",
-    });
-    if (outcome !== "duplicate") {
-      await calendar.save();
-      await announcePayment(calendar, item, outcome).catch(() => {});
-      if (outcome === "paid") await propagateToNewerCalendars(calendar, item).catch(() => {});
+    const recorded = await withKeyLock(`payment:${payment.id}`, () => retryOnConflict(async () => {
+      const fresh = await findCalendarAndItemForOrder(orderId);
+      const cal = fresh.calendar || calendar;
+      const it = fresh.item || item;
+      const outcome = applyCapturedPayment(it, {
+        orderId, paymentId: payment.id, amountCents: payment.amount, currency: payment.currency, source: "webhook_captured",
+      });
+      if (outcome !== "duplicate") await cal.save();
+      return { calendar: cal, item: it, outcome };
+    }));
+    if (recorded.outcome !== "duplicate") {
+      await announcePayment(recorded.calendar, recorded.item, recorded.outcome).catch(() => {});
+      if (recorded.outcome === "paid") await propagateToNewerCalendars(recorded.calendar, recorded.item).catch(() => {});
     }
     res.status(200).json({ received: true });
   } catch (err) {

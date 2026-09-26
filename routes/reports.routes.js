@@ -67,7 +67,12 @@ router.get("/summary", async (req, res) => {
     canSeeFinance: canSeeFinance(req.user),
     generatedAt: new Date(),
   };
-  if (payload.canSeeFinance) payload.revenue = R.revenue(await invoiceDocs(), period);
+  if (payload.canSeeFinance) {
+    // Only what the page can show: the period, and the 12-month chart.
+    const chartStart = new Date(Date.UTC(period.to.getUTCFullYear(), period.to.getUTCMonth() - 12, 1));
+    const since = period.from < chartStart ? period.from : chartStart;
+    payload.revenue = R.revenue(await invoiceDocs({ issuedAt: { $gte: since, $lt: period.to } }), period);
+  }
   res.json(payload);
 });
 

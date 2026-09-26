@@ -1,143 +1,156 @@
-# Compliance Calendar Generator
+# ComplyGlobally — Compliance Calendar Platform
 
-Internal tool: fill in a company's profile (state, entity type, incorporation
-date, etc.) and get back an AI-researched US compliance calendar — the same
-fields and layout as the team's existing Excel/PDF template, generated live
-from official government sources instead of maintained by hand.
+Companies (mainly US entities, with some other countries) get an
+AI-researched compliance calendar: every filing they owe, with real due
+dates. They can then ask ComplyGlobally to handle any filing. They upload
+documents, pay online, and get proof when it's done. The ComplyGlobally team
+works from a staff workspace with a review queue, a pipeline, reports,
+invoices and refunds.
 
-**Status:** Q&A / calendar-generation layer only. There is no database yet —
-nothing is saved between sessions, and there's no admin review queue. That's
-a deliberate, separate next step (see "What's not here yet" below).
-
----
-
-## What actually happens when someone clicks "Generate Calendar"
-
-1. The browser sends the form fields (state, entity type, tax status, dates,
-   foreign-ownership flag) to **your own server**, at `POST /api/generate`.
-2. The server — not the browser — builds a research prompt and calls the
-   Anthropic API with the `web_search` tool turned on.
-3. Claude searches official sources (irs.gov, the relevant Secretary of
-   State, Department of Revenue/Franchise Tax authority, etc.), and returns
-   structured JSON: one entry per compliance item, with a due date,
-   description, source URL, and a confidence rating (high/medium/low).
-4. The server hands that JSON straight back to the browser, which renders it
-   as the grouped calendar table you already saw.
-5. Nothing is written to disk. Refreshing the page clears the session.
-
-The reason step 2 has to happen on a server and not in the browser: calling
-Anthropic's API requires a secret API key. If that key lived in the
-JavaScript file, anyone who opened the page's source code could copy it and
-run up charges on your account. Keeping it in an environment variable on the
-server, never in a file that ships to the browser, is what makes this safe
-to actually deploy.
+Node.js 22 · Express 4 · MongoDB (Mongoose 8) · Cloudflare R2 · Razorpay ·
+Anthropic Claude · deployed on Railway.
 
 ---
 
-## Run it on your own computer first
+## What it does
 
-You need [Node.js](https://nodejs.org) installed (version 18 or newer —
-running `node -v` in a terminal tells you what you have).
+**Public website** (`/`)
+- Free calendar generator. The visitor enters their company details and
+  Claude researches official sources. Some items are shown for free; the
+  full calendar comes after sign-up.
+- Protected by a "verify you are human" check (Cloudflare Turnstile,
+  optional) and a daily AI budget.
+- Company and policy pages: `/about`, `/pricing`, `/terms`, `/privacy`,
+  `/refund-policy`, `/shipping-policy`, `/contact`.
+
+**Client portal** (`/portal.html`)
+- The calendar with real due dates. Clients choose the services they want
+  handled, see prices, upload documents (checked by content, stored in R2)
+  and pay by card through Razorpay.
+- Invoices and credit notes (PDF), a chat with the team and a notification bell.
+- Deadlines can be added to Google, Outlook or Apple Calendar (a
+  subscription link that stays up to date).
+- Optional WhatsApp reminders (the client opts in).
+
+**Staff workspace**
+- `/dashboard.html`: deadlines, documents waiting to be checked, clients
+  waiting on documents, finance to-do lists, the team and the security log.
+- `/pipeline.html`: every service a client chose, in the step it's at now,
+  with an owner for each.
+- `/reports.html`: on-time rate, turnaround, workload, services, money
+  collected, and CSV exports.
+- `/review.html` and `/calendar.html`: review and approve AI calendars;
+  per client, check documents, send prices, upload proof of completion,
+  refund, and chase documents.
+- `/admin.html`: accounts, client companies, and health checks for
+  storage, payments, WhatsApp, legal pages and backups.
+- Staff sign in with a password or an email code, plus required two-factor login.
+
+**Automatic work (daily, 08:00 UTC by default)**
+- Reminders before each deadline (30, 7 and 1 days) and when a filing is
+  overdue.
+- Document chasing: 2, 5 and 10 days after a service is chosen, then weekly.
+- Payment reminders.
+- A team digest.
+- Next year's filings are created automatically.
+- A nightly database backup to R2 (02:30 UTC), with retention.
+
+---
+
+## Run it locally
 
 ```bash
-# 1. Install the three packages this needs (express, the Anthropic SDK, dotenv)
 npm install
-
-# 2. Copy the env template and add your real API key
-cp .env.example .env
-# then open .env in any text editor and paste your key in place of the xxxx's
-# get a key at https://console.anthropic.com/settings/keys
-
-# 3. Start the server
-npm start
+cp .env.example .env      # fill in at least ANTHROPIC_API_KEY, MONGODB_URI, JWT_SECRET
+node scripts/createUser.js --email you@example.com --password "a long password" --role super_admin --name "Your Name"
+npm run dev               # http://localhost:3000
+npm test                  # all tests; no database or internet needed
 ```
 
-You'll see:
-```
-Compliance Calendar Generator running at http://localhost:3000
-```
-Open that URL in a browser. That's the whole app.
+Without R2 settings, files are stored in `./uploads` (development only).
+Without an email provider, emails are printed in the log. Without Razorpay
+keys, payments are disabled.
 
----
+## Deploy (Railway)
 
-## Putting it on GitHub
+- `railway.json` sets the start command, the health check (`/healthz`, which
+  checks the database) and a 30-second graceful shutdown on deploys.
+- Put every setting from `.env.example` in Railway → Variables. At minimum:
+  `ANTHROPIC_API_KEY`, `MONGODB_URI`, `JWT_SECRET`, `APP_URL`,
+  `NODE_ENV=production`, the `R2_*` settings, an email provider (`RESEND_API_KEY`
+  or `SMTP_*`) with `MAIL_FROM`, the `RAZORPAY_*` settings and `TOTP_ENCRYPTION_KEY`.
+- Strongly recommended: `SENTRY_DSN` (error alerts) and the
+  `TURNSTILE_*` keys (human check).
+- On start-up the server logs a warning for each important setting that is missing.
+- MongoDB: use a paid Atlas tier (M10 or higher) in production.
+- Webhooks:
+  - Razorpay → `<APP_URL>/api/webhooks/razorpay`, with the events listed in `.env.example`.
+  - WhatsApp → `<APP_URL>/api/webhooks/whatsapp`.
 
-```bash
-git init
-git add .
-git commit -m "Initial commit: compliance calendar generator"
-git branch -M main
-git remote add origin https://github.com/<your-username>/<repo-name>.git
-git push -u origin main
-```
+### Running more than one copy
 
-`.gitignore` is already set up to keep `node_modules/` and your `.env` file
-(the one with your real API key) out of the repo. **Never commit `.env`.**
-If you ever do by accident, treat that key as compromised — revoke it in the
-Anthropic console and issue a new one.
+This is safe. Scheduled jobs run on one copy only, once per period
+(`lib/jobLock.js`, stored in MongoDB). Rate-limit counters are shared through
+MongoDB (`lib/rateLimitStore.js`). Payments are recorded exactly once
+(`lib/keyedLock.js`). The dashboard, pipeline and reports cache their data
+for 30 seconds per copy (`lib/workData.js`).
 
----
+## Operations
 
-## Letting your coworkers actually use it (deployment)
+| Task | How |
+|---|---|
+| Is it up? | `GET /healthz` returns 200 when the app and the database are fine, 503 otherwise |
+| Errors | Sentry emails you (with `SENTRY_DSN`); everything is also in Railway's logs |
+| Backups | Admin → Backups (list, run now, download). Restore: `node scripts/restoreBackup.js` (read its header first) |
+| Storage problems | Admin → Check storage (also finds uploaded files that have gone missing) |
+| Payment problems | Admin → Check payments |
+| WhatsApp setup | Admin → Check WhatsApp (shows the template text to submit to Meta) |
+| Someone locked out | A super admin can reset their password or two-factor from the dashboard or Admin |
+| AI budget reached | The team gets a notification. Raise `AI_DAILY_LIMIT_PUBLIC` / `AI_DAILY_LIMIT_TOTAL` if it's real demand |
 
-Running it on your own laptop only works while your laptop is on and the
-terminal is open. For a few people at the company to reach it anytime, you
-need to run it somewhere always-on. Cheapest/simplest options, roughly
-easiest first:
+Data kept automatically: bell notifications for 180 days
+(`NOTIFICATION_RETENTION_DAYS`), rate-limit counters until their window
+ends, and job locks for 14 days. Chat, invoices, calendars and the audit log
+are kept permanently.
 
-- **[Render](https://render.com)** or **[Railway](https://railway.app)** —
-  connect your GitHub repo, they auto-detect it's a Node app (because of
-  `package.json`), you paste your `ANTHROPIC_API_KEY` into their dashboard's
-  environment variables, and it gives you a URL. Free tiers exist; good
-  enough for "a few people."
-- **A small company VM** (AWS/Azure/GCP/DigitalOcean) if your company
-  already has one — `git clone`, `npm install`, `npm start` (ideally kept
-  alive with a process manager like `pm2`), put it behind your existing
-  reverse proxy/HTTPS.
+If you change `NOTIFICATION_RETENTION_DAYS` after the first deploy, drop the
+`createdAt_1` index on the `notifications` collection once (Atlas → Indexes)
+so the new value can apply.
 
-Whichever you pick, the only thing that changes is *where* `ANTHROPIC_API_KEY`
-gets set — it's always an environment variable on the server, never in code.
-
----
-
-## Access control
-
-Right now, anyone who has the URL can use it — there's no login. That's fine
-if it's only reachable inside your company network or shared privately with
-a few people. If it'll be reachable from the open internet, add basic
-protection before wide distribution: a shared password gate, your company
-SSO, or restricting it to your office/VPN IP range at the hosting level.
-Ask if you want this added — it's a small change to `server.js`.
-
-There's also a basic rate limit (20 requests/hour per visitor) baked into
-`server.js` so one person (or a bug) can't accidentally burn through your
-Anthropic budget. Adjust `RATE_LIMIT` there if needed.
-
----
-
-## What's not here yet (by design, for now)
-
-- **No database.** Every generated calendar disappears on refresh. Nothing
-  is reviewed or approved by a human before being shown.
-- **No admin review queue, rule versioning, or "50 states pre-loaded"
-  rule engine.** Every calendar is generated fresh, live, per click.
-- **No saved company profiles.** You retype the form each time.
-
-These map to Layers 2–4 of the fuller system we scoped earlier (research
-database, human approval workflow, deterministic rule engine). Natural next
-step whenever you're ready for it.
-
----
-
-## File map
+## Code map
 
 ```
-compliance-calendar-webapp/
-├── package.json       # dependencies + npm start/dev scripts
-├── server.js           # the only file that touches your API key
-├── .env.example         # template — copy to .env, never commit .env
-├── .gitignore
-├── public/
-│   └── index.html        # the whole frontend (form + results), no secrets in it
-└── README.md            # this file
+server.js                 wiring: security headers, compression, routes, schedules, shutdown
+config/db.js              MongoDB connection (pool, timeouts)
+middleware/auth.js        sessions (JWT cookies), roles, two-factor
+middleware/upload.js      uploads: temp file on disk, type checked by content, cleaned up
+routes/                   one file per area (public, auth, portal, payments, calendars,
+                          dashboard, pipeline, reports, invoices, admin, messages,
+                          notifications, feeds, whatsapp, legal)
+lib/claude.js             AI research (cache first, live search when needed)
+lib/deadlines.js          due-date engine (business days, US holidays, next periods)
+lib/reminders.js          the daily run: reminders, document chasing, digests
+lib/calendarView.js       what a filing looks like to clients and staff (checklist, price)
+lib/pipeline.js / reports.js   pipeline stages, report numbers
+lib/invoices.js / refunds.js   GST-compliant invoices, credit notes, Razorpay refunds
+lib/storage.js            R2 / S3 (streamed), or local disk in development
+lib/backup.js             nightly backups (streamed, gzip, EJSON)
+lib/notify.js / mailer.js / whatsapp.js   bell + email + WhatsApp
+lib/abuseGuard.js         human check + daily AI budget
+lib/jobLock.js / keyedLock.js / rateLimitStore.js   safe with several server copies
+lib/workData.js           shared cached read of all client work
+lib/lifecycle.js          graceful shutdown
+lib/monitoring.js         Sentry error alerts
+models/                   Mongoose schemas
+public/                   the web pages (plain HTML/CSS/JS, no build step)
+scripts/                  create the first user, restore a backup, seed research caches
+tests/                    node:test suites (run on every pull request by GitHub Actions)
 ```
+
+## Tests
+
+`npm test` runs every suite in `tests/` with in-memory stand-ins for the
+database, storage, email and Razorpay. The real route and business code
+runs unchanged. GitHub Actions (`.github/workflows/test.yml`) runs the
+suites on every pull request and on every push to main, and also checks
+dependencies for known security problems.

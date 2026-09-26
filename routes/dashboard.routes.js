@@ -39,6 +39,7 @@ router.use(requireAuth, requireRole("staff"));
 // here. Superseded calendars are excluded so a regenerated calendar isn't
 // counted twice.
 const { REAL_WORK_MATCH, toView } = require("../lib/calendarView");
+const { loadClientWork } = require("../lib/workData");
 const { getPriceList } = require("../lib/complianceFees");
 const REAL_WORK = { ...REAL_WORK_MATCH, supersededAt: null };
 const { CHASEABLE, missingDocuments } = require("../lib/reminders");
@@ -107,13 +108,11 @@ async function buildTechSection() {
 
   // Per client: what they picked and what's waiting on us. Sorted so the
   // clients who need something from the team come first.
-  const clientCalendars = await Calendar.find({ status: "approved", clientOrgId: { $ne: null }, supersededAt: null })
-    .sort({ updatedAt: -1 })
-    .limit(60);
-  const orgNames = Object.fromEntries(
-    (await ClientOrg.find({ _id: { $in: clientCalendars.map((c) => c.clientOrgId) } }).select("name primaryContactPhone whatsappOptIn").lean())
-      .map((o) => [String(o._id), o])
-  );
+  // ALL current client calendars (this used to stop at the 60 most recently
+  // updated, so older clients' deadlines silently vanished from here).
+  const work = await loadClientWork();
+  const clientCalendars = work.calendars.map((w) => w.calendar);
+  const orgNames = Object.fromEntries(work.orgs);
   // Deadlines across all clients: selected filings not done yet, overdue
   // first, then the next 30 days; plus filings with no date to set.
   const deadlines = [];
@@ -134,7 +133,7 @@ async function buildTechSection() {
   });
   deadlines.sort((a, b) => a.days - b.days);
 
-  const views = new Map(clientCalendars.map((c) => [String(c._id), toView(c, { staff: true })]));
+  const views = new Map(work.calendars.map((w) => [String(w.calendar._id), w.view]));
 
   // Waiting on the client for documents: what's missing and how many
   // automatic reminders have gone out, so staff know when to phone.
@@ -280,12 +279,13 @@ async function buildFinanceSection() {
   // Services clients chose that have no price yet: the finance to-do list.
   // Sorted so the ones with every document already uploaded come first,
   // because those clients are waiting on us.
-  const clientCals = await Calendar.find({ status: "approved", clientOrgId: { $ne: null }, supersededAt: null })
-    .sort({ updatedAt: -1 })
-    .limit(150);
+  // All current client calendars (this used to stop at 150).
+  const work = await loadClientWork();
+  const clientCals = work.calendars.map((w) => w.calendar);
+  const viewOf = new Map(work.calendars.map((w) => [String(w.calendar._id), w.view]));
   const needsPrice = [];
   clientCals.forEach((c) => {
-    const v = toView(c, { staff: true });
+    const v = viewOf.get(String(c._id));
     v.items.forEach((it) => {
       if (it.isHistory || !it.selectedByClient || it.feeAmountCents || it.paymentStatus !== "Not Invoiced") return;
       if (it.price?.kind === "included") return;
