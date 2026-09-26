@@ -328,6 +328,16 @@ const calendarSchema = new mongoose.Schema(
 );
 
 calendarSchema.index({ createdBy: 1, createdAt: -1 });
+// "Current client calendars" — the lookup behind the dashboard, pipeline,
+// reports, reminders and the client portal.
+calendarSchema.index({ status: 1, clientOrgId: 1, supersededAt: 1 });
+// Razorpay webhooks find the filing by order / payment id.
+calendarSchema.index({ "items.razorpayOrderId": 1 }, { sparse: true });
+calendarSchema.index({ "items.paymentEvents.razorpayOrderId": 1 }, { sparse: true });
+calendarSchema.index({ "items.razorpayPaymentId": 1 }, { sparse: true });
+calendarSchema.index({ supersedes: 1 }, { sparse: true });
+calendarSchema.index({ status: 1, reviewedAt: -1 });
+calendarSchema.index({ status: 1, createdAt: 1 });
 
 // Every save computes real due dates for filings that don't have one yet
 // (or whose due-date text changed). Covers every way a calendar is created:
@@ -340,5 +350,15 @@ calendarSchema.pre("save", function computeDueDates(next) {
   }
   next();
 });
+
+// Any change to a calendar refreshes the shared cached view of client work
+// (lib/workData.js) on this server.
+function refreshWorkCache() {
+  try { require("../lib/workData").invalidate(); } catch (_) { /* never block a save */ }
+}
+calendarSchema.post("save", refreshWorkCache);
+calendarSchema.post("findOneAndUpdate", refreshWorkCache);
+calendarSchema.post("updateOne", refreshWorkCache);
+calendarSchema.post("updateMany", refreshWorkCache);
 
 module.exports = mongoose.model("Calendar", calendarSchema);

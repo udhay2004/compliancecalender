@@ -58,6 +58,12 @@ const notificationSchema = new mongoose.Schema(
 );
 
 notificationSchema.index({ audience: 1, clientOrgId: 1, createdAt: -1 });
+// Bell notifications are short-lived: MongoDB deletes them automatically
+// after NOTIFICATION_RETENTION_DAYS (default 180), so the table and every
+// "unread count" check stay fast. Chat messages, invoices and the audit log
+// are kept; they don't live here.
+const RETENTION_DAYS = Math.max(7, parseInt(process.env.NOTIFICATION_RETENTION_DAYS || "180", 10) || 180);
+notificationSchema.index({ createdAt: 1 }, { expireAfterSeconds: RETENTION_DAYS * 86400 });
 
 notificationSchema.statics.TYPES = TYPES;
 

@@ -14,7 +14,7 @@ const ClientOrg = require("../models/ClientOrg");
 const User = require("../models/User");
 const Notification = require("../models/Notification");
 const { requireAuth, requireRole } = require("../middleware/auth");
-const { toView } = require("../lib/calendarView");
+const { loadClientWork } = require("../lib/workData");
 const { logActivity } = require("../lib/auditLog");
 const { sendEmail } = require("../lib/mailer");
 const P = require("../lib/pipeline");
@@ -38,12 +38,10 @@ async function teamMembers({ includeInactive = false } = {}) {
  * the team — everything the pipeline and the reports are built from.
  */
 async function loadWork() {
-  const calendars = await Calendar.find({ status: "approved", clientOrgId: { $ne: null }, supersededAt: null });
-  const orgList = await ClientOrg.find({ _id: { $in: calendars.map((c) => c.clientOrgId) } }).select("name assignedStaff createdAt").lean();
-  const team = await teamMembers({ includeInactive: true });
+  const [work, team] = await Promise.all([loadClientWork(), teamMembers({ includeInactive: true })]);
   return {
-    calendars: calendars.map((calendar) => ({ calendar, view: toView(calendar, { staff: true }) })),
-    orgs: new Map(orgList.map((o) => [String(o._id), o])),
+    calendars: work.calendars,
+    orgs: work.orgs,
     team,
     users: new Map(team.map((u) => [u.id, u])),
   };

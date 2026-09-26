@@ -7,7 +7,7 @@ const Message = require("../models/Message");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { generateCompanyCalendar } = require("../lib/claude");
 const { calendarToPdfBuffer } = require("../lib/pdf");
-const { upload, MAX_FILE_SIZE_MB } = require("../middleware/upload");
+const { upload, acceptUploads } = require("../middleware/upload");
 const storage = require("../lib/storage");
 const { getSuggestedFee, formatUSD } = require("../lib/complianceFees");
 const { logActivity } = require("../lib/auditLog");
@@ -32,22 +32,15 @@ router.use(requireAuth, requireRole("staff"));
 // Extremely basic in-memory rate limit, kept from the original app —
 // still useful even with auth, so one account can't accidentally burn
 // through the whole team's Anthropic budget.
+// Counted in MongoDB (lib/rateLimitStore.js), shared by every server copy.
 const RATE_LIMIT = 20;
-const hits = new Map(); // userId -> [timestamps]
-function isRateLimited(userId) {
-  const now = Date.now();
-  const windowMs = 60 * 60 * 1000;
-  const arr = (hits.get(userId) || []).filter((t) => now - t < windowMs);
-  arr.push(now);
-  hits.set(userId, arr);
-  return arr.length > RATE_LIMIT;
-}
+const isRateLimited = (userId) => require("../lib/rateLimitStore").overLimit("staff-generate", userId, RATE_LIMIT, 60 * 60 * 1000);
 
 // POST /api/calendars/generate
 // Creates a new calendar in "pending_review" — it is NOT the source of
 // truth until a reviewer approves it.
 router.post("/generate", async (req, res) => {
-  if (isRateLimited(req.user.email)) {
+  if (await isRateLimited(req.user.email)) {
     return res.status(429).json({ error: "Rate limit reached. Try again later." });
   }
 
@@ -61,6 +54,7 @@ router.post("/generate", async (req, res) => {
   const clientOrgId = req.body?.clientOrgId || null;
 
   try {
+    await require("../lib/abuseGuard").reserveAiRun("staff"); // counted, never blocked
     const { items, sourceMode } = await generateCompanyCalendar(profile);
     if (!items.length) {
       return res.status(502).json({ error: "No calendar items returned — try again or refine the profile." });
@@ -83,9 +77,17 @@ router.post("/generate", async (req, res) => {
 });
 
 // GET /api/calendars/mine — calendars the current user created
+// Lists send only what the list shows (not every filing and document), and
+// at most LIST_LIMIT rows, so they stay fast however many calendars exist.
+const LIST_FIELDS = "profile status source sourceMode clientOrgId createdAt createdBy reviewedAt reviewedBy supersededAt";
+const LIST_LIMIT = 300;
+
 router.get("/mine", async (req, res) => {
   const calendars = await Calendar.find({ createdBy: req.user.email })
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .select(LIST_FIELDS)
+    .limit(LIST_LIMIT)
+    .lean();
   res.json({ calendars });
 });
 
@@ -97,14 +99,20 @@ router.get("/mine", async (req, res) => {
 // See GET /api/admin/leads for where those actually belong.
 router.get("/queue", async (req, res) => {
   const calendars = await Calendar.find({ status: "pending_review", ...REAL_WORK_MATCH })
-    .sort({ createdAt: 1 });
+    .sort({ createdAt: 1 })
+    .select(LIST_FIELDS)
+    .limit(LIST_LIMIT)
+    .lean();
   res.json({ calendars });
 });
 
 // GET /api/calendars/approved — the trusted, approved library
 router.get("/approved", async (req, res) => {
   const calendars = await Calendar.find({ status: "approved" })
-    .sort({ reviewedAt: -1 });
+    .sort({ reviewedAt: -1 })
+    .select(LIST_FIELDS)
+    .limit(LIST_LIMIT)
+    .lean();
   res.json({ calendars });
 });
 
@@ -113,19 +121,17 @@ router.get("/approved", async (req, res) => {
 // the client selected, documents waiting to be verified, items ready for
 // a quote, invoices unpaid. This is the "which client needs me" list.
 router.get("/client-work", async (req, res) => {
-  const calendars = await Calendar.find({
-    status: "approved",
-    clientOrgId: { $ne: null },
-    supersededAt: null,
-  })
-    .sort({ updatedAt: -1 })
-    .limit(200);
+  // Every current client (shared cached read, lib/workData.js). This used to
+  // stop at 200 and returned no numbers (the view was never awaited).
+  const work = await require("../lib/workData").loadClientWork();
+  const calendars = work.calendars.map((w) => w.calendar);
+  const views = new Map(work.calendars.map((w) => [String(w.calendar._id), w.view]));
   const orgIds = [...new Set(calendars.map((c) => String(c.clientOrgId)))];
   const orgs = await ClientOrg.find({ _id: { $in: orgIds } }).select("name primaryContactEmail primaryContactPhone").lean();
   const orgById = Object.fromEntries(orgs.map((o) => [String(o._id), o]));
   res.json({
     clients: calendars.map((c) => {
-      const v = staffView(c);
+      const v = views.get(String(c._id));
       const org = orgById[String(c.clientOrgId)] || {};
       return {
         calendarId: String(c._id),
@@ -445,16 +451,7 @@ router.post("/:id/items/:index/quote", async (req, res) => {
 // Marking done sets the status to Filed, records who did it, and tells the
 // client (bell + email) with the reference and note.
 const proofUpload = upload.fields([{ name: "files", maxCount: 10 }, { name: "file", maxCount: 1 }]);
-router.post("/:id/items/:index/certificate", (req, res, next) => {
-  proofUpload(req, res, (err) => {
-    if (!err) return next();
-    const msg = err.code === "LIMIT_FILE_SIZE" ? `Each file must be under ${MAX_FILE_SIZE_MB} MB.`
-      : err.code === "LIMIT_UNEXPECTED_FILE" || err.code === "LIMIT_FILE_COUNT" ? "You can upload up to 10 files at once."
-      : /not allowed/.test(err.message) ? "Upload a PDF, image (PNG/JPG/WEBP), Word or Excel file."
-      : "The upload failed. Please try again.";
-    res.status(400).json({ error: msg });
-  });
-}, async (req, res) => {
+router.post("/:id/items/:index/certificate", acceptUploads(proofUpload), async (req, res) => {
   const calendar = await Calendar.findById(req.params.id);
   if (!calendar) return res.status(404).json({ error: "Not found." });
   const idx = parseInt(req.params.index, 10);
@@ -481,7 +478,7 @@ router.post("/:id/items/:index/certificate", (req, res, next) => {
   try {
     const saved = [];
     for (const f of files) {
-      const { fileKey, fileUrl } = await storage.saveFile({ buffer: f.buffer, fileName: f.originalname, contentType: f.mimetype });
+      const { fileKey, fileUrl } = await storage.saveFile({ filePath: f.path, fileName: f.originalname, contentType: f.mimetype });
       saved.push({
         fileKey,
         fileUrl,

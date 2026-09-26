@@ -20,7 +20,13 @@ async function connectDB() {
   mongoose.set("strictQuery", true);
 
   try {
-    await mongoose.connect(uri);
+    await mongoose.connect(uri, {
+      // Enough parallel database connections for busy periods, and a clear
+      // failure (instead of hanging) if the database can't be reached.
+      maxPoolSize: parseInt(process.env.MONGODB_POOL_SIZE || "20", 10),
+      serverSelectionTimeoutMS: 15000,
+      socketTimeoutMS: 60000,
+    });
     console.log(`[db] Connected to MongoDB (${mongoose.connection.name})`);
   } catch (err) {
     console.error("[db] Failed to connect to MongoDB:", err.message);

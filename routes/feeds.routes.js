@@ -20,7 +20,7 @@ const ics = require("../lib/ics");
 const router = express.Router();
 
 // Calendar apps poll every few hours; this only stops someone guessing.
-const feedLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 60, standardHeaders: "draft-7", legacyHeaders: false });
+const feedLimiter = rateLimit({ store: require("../lib/rateLimitStore").mongoStore("calendar-feed"), windowMs: 15 * 60 * 1000, limit: 60, standardHeaders: "draft-7", legacyHeaders: false });
 
 const KEEP_PAST_DAYS = 400; // older events drop out of the feed
 
@@ -45,9 +45,9 @@ async function orgIcs(org, { calendarId = null } = {}) {
 
 /** .ics text for the team: every filing a client asked us to handle. */
 async function teamIcs() {
-  const calendars = await Calendar.find({ status: "approved", clientOrgId: { $ne: null }, supersededAt: null });
-  const orgs = await ClientOrg.find({ _id: { $in: calendars.map((c) => c.clientOrgId) } }).select("name").lean();
-  const names = Object.fromEntries(orgs.map((o) => [String(o._id), o.name]));
+  const work = await require("../lib/workData").loadClientWork();
+  const calendars = work.calendars.map((w) => w.calendar);
+  const names = Object.fromEntries([...work.orgs].map(([id, o]) => [id, o.name]));
   const events = [];
   calendars.forEach((c) => events.push(...ics.calendarEvents(c, { audience: "staff", company: names[String(c.clientOrgId)] || c.profile?.companyName || "" })));
   return ics.buildIcs({
