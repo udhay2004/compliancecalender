@@ -121,7 +121,7 @@ app.use(cookieParser());
 // UI whose every API call then 403s, which is a worse experience than
 // just redirecting them away at the page level.
 // ---------------------------------------------------------------------
-const STAFF_PAGES = ["/app.html", "/review.html", "/calendar.html"];
+const STAFF_PAGES = ["/app.html", "/review.html", "/calendar.html", "/pipeline.html", "/reports.html"];
 STAFF_PAGES.forEach((route) => {
   app.get(route, requirePageAuth, requirePageRole("staff"), (req, res) => {
     res.sendFile(path.join(__dirname, "public", route));
@@ -186,6 +186,8 @@ app.use("/api/messages", messagesRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/notifications", notificationsRoutes);
 app.use("/api/invoices", invoicesRoutes);
+app.use("/api/pipeline", require("./routes/pipeline.routes"));
+app.use("/api/reports", require("./routes/reports.routes"));
 
 app.get("/healthz", (req, res) => res.json({ ok: true }));
 

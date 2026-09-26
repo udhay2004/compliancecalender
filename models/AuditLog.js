@@ -52,6 +52,7 @@ const auditLogSchema = new mongoose.Schema(
         "whatsapp_opt_out",
         "documents_chased",
         "document_chasing_paused",
+        "filing_assigned",
       ],
       required: true,
     },

@@ -215,6 +215,11 @@ const itemSchema = new mongoose.Schema(
     // Staff can pause them for one filing (e.g. the client said they'll
     // send the papers next week).
     docChasePaused: { type: Boolean, default: false },
+    // Staff pipeline (lib/pipeline.js): who on the team owns this filing.
+    // Null = falls back to the staff member assigned to the client company.
+    assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+    assignedToName: { type: String, default: "" },
+    assignedAt: { type: Date, default: null },
   },
   { _id: false }
 );

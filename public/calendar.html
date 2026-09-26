@@ -97,6 +97,9 @@
 <div class="topbar">
   <div class="brand"><a href="/app.html">Compliance Calendar <strong>Generator</strong></a></div>
   <div class="nav-links" id="navLinks">
+    <a href="/dashboard.html">Dashboard</a>
+    <a href="/pipeline.html">Pipeline</a>
+    <a href="/reports.html">Reports</a>
     <a href="/app.html">Generate</a>
     <a href="/review.html">Review Queue</a>
   </div>
@@ -422,6 +425,9 @@
       const org = data.clientOrg;
       if (!org) { el.innerHTML = ''; return; }
       const waInfo = data.whatsapp || {};
+      const prevOwner = clientOwnerName;
+      clientOwnerName = org.assignedStaff ? (org.assignedStaff.name || org.assignedStaff.email) : '';
+      if (prevOwner !== clientOwnerName && document.getElementById('clientItemsList')) renderClientItems();
       const phone = org.primaryContactPhone || '';
       const dial = phone.replace(/[^\d+]/g, '');
       const wa = phone.replace(/\D/g, '');
@@ -667,6 +673,7 @@
             <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center;">
               ${priceTag(item)}
               ${pendingCount ? `<span class="status-pill-cw" style="background:var(--seal-gold-bg);color:var(--seal-gold);">${pendingCount} to verify</span>` : ''}
+              ${item.assignedToName ? `<span class="status-pill-cw" title="Owner">${escapeHtml(item.assignedToName)}</span>` : ''}
               <span class="status-pill-cw">${item.selectedByClient ? escapeHtml(item.clientStatus) : 'Not selected'}</span>
               ${item.paymentStatus !== 'Not Invoiced' ? `<span class="status-pill-cw">${escapeHtml(item.paymentStatus)}</span>` : ''}
             </div>
@@ -710,6 +717,7 @@
             </div>
             ${quoteHtml(item, idx)}
             ${proofHtml(item, idx, certs, dl)}
+            ${item.selectedByClient && !item.isHistory ? ownerHtml(item, idx) : ''}
             <div class="edit-grid" style="margin-top:14px;">
               <div class="field">
                 <label>Filing status</label>
@@ -742,10 +750,25 @@
 
   let jumpedToHash = false;
   let billingLoaded = false;
+  // Team members for the "Owner" picker (routes/pipeline.routes.js).
+  let team = null;
+  async function loadTeam() {
+    try { const r = await fetch('/api/pipeline/team'); team = r.ok ? (await r.json()).team : []; } catch { team = []; }
+  }
+  function ownerHtml(item, idx) {
+    const opts = (team || []).map(u => `<option value="${escapeHtml(u.id)}" ${String(item.assignedTo || '') === u.id ? 'selected' : ''}>${escapeHtml(u.name || u.email)}</option>`).join('');
+    return `
+      <div class="field" style="margin-top:14px;max-width:360px;">
+        <label for="own-${idx}">Owner <span style="font-weight:400;color:var(--ink-soft);">(who on the team does this)</span></label>
+        <select id="own-${idx}" data-assign-idx="${idx}"><option value="">Unassigned${clientOwnerName ? ` (client owner: ${escapeHtml(clientOwnerName)})` : ''}</option>${opts}</select>
+        <span class="hint" data-assign-hint="${idx}" style="display:block;margin-top:4px;"></span>
+      </div>`;
+  }
+  let clientOwnerName = '';
   async function renderClientItems() {
     const el = document.getElementById('clientItemsList');
     if (!el) return;
-    if (!billingLoaded) { billingLoaded = true; await loadBilling(); }
+    if (!billingLoaded) { billingLoaded = true; await Promise.all([loadBilling(), loadTeam()]); }
     // Links like /calendar.html?id=…#item-3 (from the finance screen) open
     // that service's card and scroll to it, once.
     const hashIdx = !jumpedToHash && /^#item-(\d+)$/.test(location.hash) ? +location.hash.slice(6) : null;
@@ -801,6 +824,21 @@
         } catch (err) { hint.textContent = err.message; hint.classList.add('err'); }
       });
     });
+
+    el.querySelectorAll('[data-assign-idx]').forEach(sel => sel.addEventListener('change', async () => {
+      const idx = +sel.dataset.assignIdx;
+      const hint = el.querySelector(`[data-assign-hint="${idx}"]`);
+      sel.disabled = true; hint.textContent = 'Saving…'; hint.classList.remove('err');
+      try {
+        const res = await fetch(`/api/pipeline/${id}/items/${idx}/assign`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: sel.value || null }) });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Could not save.');
+        calendar.items[idx].assignedTo = data.assignedTo ? data.assignedTo.id : null;
+        calendar.items[idx].assignedToName = data.assignedTo ? data.assignedTo.name : '';
+        hint.textContent = data.assignedTo ? `Assigned to ${data.assignedTo.name}. They've been notified.` : 'Unassigned.';
+      } catch (err) { hint.textContent = err.message; hint.classList.add('err'); }
+      finally { sel.disabled = false; }
+    }));
 
     el.querySelectorAll('[data-chase]').forEach(btn => btn.addEventListener('click', async () => {
       const idx = +btn.dataset.chase;
