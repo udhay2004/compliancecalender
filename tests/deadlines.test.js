@@ -89,6 +89,8 @@ function cal(items, profile = { fyEnd: "Dec" }) {
   return { profile, items: items.map((it) => ({
     category: "Mandatory Annual", compliance_name: "Delaware Annual Report & Franchise Tax", due_date: "1 March (Annually)",
     clientStatus: "Not Started", paymentStatus: "Not Invoiced", documents: [], paymentEvents: [], remindersSent: [], selectedByClient: false,
+    // Document chasing has its own tests (tests/chasing-export-whatsapp.test.js).
+    docChasePaused: true,
     ...it,
   })) };
 }

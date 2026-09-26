@@ -41,6 +41,8 @@ router.use(requireAuth, requireRole("staff"));
 const { REAL_WORK_MATCH, toView } = require("../lib/calendarView");
 const { getPriceList } = require("../lib/complianceFees");
 const REAL_WORK = { ...REAL_WORK_MATCH, supersededAt: null };
+const { CHASEABLE, missingDocuments } = require("../lib/reminders");
+const { feedLinksFor } = require("./feeds.routes");
 
 // Staff accounts created before departments existed have department ""
 // — they fall through to the tech/delivery view, which is what the
@@ -109,7 +111,7 @@ async function buildTechSection() {
     .sort({ updatedAt: -1 })
     .limit(60);
   const orgNames = Object.fromEntries(
-    (await ClientOrg.find({ _id: { $in: clientCalendars.map((c) => c.clientOrgId) } }).select("name primaryContactPhone").lean())
+    (await ClientOrg.find({ _id: { $in: clientCalendars.map((c) => c.clientOrgId) } }).select("name primaryContactPhone whatsappOptIn").lean())
       .map((o) => [String(o._id), o])
   );
   // Deadlines across all clients: selected filings not done yet, overdue
@@ -132,9 +134,40 @@ async function buildTechSection() {
   });
   deadlines.sort((a, b) => a.days - b.days);
 
+  const views = new Map(clientCalendars.map((c) => [String(c._id), toView(c, { staff: true })]));
+
+  // Waiting on the client for documents: what's missing and how many
+  // automatic reminders have gone out, so staff know when to phone.
+  const waitingOnDocs = [];
+  clientCalendars.forEach((c) => {
+    const org = orgNames[String(c.clientOrgId)] || {};
+    views.get(String(c._id)).items.forEach((v, idx) => {
+      if (v.isHistory || !v.selectedByClient || !CHASEABLE.has(v.clientStatus)) return;
+      const missingDocs = missingDocuments(v);
+      if (!missingDocs.length) return;
+      waitingOnDocs.push({
+        calendarId: String(c._id),
+        itemIndex: idx,
+        company: org.name || c.profile?.companyName || "(unnamed)",
+        phone: org.primaryContactPhone || "",
+        whatsapp: Boolean(org.whatsappOptIn),
+        task: v.compliance_name,
+        missing: missingDocs,
+        days: v.daysUntil,
+        dueDate: v.dueDateActual || null,
+        remindersSent: v.docChase?.count || 0,
+        lastReminder: v.docChase?.last || null,
+        paused: Boolean(v.docChase?.paused),
+        selectedAt: v.selectedAt || null,
+      });
+    });
+  });
+  // Most urgent first: nearest deadline, then most reminders ignored.
+  waitingOnDocs.sort((a, b) => (a.days ?? 9999) - (b.days ?? 9999) || b.remindersSent - a.remindersSent);
+
   const clientWork = clientCalendars
     .map((c) => {
-      const sm = toView(c, { staff: true }).summary;
+      const sm = views.get(String(c._id)).summary;
       const org = orgNames[String(c.clientOrgId)] || {};
       return {
         calendarId: String(c._id),
@@ -145,6 +178,7 @@ async function buildTechSection() {
         toVerify: sm.documentsPendingReview,
         readyToQuote: sm.readyToQuote,
         awaitingPayment: sm.awaitingPayment,
+        waitingOnDocuments: sm.waitingOnDocuments || 0,
         updatedAt: c.updatedAt,
       };
     })
@@ -170,6 +204,8 @@ async function buildTechSection() {
     ],
     clientWork,
     deadlines: deadlines.slice(0, 40),
+    waitingOnDocs: waitingOnDocs.slice(0, 40),
+    waitingOnDocsTotal: waitingOnDocs.length,
     needsDate: needsDate.slice(0, 25),
     pendingDocuments: pendingDocList.map((d) => ({
       calendarId: String(d._id),
@@ -411,6 +447,21 @@ router.get("/summary", async (req, res) => {
     console.error("[dashboard] Failed to build summary:", err);
     res.status(500).json({ error: "Couldn't load the dashboard right now." });
   }
+});
+
+// GET /api/dashboard/calendar-feed — this staff member's private link to
+// subscribe to every client deadline we're handling (Google/Outlook).
+router.get("/calendar-feed", async (req, res) => {
+  const me = await User.findById(req.user._id);
+  if (!me) return res.status(404).json({ error: "Account not found." });
+  res.json({ feed: await feedLinksFor(me, { kind: "team", name: "ComplyGlobally client deadlines" }) });
+});
+
+// POST /api/dashboard/calendar-feed/reset — new link; the old one stops working.
+router.post("/calendar-feed/reset", async (req, res) => {
+  const me = await User.findById(req.user._id);
+  if (!me) return res.status(404).json({ error: "Account not found." });
+  res.json({ feed: await feedLinksFor(me, { kind: "team", name: "ComplyGlobally client deadlines", reset: true }) });
 });
 
 // PATCH /api/dashboard/team/:id/reset — super_admin only. Clears the

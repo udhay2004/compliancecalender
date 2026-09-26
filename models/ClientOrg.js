@@ -29,8 +29,33 @@ const clientOrgSchema = new mongoose.Schema(
     // until someone is assigned, in which case the portal falls back to
     // ComplyGlobally's general support contact instead of a named person.
     assignedStaff: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+
+    // WhatsApp reminders (lib/whatsapp.js). Only ever switched on by the
+    // client themselves in the portal (or by replying START) — WhatsApp
+    // requires the person's own opt-in. whatsappNumber is digits only,
+    // with country code (e.g. 14155550100).
+    whatsappOptIn: { type: Boolean, default: false },
+    whatsappNumber: { type: String, default: "", index: true },
+    whatsappOptInAt: { type: Date, default: null },
+    whatsappOptOutAt: { type: Date, default: null },
+    whatsappLastSentAt: { type: Date, default: null },
+    whatsappLastError: { type: String, default: "" },
+
+    // Secret part of the client's calendar subscription link
+    // (/feeds/<token>.ics). Anyone with the link can read the deadlines, so
+    // the client can reset it from the portal at any time.
+    calendarFeedToken: { type: String, default: undefined, index: { unique: true, sparse: true } },
   },
   { timestamps: true }
 );
+
+// The calendar-link secret never leaves the server in ordinary API
+// responses; only the portal's own "calendar link" endpoint returns it.
+clientOrgSchema.set("toJSON", {
+  transform(doc, ret) {
+    delete ret.calendarFeedToken;
+    return ret;
+  },
+});
 
 module.exports = mongoose.model("ClientOrg", clientOrgSchema);

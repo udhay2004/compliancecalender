@@ -210,6 +210,11 @@ const itemSchema = new mongoose.Schema(
     // Reminder keys already sent for this item ("client-7:2027-04-15"),
     // so each reminder goes out exactly once per due date.
     remindersSent: { type: [String], default: [] },
+    // Automatic "please upload your documents" reminders (lib/reminders.js).
+    // Each one sent is recorded in remindersSent as "docs-chase:YYYY-MM-DD".
+    // Staff can pause them for one filing (e.g. the client said they'll
+    // send the papers next week).
+    docChasePaused: { type: Boolean, default: false },
   },
   { _id: false }
 );

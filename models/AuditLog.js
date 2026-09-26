@@ -47,6 +47,11 @@ const auditLogSchema = new mongoose.Schema(
         // question asked after any suspected account compromise.
         "password_set",
         "password_changed",
+        // WhatsApp consent (lib/whatsapp.js) and document chasing.
+        "whatsapp_opt_in",
+        "whatsapp_opt_out",
+        "documents_chased",
+        "document_chasing_paused",
       ],
       required: true,
     },
