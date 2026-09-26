@@ -451,6 +451,10 @@ function carryOverProgress(oldCalendar, newItems) {
       // the new calendar's details.
       ...(p.dueDateSource === "staff" ? { dueDateActual: p.dueDateActual, dueDateSource: "staff" } : {}),
       remindersSent: p.remindersSent || [],
+      docChasePaused: Boolean(p.docChasePaused),
+      assignedTo: p.assignedTo || null,
+      assignedToName: p.assignedToName || "",
+      assignedAt: p.assignedAt || null,
     };
   });
   return { items, carried };

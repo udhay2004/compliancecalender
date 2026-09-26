@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pipeline — Compliance Calendar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/shared.css">
+<style>
+  .hero { padding-top: 36px; }
+  .hero h1 { font-family: var(--serif); font-size: 28px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .hero p { color: var(--ink-soft); font-size: 14px; margin: 0; max-width: 70ch; }
+  .filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin-top: 22px; }
+  .filters label { display: flex; flex-direction: column; gap: 4px; font-size: 11.5px; font-weight: 600; color: var(--ink-soft); }
+  .filters select, .filters input { font: inherit; font-size: 13.5px; padding: 8px 10px; border: 1px solid var(--rule); border-radius: 6px; background: var(--card); color: var(--ink); min-width: 170px; }
+  .filters input { min-width: 220px; }
+  .quick { display: flex; gap: 6px; flex-wrap: wrap; }
+  .quick button { font: inherit; font-size: 12.5px; font-weight: 600; padding: 8px 12px; border-radius: 999px; border: 1px solid var(--rule); background: var(--card); color: var(--ink); cursor: pointer; }
+  .quick button.on { background: var(--brand); border-color: var(--brand); color: #fff; }
+
+  .stages { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 22px; }
+  .stage { text-align: left; font: inherit; background: var(--card); border: 1px solid var(--rule); border-radius: var(--radius); padding: 12px 14px; cursor: pointer; box-shadow: var(--shadow-sm); color: var(--ink); }
+  .stage:hover { border-color: var(--brand); }
+  .stage.on { border-color: var(--brand); box-shadow: 0 0 0 2px var(--teal-bg); }
+  .stage .n { font-family: var(--serif); font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .stage .l { font-size: 13px; font-weight: 600; }
+  .stage .h { font-size: 11.5px; color: var(--ink-soft); margin-top: 2px; }
+  .stage.us .n { color: var(--brand-dark); }
+
+  .group-title { font-family: var(--serif); font-weight: 700; font-size: 17px; margin: 30px 0 4px; display: flex; gap: 8px; align-items: baseline; }
+  .group-title span { font-family: var(--sans); font-size: 12.5px; font-weight: 500; color: var(--ink-soft); }
+  .cards { background: var(--card); border: 1px solid var(--rule); border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden; margin-top: 8px; }
+  .card-row { display: grid; grid-template-columns: minmax(0, 1fr) auto 200px; gap: 16px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--rule-soft); }
+  .card-row:last-child { border-bottom: 0; }
+  .card-main { min-width: 0; }
+  .card-main a { font-weight: 600; color: var(--brand-dark); text-decoration: none; overflow-wrap: anywhere; }
+  .card-main a:hover { text-decoration: underline; }
+  .card-sub { font-size: 12.5px; color: var(--ink-soft); margin-top: 2px; overflow-wrap: anywhere; }
+  .card-meta { text-align: right; font-size: 12.5px; white-space: nowrap; }
+  .pill { display: inline-block; font-size: 11.5px; font-weight: 600; padding: 2px 9px; border-radius: 999px; background: var(--grey-bg); color: var(--ink-soft); }
+  .pill.bad { background: var(--stamp-red-bg); color: var(--stamp-red); }
+  .pill.warn { background: var(--seal-gold-bg); color: var(--seal-gold); }
+  .pill.good { background: var(--teal-bg); color: var(--brand-dark); }
+  .wait { color: var(--ink-soft); margin-top: 3px; }
+  .owner select { width: 100%; font: inherit; font-size: 12.5px; padding: 6px 8px; border: 1px solid var(--rule); border-radius: 6px; background: var(--card); color: var(--ink); }
+  .owner .via { font-size: 11px; color: var(--ink-soft); margin-top: 2px; }
+  .empty { background: var(--card); border: 1px dashed var(--rule); border-radius: var(--radius); padding: 28px 16px; text-align: center; color: var(--ink-soft); font-size: 13.5px; margin-top: 16px; }
+  .note { font-size: 12.5px; color: var(--ink-soft); margin-top: 10px; }
+  .err { color: var(--stamp-red); }
+  @media (max-width: 760px) {
+    .card-row { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+    .card-meta { text-align: left; white-space: normal; }
+    .filters select, .filters input { min-width: 0; width: 100%; }
+    .filters label { flex: 1 1 100%; }
+    .stages { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .hero h1 { font-size: 23px; }
+  }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><a href="/dashboard.html" style="color:inherit;text-decoration:none;">Compliance Calendar <strong>Generator</strong></a></div>
+  <div class="nav-links" id="navLinks">
+    <a href="/dashboard.html">Dashboard</a>
+    <a href="/pipeline.html" class="active">Pipeline</a>
+    <a href="/reports.html">Reports</a>
+    <a href="/review.html">Review Queue</a>
+  </div>
+  <div class="nav-user">
+    <span id="navUser"></span>
+    <button type="button" id="logoutBtn">Log out</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="hero">
+    <h1>Pipeline</h1>
+    <p>Every service a client asked us to handle, in the step it's at now. Most urgent first. Assign each one to a person so nothing sits with nobody.</p>
+  </div>
+
+  <div class="filters">
+    <div class="quick" role="group" aria-label="Whose work">
+      <button type="button" data-owner="me">My work</button>
+      <button type="button" data-owner="unassigned">Unassigned</button>
+      <button type="button" data-owner="all">Everyone</button>
+    </div>
+    <label>Team member
+      <select id="ownerSel"></select>
+    </label>
+    <label>Due
+      <select id="dueSel">
+        <option value="">Any time</option>
+        <option value="overdue">Overdue</option>
+        <option value="7">Within 7 days</option>
+        <option value="30">Within 30 days</option>
+      </select>
+    </label>
+    <label>Search
+      <input id="qInput" type="search" placeholder="Company or filing">
+    </label>
+  </div>
+
+  <div class="stages" id="stages"></div>
+  <div id="list"><div class="empty">Loading…</div></div>
+  <p class="note">"Owner" is the person the filing is assigned to. If nobody is, it's the team member assigned to that client (Admin → Client companies). The new owner gets a notification and an email.</p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(v) { var d = document.createElement('div'); d.textContent = v == null ? '' : String(v); return d.innerHTML; }
+  function fmtDay(d) { return new Date(d).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }); }
+  function money(c) { var d = c / 100; return '$' + d.toLocaleString('en-US', { minimumFractionDigits: d % 1 ? 2 : 0, maximumFractionDigits: 2 }); }
+
+  var params = new URLSearchParams(location.search);
+  var state = { owner: params.get('owner') || 'me', due: params.get('due') || '', q: params.get('q') || '', stage: params.get('stage') || 'open' };
+  var data = null;
+  var OUR_STAGES = { verify: 1, price: 1, work: 1 };
+
+  function syncUrl() {
+    var p = new URLSearchParams();
+    if (state.owner !== 'me') p.set('owner', state.owner);
+    if (state.due) p.set('due', state.due);
+    if (state.q) p.set('q', state.q);
+    if (state.stage !== 'open') p.set('stage', state.stage);
+    history.replaceState(null, '', '/pipeline.html' + (p.toString() ? '?' + p : ''));
+  }
+
+  function load() {
+    var p = new URLSearchParams({ owner: state.owner, due: state.due, q: state.q });
+    return fetch('/api/pipeline?' + p, { credentials: 'same-origin' })
+      .then(function (r) {
+        if (r.status === 401) { location.href = '/login.html'; throw new Error('Signed out'); }
+        return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || 'Could not load the pipeline.'); return d; });
+      })
+      .then(function (d) { data = d; render(); })
+      .catch(function (err) { $('list').innerHTML = '<div class="empty err">' + esc(err.message) + '</div>'; });
+  }
+
+  function renderFilters() {
+    document.querySelectorAll('[data-owner]').forEach(function (b) { b.classList.toggle('on', b.dataset.owner === state.owner); b.setAttribute('aria-pressed', String(b.dataset.owner === state.owner)); });
+    var opts = '<option value="all">Everyone</option><option value="me">Me</option><option value="unassigned">Unassigned</option>' +
+      data.team.map(function (u) { return '<option value="' + esc(u.id) + '">' + esc(u.name || u.email) + '</option>'; }).join('');
+    $('ownerSel').innerHTML = opts;
+    $('ownerSel').value = state.owner;
+    $('dueSel').value = state.due;
+    if (document.activeElement !== $('qInput')) $('qInput').value = state.q;
+  }
+
+  function renderStages() {
+    var open = data.totalOpen;
+    var tiles = '<button type="button" class="stage' + (state.stage === 'open' ? ' on' : '') + '" data-stage="open"><div class="n">' + open + '</div><div class="l">All open work</div><div class="h">Everything not done yet</div></button>';
+    tiles += data.stages.map(function (s) {
+      return '<button type="button" class="stage' + (OUR_STAGES[s.key] ? ' us' : '') + (state.stage === s.key ? ' on' : '') + '" data-stage="' + s.key + '">' +
+        '<div class="n">' + (data.counts[s.key] || 0) + '</div><div class="l">' + esc(s.label) + '</div><div class="h">' + esc(s.hint) + '</div></button>';
+    }).join('');
+    $('stages').innerHTML = tiles;
+    document.querySelectorAll('[data-stage]').forEach(function (b) {
+      b.addEventListener('click', function () { state.stage = b.dataset.stage; syncUrl(); render(); });
+    });
+  }
+
+  function ownerCell(c) {
+    var opts = '<option value="">Unassigned</option>' + data.team.map(function (u) {
+      return '<option value="' + esc(u.id) + '"' + (c.owner.via === 'filing' && c.owner.id === u.id ? ' selected' : '') + '>' + esc(u.name || u.email) + (u.id === data.me ? ' (me)' : '') + '</option>';
+    }).join('');
+    var via = c.owner.via === 'client' ? '<div class="via">Client owner: ' + esc(c.owner.name) + '</div>' : '';
+    return '<div class="owner"><label class="sr-only" for="own-' + c.calendarId + '-' + c.itemIndex + '">Owner</label>' +
+      '<select id="own-' + c.calendarId + '-' + c.itemIndex + '" data-assign="' + esc(c.calendarId) + '" data-idx="' + c.itemIndex + '">' + opts + '</select>' + via + '</div>';
+  }
+
+  function cardHtml(c) {
+    var due = '';
+    if (c.stage === 'done') due = '<span class="pill good">Filed ' + esc(fmtDay(c.completedAt)) + '</span>';
+    else if (c.daysUntilDue === null) due = '<span class="pill">No due date</span>';
+    else {
+      var d = c.daysUntilDue;
+      var label = d < 0 ? (-d) + ' day' + (d === -1 ? '' : 's') + ' overdue' : d === 0 ? 'Due today' : d === 1 ? 'Due tomorrow' : 'Due in ' + d + ' days';
+      due = '<span class="pill ' + (d < 0 ? 'bad' : d <= 7 ? 'warn' : '') + '" title="' + esc(fmtDay(c.dueDate)) + '">' + esc(label) + '</span>';
+    }
+    var bits = [];
+    if (c.stage === 'docs' && c.docs) bits.push(c.docs.provided + '/' + c.docs.total + ' documents' + (c.remindersSent ? ' · reminded ' + c.remindersSent + '×' : ''));
+    if (c.stage === 'verify') bits.push(c.toVerify + ' to check');
+    if ((c.stage === 'payment' || c.stage === 'work') && c.feeCents) bits.push(money(c.feeCents) + (c.stage === 'work' ? ' paid' : ''));
+    if (c.paymentStatus === 'Overdue') bits.push('payment overdue');
+    var wait = c.stage !== 'done' && c.daysInStage !== null ? '<div class="wait">' + (c.daysInStage === 0 ? 'since today' : 'waiting ' + c.daysInStage + ' day' + (c.daysInStage === 1 ? '' : 's')) + '</div>' : '';
+    return '<div class="card-row">' +
+      '<div class="card-main"><a href="/calendar.html?id=' + encodeURIComponent(c.calendarId) + '#item-' + c.itemIndex + '">' + esc(c.company) + '</a>' +
+        '<div class="card-sub">' + esc(c.task) + (bits.length ? ' · ' + esc(bits.join(' · ')) : '') + '</div></div>' +
+      '<div class="card-meta">' + due + wait + '</div>' +
+      ownerCell(c) +
+    '</div>';
+  }
+
+  function renderList() {
+    var keys = state.stage === 'open' ? data.stages.filter(function (s) { return s.key !== 'done'; }) : data.stages.filter(function (s) { return s.key === state.stage; });
+    var html = keys.map(function (s) {
+      var cards = data.cards[s.key] || [];
+      if (!cards.length && state.stage === 'open') return '';
+      var more = (data.counts[s.key] || 0) > cards.length ? '<div class="note">Showing the first ' + cards.length + ' of ' + data.counts[s.key] + '. Narrow it down with the filters.</div>' : '';
+      return '<div class="group-title">' + esc(s.label) + ' <span>' + (data.counts[s.key] || 0) + ' · ' + esc(s.hint) + '</span></div>' +
+        (cards.length ? '<div class="cards">' + cards.map(cardHtml).join('') + '</div>' + more : '<div class="empty">Nothing here.</div>');
+    }).join('');
+    $('list').innerHTML = html || '<div class="empty">Nothing to do here' + (state.owner === 'me' ? ' for you' : '') + '. ' + (state.owner !== 'all' ? '<a href="#" id="showAll">Show everyone’s work</a>' : '') + '</div>';
+    var all = $('showAll');
+    if (all) all.addEventListener('click', function (e) { e.preventDefault(); setOwner('all'); });
+    document.querySelectorAll('[data-assign]').forEach(function (sel) {
+      sel.addEventListener('change', function () {
+        sel.disabled = true;
+        fetch('/api/pipeline/' + encodeURIComponent(sel.dataset.assign) + '/items/' + encodeURIComponent(sel.dataset.idx) + '/assign', {
+          method: 'PATCH', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: sel.value || null })
+        })
+          .then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || 'Could not assign.'); return d; }); })
+          .then(function () { return load(); })
+          .catch(function (err) { alert(err.message); sel.disabled = false; });
+      });
+    });
+  }
+
+  function render() { renderFilters(); renderStages(); renderList(); }
+
+  function setOwner(v) { state.owner = v; syncUrl(); load(); }
+  document.querySelectorAll('[data-owner]').forEach(function (b) { b.addEventListener('click', function () { setOwner(b.dataset.owner); }); });
+  $('ownerSel').addEventListener('change', function () { setOwner(this.value); });
+  $('dueSel').addEventListener('change', function () { state.due = this.value; syncUrl(); load(); });
+  var t = null;
+  $('qInput').addEventListener('input', function () { var v = this.value; clearTimeout(t); t = setTimeout(function () { state.q = v.trim(); syncUrl(); load(); }, 300); });
+
+  fetch('/api/auth/me', { credentials: 'same-origin' }).then(function (r) { return r.json(); }).then(function (d) {
+    var u = d.user || {};
+    $('navUser').textContent = u.email || '';
+    if (u.role === 'admin' || u.role === 'super_admin') $('navLinks').insertAdjacentHTML('beforeend', '<a href="/admin.html">Admin</a>');
+  }).catch(function () {});
+  $('logoutBtn').addEventListener('click', function () {
+    fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' }).then(function () { location.href = '/login.html'; });
+  });
+  document.addEventListener('cc:notifications', function () { load(); });
+  load();
+})();
+</script>
+<script src="/js/notifications.js" defer></script>
+</body>
+</html>

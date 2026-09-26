@@ -438,6 +438,7 @@
       '<p>Signed in as ' + esc(user.email) + '. Last sign-in ' + esc(when(user.lastLoginAt)) + '. ' +
         (user.twoFactorEnabled ? '<a href="/two-factor.html">Two-factor login: on</a>' : '<a href="/two-factor.html">Set up two-factor login</a>') +
         (data.tech ? ' \u00b7 <a href="#" id="teamFeedBtn">Add client deadlines to my calendar</a>' : '') + '</p>' +
+      '<p style="margin-top:6px;"><a href="/pipeline.html">My work in the pipeline</a> \u00b7 <a href="/reports.html">Reports</a></p>' +
       '<div id="teamFeedBox" hidden class="feed-box"></div>' +
     '</div>';
 
@@ -454,6 +455,8 @@
 
     $('navUser').textContent = user.email;
     var links = [
+      { href: '/pipeline.html', label: 'Pipeline' },
+      { href: '/reports.html', label: 'Reports' },
       { href: '/app.html', label: 'Generate' },
       { href: '/review.html', label: 'Review queue' }
     ];

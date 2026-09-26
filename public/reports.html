@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reports — Compliance Calendar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/shared.css">
+<style>
+  .hero { padding-top: 36px; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+  .hero h1 { font-family: var(--serif); font-size: 28px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .hero p { color: var(--ink-soft); font-size: 14px; margin: 0; }
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; }
+  .controls label { display: flex; flex-direction: column; gap: 4px; font-size: 11.5px; font-weight: 600; color: var(--ink-soft); }
+  .controls select, .controls input { font: inherit; font-size: 13.5px; padding: 8px 10px; border: 1px solid var(--rule); border-radius: 6px; background: var(--card); color: var(--ink); }
+  .btn { display: inline-block; font: inherit; font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: 6px; border: 1px solid var(--rule); background: var(--card); color: var(--ink); text-decoration: none; cursor: pointer; }
+  .btn:hover { border-color: var(--brand); color: var(--brand); }
+  .controls [hidden] { display: none; }
+
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 24px; }
+  .kpi { background: var(--card); border: 1px solid var(--rule); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow-sm); }
+  .kpi .l { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-soft); }
+  .kpi .v { font-family: var(--serif); font-size: 26px; font-weight: 700; margin: 6px 0 2px; font-variant-numeric: tabular-nums; color: var(--ink); }
+  .kpi .h { font-size: 12px; color: var(--ink-soft); }
+  .kpi.bad .v { color: var(--stamp-red); }
+
+  .sec { margin-top: 36px; }
+  .sec h2 { font-family: var(--serif); font-size: 18px; margin: 0; }
+  .sec > p { font-size: 13px; color: var(--ink-soft); margin: 4px 0 12px; line-height: 1.5; max-width: 80ch; }
+  .box { background: var(--card); border: 1px solid var(--rule); border-radius: var(--radius); box-shadow: var(--shadow-sm); padding: 14px 16px; }
+  .two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+
+  table.rt { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.rt th { text-align: left; font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-soft); padding: 8px 10px; border-bottom: 1px solid var(--rule); }
+  table.rt td { padding: 9px 10px; border-bottom: 1px solid var(--rule-soft); vertical-align: top; overflow-wrap: anywhere; }
+  table.rt tr:last-child td { border-bottom: 0; }
+  table.rt .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  table.rt a { color: var(--brand-dark); font-weight: 600; text-decoration: none; }
+  .red { color: var(--stamp-red); font-weight: 600; }
+
+  .hbar { display: grid; grid-template-columns: minmax(110px, 180px) minmax(0, 1fr) 48px; gap: 10px; align-items: center; padding: 6px 0; font-size: 13px; }
+  .hbar .track { height: 10px; background: var(--grey-bg); border-radius: 0 4px 4px 0; }
+  .hbar .fill { height: 10px; background: var(--brand); border-radius: 0 4px 4px 0; min-width: 2px; }
+  .hbar .n { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+
+  .chart { position: relative; }
+  .chart svg { display: block; width: 100%; height: 260px; overflow: visible; }
+  .chart .tip { position: absolute; pointer-events: none; background: var(--ink); color: #fff; font-size: 12px; line-height: 1.45; padding: 6px 9px; border-radius: 6px; white-space: nowrap; transform: translate(-50%, -100%); display: none; z-index: 2; }
+  details.tbl { margin-top: 10px; font-size: 13px; }
+  details.tbl summary { cursor: pointer; color: var(--brand-dark); font-weight: 600; }
+  .muted { color: var(--ink-soft); font-size: 13px; }
+  .err { color: var(--stamp-red); }
+  .defs { font-size: 12px; color: var(--ink-soft); margin-top: 28px; line-height: 1.6; }
+  @media (max-width: 900px) { .two { grid-template-columns: minmax(0, 1fr); } }
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 23px; }
+    .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .kpi .v { font-size: 22px; }
+    .hbar { grid-template-columns: minmax(0, 1fr) 40px; }
+    .hbar .track { grid-column: 1 / -1; grid-row: 2; }
+    table.rt.stack thead { display: none; }
+    table.rt.stack, table.rt.stack tbody, table.rt.stack tr, table.rt.stack td { display: block; width: 100%; }
+    table.rt.stack tr { border-bottom: 1px solid var(--rule); padding: 6px 0; }
+    table.rt.stack td { border: 0; padding: 3px 4px; text-align: left; }
+    table.rt.stack td[data-l]::before { content: attr(data-l) ": "; color: var(--ink-soft); font-size: 12px; }
+    .controls, .controls label { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><a href="/dashboard.html" style="color:inherit;text-decoration:none;">Compliance Calendar <strong>Generator</strong></a></div>
+  <div class="nav-links" id="navLinks">
+    <a href="/dashboard.html">Dashboard</a>
+    <a href="/pipeline.html">Pipeline</a>
+    <a href="/reports.html" class="active">Reports</a>
+    <a href="/review.html">Review Queue</a>
+  </div>
+  <div class="nav-user">
+    <span id="navUser"></span>
+    <button type="button" id="logoutBtn">Log out</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="hero">
+    <div>
+      <h1>Reports</h1>
+      <p id="periodLabel">Loading…</p>
+    </div>
+    <div class="controls">
+      <label>Period
+        <select id="rangeSel">
+          <option value="30d">Last 30 days</option>
+          <option value="90d">Last 90 days</option>
+          <option value="fy">This financial year</option>
+          <option value="12m">Last 12 months</option>
+          <option value="custom">Choose dates…</option>
+        </select>
+      </label>
+      <label id="fromWrap" hidden>From <input type="date" id="fromIn"></label>
+      <label id="toWrap" hidden>To <input type="date" id="toIn"></label>
+      <button class="btn" id="applyBtn" hidden>Show</button>
+      <a class="btn" id="csvFilings" href="#">Filings (CSV)</a>
+      <a class="btn" id="csvRevenue" href="#" hidden>Revenue (CSV)</a>
+    </div>
+  </div>
+  <div id="root"><p class="muted" style="margin-top:30px;">Loading…</p></div>
+  <p class="defs"><b>On time</b>: filed on or before its due date (filings without a due date are left out of the rate). <b>Turnaround</b>: days from the client choosing the service to our proof of completion. <b>Collected</b>: payments received (invoices) minus refunds (credit notes), counted on the day each was issued. Figures in US dollars; rupee payments are shown separately.</p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(v) { var d = document.createElement('div'); d.textContent = v == null ? '' : String(v); return d.innerHTML; }
+  function money(minor, cur) { var v = (minor || 0) / 100; return (v < 0 ? '\u2212' : '') + (cur === 'INR' ? '₹' : '$') + Math.abs(v).toLocaleString(cur === 'INR' ? 'en-IN' : 'en-US', { minimumFractionDigits: 0, maximumFractionDigits: v % 1 ? 2 : 0 }); }
+  function fmtDay(d) { return new Date(d).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }); }
+  function days(n) { return n === null || n === undefined ? '—' : n + ' day' + (n === 1 ? '' : 's'); }
+
+  var params = new URLSearchParams(location.search);
+  var state = { range: params.get('range') || '90d', from: params.get('from') || '', to: params.get('to') || '' };
+  var last = null;
+
+  function query() {
+    var p = new URLSearchParams({ range: state.range });
+    if (state.range === 'custom') { p.set('from', state.from); p.set('to', state.to); }
+    return p.toString();
+  }
+  function syncControls() {
+    $('rangeSel').value = state.range;
+    var custom = state.range === 'custom';
+    $('fromWrap').hidden = $('toWrap').hidden = $('applyBtn').hidden = !custom;
+    $('fromIn').value = state.from; $('toIn').value = state.to;
+    $('csvFilings').href = '/api/reports/filings.csv?' + query();
+    $('csvRevenue').href = '/api/reports/revenue.csv?' + query();
+  }
+
+  function load() {
+    syncControls();
+    history.replaceState(null, '', '/reports.html?' + query());
+    $('root').innerHTML = '<p class="muted" style="margin-top:30px;">Loading…</p>';
+    fetch('/api/reports/summary?' + query(), { credentials: 'same-origin' })
+      .then(function (r) {
+        if (r.status === 401) { location.href = '/login.html'; throw new Error('Signed out'); }
+        return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || 'Could not load reports.'); return d; });
+      })
+      .then(function (d) { last = d; render(d); })
+      .catch(function (err) { $('root').innerHTML = '<p class="err" style="margin-top:30px;">' + esc(err.message) + '</p>'; });
+  }
+
+  function kpi(label, value, hint, tone) {
+    return '<div class="kpi ' + (tone || '') + '"><div class="l">' + esc(label) + '</div><div class="v">' + value + '</div><div class="h">' + esc(hint || '') + '</div></div>';
+  }
+  function hbars(rows) {
+    var max = rows.reduce(function (m, r) { return Math.max(m, r.value); }, 0) || 1;
+    return rows.map(function (r) {
+      return '<div class="hbar"><div>' + esc(r.label) + '</div><div class="track"><div class="fill" style="width:' + (r.value / max * 100).toFixed(1) + '%"></div></div><div class="n">' + esc(r.value) + '</div></div>';
+    }).join('');
+  }
+
+  // Monthly net collected: one series, bars from a zero baseline, value on hover.
+  function monthChart(months, cur) {
+    var el = $('monthChart');
+    if (!el) return;
+    var W = Math.max(280, el.clientWidth), H = 260, padL = 56, padR = 8, padT = 12, padB = 28;
+    var vals = months.map(function (m) { return m.net; });
+    var max = Math.max.apply(null, vals.concat([0])), min = Math.min.apply(null, vals.concat([0]));
+    if (max === min) max = min + 100;
+    var nice = function (v) { var p = Math.pow(10, Math.floor(Math.log10(Math.abs(v) || 1))); return Math.ceil(v / p) * p; };
+    max = max > 0 ? nice(max) : 0; min = min < 0 ? -nice(-min) : 0;
+    var y = function (v) { return padT + (max - v) / (max - min) * (H - padT - padB); };
+    var slot = (W - padL - padR) / months.length, bw = Math.max(6, Math.min(36, slot - 2));
+    var ticks = [min, (min + max) / 2, max].filter(function (v, i, a) { return a.indexOf(v) === i; });
+    if (min < 0 && max > 0) ticks = [min, 0, max];
+    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Net collected per month">';
+    ticks.forEach(function (t) {
+      svg += '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + y(t) + '" y2="' + y(t) + '" stroke="' + (t === 0 ? '#C9D5D3' : '#ECF2F1') + '" stroke-width="1"/>' +
+        '<text x="' + (padL - 8) + '" y="' + (y(t) + 4) + '" text-anchor="end" font-size="11" fill="#5C6E72">' + esc(money(t, cur)) + '</text>';
+    });
+    months.forEach(function (m, i) {
+      var cx = padL + slot * i + slot / 2, top = y(Math.max(m.net, 0)), bot = y(Math.min(m.net, 0)), h = Math.max(m.net ? 1 : 0, bot - top), r = Math.min(4, h, bw / 2);
+      var x = cx - bw / 2;
+      var path = m.net >= 0
+        ? 'M' + x + ',' + (top + h) + 'V' + (top + r) + 'Q' + x + ',' + top + ' ' + (x + r) + ',' + top + 'H' + (x + bw - r) + 'Q' + (x + bw) + ',' + top + ' ' + (x + bw) + ',' + (top + r) + 'V' + (top + h) + 'Z'
+        : 'M' + x + ',' + top + 'V' + (top + h - r) + 'Q' + x + ',' + (top + h) + ' ' + (x + r) + ',' + (top + h) + 'H' + (x + bw - r) + 'Q' + (x + bw) + ',' + (top + h) + ' ' + (x + bw) + ',' + (top + h - r) + 'V' + top + 'Z';
+      if (h > 0) svg += '<path d="' + path + '" fill="' + (m.net >= 0 ? '#34A9A1' : '#D64545') + '"/>';
+      svg += '<rect x="' + (padL + slot * i) + '" y="' + padT + '" width="' + slot + '" height="' + (H - padT - padB) + '" fill="transparent" data-i="' + i + '"/>';
+      if (months.length <= 12 && (W > 520 || i % 2 === 0)) svg += '<text x="' + cx + '" y="' + (H - 8) + '" text-anchor="middle" font-size="11" fill="#5C6E72">' + esc(m.label) + '</text>';
+    });
+    svg += '</svg><div class="tip" id="monthTip"></div>';
+    el.innerHTML = svg;
+    var tip = $('monthTip');
+    el.querySelectorAll('rect[data-i]').forEach(function (rc) {
+      function show() {
+        var m = months[+rc.dataset.i];
+        tip.innerHTML = '<b>' + esc(m.label) + '</b><br>Net ' + esc(money(m.net, cur)) + (m.refunded ? '<br>Collected ' + esc(money(m.collected, cur)) + ', refunded ' + esc(money(m.refunded, cur)) : '');
+        tip.style.left = (+rc.getAttribute('x') + +rc.getAttribute('width') / 2) / W * el.clientWidth + 'px';
+        tip.style.top = (y(Math.max(m.net, 0)) - 6) + 'px';
+        tip.style.display = 'block';
+      }
+      rc.addEventListener('mouseenter', show);
+      rc.addEventListener('click', show);
+      rc.addEventListener('mouseleave', function () { tip.style.display = 'none'; });
+    });
+  }
+
+  function render(d) {
+    $('periodLabel').textContent = d.period.label + ' (' + fmtDay(d.period.from) + ' – ' + fmtDay(d.period.to) + ')';
+    $('csvRevenue').hidden = !d.canSeeFinance;
+    var f = d.filings, rev = d.revenue;
+    var html = '<div class="kpis">' +
+      kpi('Filings done', f.completed, f.chosen + ' newly chosen by clients') +
+      kpi('On time', f.onTimeRate === null ? '—' : f.onTimeRate + '%', f.late ? f.late + ' filed late' : f.completed ? 'None filed late' : 'Nothing filed yet', f.late ? 'bad' : '') +
+      kpi('Typical turnaround', days(f.turnaroundMedianDays), f.turnaroundAverageDays !== null ? 'average ' + days(f.turnaroundAverageDays) : 'chosen → filed') +
+      kpi('Open now', f.openNow, d.clients.withWork + ' client' + (d.clients.withWork === 1 ? '' : 's') + ' with open work') +
+      kpi('Overdue now', f.overdueNow, 'past their due date, not filed', f.overdueNow ? 'bad' : '') +
+      kpi('New clients', d.clients.new, d.clients.total + ' in total') +
+      (rev ? kpi('Collected', esc(money(rev.totals.net, rev.currency)), rev.totals.invoices + ' payment' + (rev.totals.invoices === 1 ? '' : 's') + (rev.totals.refunded ? ', ' + money(rev.totals.refunded, rev.currency) + ' refunded' : '')) : '') +
+      '</div>';
+
+    if (rev) {
+      html += '<div class="sec"><h2>Money collected per month</h2><p>Payments minus refunds, last 12 months up to the end of this period' +
+        (rev.otherCurrencies.length ? '. Also in this period: ' + rev.otherCurrencies.map(function (o) { return money(o.net, o.currency) + ' in ' + o.currency; }).join(', ') : '') + '.</p>' +
+        '<div class="box"><div class="chart" id="monthChart"></div>' +
+        '<details class="tbl"><summary>Show as a table</summary><table class="rt"><thead><tr><th>Month</th><th class="num">Collected</th><th class="num">Refunded</th><th class="num">Net</th></tr></thead><tbody>' +
+        rev.byMonth.map(function (m) { return '<tr><td>' + esc(m.label) + '</td><td class="num">' + money(m.collected, rev.currency) + '</td><td class="num">' + money(m.refunded, rev.currency) + '</td><td class="num">' + money(m.net, rev.currency) + '</td></tr>'; }).join('') +
+        '</tbody></table></details></div></div>';
+    }
+
+    html += '<div class="sec"><h2>Team workload</h2><p>Open work each person owns right now, and what they finished in this period. "Waiting on us" is work where the next step is ours (check documents, send a price, file).</p>' +
+      '<div class="box"><table class="rt stack"><thead><tr><th>Team member</th><th class="num">Open</th><th class="num">Waiting on us</th><th class="num">Overdue</th><th class="num">Done in period</th><th class="num">Typical turnaround</th></tr></thead><tbody>' +
+      (d.workload.length ? d.workload.map(function (w) {
+        var link = '/pipeline.html?owner=' + encodeURIComponent(w.id || 'unassigned');
+        return '<tr><td data-l="Member"><a href="' + link + '">' + esc(w.name) + '</a>' + (w.active ? '' : ' <span class="muted">(inactive)</span>') + '</td>' +
+          '<td class="num" data-l="Open">' + w.open + '</td><td class="num" data-l="Waiting on us">' + w.waitingOnUs + '</td>' +
+          '<td class="num' + (w.overdue ? ' red' : '') + '" data-l="Overdue">' + w.overdue + '</td><td class="num" data-l="Done">' + w.completed + '</td>' +
+          '<td class="num" data-l="Turnaround">' + days(w.turnaroundMedianDays) + '</td></tr>';
+      }).join('') : '<tr><td colspan="6" class="muted">No team members yet.</td></tr>') +
+      '</tbody></table></div></div>';
+
+    html += '<div class="two">' +
+      '<div class="sec"><h2>Pipeline right now</h2><p>Open services by step. <a href="/pipeline.html?owner=all">Open the pipeline</a></p><div class="box">' +
+        hbars(d.pipeline.stages.map(function (s) { return { label: s.label, value: d.pipeline.counts[s.key] || 0 }; })) + '</div></div>' +
+      '<div class="sec"><h2>Filed late</h2><p>Finished in this period after their due date, latest first.</p><div class="box">' +
+        (f.lateList.length ? '<table class="rt"><tbody>' + f.lateList.map(function (l) {
+          return '<tr><td><a href="/calendar.html?id=' + encodeURIComponent(l.calendarId) + '#item-' + l.itemIndex + '">' + esc(l.company) + '</a><div class="muted">' + esc(l.task) + '</div></td><td class="num red">' + days(l.daysLate) + ' late</td></tr>';
+        }).join('') + '</tbody></table>' : '<p class="muted" style="margin:6px 0;">Nothing was filed late.</p>') +
+      '</div></div></div>';
+
+    html += '<div class="sec"><h2>Services</h2><p>What clients chose in this period, what we finished, and what is still open.</p><div class="box"><table class="rt stack"><thead><tr><th>Service</th><th class="num">Chosen</th><th class="num">Done</th><th class="num">Open now</th></tr></thead><tbody>' +
+      (d.services.length ? d.services.map(function (s) {
+        return '<tr><td data-l="Service">' + esc(s.name) + '</td><td class="num" data-l="Chosen">' + s.chosen + '</td><td class="num" data-l="Done">' + s.completed + '</td><td class="num" data-l="Open">' + s.openNow + '</td></tr>';
+      }).join('') : '<tr><td colspan="4" class="muted">No services chosen yet.</td></tr>') + '</tbody></table></div></div>';
+
+    if (rev) {
+      var list = function (rows) {
+        return rows.length ? '<table class="rt"><tbody>' + rows.map(function (r) { return '<tr><td>' + esc(r.name) + '<div class="muted">' + r.invoices + ' payment' + (r.invoices === 1 ? '' : 's') + '</div></td><td class="num">' + money(r.net, rev.currency) + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="muted" style="margin:6px 0;">No payments in this period.</p>';
+      };
+      html += '<div class="two"><div class="sec"><h2>Top services by revenue</h2><p>Net collected in this period.</p><div class="box">' + list(rev.byService) + '</div></div>' +
+        '<div class="sec"><h2>Top clients by revenue</h2><p>Net collected in this period.</p><div class="box">' + list(rev.byClient) + '</div></div></div>';
+    }
+
+    $('root').innerHTML = html;
+    if (rev) monthChart(rev.byMonth, rev.currency);
+  }
+
+  $('rangeSel').addEventListener('change', function () {
+    state.range = this.value;
+    if (state.range === 'custom') {
+      if (!state.from && last) { state.from = last.period.from; state.to = last.period.to; }
+      syncControls();
+    } else load();
+  });
+  $('applyBtn').addEventListener('click', function () { state.from = $('fromIn').value; state.to = $('toIn').value; load(); });
+  var rt = null;
+  window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { if (last && last.revenue) monthChart(last.revenue.byMonth, last.revenue.currency); }, 150); });
+
+  fetch('/api/auth/me', { credentials: 'same-origin' }).then(function (r) { return r.json(); }).then(function (d) {
+    var u = d.user || {};
+    $('navUser').textContent = u.email || '';
+    if (u.role === 'admin' || u.role === 'super_admin') $('navLinks').insertAdjacentHTML('beforeend', '<a href="/admin.html">Admin</a>');
+  }).catch(function () {});
+  $('logoutBtn').addEventListener('click', function () {
+    fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' }).then(function () { location.href = '/login.html'; });
+  });
+  load();
+})();
+</script>
+<script src="/js/notifications.js" defer></script>
+</body>
+</html>
