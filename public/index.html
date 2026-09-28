@@ -69,6 +69,8 @@
   .topbar-actions { display: flex; align-items: center; gap: 6px; }
   .staff-link { white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 600; color: var(--ink-soft); text-decoration: none; padding: 9px 12px; border-radius: 10px; transition: color .15s, background .15s; }
   .staff-link:hover { color: var(--brand-text); background: var(--brand-tint); }
+  .client-link { white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 700; color: var(--brand-text); text-decoration: none; padding: 8px 14px; border: 1.5px solid var(--brand); border-radius: 10px; background: #fff; transition: background .15s; }
+  .client-link:hover { background: var(--brand-tint); }
   .btn.js-new, .btn.js-results { display: none; }
   [data-view="results"] .btn.js-new { display: inline-flex; }
   /* Once a calendar exists, going back to the form must not strand it — offer a way back. */
@@ -446,6 +448,10 @@
     .brand { font-size: 17px; }
     .lbl-new { display: none; }
     .btn.js-new { width: 40px; padding: 0 !important; }
+    .topbar-actions { gap: 2px; }
+    .client-link { padding: 7px 10px; font-size: 13px; }
+    .staff-link { padding: 8px 8px; font-size: 13px; }
+    .client-link .ic, .staff-link .ic { display: none; }
     .grid, .conditional-block.visible { grid-template-columns: minmax(0, 1fr); }
     .field.span2 { grid-column: auto; }
     .intake { padding: 22px 18px 24px; border-radius: 20px; }
@@ -501,7 +507,8 @@
   <div class="topbar-actions">
     <button class="btn btn-ghost js-results" type="button" aria-label="View your calendar" style="height:40px;padding:0 14px;font-size:13.5px"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg><span class="lbl-new">View calendar</span></button>
     <button class="btn btn-ghost js-new" type="button" aria-label="New calendar" style="height:40px;padding:0 14px;font-size:13.5px"><svg class="ic" aria-hidden="true"><use href="#i-calendar"/></svg><span class="lbl-new">New calendar</span></button>
-    <a class="staff-link" href="/login.html">Staff Login <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+    <a class="client-link" href="/login.html?as=client">Client login <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+    <a class="staff-link" href="/login.html">Staff login</a>
   </div>
 </div></div>
 
@@ -844,7 +851,7 @@
   // (routes/public.routes.js returns portalUrl); everyone else signs in first.
   const portalUrls = {};
   function startFilingHref(calendarId) {
-    return portalUrls[calendarId] || `/api/auth/google?calendarId=${encodeURIComponent(calendarId)}`;
+    return portalUrls[calendarId] || `/login.html?as=client&mode=signup&calendarId=${encodeURIComponent(calendarId)}`;
   }
 
   function icon(name, extra) {
@@ -1007,8 +1014,8 @@
       </p>`;
   }
 
-  // Clicking the primary button sends the browser to Google sign-in (routes/auth.routes.js), carrying this
-  // calendarId so the callback can attach it to whichever account they log into/create. The calendar is
+  // Clicking the primary button opens the client sign-in page (Google or email code), carrying this
+  // calendarId so it's attached to whichever account they log into/create (lib/clientAccounts.js). The calendar is
   // auto-approved on link, so there's no "wait for staff to approve" delay between logging in and uploading documents.
   function renderActionBar(calendarId) {
     const id = escapeHtml(calendarId);
@@ -1390,8 +1397,10 @@
     if (p.contactName) document.getElementById('contactName').value = p.contactName;
     if (p.email || p.loginEmail) document.getElementById('contactEmail').value = p.email || p.loginEmail;
     if (p.phone) document.getElementById('contactPhone').value = p.phone;
+    const clientLink = document.querySelector('.client-link');
+    if (clientLink) { clientLink.href = '/portal.html'; clientLink.firstChild.textContent = 'Back to your portal '; }
     const staff = document.querySelector('.staff-link');
-    if (staff) { staff.href = '/portal.html'; staff.firstChild.textContent = 'Back to your portal '; }
+    if (staff) staff.remove();
   }).catch(() => {});
 </script>
 <!--SITE_FOOTER-->

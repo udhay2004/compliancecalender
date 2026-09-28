@@ -189,9 +189,10 @@ app.use(require("./routes/feeds.routes"));
 // Company and policy pages (/terms, /privacy, /refund-policy, /pricing …):
 // public, server-rendered and linked from the footer of every public page.
 app.use(legalRoutes);
-["login.html", "signup.html"].forEach((file) => {
-  app.get(`/${file}`, (req, res) => sendPageWithFooter(res, file));
-});
+app.get("/login.html", (req, res) => sendPageWithFooter(res, "login.html"));
+// Old address for creating an account; account creation now lives on the
+// client tab of the sign-in page.
+app.get(["/signup", "/signup.html"], (req, res) => res.redirect("/login.html?as=client&mode=signup"));
 
 // "/" routes by role rather than always going to the staff app, since a
 // client hitting the root of the site should land in their portal, not

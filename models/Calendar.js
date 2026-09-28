@@ -338,6 +338,9 @@ calendarSchema.index({ "items.razorpayPaymentId": 1 }, { sparse: true });
 calendarSchema.index({ supersedes: 1 }, { sparse: true });
 calendarSchema.index({ status: 1, reviewedAt: -1 });
 calendarSchema.index({ status: 1, createdAt: 1 });
+// Signing in collects every calendar generated with that email before the
+// account existed (lib/clientAccounts.js).
+calendarSchema.index({ "leadContact.email": 1, clientOrgId: 1 });
 
 // Every save computes real due dates for filings that don't have one yet
 // (or whose due-date text changed). Covers every way a calendar is created:

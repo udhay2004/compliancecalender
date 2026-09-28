@@ -1,18 +1,16 @@
 // routes/auth.routes.js
 //
-// Real per-person login against the User collection (models/User.js),
-// replacing the old single-shared-username/password design. There is
-// still no public signup route here on purpose — every account (staff,
-// admin, client) is created by an admin/super_admin via
-// routes/admin.routes.js, or by the bootstrap script
-// (scripts/createUser.js) for the very first super_admin.
+// Real per-person login against the User collection (models/User.js).
+// Team accounts (staff, admin, super_admin) are only ever created by an
+// admin via routes/admin.routes.js, or by the bootstrap script
+// (scripts/createUser.js) for the very first super_admin. Clients create
+// their own account: with Google, or with an emailed code (below).
 
 const express = require("express");
 const rateLimit = require("express-rate-limit");
 const crypto = require("crypto");
 const User = require("../models/User");
-const ClientOrg = require("../models/ClientOrg");
-const Calendar = require("../models/Calendar");
+const mongoose = require("mongoose");
 const {
   setSessionCookie,
   loadUserFromMfaToken,
@@ -28,7 +26,7 @@ const { getAuthUrl, verifyCodeAndGetProfile } = require("../lib/google");
 const otp = require("../lib/otp");
 const { checkPassword, MIN_LENGTH } = require("../lib/passwordPolicy");
 const { logActivity } = require("../lib/auditLog");
-const { notifyStaff } = require("../lib/notify");
+const { createClientAccount, claimCalendars, portalUrlFor } = require("../lib/clientAccounts");
 
 const router = express.Router();
 
@@ -382,6 +380,128 @@ router.post("/password/set", async (req, res) => {
 
 
 // ---------------------------------------------------------------------
+// Client sign-in and sign-up by email code
+//
+//   POST /client/code/request { email, mode: "signin" | "signup" }
+//   POST /client/code/verify  { email, code, mode, name, companyName, calendarId }
+//
+// Unlike the team login above, these answers are explicit on purpose: a
+// client typing an address that has no account is told so and offered
+// "Create your account", and someone signing up with an address that is
+// already registered is sent to "Sign in". Both endpoints share the
+// per-IP limits of the team code login, which keeps address-guessing slow.
+// ---------------------------------------------------------------------
+
+const CLIENT_MESSAGES = {
+  NO_ACCOUNT: "There's no account for this email yet. Create your account to continue.",
+  ACCOUNT_EXISTS: "An account with this email already exists. Sign in instead.",
+  TEAM_ACCOUNT: "This email belongs to a team account. Please use Staff login.",
+  DEACTIVATED: "This account has been deactivated. Please contact support.",
+};
+
+function cleanEmail(raw) {
+  const email = typeof raw === "string" ? raw.trim().toLowerCase() : "";
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 254 ? email : null;
+}
+
+function cleanText(raw, max) {
+  return typeof raw === "string" ? raw.replace(/\s+/g, " ").trim().slice(0, max) : "";
+}
+
+router.post("/client/code/request", otpRequestLimiter, async (req, res) => {
+  const mode = req.body?.mode === "signup" ? "signup" : "signin";
+  const email = cleanEmail(req.body?.email);
+  if (!email) return res.status(400).json({ error: "Please enter a valid email address.", field: "email" });
+
+  const user = await User.findOne({ email });
+  if (mode === "signin") {
+    if (!user) return res.status(404).json({ error: CLIENT_MESSAGES.NO_ACCOUNT, code: "NO_ACCOUNT" });
+    if (user.role !== "client") return res.status(403).json({ error: CLIENT_MESSAGES.TEAM_ACCOUNT, code: "TEAM_ACCOUNT" });
+    if (!user.active) return res.status(403).json({ error: CLIENT_MESSAGES.DEACTIVATED, code: "DEACTIVATED" });
+    if (user.isLocked()) {
+      return res.status(429).json({ error: `Too many incorrect codes. Please try again in ${otp.LOCK_MINUTES} minutes.` });
+    }
+  } else if (user) {
+    return res.status(409).json({ error: CLIENT_MESSAGES.ACCOUNT_EXISTS, code: "ACCOUNT_EXISTS" });
+  }
+
+  if (await otp.isInCooldown(email)) {
+    return res.status(429).json({ error: "We just sent a code to this address. Please wait a minute before asking for another." });
+  }
+  try {
+    const code = await otp.issueCode({ email, user, requestIp: req.ip, purpose: mode === "signup" ? "client_signup" : "login" });
+    await otp.sendClientCode({ to: email, code, isSignup: mode === "signup" });
+  } catch (err) {
+    console.error("[client-code] Failed to send code:", err.message);
+    return res.status(502).json({ error: "We couldn't send the code right now. Please try again in a minute." });
+  }
+  return res.json({
+    ok: true,
+    message: `We sent a 6-digit code to ${email}. It expires in ${otp.TTL_MINUTES} minutes.`,
+    expiresInMinutes: otp.TTL_MINUTES,
+  });
+});
+
+router.post("/client/code/verify", otpVerifyLimiter, async (req, res) => {
+  const mode = req.body?.mode === "signup" ? "signup" : "signin";
+  const email = cleanEmail(req.body?.email);
+  const code = String(req.body?.code || "").replace(/\D/g, "");
+  if (!email || code.length !== otp.CODE_LENGTH) {
+    return res.status(400).json({ error: "Enter the 6-digit code from the email." });
+  }
+  const INVALID = "That code isn't right, or it has expired. Check the latest email or request a new code.";
+
+  let user = await User.findOne({ email });
+
+  if (mode === "signin") {
+    if (!user) return res.status(404).json({ error: CLIENT_MESSAGES.NO_ACCOUNT, code: "NO_ACCOUNT" });
+    if (user.role !== "client") return res.status(403).json({ error: CLIENT_MESSAGES.TEAM_ACCOUNT, code: "TEAM_ACCOUNT" });
+    if (!user.active) return res.status(403).json({ error: CLIENT_MESSAGES.DEACTIVATED, code: "DEACTIVATED" });
+    if (user.isLocked()) {
+      return res.status(429).json({ error: `Too many incorrect codes. Please try again in ${otp.LOCK_MINUTES} minutes.` });
+    }
+    const result = await otp.verifyCode({ email, code, purpose: "login" });
+    if (!result.ok) {
+      user.failedOtpAttempts = (user.failedOtpAttempts || 0) + 1;
+      if (user.failedOtpAttempts >= otp.MAX_ACCOUNT_FAILURES) {
+        user.lockedUntil = new Date(Date.now() + otp.LOCK_MINUTES * 60 * 1000);
+        user.failedOtpAttempts = 0;
+      }
+      await user.save();
+      return res.status(401).json({ error: INVALID });
+    }
+    user.failedOtpAttempts = 0;
+    user.lockedUntil = null;
+  } else {
+    if (user) return res.status(409).json({ error: CLIENT_MESSAGES.ACCOUNT_EXISTS, code: "ACCOUNT_EXISTS" });
+    const name = cleanText(req.body?.name, 100);
+    if (!name) return res.status(400).json({ error: "Please enter your name.", field: "name" });
+    const result = await otp.verifyCode({ email, code, purpose: "client_signup" });
+    if (!result.ok) return res.status(401).json({ error: INVALID });
+    user = await createClientAccount({
+      email,
+      name,
+      companyName: cleanText(req.body?.companyName, 150),
+      createdBy: "client-signup",
+    });
+    logActivity({ action: "client_signed_up", actor: user, clientOrgId: user.clientOrgId, summary: `${email} created a client account.` });
+  }
+
+  user.lastLoginAt = new Date();
+  await user.save();
+  setSessionCookie(res, user);
+
+  let claimed = [];
+  try {
+    claimed = await claimCalendars(user, { pendingCalendarId: req.body?.calendarId });
+  } catch (err) {
+    console.error("[client-code] Failed to link calendars (non-fatal):", err.message);
+  }
+  return res.json({ ok: true, created: mode === "signup", user: user.toSafeJSON(), redirect: portalUrlFor(claimed), calendarsSaved: claimed.length });
+});
+
+
+// ---------------------------------------------------------------------
 // Google sign-in
 //
 // GET /google           — redirects the browser to Google's consent screen
@@ -403,31 +523,37 @@ router.post("/password/set", async (req, res) => {
 
 const GOOGLE_STATE_COOKIE = "cc_oauth_state";
 const PENDING_CALENDAR_COOKIE = "cc_pending_calendar";
+// "signin" when the person pressed Google on the client "Sign in" tab: an
+// unknown Google account is then sent to "Create your account" instead of
+// being signed up silently. Any other way in (the "Create account" tab,
+// "Log in and let us file this" after generating a calendar) creates the
+// account straight away.
+const GOOGLE_INTENT_COOKIE = "cc_oauth_intent";
+const oauthCookie = {
+  httpOnly: true,
+  sameSite: "lax",
+  secure: process.env.NODE_ENV === "production",
+  maxAge: 10 * 60 * 1000, // only needs to survive the round trip to Google and back
+};
 
 router.get("/google", (req, res) => {
   // Random per-attempt state, checked on callback, to stop a
   // cross-site request from forging a callback hit against this
   // server (standard OAuth CSRF protection).
   const state = crypto.randomBytes(24).toString("hex");
-  res.cookie(GOOGLE_STATE_COOKIE, state, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 10 * 60 * 1000, // only needs to survive the round trip to Google and back
-  });
+  res.cookie(GOOGLE_STATE_COOKIE, state, oauthCookie);
 
-  // "Start Filing" links here as /auth/google?calendarId=<id>&flow=start_filing
-  // so the calendar they just generated anonymously can be attached to
-  // the account they're about to create/log into, on the other side of
-  // the OAuth round trip.
-  if (req.query.calendarId) {
-    res.cookie(PENDING_CALENDAR_COOKIE, String(req.query.calendarId), {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 10 * 60 * 1000,
-    });
+  // "Log in and let us file this" links here with ?calendarId=<id> so the
+  // calendar they just generated anonymously can be attached to the
+  // account they're about to create/log into, on the other side of the
+  // OAuth round trip.
+  if (req.query.calendarId && mongoose.isValidObjectId(String(req.query.calendarId))) {
+    res.cookie(PENDING_CALENDAR_COOKIE, String(req.query.calendarId), oauthCookie);
+  } else {
+    res.clearCookie(PENDING_CALENDAR_COOKIE);
   }
+  if (req.query.intent === "signin") res.cookie(GOOGLE_INTENT_COOKIE, "signin", oauthCookie);
+  else res.clearCookie(GOOGLE_INTENT_COOKIE);
 
   res.redirect(getAuthUrl(state));
 });
@@ -436,14 +562,16 @@ router.get("/google/callback", async (req, res) => {
   const { code, state, error } = req.query;
   const expectedState = req.cookies?.[GOOGLE_STATE_COOKIE];
   const pendingCalendarId = req.cookies?.[PENDING_CALENDAR_COOKIE];
+  const intent = req.cookies?.[GOOGLE_INTENT_COOKIE];
   res.clearCookie(GOOGLE_STATE_COOKIE);
   res.clearCookie(PENDING_CALENDAR_COOKIE);
+  res.clearCookie(GOOGLE_INTENT_COOKIE);
 
   if (error) {
-    return res.redirect("/login.html?reason=google_denied");
+    return res.redirect("/login.html?as=client&reason=google_denied");
   }
   if (!code || !state || !expectedState || state !== expectedState) {
-    return res.redirect("/login.html?reason=google_invalid_state");
+    return res.redirect("/login.html?as=client&reason=google_invalid_state");
   }
 
   let profile;
@@ -451,7 +579,7 @@ router.get("/google/callback", async (req, res) => {
     profile = await verifyCodeAndGetProfile(code);
   } catch (err) {
     console.error("Google sign-in failed:", err.message);
-    return res.redirect("/login.html?reason=google_failed");
+    return res.redirect("/login.html?as=client&reason=google_failed");
   }
 
   let user = await User.findOne({ googleId: profile.googleId });
@@ -469,92 +597,36 @@ router.get("/google/callback", async (req, res) => {
   }
 
   if (!user) {
-    // Genuinely new person, instant signup: give them their own
-    // ClientOrg workspace and a client account scoped to it. Name the
-    // org from their email domain as a reasonable default — they can
-    // rename it later from the portal, same as any SaaS "workspace
-    // name" you're free to change after signup.
-    const domain = profile.email.split("@")[1] || "";
-    const orgName = profile.name ? `${profile.name}'s Company` : domain || profile.email;
-
-    const org = await ClientOrg.create({
-      name: orgName,
-      primaryContactEmail: profile.email,
-      primaryContactName: profile.name,
-      createdBy: "google-signup",
-    });
-
-    user = await User.create({
+    // Pressed Google on the "Sign in" tab, but this Google account has
+    // never been used here: say so, and offer to create the account.
+    if (intent === "signin") {
+      return res.redirect("/login.html?as=client&mode=signup&reason=no_account_google");
+    }
+    user = await createClientAccount({
       email: profile.email,
-      name: profile.name,
+      name: profile.name || "",
       googleId: profile.googleId,
-      role: "client",
-      clientOrgId: org._id,
+      createdBy: "google-signup",
     });
   }
 
   if (!user.active) {
-    return res.redirect("/login.html?reason=account_deactivated");
+    return res.redirect("/login.html?as=client&reason=account_deactivated");
   }
 
   const loginStep = setSessionCookie(res, user);
   if (loginStep === "mfa") return res.redirect("/two-factor.html");
+  if (user.role !== "client") return res.redirect(destinationFor(user));
 
-  // Link the calendar they generated anonymously (before this login) to
-  // the account they just created/signed into. Only ever touches a
-  // calendar that's still unclaimed public data (source:"public",
-  // clientOrgId: null) — never overwrites a calendar that already
-  // belongs to someone. Auto-approved on link: no staff review step
-  // here, it goes straight from "generated" to "visible in the portal"
-  // the moment the lead logs in.
-  let linkedCalendarId = null;
-  if (pendingCalendarId && user.role === "client" && user.clientOrgId) {
-    try {
-      const linked = await Calendar.findOneAndUpdate(
-        { _id: pendingCalendarId, source: "public", clientOrgId: null },
-        {
-          $set: {
-            clientOrgId: user.clientOrgId,
-            status: "approved",
-            reviewedBy: "auto",
-            reviewedAt: new Date(),
-          },
-        },
-        { new: true }
-      );
-      if (linked) {
-        linkedCalendarId = linked._id.toString();
-        // Carry the contact details they typed into the public form onto
-        // their company record, so staff have an email AND phone from the
-        // first minute (the portal asks for anything still missing).
-        const org = await ClientOrg.findById(user.clientOrgId);
-        if (org) {
-          const lead = linked.leadContact || {};
-          if (!org.primaryContactPhone && lead.phone) org.primaryContactPhone = lead.phone;
-          if (!org.primaryContactEmail) org.primaryContactEmail = lead.email || user.email;
-          if (!org.primaryContactName && lead.name) org.primaryContactName = lead.name;
-          if (org.createdBy === "google-signup" && linked.profile?.companyName && /'s Company$|@|\./.test(org.name)) {
-            org.name = linked.profile.companyName;
-          }
-          await org.save();
-        }
-        notifyStaff({
-          clientOrgId: user.clientOrgId,
-          calendarId: linked._id,
-          type: "client_signed_up",
-          title: `${org?.name || user.email} signed in to start filing`,
-          body: `${user.name || user.email} claimed their ${linked.items?.length || ""}-item compliance calendar and can now pick services and upload documents.`,
-          link: `/calendar.html?id=${linked._id}`,
-          actorName: user.name || user.email,
-        });
-      }
-    } catch (err) {
-      console.error("[google-callback] Failed to link pending calendar (non-fatal):", err.message);
-    }
+  user.lastLoginAt = new Date();
+  await user.save();
+  let claimed = [];
+  try {
+    claimed = await claimCalendars(user, { pendingCalendarId });
+  } catch (err) {
+    console.error("[google-callback] Failed to link calendars (non-fatal):", err.message);
   }
-
-  const portalUrl = linkedCalendarId ? `/portal.html?calendar=${linkedCalendarId}` : "/portal.html";
-  res.redirect(user.role === "client" ? portalUrl : "/");
+  res.redirect(portalUrlFor(claimed));
 });
 
 module.exports = router;

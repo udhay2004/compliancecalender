@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sign in — Compliance Calendar</title>
+<title>Sign in — ComplyGlobally</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/shared.css">
@@ -51,11 +51,37 @@
     background: var(--teal-bg); color: var(--brand-dark); margin-bottom: 18px;
   }
   .notice.warn { background: var(--seal-gold-bg); color: var(--seal-gold); }
+  .notice .notice-action {
+    display: inline-block; margin-top: 8px; background: none; border: 0; padding: 0; cursor: pointer;
+    font-family: var(--sans); font-size: 13px; font-weight: 700; color: inherit; text-decoration: underline;
+  }
+  .door-group-label {
+    font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink-soft); margin: 4px 0 8px;
+  }
+  .door-list + .door-group-label { margin-top: 22px; }
+  .door-client { border-color: var(--brand); background: var(--teal-bg); }
+  .door-icon.client { background: var(--brand); color: #fff; }
+  .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 10px; background: var(--teal-bg); margin-bottom: 18px; }
+  .tab {
+    border: 0; border-radius: 8px; padding: 9px 10px; background: transparent; cursor: pointer;
+    font-family: var(--sans); font-size: 14px; font-weight: 600; color: var(--ink-soft);
+  }
+  .tab[aria-selected="true"] { background: var(--card); color: var(--ink); box-shadow: var(--shadow-sm); }
+  .google-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; box-sizing: border-box;
+    padding: 11px 16px; border: 1px solid var(--rule); border-radius: var(--radius-sm); background: var(--card);
+    color: var(--ink); font-family: var(--sans); font-size: 14.5px; font-weight: 600; text-decoration: none;
+  }
+  .google-btn:hover { border-color: var(--brand); }
+  .or-divider { display: flex; align-items: center; gap: 12px; margin: 18px 0 6px; color: var(--ink-soft); font-size: 12.5px; }
+  .or-divider::before, .or-divider::after { content: ''; flex: 1; border-top: 1px solid var(--rule); }
+  #stepClient:not(.signup) .signup-only { display: none; }
 </style>
 </head>
 <body>
 <div class="topbar">
-  <div class="brand">Compliance Calendar <strong>Generator</strong></div>
+  <a class="brand" href="/" style="text-decoration:none;color:inherit;">Comply<strong>Globally</strong></a>
 </div>
 
 <div class="wrap narrow">
@@ -64,11 +90,22 @@
     <!-- Step 1: which door -->
     <div class="step active" id="stepDoor">
       <div class="card-head">
-        <div class="card-eyebrow">Internal Access</div>
+        <div class="card-eyebrow">ComplyGlobally</div>
         <h1>Sign in</h1>
-        <p class="sub">Choose how you work with the platform. You'll get a one-time code by email.</p>
+        <p class="sub">Choose how you use ComplyGlobally.</p>
       </div>
       <div class="card-body">
+        <div class="door-group-label">Clients</div>
+        <div class="door-list">
+          <button type="button" class="door door-client" id="clientDoor">
+            <span class="door-icon client">CL</span>
+            <span>
+              <span class="door-title">Client login</span>
+              <span class="door-sub">Sign in to your portal, or create your account</span>
+            </span>
+          </button>
+        </div>
+        <div class="door-group-label">ComplyGlobally team</div>
         <div class="door-list">
           <button type="button" class="door" data-portal="staff">
             <span class="door-icon">ST</span>
@@ -85,11 +122,80 @@
             </span>
           </button>
         </div>
-        <div class="form-foot" style="margin-top:22px;">
-          A client? <a href="/api/auth/google">Continue with Google</a>
-        </div>
-        <p class="hint" style="margin-top:8px;font-size:12px;">By continuing you agree to our <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</p>
+        <p class="hint" style="margin-top:18px;font-size:12px;">By continuing you agree to our <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</p>
         <p class="hint" id="doorHint" style="margin-top:14px;"></p>
+      </div>
+    </div>
+
+    <!-- Client: sign in or create an account -->
+    <div class="step" id="stepClient">
+      <div class="card-head">
+        <button type="button" class="back-link" data-back="stepDoor">← Back</button>
+        <div class="card-eyebrow">Client portal</div>
+        <h1 id="clientTitle">Sign in to your portal</h1>
+        <p class="sub" id="clientSub">Welcome back. Use the Google account or email you signed up with.</p>
+      </div>
+      <div class="card-body">
+        <div class="tabs" role="tablist" aria-label="Sign in or create an account">
+          <button type="button" role="tab" class="tab" id="tabSignin" data-mode="signin" aria-selected="true">Sign in</button>
+          <button type="button" role="tab" class="tab" id="tabSignup" data-mode="signup" aria-selected="false">Create account</button>
+        </div>
+        <div id="clientNotice" role="alert" aria-live="polite"></div>
+        <a class="google-btn" id="googleBtn" href="/api/auth/google?intent=signin">
+          <svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+          <span id="googleLabel">Sign in with Google</span>
+        </a>
+        <div class="or-divider"><span>or use your email</span></div>
+        <form id="clientForm" novalidate>
+          <div class="grid full">
+            <div class="field signup-only">
+              <label for="clientName">Your name</label>
+              <input type="text" id="clientName" autocomplete="name" maxlength="100">
+            </div>
+            <div class="field signup-only">
+              <label for="clientCompany">Company name <span style="font-weight:400;color:var(--ink-soft);">(optional)</span></label>
+              <input type="text" id="clientCompany" autocomplete="organization" maxlength="150">
+            </div>
+            <div class="field">
+              <label for="clientEmail">Email</label>
+              <input type="email" id="clientEmail" autocomplete="email" required autocapitalize="off" spellcheck="false">
+            </div>
+          </div>
+          <div class="submit-row">
+            <span class="hint" id="clientHint"></span>
+            <button type="submit" class="primary" id="clientSubmit">Email me a code →</button>
+          </div>
+        </form>
+        <div class="form-foot" style="margin-top:16px;" id="clientSwitch"></div>
+      </div>
+    </div>
+
+    <!-- Client: enter the code -->
+    <div class="step" id="stepClientCode">
+      <div class="card-head">
+        <button type="button" class="back-link" data-back="stepClient">← Use a different email</button>
+        <div class="card-eyebrow">Check your inbox</div>
+        <h1>Enter your code</h1>
+      </div>
+      <div class="card-body">
+        <p class="sent-to">We sent a 6-digit code to <strong id="clientSentTo"></strong>. It expires in 10 minutes and works once.</p>
+        <form id="clientCodeForm">
+          <div class="grid full">
+            <div class="field">
+              <label for="clientCode">6-digit code</label>
+              <input type="text" id="clientCode" class="code-input" inputmode="numeric" autocomplete="one-time-code"
+                     maxlength="6" pattern="[0-9]{6}" required>
+            </div>
+          </div>
+          <div class="submit-row">
+            <span class="hint" id="clientCodeHint"></span>
+            <button type="submit" class="primary" id="clientCodeSubmit">Continue →</button>
+          </div>
+        </form>
+        <div class="resend-row">
+          Didn't get it? Check your spam folder, or <button type="button" id="clientResendBtn" disabled>send a new code</button>
+          <span id="clientResendTimer"></span>
+        </div>
       </div>
     </div>
 
@@ -116,6 +222,9 @@
         </form>
         <div class="form-foot" style="margin-top:16px;">
           Already set a password? <a href="#" id="usePasswordInstead">Sign in with it instead</a>
+        </div>
+        <div class="form-foot" style="margin-top:8px;">
+          Are you a client? <a href="/login.html?as=client">Client login</a>
         </div>
       </div>
     </div>
@@ -227,8 +336,12 @@
     var steps = document.querySelectorAll('.step');
     for (var i = 0; i < steps.length; i++) steps[i].classList.remove('active');
     $(stepId).classList.add('active');
-    var firstInput = $(stepId).querySelector('input');
-    if (firstInput) setTimeout(function () { firstInput.focus(); }, 40);
+    setTimeout(function () {
+      var inputs = $(stepId).querySelectorAll('input');
+      for (var i = 0; i < inputs.length; i++) {
+        if (inputs[i].offsetParent !== null) { inputs[i].focus(); return; }
+      }
+    }, 40);
   }
 
   function setHint(id, message, isError) {
@@ -248,7 +361,11 @@
       body: JSON.stringify(body)
     }).then(function (res) {
       return res.json().catch(function () { return {}; }).then(function (data) {
-        if (!res.ok) throw new Error(data.error || 'Something went wrong. Please try again.');
+        if (!res.ok) {
+          var err = new Error(data.error || 'Something went wrong. Please try again.');
+          err.code = data.code || '';
+          throw err;
+        }
         return data;
       });
     });
@@ -265,10 +382,208 @@
     not_authorized: "You don't have access to that page."
   };
   var reason = params.get('reason');
-  if (reason && REASONS[reason]) setHint('doorHint', REASONS[reason], true);
+  if (reason && REASONS[reason] && params.get('as') !== 'client') setHint('doorHint', REASONS[reason], true);
+
+  // --- clients: sign in or create an account --------------------------
+  // ?as=client opens this straight away (the home page's "Client login");
+  // ?mode=signup picks the "Create account" tab; ?calendarId=<id> is the
+  // calendar they just generated, saved to their portal once they're in.
+  var client = {
+    mode: params.get('mode') === 'signup' ? 'signup' : 'signin',
+    email: '',
+    calendarId: /^[a-f0-9]{24}$/i.test(params.get('calendarId') || '') ? params.get('calendarId') : '',
+    resendAt: 0
+  };
+
+  function clientNotice(message, action) {
+    var box = $('clientNotice');
+    box.innerHTML = '';
+    if (!message) return;
+    var div = document.createElement('div');
+    div.className = 'notice warn';
+    div.appendChild(document.createTextNode(message));
+    if (action) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'notice-action';
+      btn.textContent = action.label;
+      btn.addEventListener('click', action.run);
+      div.appendChild(document.createElement('br'));
+      div.appendChild(btn);
+    }
+    box.appendChild(div);
+  }
+
+  function googleHref(mode) {
+    var q = [];
+    if (mode === 'signin' && !client.calendarId) q.push('intent=signin');
+    if (client.calendarId) q.push('calendarId=' + encodeURIComponent(client.calendarId));
+    return '/api/auth/google' + (q.length ? '?' + q.join('&') : '');
+  }
+
+  function setClientMode(mode, keepNotice) {
+    client.mode = mode;
+    var signup = mode === 'signup';
+    $('stepClient').classList.toggle('signup', signup);
+    $('tabSignin').setAttribute('aria-selected', String(!signup));
+    $('tabSignup').setAttribute('aria-selected', String(signup));
+    $('clientTitle').textContent = signup ? 'Create your account' : 'Sign in to your portal';
+    $('clientSub').textContent = signup
+      ? 'Free to create. Keep every calendar you generate in one place, pick the filings you want us to handle, and upload documents securely.'
+      : 'Welcome back. Use the Google account or email you signed up with.';
+    $('googleLabel').textContent = signup ? 'Sign up with Google' : 'Sign in with Google';
+    $('googleBtn').href = googleHref(mode);
+    $('clientName').required = signup;
+    $('clientSwitch').innerHTML = signup
+      ? 'Already have an account? <a href="#" data-switch="signin">Sign in</a>'
+      : 'New to ComplyGlobally? <a href="#" data-switch="signup">Create your account</a>';
+    setHint('clientHint', '');
+    if (!keepNotice) clientNotice('');
+  }
+
+  function openClient(mode, notice) {
+    setClientMode(mode, Boolean(notice));
+    if (notice) clientNotice(notice.message, notice.action);
+    show('stepClient');
+  }
+
+  $('clientDoor').addEventListener('click', function () { openClient(client.mode); });
+  $('tabSignin').addEventListener('click', function () { setClientMode('signin'); });
+  $('tabSignup').addEventListener('click', function () { setClientMode('signup'); });
+  $('clientSwitch').addEventListener('click', function (e) {
+    var mode = e.target.getAttribute && e.target.getAttribute('data-switch');
+    if (!mode) return;
+    e.preventDefault();
+    setClientMode(mode);
+  });
+
+  // The server's explicit answers become a message plus the one button
+  // that fixes it.
+  function handleClientError(err, hintId) {
+    if (err.code === 'NO_ACCOUNT') {
+      show('stepClient');
+      setClientMode('signin', true);
+      clientNotice(err.message, { label: 'Create your account', run: function () { setClientMode('signup'); $('clientName').focus(); } });
+      setHint(hintId, '');
+      return;
+    }
+    if (err.code === 'ACCOUNT_EXISTS') {
+      show('stepClient');
+      setClientMode('signup', true);
+      clientNotice(err.message, { label: 'Sign in instead', run: function () { setClientMode('signin'); } });
+      setHint(hintId, '');
+      return;
+    }
+    if (err.code === 'TEAM_ACCOUNT') {
+      clientNotice(err.message, { label: 'Go to Staff login', run: function () { $('email').value = client.email; show('stepEmail'); } });
+      setHint(hintId, '');
+      return;
+    }
+    setHint(hintId, err.message, true);
+  }
+
+  function requestClientCode(button, hintId) {
+    button.disabled = true;
+    setHint(hintId, 'Sending code…');
+    return post('/api/auth/client/code/request', { email: client.email, mode: client.mode })
+      .then(function () {
+        $('clientSentTo').textContent = client.email;
+        setHint(hintId, '');
+        setHint('clientCodeHint', '');
+        $('clientCode').value = '';
+        startClientResendTimer();
+        show('stepClientCode');
+      })
+      .catch(function (err) { handleClientError(err, hintId); })
+      .then(function () { button.disabled = false; });
+  }
+
+  $('clientForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    clientNotice('');
+    var email = $('clientEmail').value.trim().toLowerCase();
+    if (client.mode === 'signup' && !$('clientName').value.trim()) {
+      setHint('clientHint', 'Please enter your name.', true);
+      $('clientName').focus();
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setHint('clientHint', 'Please enter a valid email address.', true);
+      $('clientEmail').focus();
+      return;
+    }
+    client.email = email;
+    requestClientCode($('clientSubmit'), 'clientHint');
+  });
+
+  var clientTimer = null;
+  function startClientResendTimer() {
+    client.resendAt = Date.now() + 60000;
+    $('clientResendBtn').disabled = true;
+    if (clientTimer) clearInterval(clientTimer);
+    clientTimer = setInterval(tickClientResend, 1000);
+    tickClientResend();
+  }
+  function tickClientResend() {
+    var left = Math.ceil((client.resendAt - Date.now()) / 1000);
+    if (left <= 0) {
+      clearInterval(clientTimer);
+      clientTimer = null;
+      $('clientResendBtn').disabled = false;
+      $('clientResendTimer').textContent = '';
+      return;
+    }
+    $('clientResendTimer').textContent = '(in ' + left + 's)';
+  }
+  $('clientResendBtn').addEventListener('click', function () {
+    requestClientCode($('clientResendBtn'), 'clientCodeHint');
+  });
+
+  $('clientCode').addEventListener('input', function () {
+    this.value = this.value.replace(/\D/g, '').slice(0, 6);
+    if (this.value.length === 6) $('clientCodeForm').requestSubmit();
+  });
+
+  $('clientCodeForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var btn = $('clientCodeSubmit');
+    if (btn.disabled) return;
+    btn.disabled = true;
+    setHint('clientCodeHint', client.mode === 'signup' ? 'Creating your account…' : 'Signing in…');
+    post('/api/auth/client/code/verify', {
+      email: client.email,
+      code: $('clientCode').value,
+      mode: client.mode,
+      name: $('clientName').value.trim(),
+      companyName: $('clientCompany').value.trim(),
+      calendarId: client.calendarId
+    })
+      .then(function (data) { location.href = data.redirect || '/portal.html'; })
+      .catch(function (err) {
+        btn.disabled = false;
+        if (err.code) { handleClientError(err, 'clientCodeHint'); return; }
+        setHint('clientCodeHint', err.message, true);
+        $('clientCode').value = '';
+        $('clientCode').focus();
+      });
+  });
+
+  var CLIENT_REASONS = {
+    no_account_google: { mode: 'signup', message: "That Google account doesn't have a ComplyGlobally account yet. Create one below, with Google or your email." },
+    google_denied: { mode: 'signin', message: 'Google sign-in was cancelled.' },
+    google_invalid_state: { mode: 'signin', message: 'Google sign-in failed. Please try again.' },
+    google_failed: { mode: 'signin', message: 'Google sign-in failed. Please try again, or use your email instead.' },
+    account_deactivated: { mode: 'signin', message: 'This account has been deactivated. Please contact support.' }
+  };
+  if (params.get('as') === 'client') {
+    var r = CLIENT_REASONS[reason];
+    openClient(r ? r.mode : client.mode, r ? { message: r.message } : null);
+  } else {
+    setClientMode(client.mode);
+  }
 
   // --- step 1: door ---------------------------------------------------
-  var doors = document.querySelectorAll('.door');
+  var doors = document.querySelectorAll('.door[data-portal]');
   for (var d = 0; d < doors.length; d++) {
     doors[d].addEventListener('click', function () {
       state.portal = this.getAttribute('data-portal');

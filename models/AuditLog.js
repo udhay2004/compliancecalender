@@ -46,6 +46,7 @@ const auditLogSchema = new mongoose.Schema(
         // business events: "who set a password, and when" is the first
         // question asked after any suspected account compromise.
         "password_set",
+        "client_signed_up",
         "password_changed",
         // WhatsApp consent (lib/whatsapp.js) and document chasing.
         "whatsapp_opt_in",

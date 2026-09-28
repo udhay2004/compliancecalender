@@ -20,7 +20,9 @@
 
 const mongoose = require("mongoose");
 
-const PURPOSES = ["login"];
+// login: an existing account signing in. client_signup: a new client
+// confirming their email before the account is created.
+const PURPOSES = ["login", "client_signup"];
 
 const loginOtpSchema = new mongoose.Schema(
   {

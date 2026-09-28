@@ -521,7 +521,7 @@ router.post("/calendars/regenerate", requireCompleteContact, async (req, res) =>
       calendarId: calendar._id,
       type: "calendar_regenerated",
       title: "Your compliance calendar was regenerated",
-      body: `Your new calendar has ${items.length} items. We kept your selections, documents and payments for the ${carried} filings that are still on it. Your previous calendar is still available under "Calendar history".`,
+      body: `Your new calendar has ${items.length} items. We kept your selections, documents and payments for the ${carried} filings that are still on it. Your previous calendar is still available: choose it from the version list above the calendar.`,
       link: `/portal.html?calendar=${calendar._id}`,
       actorName: who,
     });
