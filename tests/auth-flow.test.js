@@ -432,3 +432,22 @@ test("the code endpoint stops handing out emails under a flood", async () => {
   }
   assert.ok(sawLimit, "repeated code requests from one IP must start being refused");
 });
+
+test("a whole office can sign in from one address; only wrong passwords count toward the limit", async () => {
+  const email = "finance@theconnectventures.com";
+  const setup = makeClient();
+  await setup.post("/api/auth/otp/request", { email, portal: "staff" });
+  await setup.post("/api/auth/otp/verify", { email, code: lastCodeFor(email) });
+  await setup.post("/api/auth/password/set", { password: "Quiet-Ledger-98", confirmPassword: "Quiet-Ledger-98" });
+  Object.values(authRoutes.rateLimitStores).forEach((store) => store.resetAll());
+  for (let i = 0; i < 15; i++) {
+    const ok = await makeClient().post("/api/auth/login", { email, password: "Quiet-Ledger-98" });
+    assert.strictEqual(ok.status, 200, `sign-in ${i + 1} from the same office address`);
+  }
+  let limited = false;
+  for (let i = 0; i < 12; i++) {
+    const bad = await makeClient().post("/api/auth/login", { email, password: "wrong-guess-" + i });
+    if (bad.status === 429) { limited = true; break; }
+  }
+  assert.ok(limited, "password guessing is still stopped");
+});

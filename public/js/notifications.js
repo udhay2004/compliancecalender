@@ -44,7 +44,27 @@
       </div>`;
     group.appendChild(wrap);
     group.appendChild(navUser);
+    addMobileMenu(group);
     return wrap;
+  }
+
+  // On phones the page links (Dashboard, Pipeline, Reports…) are hidden to
+  // save space; this "Menu" button shows them as a drop-down.
+  function addMobileMenu(group) {
+    const topbar = document.querySelector('.topbar');
+    const links = topbar && topbar.querySelector('.nav-links');
+    if (!links) return;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'menu-btn';
+    btn.setAttribute('aria-expanded', 'false');
+    btn.setAttribute('aria-label', 'Menu');
+    btn.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
+    group.insertBefore(btn, group.firstChild);
+    const set = (open) => { topbar.classList.toggle('nav-open', open); btn.setAttribute('aria-expanded', String(open)); };
+    btn.addEventListener('click', (e) => { e.stopPropagation(); set(!topbar.classList.contains('nav-open')); });
+    document.addEventListener('click', (e) => { if (!links.contains(e.target)) set(false); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') set(false); });
   }
 
   function render(wrap, data) {

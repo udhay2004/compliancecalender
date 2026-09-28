@@ -429,10 +429,17 @@
     renderItems();
   }
 
+  // "FY Jan–Dec", or "Year ends December" when only the end is known.
+  function fyText(p) {
+    if (p.fyStart && p.fyEnd) return `FY ${p.fyStart}–${p.fyEnd}`;
+    if (p.fyEnd) return `Year ends ${p.fyEnd}`;
+    if (p.fyStart) return `Year starts ${p.fyStart}`;
+    return '';
+  }
   function renderHeader() {
     const p = calendar.profile || {};
     document.getElementById('calTitle').textContent = p.companyName || 'Your compliance calendar';
-    document.getElementById('calSub').textContent = [p.entityType, p.state, p.country && p.country !== 'United States' ? p.country : '', (p.fyStart || p.fyEnd) ? `FY ${p.fyStart || ''}–${p.fyEnd || ''}` : '', `Generated ${new Date(calendar.createdAt).toLocaleDateString()}`].filter(Boolean).join(' · ');
+    document.getElementById('calSub').textContent = [p.entityType, p.state, p.country && p.country !== 'United States' ? p.country : '', fyText(p), `Generated ${new Date(calendar.createdAt).toLocaleDateString()}`].filter(Boolean).join(' · ');
 
     const current = calendars.filter(c => !c.supersededAt);
     const older = calendars.filter(c => c.supersededAt);
