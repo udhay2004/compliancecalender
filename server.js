@@ -211,6 +211,12 @@ app.get("/", tryPageAuth, (req, res) => {
 // ---------------------------------------------------------------------
 // Public static assets: login page, CSS/JS, etc.
 // ---------------------------------------------------------------------
+// Browsers ask for /favicon.ico on every page; answer with the site icon.
+app.get("/favicon.ico", (req, res) => {
+  res.setHeader("Cache-Control", "public, max-age=86400");
+  res.type("image/svg+xml").sendFile(path.join(__dirname, "public", "favicon.svg"));
+});
+
 // Pages always re-check for a newer version; scripts, styles and images are
 // cached by the browser for an hour (then re-checked cheaply via ETag).
 app.use(express.static(path.join(__dirname, "public"), {

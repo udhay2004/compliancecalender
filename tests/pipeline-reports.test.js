@@ -299,7 +299,7 @@ test("revenue: payments minus refunds, by month, service and client; void refund
   const docs = [
     { kind: "invoice", issuedAt: new Date("2026-07-10"), amountMinor: 50000, currency: "USD", description: "Form 1120", customer: { name: "Acme" } },
     { kind: "invoice", issuedAt: new Date("2026-09-02"), amountMinor: 12500, currency: "USD", description: "Registered Agent", customer: { name: "Blue" } },
-    { kind: "credit_note", issuedAt: new Date("2026-09-05"), amountMinor: 10000, currency: "USD", status: "issued", description: "Form 1120", customer: { name: "Acme" } },
+    { kind: "credit_note", issuedAt: new Date("2026-09-05"), amountMinor: 10000, currency: "USD", status: "issued", description: "Refund: Form 1120", customer: { name: "Acme" } },
     { kind: "credit_note", issuedAt: new Date("2026-09-06"), amountMinor: 99999, currency: "USD", status: "void", description: "Form 1120", customer: { name: "Acme" } },
     { kind: "invoice", issuedAt: new Date("2026-05-01"), amountMinor: 70000, currency: "USD", description: "Old", customer: { name: "Old Co" } },
     { kind: "invoice", issuedAt: new Date("2026-08-01"), amountMinor: 1000000, currency: "INR", description: "X", customer: { name: "Rupee Co" } },

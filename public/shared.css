@@ -57,6 +57,24 @@ a { color: var(--teal); }
 @media (max-width: 640px) {
   .nav-links { display: none; }
 }
+/* Phone menu (added by public/js/notifications.js on pages with links). */
+.menu-btn { display: none; }
+@media (max-width: 640px) {
+  .topbar .brand { white-space: nowrap; font-size: 13.5px; }
+  .topbar .nav-user button { white-space: nowrap; }
+  .topbar .nav-user #navUser, .topbar .nav-user > span:not(:only-child) { display: none; }
+  .menu-btn {
+    display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px;
+    border: 1px solid var(--rule); border-radius: 50%; background: var(--card); color: var(--ink); cursor: pointer;
+  }
+  .topbar.nav-open .nav-links {
+    display: flex; flex-direction: column; align-items: stretch; gap: 0;
+    position: absolute; top: 100%; left: 0; right: 0; background: var(--card);
+    border-bottom: 1px solid var(--rule); box-shadow: var(--shadow); padding: 6px 16px 10px; z-index: 40;
+  }
+  .topbar.nav-open .nav-links a { padding: 12px 2px; border-bottom: 1px solid var(--rule-soft); }
+  .topbar.nav-open .nav-links a:last-child { border-bottom: 0; }
+}
 
 /* ---- two-column workspace layout (calendar.html, portal.html): main
    content on the left, a sticky sidebar (contact + chat) on the right.

@@ -262,7 +262,7 @@
             <tr id="row-${it.__index}">
               <td class="due" data-label="Due">${it.dueDateActual ? `<b>${fmtDue(it.dueDateActual)}</b><div style="font-weight:400;font-size:11.5px;color:var(--ink-soft);">${escapeHtml(it.due_date)}</div>` : escapeHtml(it.due_date)}</td>
               <td class="name"><span class="dot ${escapeHtml(it.confidence||'medium')}"></span>${escapeHtml(it.compliance_name)}${it.editedByReviewer ? '<span class="edited-flag">edited</span>' : ''}
-                <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">${priceTag(it)}${calendar.clientOrgId ? (it.selectedByClient ? '<span class="sel-badge on">Client selected</span>' : '<span class="sel-badge">Not selected</span>') : ''}</div></td>
+                <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">${priceTag(it)}${it.isHistory ? `<span class="sel-badge">Previous period${it.clientStatus === 'Filed' ? ' · done' : ''}</span>` : calendar.clientOrgId ? (it.selectedByClient ? '<span class="sel-badge on">Client selected</span>' : '<span class="sel-badge">Not selected</span>') : ''}</div></td>
               <td class="applies" data-label="Applies to">${escapeHtml(it.applicable_to)}</td>
               <td class="desc">${escapeHtml(it.description)} — <span style="color:var(--ink-soft)">${escapeHtml(it.authority||'')}</span>
                 ${it.source_url ? `<a class="src-link" href="${escapeHtml(it.source_url)}" target="_blank" rel="noopener">Source: ${escapeHtml(sourceHost(it.source_url))} ↗</a>` : ''}
@@ -279,7 +279,7 @@
     const reviewInfo = status !== 'pending_review'
       ? `<div class="review-panel">
           <h3>${status === 'approved' ? 'Approved' : 'Rejected'}</h3>
-          <p style="font-size:13.5px; color:var(--ink-soft);">By ${escapeHtml(reviewedBy || '—')} on ${fmtDateTime(reviewedAt)}${reviewNotes ? ' — “' + escapeHtml(reviewNotes) + '”' : ''}</p>
+          <p style="font-size:13.5px; color:var(--ink-soft);">${reviewedBy ? `By ${escapeHtml(reviewedBy)}${reviewedAt ? ' on ' + fmtDateTime(reviewedAt) : ''}` : 'Approved (reviewer not recorded)'}${reviewNotes ? ' — “' + escapeHtml(reviewNotes) + '”' : ''}</p>
         </div>`
       : `<div class="review-panel">
           <h3>Review this calendar</h3>
@@ -301,7 +301,12 @@
             <div class="case-header">
               <div>
                 <div class="case-title">${escapeHtml(profile.companyName || 'Unnamed Company')}</div>
-                <div class="case-sub">${escapeHtml(profile.entityType)} (${escapeHtml(profile.taxStatus||'')}) · ${escapeHtml(profile.state)} · FY ${escapeHtml(profile.fyStart||'')}–${escapeHtml(profile.fyEnd||'')} · Generated ${fmtDateTime(createdAt)} by ${escapeHtml(createdBy || '—')}</div>
+                <div class="case-sub">${[
+                  escapeHtml(profile.entityType || '') + (profile.taxStatus ? ` (${escapeHtml(profile.taxStatus)})` : ''),
+                  escapeHtml(profile.state || ''),
+                  profile.fyStart && profile.fyEnd ? `FY ${escapeHtml(profile.fyStart)}–${escapeHtml(profile.fyEnd)}` : profile.fyEnd ? `Year ends ${escapeHtml(profile.fyEnd)}` : '',
+                  `Generated ${fmtDateTime(createdAt)} by ${escapeHtml(createdBy || '—')}`,
+                ].filter(Boolean).join(' · ')}</div>
                 ${(profile.employeeStates && profile.employeeStates.length) ? `<div class="case-sub">Employees also in: ${escapeHtml(profile.employeeStates.join(', '))}</div>` : ''}
                 ${(profile.quarterlyGrossReceipts !== undefined && profile.quarterlyGrossReceipts !== null && profile.quarterlyGrossReceipts !== '') ? `<div class="case-sub">Avg. Quarterly Gross Receipts: $${escapeHtml(Number(profile.quarterlyGrossReceipts).toLocaleString('en-US'))}</div>` : ''}
               </div>

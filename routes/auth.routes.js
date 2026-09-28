@@ -53,6 +53,9 @@ const rateLimitStores = {
 
 const loginLimiter = rateLimit({
   store: rateLimitStores.login,
+  // Only failed attempts count. Successful sign-ins from a shared office
+  // address must never lock the rest of the team out.
+  skipSuccessfulRequests: true,
   windowMs: 15 * 60 * 1000,
   max: 10,
   standardHeaders: true,
@@ -167,6 +170,7 @@ const otpRequestLimiter = rateLimit({
 
 const otpVerifyLimiter = rateLimit({
   store: rateLimitStores.otpVerify,
+  skipSuccessfulRequests: true,
   windowMs: 15 * 60 * 1000,
   max: 12,
   standardHeaders: true,
