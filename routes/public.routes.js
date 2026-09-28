@@ -29,6 +29,7 @@ const { getPriceInfo } = require("../lib/complianceFees");
 const { normalizePhone } = require("../lib/calendarView");
 const { notifyStaff, notifyClient } = require("../lib/notify");
 
+const { checkProfile } = require("../lib/countries");
 const router = express.Router();
 const { reserveAiRun, BudgetError, verifyHuman, humanCheckEnabled, turnstileKeys } = require("../lib/abuseGuard");
 
@@ -180,12 +181,14 @@ function notifyAdminOfLead(calendar, contact, { isReviewRequest = false } = {}) 
 // contact.email is REQUIRED — this is the lead capture, now the FIRST
 // step instead of something requested after seeing a locked preview.
 router.post("/generate", generateLimiter, async (req, res) => {
-  const profile = req.body?.profile;
   const contact = req.body?.contact || {};
 
-  if (!profile || !profile.state || !profile.entityType) {
-    return res.status(400).json({ error: "Missing required profile fields (state, entityType)." });
-  }
+  // Only the countries we cover (lib/countries.js). Outside the US the
+  // region is optional; it used to be required here, so a German or UK
+  // visitor who left it blank got "Missing required profile fields".
+  const checked = checkProfile(req.body?.profile);
+  if (!checked.ok) return res.status(400).json({ error: checked.error, field: checked.field });
+  const profile = checked.profile;
   // A signed-in client generating another calendar: it belongs to their
   // company straight away (saved, visible in their portal, nothing locked).
   const viewer = await loadUserFromRequest(req).catch(() => null);

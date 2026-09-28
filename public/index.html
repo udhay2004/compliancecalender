@@ -674,7 +674,8 @@
 </main>
 
 <script>
-  const COUNTRIES = ["United States", "Canada", "Singapore", "United Arab Emirates", "United Kingdom", "Germany", "Other"];
+  // Only countries with researched data (same list as lib/countries.js).
+  const COUNTRIES = ["United States", "Canada", "Singapore", "United Arab Emirates", "United Kingdom", "Germany"];
   const US_STATES = ["Delaware","California","Texas","Florida","Wyoming","New York","Illinois","Washington","Massachusetts",
     "Alabama","Alaska","Arizona","Arkansas","Colorado","Connecticut","Georgia","Hawaii","Idaho","Indiana","Iowa","Kansas",
     "Kentucky","Louisiana","Maine","Maryland","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada",
@@ -723,10 +724,8 @@
     // cache lookup in lib/claude.js could never hit and every UK calendar
     // was silently going live despite fully-researched data existing.
     "United Kingdom": ["Private Limited Company (Ltd)", "Limited Liability Partnership (LLP)", "Public Limited Company (PLC)", "Sole Trader"],
-    // Other countries fall back to this generic list until their own
-    // data is researched — see NOTES from the Germany rollout for the
-    // pattern to follow for the next country.
-    "__default__": ["Corporation", "LLC", "Partnership", "Other"],
+    // Safety net only; every country in COUNTRIES has its own list above.
+    "__default__": ["Corporation", "LLC", "Partnership"],
   };
 
   // Countries without a US-style "State of Incorporation" concept get a
@@ -754,12 +753,8 @@
       // specifically, it does NOT select a province's own compliance
       // regime (see note in ENTITY_TYPES_BY_COUNTRY above); it's just a
       // free-text note field.
-      if (country === "Germany" || country === "United Arab Emirates" || country === "Singapore" || country === "Canada" || country === "United Kingdom") {
-        stateHint.style.display = 'none';
-      } else {
-        stateHint.style.display = 'block';
-        stateHint.textContent = "We're still building our verified database for this country — your calendar will be researched live and may take a little longer.";
-      }
+      // Every country in the list has researched data, so no warning hint.
+      stateHint.style.display = 'none';
       const input = document.createElement('input');
       input.type = 'text'; input.id = 'state';
       input.placeholder = country === 'Germany'
