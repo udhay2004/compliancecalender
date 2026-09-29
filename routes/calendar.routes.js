@@ -5,7 +5,7 @@ const Calendar = require("../models/Calendar");
 const ClientOrg = require("../models/ClientOrg");
 const Message = require("../models/Message");
 const { requireAuth, requireRole } = require("../middleware/auth");
-const { generateCompanyCalendar } = require("../lib/claude");
+const { generateCompanyCalendar, NotCoveredError } = require("../lib/generateCalendar");
 const { calendarToPdfBuffer } = require("../lib/pdf");
 const { upload, acceptUploads } = require("../middleware/upload");
 const storage = require("../lib/storage");
@@ -29,9 +29,8 @@ const router = express.Router();
 // never reach these endpoints even if they guess a URL.
 router.use(requireAuth, requireRole("staff"));
 
-// Extremely basic in-memory rate limit, kept from the original app —
-// still useful even with auth, so one account can't accidentally burn
-// through the whole team's Anthropic budget.
+// Per-person limit on generated calendars, so a stuck script or double
+// clicks can't flood the review queue.
 // Counted in MongoDB (lib/rateLimitStore.js), shared by every server copy.
 const RATE_LIMIT = 20;
 const isRateLimited = (userId) => require("../lib/rateLimitStore").overLimit("staff-generate", userId, RATE_LIMIT, 60 * 60 * 1000);
@@ -53,11 +52,9 @@ router.post("/generate", async (req, res) => {
   const clientOrgId = req.body?.clientOrgId || null;
 
   try {
-    const { items, sourceMode } = await generateCompanyCalendar(profile, {
-      beforeLiveResearch: () => require("../lib/abuseGuard").reserveAiRun("staff"), // counted, never blocked
-    });
+    const { items, sourceMode } = await generateCompanyCalendar(profile);
     if (!items.length) {
-      return res.status(502).json({ error: "No calendar items returned — try again or refine the profile." });
+      return res.status(500).json({ error: "No filings matched this company profile. Please check the details and try again." });
     }
 
     const calendar = await Calendar.create({
@@ -71,8 +68,9 @@ router.post("/generate", async (req, res) => {
 
     return res.status(201).json({ calendar: await staffView(calendar) });
   } catch (err) {
+    if (err instanceof NotCoveredError) return res.status(400).json({ error: err.message });
     console.error("Generate error:", err);
-    return res.status(502).json({ error: `Research request failed: ${err.message}` });
+    return res.status(500).json({ error: "The calendar couldn't be saved. Please try again." });
   }
 });
 

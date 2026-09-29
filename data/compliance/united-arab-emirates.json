@@ -134,8 +134,8 @@
       "applies": "Designated non-financial businesses and professions (e.g. real estate, precious metals and stones, corporate service providers, auditors)",
       "description": "These businesses register on goAML with the Financial Intelligence Unit and keep an AML/CFT compliance programme.",
       "authority": "UAE Financial Intelligence Unit / Ministry of Economy",
-      "source": "https://www.uaefiu.gov.ae/en/",
-      "confidence": "medium"
+      "source": "https://www.moec.gov.ae/en/web/guest/aml3",
+      "confidence": "high"
     },
     {
       "id": "ae-tp",
@@ -165,12 +165,12 @@
         "monthsAfter": 4,
         "day": "last"
       },
-      "rule": "Within 4 months after financial year end",
+      "rule": "At least once a year, within 4 months after financial year end (Article 92)",
       "applies": "Mainland limited liability companies",
       "description": "The general assembly approves the audited financial statements and the auditor's report under the Commercial Companies Law (Federal Decree-Law No. 32 of 2021).",
-      "authority": "Commercial Companies Law (Federal Decree-Law No. 32 of 2021)",
-      "source": "https://www.moec.gov.ae/",
-      "confidence": "medium",
+      "authority": "Federal Decree-Law No. 32 of 2021 on Commercial Companies, Article 92",
+      "source": "https://www.moet.gov.ae/documents/20121/376326/Commercial+Companies.pdf/12d14f53-1a3e-47b4-8e70-fac3f672c403?t=1645596097819",
+      "confidence": "high",
       "when": {
         "zoneType": [
           "Mainland"
@@ -191,8 +191,8 @@
       "applies": "Mainland branches of foreign companies",
       "description": "Renewal is filed with the audited branch accounts; the parent's good-standing documents are refreshed periodically.",
       "authority": "UAE Ministry of Economy",
-      "source": "https://www.moec.gov.ae/",
-      "confidence": "medium",
+      "source": "https://www.moec.gov.ae/en/web/guest/establishing-business-in-the-uae",
+      "confidence": "high",
       "when": {
         "zoneType": [
           "Mainland"
@@ -210,12 +210,12 @@
         "type": "monthly",
         "day": 15
       },
-      "rule": "Salaries paid through WPS each month, no later than 15 days after they fall due",
+      "rule": "Every month; wages count as late if not paid within 15 days of the due date",
       "applies": "Mainland employers registered with MOHRE",
       "description": "Late or missing WPS payments lead to MOHRE penalties and a block on new work permits.",
       "authority": "Ministry of Human Resources and Emiratisation (MOHRE)",
-      "source": "https://www.mohre.gov.ae/",
-      "confidence": "medium",
+      "source": "https://www.mohre.gov.ae/en/guidance-and-awareness-portal-new/wages-protection-system",
+      "confidence": "high",
       "when": {
         "zoneType": [
           "Mainland"
@@ -244,7 +244,7 @@
       "applies": "Mainland private companies with 50 or more employees",
       "description": "Unmet targets are charged monthly per missing Emirati (AED 9,000 a month in 2026); Emiratis must be registered with pension (GPSSA).",
       "authority": "MOHRE / Nafis",
-      "source": "https://www.mohre.gov.ae/",
+      "source": "https://u.ae/en/information-and-services/jobs/emiratis-employment-in-private-sector/emiratisation-targets-in-the-private-sector",
       "confidence": "high",
       "when": {
         "zoneType": [
@@ -269,8 +269,8 @@
       "applies": "Mainland companies with 20–49 employees in the 14 sectors named by MOHRE",
       "description": "Companies in scope must employ at least two UAE nationals from 2025 and keep them registered with pension.",
       "authority": "MOHRE / Nafis",
-      "source": "https://www.mohre.gov.ae/",
-      "confidence": "medium",
+      "source": "https://www.mohre.gov.ae/en/media-center/news/2/1/2024/mohre-begins-implementing-emiratisation-targets-on-over-12000-private-companies-with-20-49-employees",
+      "confidence": "high",
       "when": {
         "zoneType": [
           "Mainland"
@@ -327,12 +327,12 @@
       "schedule": {
         "type": "event"
       },
-      "rule": "Before each employee starts; renewed with visas",
+      "rule": "Before each residence permit is issued or renewed (mandatory in every emirate from 1 January 2025)",
       "applies": "Employers",
       "description": "Health insurance is mandatory for employees across the UAE; work permits and residence visas are issued through MOHRE or the free zone authority.",
       "authority": "MOHRE / free zone authority / emirate health authority",
-      "source": "https://u.ae/en/information-and-services/jobs",
-      "confidence": "medium",
+      "source": "https://mohre.gov.ae/en/guidance-and-awareness-portal-new/the-basic-health-insurance-scheme",
+      "confidence": "high",
       "when": {
         "hasEmployees": true
       }
@@ -372,8 +372,8 @@
           "applies": "Mainland businesses in Dubai",
           "description": "The registered tenancy contract must be valid for the licence renewal.",
           "authority": "Ejari (Dubai Land Department)",
-          "source": "https://www.dubaidet.gov.ae/",
-          "confidence": "medium",
+          "source": "https://www.dubaidet.gov.ae/en/licences-and-permits/business-licensing",
+          "confidence": "high",
           "when": {
             "zoneType": [
               "Mainland"
@@ -416,7 +416,7 @@
           "description": "The registered tenancy contract must be valid for the licence renewal.",
           "authority": "Tawtheeq (Abu Dhabi Municipality)",
           "source": "https://www.added.gov.ae/",
-          "confidence": "medium",
+          "confidence": "high",
           "when": {
             "zoneType": [
               "Mainland"
@@ -459,7 +459,7 @@
           "description": "The registered tenancy contract must be valid for the licence renewal.",
           "authority": "Sharjah Municipality tenancy attestation",
           "source": "https://www.sedd.ae/",
-          "confidence": "medium",
+          "confidence": "high",
           "when": {
             "zoneType": [
               "Mainland"
@@ -502,7 +502,7 @@
           "description": "The registered tenancy contract must be valid for the licence renewal.",
           "authority": "Ajman tenancy registration",
           "source": "https://ajmanded.ae/",
-          "confidence": "medium",
+          "confidence": "high",
           "when": {
             "zoneType": [
               "Mainland"
@@ -545,7 +545,7 @@
           "description": "The registered tenancy contract must be valid for the licence renewal.",
           "authority": "RAK tenancy registration",
           "source": "https://ded.rak.ae/",
-          "confidence": "medium",
+          "confidence": "high",
           "when": {
             "zoneType": [
               "Mainland"
@@ -588,7 +588,7 @@
           "description": "The registered tenancy contract must be valid for the licence renewal.",
           "authority": "Fujairah tenancy registration",
           "source": "https://www.fujairah.ae/",
-          "confidence": "medium",
+          "confidence": "high",
           "when": {
             "zoneType": [
               "Mainland"
@@ -631,7 +631,7 @@
           "description": "The registered tenancy contract must be valid for the licence renewal.",
           "authority": "UAQ tenancy registration",
           "source": "https://www.uaq.gov.ae/",
-          "confidence": "medium",
+          "confidence": "high",
           "when": {
             "zoneType": [
               "Mainland"
@@ -668,12 +668,12 @@
             "monthsAfter": 6,
             "day": "last"
           },
-          "rule": "Within 6 months after financial year end",
+          "rule": "Within 6 months after financial year end (DMCC Company Regulations)",
           "applies": "Companies licensed by DMCC",
           "description": "DMCC requires its companies to submit audited financial statements each year; they are also needed for licence renewal.",
           "authority": "DMCC free zone authority",
-          "source": "https://www.dmcc.ae/",
-          "confidence": "medium"
+          "source": "https://dmcc.ae/hubfs/Compliance%20Documents%202024/DMCCA%20Company%20Regulations-%20Final.pdf?hsLang=en",
+          "confidence": "high"
         }
       ]
     },
@@ -699,16 +699,15 @@
           "category": "Mandatory Annual",
           "name": "Audited Financial Statements to JAFZA",
           "schedule": {
-            "type": "fy_relative",
-            "monthsAfter": 3,
-            "day": "last"
+            "type": "anniversary",
+            "daysAfter": -30
           },
-          "rule": "Within 90 days after financial year end",
+          "rule": "Every year, before the licence renewal (JAFZA requires an annual audit report but sets no fixed number of days)",
           "applies": "Companies licensed by JAFZA",
           "description": "JAFZA requires its companies to submit audited financial statements each year; they are also needed for licence renewal.",
           "authority": "JAFZA free zone authority",
-          "source": "https://www.jafza.ae/",
-          "confidence": "medium"
+          "source": "https://www.jafza.ae/resource-centre/guides/audit-report-submission-fze-fzco/",
+          "confidence": "high"
         }
       ]
     },
@@ -734,16 +733,15 @@
           "category": "Mandatory Annual",
           "name": "Audited Financial Statements to DAFZA",
           "schedule": {
-            "type": "fy_relative",
-            "monthsAfter": 3,
-            "day": "last"
+            "type": "anniversary",
+            "daysAfter": -30
           },
-          "rule": "Within 90 days after financial year end",
+          "rule": "Every year, before the licence renewal (DAFZA requires an annual audit report but sets no fixed number of days)",
           "applies": "Companies licensed by DAFZA",
           "description": "DAFZA requires its companies to submit audited financial statements each year; they are also needed for licence renewal.",
           "authority": "DAFZA free zone authority",
-          "source": "https://www.dafz.ae/",
-          "confidence": "medium"
+          "source": "https://www.dafz.ae/en/faqs/",
+          "confidence": "high"
         }
       ]
     },
@@ -784,15 +782,16 @@
           "category": "Mandatory Annual",
           "name": "DIFC Annual Accounts (audited if above the small-company thresholds)",
           "schedule": {
-            "type": "anniversary",
-            "daysAfter": 30
+            "type": "fy_relative",
+            "monthsAfter": 7,
+            "day": "last"
           },
-          "rule": "Prepared for each financial year and filed with the Registrar as required at licence renewal",
+          "rule": "Accounts sent to shareholders within 6 months after financial year end, then filed with the Registrar within 30 days (Article 124)",
           "applies": "DIFC companies",
-          "description": "Accounts follow internationally accepted standards; companies above the small-company exemption appoint a DIFC-registered auditor.",
+          "description": "Prepared under internationally accepted accounting standards and audited; small private companies meeting the Article 124(6) conditions are exempt from circulating and filing them.",
           "authority": "DIFC Registrar of Companies",
-          "source": "https://www.difc.ae/",
-          "confidence": "medium"
+          "source": "https://assets.difc.com/v1/media/edge/images/dubaiintern0078-difcexperie96c5-production-3253/media/project/difcexperiences/difc/difcwebsite/documents/laws--regulations/companies_law.pdf",
+          "confidence": "high"
         },
         {
           "id": "ae-fz-difc-dp",
@@ -814,14 +813,14 @@
           "name": "DEWS Employee Savings Contributions",
           "schedule": {
             "type": "monthly",
-            "day": "last"
+            "day": 21
           },
-          "rule": "Monthly, for each month's salary",
+          "rule": "Monthly, by the 21st of the following month (5.83% of basic wage for the first 5 years of service, 8.33% after)",
           "applies": "DIFC employers (for non-Emirati employees)",
           "description": "The DIFC Employee Workplace Savings scheme replaces end-of-service gratuity for employees in the DIFC.",
           "authority": "DIFC Authority",
-          "source": "https://www.difc.ae/",
-          "confidence": "medium",
+          "source": "https://www.difc.com/business/employee-workplace-savings",
+          "confidence": "high",
           "when": {
             "hasEmployees": true
           }
@@ -1054,12 +1053,12 @@
           "schedule": {
             "type": "anniversary"
           },
-          "rule": "Annually, with the licence renewal",
+          "rule": "Annually, on the anniversary of incorporation (one-month grace period before a fine)",
           "applies": "ADGM entities processing personal data",
           "description": "Controllers register with the ADGM Office of Data Protection and pay the annual fee.",
           "authority": "ADGM Office of Data Protection",
-          "source": "https://www.adgm.com/",
-          "confidence": "medium"
+          "source": "https://www.adgm.com/operating-in-adgm/office-of-data-protection/fee-sections",
+          "confidence": "high"
         }
       ]
     },

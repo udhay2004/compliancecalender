@@ -1,7 +1,7 @@
 {
   "country": "Canada",
   "updated": "2026-09-29",
-  "notes": "items apply nationally; regions[P].items apply to the home province (province of incorporation, or of the registered office for federal corporations, or of operation for unincorporated businesses); extraProvincialItems apply to each other province where a corporation carries on business (and to the home province of a federal corporation); operatingItems apply to every province where the business operates; employerItems apply where employees work. Territories are not covered yet.",
+  "notes": "items apply nationally; regions[P].items apply to the home province (province of incorporation, or of the registered office for federal corporations, or of operation for unincorporated businesses); extraProvincialItems apply to each other province where a corporation carries on business (and to the home province of a federal corporation); operatingItems apply to every province where the business operates; employerItems apply where employees work. The three territories are covered the same way.",
   "items": [
     {
       "id": "ca-t2",
@@ -589,12 +589,12 @@
             "month": 3,
             "day": 31
           },
-          "rule": "Premiums monthly or quarterly; annual reconciliation by 31 March",
+          "rule": "Premiums monthly or quarterly as assigned; annual reconciliation by 31 March",
           "applies": "Employers with workers in Ontario (most industries)",
           "description": "Register with Workplace Safety and Insurance Board (WSIB) when you hire in Ontario, pay premiums on insurable earnings and report the year's payroll.",
           "authority": "Workplace Safety and Insurance Board (WSIB)",
-          "source": "https://www.wsib.ca/",
-          "confidence": "medium"
+          "source": "https://www.wsib.ca/en/frequently-asked-questions-about-reconciliation",
+          "confidence": "high"
         }
       ],
       "operatingItems": []
@@ -657,8 +657,8 @@
           "applies": "Corporations from outside British Columbia registered there (not corporations from Alberta, Saskatchewan, Manitoba, under the New West Partnership)",
           "description": "Extra-provincially registered corporations confirm their information with the British Columbia registry each year to stay in good standing.",
           "authority": "BC Registries and Online Services",
-          "source": "https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/companies",
-          "confidence": "medium",
+          "source": "https://www.corporateonline.gov.bc.ca/WebHelp/overview_annxp.htm",
+          "confidence": "high",
           "when": {
             "entityType": [
               "Corporation"
@@ -715,12 +715,12 @@
               }
             ]
           },
-          "rule": "Quarterly payroll reports and premiums, by the 20th of the month after each quarter",
+          "rule": "Quarterly reporters: payroll and premiums by 20 April, 20 July, 20 October and 20 January; annual reporters: Annual Payroll Report by 28 February",
           "applies": "Employers with workers in British Columbia (most industries)",
           "description": "Register with WorkSafeBC when you hire in British Columbia, pay premiums on insurable earnings and report the year's payroll.",
           "authority": "WorkSafeBC",
-          "source": "https://www.worksafebc.com/",
-          "confidence": "medium"
+          "source": "https://www.worksafebc.com/en/insurance/manage-account/report-payroll-pay-premiums/date-deadlines",
+          "confidence": "high"
         }
       ],
       "operatingItems": [
@@ -825,14 +825,14 @@
           "schedule": {
             "type": "annual",
             "month": 2,
-            "day": "last"
+            "day": 28
           },
-          "rule": "Annual return of insurable earnings by the last day of February",
+          "rule": "Annual return of insurable earnings by 28 February",
           "applies": "Employers with workers in Alberta (most industries)",
           "description": "Register with WCB-Alberta when you hire in Alberta, pay premiums on insurable earnings and report the year's payroll.",
           "authority": "WCB-Alberta",
-          "source": "https://www.wcb.ab.ca/",
-          "confidence": "medium"
+          "source": "https://www.wcb.ab.ca/insurance-and-premiums/annual-returns.html",
+          "confidence": "high"
         }
       ],
       "operatingItems": [
@@ -919,8 +919,8 @@
           "applies": "Corporations from outside Saskatchewan registered there (not corporations from British Columbia, Alberta, Manitoba, under the New West Partnership)",
           "description": "Extra-provincially registered corporations confirm their information with the Saskatchewan registry each year to stay in good standing.",
           "authority": "Saskatchewan Corporate Registry (ISC)",
-          "source": "https://www.saskregistries.ca/corporateregistry/maintainandamendyourbusinessinformation/maintainingabusinesscorporation",
-          "confidence": "medium",
+          "source": "https://www.saskregistries.ca/corporateregistry/registeringabusiness/chooseabusinesstype/new-west-partnership-and-extra-provincial-registrations",
+          "confidence": "high",
           "when": {
             "entityType": [
               "Corporation"
@@ -943,14 +943,14 @@
           "schedule": {
             "type": "annual",
             "month": 2,
-            "day": "last"
+            "day": 28
           },
-          "rule": "Annual statement of payroll by the last day of February",
+          "rule": "Employer's Payroll Statement by 28 February",
           "applies": "Employers with workers in Saskatchewan (most industries)",
           "description": "Register with Saskatchewan Workers' Compensation Board when you hire in Saskatchewan, pay premiums on insurable earnings and report the year's payroll.",
           "authority": "Saskatchewan Workers' Compensation Board",
-          "source": "https://www.wcbsask.com/",
-          "confidence": "medium"
+          "source": "https://www.wcbsask.com/employers-payroll-statement-eps",
+          "confidence": "high"
         }
       ],
       "operatingItems": [
@@ -960,14 +960,14 @@
           "name": "Saskatchewan Provincial Sales Tax (PST) Return",
           "schedule": {
             "type": "monthly",
-            "day": 20
+            "day": "last"
           },
-          "rule": "By the 20th of the month after each reporting period",
+          "rule": "By the last day of the month after each reporting period when filed and paid electronically (the 20th for paper returns)",
           "applies": "Businesses registered to collect Saskatchewan PST",
           "description": "Saskatchewan PST is reported to the Ministry of Finance separately from GST.",
           "authority": "Saskatchewan Ministry of Finance",
-          "source": "https://www.saskatchewan.ca/business/taxes-licensing-and-reporting/provincial-taxes-policies-and-bulletins/provincial-sales-tax",
-          "confidence": "medium"
+          "source": "https://www.saskatchewan.ca/business/taxes-licensing-and-reporting/provincial-taxes-policies-and-bulletins/provincial-sales-tax/file-your-pst-return",
+          "confidence": "high"
         }
       ]
     },
@@ -1031,7 +1031,7 @@
           "applies": "Corporations from outside Manitoba registered there (not corporations from British Columbia, Alberta, Saskatchewan, under the New West Partnership)",
           "description": "Extra-provincially registered corporations confirm their information with the Manitoba registry each year to stay in good standing.",
           "authority": "Manitoba Companies Office",
-          "source": "https://companiesoffice.gov.mb.ca/updating_manitoba_corporation.html",
+          "source": "https://companiesoffice.gov.mb.ca/updating_extra_provincial.html",
           "confidence": "high",
           "when": {
             "entityType": [
@@ -1056,12 +1056,12 @@
             "type": "monthly",
             "day": 15
           },
-          "rule": "Monthly by the 15th of the following month, with an annual return by 31 March",
+          "rule": "Monthly return and payment by the 15th of the following month",
           "applies": "Employers whose Manitoba payroll exceeds the $2.5 million exemption (2026)",
           "description": "The payroll levy applies above the annual exemption, at a reduced rate up to $5 million of payroll.",
           "authority": "Manitoba Finance, Taxation Division",
           "source": "https://www.gov.mb.ca/finance/taxation/taxes/payroll.html",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "ca-manitoba-wcb",
@@ -1070,14 +1070,14 @@
           "schedule": {
             "type": "annual",
             "month": 2,
-            "day": "last"
+            "day": 28
           },
-          "rule": "Annual payroll report by the last day of February",
+          "rule": "Annual payroll report by 28 February",
           "applies": "Employers with workers in Manitoba (most industries)",
           "description": "Register with WCB Manitoba when you hire in Manitoba, pay premiums on insurable earnings and report the year's payroll.",
           "authority": "WCB Manitoba",
-          "source": "https://www.wcb.mb.ca/",
-          "confidence": "medium"
+          "source": "https://www.wcb.mb.ca/reporting-payroll",
+          "confidence": "high"
         }
       ],
       "operatingItems": [
@@ -1094,7 +1094,7 @@
           "description": "Manitoba RST is reported to Manitoba Finance separately from GST.",
           "authority": "Manitoba Finance, Taxation Division",
           "source": "https://www.gov.mb.ca/finance/taxation/taxes/retail.html",
-          "confidence": "medium"
+          "confidence": "high"
         }
       ]
     },
@@ -1154,16 +1154,21 @@
             "monthsAfter": 1,
             "day": "last"
           },
-          "rule": "By the end of the month after the anniversary month of registration in New Brunswick (we use the incorporation date; change it if the registration date differs)",
-          "applies": "Corporations from outside New Brunswick registered there",
+          "rule": "By the end of the month after the anniversary month of registration in New Brunswick",
+          "applies": "Corporations from outside New Brunswick registered there (corporations from Nova Scotia need not register or file)",
           "description": "Extra-provincially registered corporations confirm their information with the New Brunswick registry each year to stay in good standing.",
           "authority": "Corporate Registry of New Brunswick (Service New Brunswick)",
-          "source": "https://www2.snb.ca/content/snb/en/sites/corporate-registry/annual-return.html",
-          "confidence": "medium",
+          "source": "https://www2.snb.ca/content/snb/en/sites/corporate-registry/forms_information.html",
+          "confidence": "high",
           "when": {
             "entityType": [
               "Corporation"
-            ]
+            ],
+            "not": {
+              "provincialHome": [
+                "Nova Scotia"
+              ]
+            }
           }
         }
       ],
@@ -1175,14 +1180,14 @@
           "schedule": {
             "type": "annual",
             "month": 2,
-            "day": "last"
+            "day": 28
           },
-          "rule": "Annual payroll report by the last day of February",
+          "rule": "Form 100 annual payroll report by 28 February",
           "applies": "Employers with workers in New Brunswick (most industries)",
           "description": "Register with WorkSafeNB when you hire in New Brunswick, pay premiums on insurable earnings and report the year's payroll.",
           "authority": "WorkSafeNB",
-          "source": "https://www.worksafenb.ca/",
-          "confidence": "medium"
+          "source": "https://www.worksafenb.ca/about-us/news-and-events/news/2026/it-s-time-to-report-your-annual-payroll-form-100/",
+          "confidence": "high"
         }
       ],
       "operatingItems": []
@@ -1225,7 +1230,7 @@
           "description": "Registered business names and partnerships renew with the Registry of Joint Stock Companies each year.",
           "authority": "Nova Scotia Registry of Joint Stock Companies",
           "source": "https://www.novascotia.ca/renew-business-or-non-profit-registration-registry-joint-stock-companies",
-          "confidence": "medium",
+          "confidence": "high",
           "when": {
             "entityType": [
               "Sole Proprietorship",
@@ -1262,16 +1267,21 @@
             "type": "anniversary",
             "day": "last"
           },
-          "rule": "During the anniversary month of registration in Nova Scotia (we use the incorporation date; change it if the registration date differs)",
-          "applies": "Corporations from outside Nova Scotia registered there",
+          "rule": "During the anniversary month of registration in Nova Scotia",
+          "applies": "Corporations from outside Nova Scotia registered there (corporations from New Brunswick need not register or file)",
           "description": "Extra-provincially registered corporations confirm their information with the Nova Scotia registry each year to stay in good standing.",
           "authority": "Nova Scotia Registry of Joint Stock Companies",
           "source": "https://www.novascotia.ca/renew-business-or-non-profit-registration-registry-joint-stock-companies",
-          "confidence": "medium",
+          "confidence": "high",
           "when": {
             "entityType": [
               "Corporation"
-            ]
+            ],
+            "not": {
+              "provincialHome": [
+                "New Brunswick"
+              ]
+            }
           }
         }
       ],
@@ -1281,16 +1291,15 @@
           "category": "Conditional",
           "name": "Workers' Compensation Reporting (Workers' Compensation Board of Nova Scotia)",
           "schedule": {
-            "type": "annual",
-            "month": 2,
-            "day": "last"
+            "type": "monthly",
+            "day": 15
           },
-          "rule": "Annual payroll report by the last day of February",
+          "rule": "Payroll report and premium by the 15th of the month after each reporting period (monthly or quarterly, as assigned)",
           "applies": "Employers with workers in Nova Scotia (most industries)",
           "description": "Register with Workers' Compensation Board of Nova Scotia when you hire in Nova Scotia, pay premiums on insurable earnings and report the year's payroll.",
           "authority": "Workers' Compensation Board of Nova Scotia",
-          "source": "https://www.wcb.ns.ca/",
-          "confidence": "medium"
+          "source": "https://employerguide.wcb.ns.ca/how-when-to-report-payroll",
+          "confidence": "high"
         }
       ],
       "operatingItems": []
@@ -1303,9 +1312,9 @@
           "name": "Newfoundland and Labrador Annual Return",
           "schedule": {
             "type": "anniversary",
-            "daysAfter": 60
+            "day": "last"
           },
-          "rule": "Within 60 days after each anniversary of incorporation",
+          "rule": "Before the end of the anniversary month of incorporation",
           "applies": "Corporations incorporated in Newfoundland and Labrador",
           "description": "Confirms the corporation's registered office, directors and officers with the provincial registry each year; corporations that stop filing are eventually dissolved.",
           "authority": "Newfoundland and Labrador Registry of Companies",
@@ -1347,14 +1356,14 @@
           "name": "Newfoundland and Labrador Extra-Provincial Annual Return",
           "schedule": {
             "type": "anniversary",
-            "daysAfter": 60
+            "day": "last"
           },
-          "rule": "Within 60 days after each anniversary of registration (we use the incorporation date; change it if the registration date differs)",
+          "rule": "Before the end of the anniversary month of registration",
           "applies": "Corporations from outside Newfoundland and Labrador registered there",
           "description": "Extra-provincially registered corporations confirm their information with the Newfoundland and Labrador registry each year to stay in good standing.",
           "authority": "Newfoundland and Labrador Registry of Companies",
           "source": "https://www.gov.nl.ca/gs/registries/companies/annual-returns/",
-          "confidence": "medium",
+          "confidence": "high",
           "when": {
             "entityType": [
               "Corporation"
@@ -1371,12 +1380,12 @@
             "type": "monthly",
             "day": 20
           },
-          "rule": "Monthly remittances, with an annual return after year end",
+          "rule": "Monthly return and payment by the 20th of the following month",
           "applies": "Employers whose Newfoundland and Labrador payroll exceeds the $2 million exemption",
           "description": "A 2% payroll tax on remuneration above the exemption.",
           "authority": "Newfoundland and Labrador Department of Finance",
-          "source": "https://www.gov.nl.ca/fin/",
-          "confidence": "medium"
+          "source": "https://www.gov.nl.ca/fin/tax-programs-incentives/business/education/",
+          "confidence": "high"
         },
         {
           "id": "ca-newfoundland-and-labrador-wcb",
@@ -1385,14 +1394,14 @@
           "schedule": {
             "type": "annual",
             "month": 2,
-            "day": "last"
+            "day": 28
           },
-          "rule": "Annual payroll report by the last day of February",
+          "rule": "Annual Employer Statement by 28 February",
           "applies": "Employers with workers in Newfoundland and Labrador (most industries)",
           "description": "Register with WorkplaceNL when you hire in Newfoundland and Labrador, pay premiums on insurable earnings and report the year's payroll.",
           "authority": "WorkplaceNL",
-          "source": "https://workplacenl.ca/",
-          "confidence": "medium"
+          "source": "https://workplacenl.ca/employers/manage-my-account/annual-employer-statement-reporting/",
+          "confidence": "high"
         }
       ],
       "operatingItems": []
@@ -1448,15 +1457,14 @@
           "category": "Mandatory Annual",
           "name": "Prince Edward Island Extra-Provincial Annual Return",
           "schedule": {
-            "type": "anniversary",
-            "daysAfter": 60
+            "type": "anniversary"
           },
-          "rule": "Within 60 days after each anniversary of registration (we use the incorporation date; change it if the registration date differs)",
+          "rule": "Renew the registration each year before the registration certificate expires (the anniversary of registration)",
           "applies": "Corporations from outside Prince Edward Island registered there",
           "description": "Extra-provincially registered corporations confirm their information with the Prince Edward Island registry each year to stay in good standing.",
           "authority": "PEI Corporate Registry",
-          "source": "https://www.princeedwardisland.ca/en/feature/pei-business-corporate-registry",
-          "confidence": "medium",
+          "source": "https://www.princeedwardisland.ca/en/legislation/extra-provincial-corporations-registration-act",
+          "confidence": "high",
           "when": {
             "entityType": [
               "Corporation"
@@ -1472,14 +1480,14 @@
           "schedule": {
             "type": "annual",
             "month": 2,
-            "day": "last"
+            "day": 28
           },
-          "rule": "Annual payroll report by the last day of February",
+          "rule": "Annual registration renewal and payroll report by 28 February",
           "applies": "Employers with workers in Prince Edward Island (most industries)",
           "description": "Register with Workers Compensation Board of PEI when you hire in Prince Edward Island, pay premiums on insurable earnings and report the year's payroll.",
           "authority": "Workers Compensation Board of PEI",
-          "source": "https://www.wcb.pe.ca/",
-          "confidence": "medium"
+          "source": "https://www.wcb.pe.ca/Employers/Payments",
+          "confidence": "high"
         }
       ],
       "operatingItems": []
@@ -1548,12 +1556,12 @@
             "month": 3,
             "day": 15
           },
-          "rule": "Annual statement of wages by 15 March",
+          "rule": "Annual statement of wages (déclaration des salaires) by 15 March",
           "applies": "Employers with workers in Quebec (most industries)",
           "description": "Register with CNESST when you hire in Quebec, pay premiums on insurable earnings and report the year's payroll.",
           "authority": "CNESST",
-          "source": "https://www.cnesst.gouv.qc.ca/",
-          "confidence": "medium"
+          "source": "https://www.cnesst.gouv.qc.ca/fr/demarches-formulaires/employeurs/assurance-sante-securite-travail/obligations-annuelles-prime-assurance/declaration-salaires/production-transmission",
+          "confidence": "high"
         }
       ],
       "operatingItems": [
@@ -1622,29 +1630,397 @@
           }
         },
         {
-          "id": "ca-quebec-qst",
           "category": "Conditional",
-          "name": "Quebec Sales Tax (QST) Return",
+          "authority": "Revenu Québec",
+          "source": "https://www.revenuquebec.ca/en/businesses/consumption-taxes/gsthst-and-qst/reporting-gsthst-and-qst/filing-frequency/",
+          "confidence": "high",
+          "applies": "Businesses registered for QST (taxable supplies in Quebec over $30,000)",
+          "id": "ca-quebec-qst-annual",
+          "name": "Quebec Sales Tax (QST) Return (annual filer)",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 3,
+            "day": "last"
+          },
+          "rule": "3 months after financial year end (individuals with a 31 December year end: 15 June, with payment by 30 April)",
+          "description": "QST is reported to Revenu Québec, together with GST in Quebec, for the same reporting period.",
+          "when": {
+            "salesTax": [
+              "Annual"
+            ]
+          }
+        },
+        {
+          "category": "Conditional",
+          "authority": "Revenu Québec",
+          "source": "https://www.revenuquebec.ca/en/businesses/consumption-taxes/gsthst-and-qst/reporting-gsthst-and-qst/filing-frequency/",
+          "confidence": "high",
+          "applies": "Businesses registered for QST (taxable supplies in Quebec over $30,000)",
+          "id": "ca-quebec-qst-quarterly",
+          "name": "Quebec Sales Tax (QST) Return (quarterly filer)",
           "schedule": {
             "type": "fy_quarterly",
             "monthsAfter": 1,
             "day": "last"
           },
-          "rule": "Same reporting periods and due dates as the GST/HST return (Revenu Québec administers both in Quebec)",
-          "applies": "Businesses registered for QST (making taxable supplies in Quebec over $30,000)",
-          "description": "QST is reported to Revenu Québec, generally together with GST, for the same periods.",
-          "authority": "Revenu Québec",
-          "source": "https://www.revenuquebec.ca/en/businesses/consumption-taxes/gsthst-and-qst/",
-          "confidence": "medium",
+          "rule": "1 month after the end of each quarter of the financial year",
+          "description": "QST is reported to Revenu Québec, together with GST in Quebec, for the same reporting period.",
           "when": {
-            "not": {
-              "salesTax": [
-                "Not registered"
-              ]
-            }
+            "salesTax": [
+              "Quarterly"
+            ]
+          }
+        },
+        {
+          "category": "Conditional",
+          "authority": "Revenu Québec",
+          "source": "https://www.revenuquebec.ca/en/businesses/consumption-taxes/gsthst-and-qst/reporting-gsthst-and-qst/filing-frequency/",
+          "confidence": "high",
+          "applies": "Businesses registered for QST (taxable supplies in Quebec over $30,000)",
+          "id": "ca-quebec-qst-monthly",
+          "name": "Quebec Sales Tax (QST) Return (monthly filer)",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "1 month after the end of each month",
+          "description": "QST is reported to Revenu Québec, together with GST in Quebec, for the same reporting period.",
+          "when": {
+            "salesTax": [
+              "Monthly"
+            ]
           }
         }
       ]
+    },
+    "Yukon": {
+      "items": [
+        {
+          "id": "ca-yukon-annual-return",
+          "category": "Mandatory Annual",
+          "name": "Yukon Annual Return",
+          "schedule": {
+            "type": "anniversary",
+            "monthsAfter": 1,
+            "day": "last"
+          },
+          "rule": "By the last day of the month after the anniversary month of incorporation",
+          "applies": "Corporations incorporated in Yukon",
+          "description": "Confirms the corporation's registered office and directors with the territorial registry each year; corporations that stop filing are eventually dissolved.",
+          "authority": "Yukon Corporate Registry",
+          "source": "https://yukon.ca/en/doing-business/businesses-societies-and-securities/file-annual-return-yukon-corporation",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ],
+            "incorporation": [
+              "Provincial"
+            ]
+          }
+        }
+      ],
+      "extraProvincialItems": [
+        {
+          "id": "ca-yukon-xp-registration",
+          "category": "Event-Based",
+          "name": "Extra-Territorial Registration in Yukon",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "Before (or promptly after) starting to carry on business in Yukon",
+          "applies": "Corporations from outside Yukon carrying on business there",
+          "description": "A corporation incorporated elsewhere (federally, in a province or another territory) registers as an extra-territorial corporation in Yukon.",
+          "authority": "Yukon Corporate Registry",
+          "source": "https://yukon.ca/en/doing-business/businesses-societies-and-securities/file-annual-return-extra-territorial-corporation",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ]
+          }
+        },
+        {
+          "id": "ca-yukon-xp-annual",
+          "category": "Mandatory Annual",
+          "name": "Yukon Extra-Territorial Annual Return",
+          "schedule": {
+            "type": "anniversary",
+            "monthsAfter": 1,
+            "day": "last"
+          },
+          "rule": "By the last day of the month after the anniversary month (we use the incorporation date; change it if your Yukon anniversary differs)",
+          "applies": "Corporations from outside Yukon registered there",
+          "description": "Extra-territorial corporations confirm their information with the Yukon registry each year to stay registered.",
+          "authority": "Yukon Corporate Registry",
+          "source": "https://yukon.ca/en/doing-business/businesses-societies-and-securities/file-annual-return-extra-territorial-corporation",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ca-yukon-wcb",
+          "category": "Conditional",
+          "name": "Workers' Compensation Reporting (Workers' Safety and Compensation Board (Yukon))",
+          "schedule": {
+            "type": "annual",
+            "month": 2,
+            "day": "last"
+          },
+          "rule": "Employer payroll report by the last day of February",
+          "applies": "Employers with workers in Yukon",
+          "description": "Register with the Workers' Safety and Compensation Board (Yukon) when you hire in Yukon, pay assessments on insurable earnings and report the year's payroll with an estimate for the coming year.",
+          "authority": "Workers' Safety and Compensation Board (Yukon)",
+          "source": "https://www.wcb.yk.ca/web-0021/web-0022/web-0035/web-0110",
+          "confidence": "high"
+        }
+      ],
+      "operatingItems": []
+    },
+    "Northwest Territories": {
+      "items": [
+        {
+          "id": "ca-northwest-territories-annual-return",
+          "category": "Mandatory Annual",
+          "name": "Northwest Territories Annual Return",
+          "schedule": {
+            "type": "anniversary",
+            "monthsAfter": 1,
+            "day": "last"
+          },
+          "rule": "By the last day of the month after the anniversary month of incorporation",
+          "applies": "Corporations incorporated in Northwest Territories",
+          "description": "Confirms the corporation's registered office and directors with the territorial registry each year; corporations that stop filing are eventually dissolved.",
+          "authority": "NWT Corporate Registries (Department of Justice)",
+          "source": "https://www.justice.gov.nt.ca/en/nwt-corporations/",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ],
+            "incorporation": [
+              "Provincial"
+            ]
+          }
+        }
+      ],
+      "extraProvincialItems": [
+        {
+          "id": "ca-northwest-territories-xp-registration",
+          "category": "Event-Based",
+          "name": "Extra-Territorial Registration in Northwest Territories",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "Before (or promptly after) starting to carry on business in Northwest Territories",
+          "applies": "Corporations from outside Northwest Territories carrying on business there",
+          "description": "A corporation incorporated elsewhere (federally, in a province or another territory) registers as an extra-territorial corporation in Northwest Territories.",
+          "authority": "NWT Corporate Registries (Department of Justice)",
+          "source": "https://www.justice.gov.nt.ca/en/extraterritorial-corporations/",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ]
+          }
+        },
+        {
+          "id": "ca-northwest-territories-xp-annual",
+          "category": "Mandatory Annual",
+          "name": "Northwest Territories Extra-Territorial Annual Return",
+          "schedule": {
+            "type": "anniversary",
+            "monthsAfter": 1,
+            "day": "last"
+          },
+          "rule": "By the last day of the month after the anniversary month (we use the incorporation date; change it if your Northwest Territories anniversary differs)",
+          "applies": "Corporations from outside Northwest Territories registered there",
+          "description": "Extra-territorial corporations confirm their information with the Northwest Territories registry each year to stay registered.",
+          "authority": "NWT Corporate Registries (Department of Justice)",
+          "source": "https://www.justice.gov.nt.ca/en/extraterritorial-corporations/",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ca-northwest-territories-wcb",
+          "category": "Conditional",
+          "name": "Workers' Compensation Reporting (Workers' Safety and Compensation Commission (WSCC))",
+          "schedule": {
+            "type": "annual",
+            "month": 2,
+            "day": "last"
+          },
+          "rule": "Annual Payroll Report by 28 February",
+          "applies": "Employers with workers in Northwest Territories",
+          "description": "Register with the Workers' Safety and Compensation Commission (WSCC) when you hire in Northwest Territories, pay assessments on insurable earnings and report the year's payroll with an estimate for the coming year.",
+          "authority": "Workers' Safety and Compensation Commission (WSCC)",
+          "source": "https://wscc.nt.ca/employer-services/report-payroll",
+          "confidence": "high"
+        },
+        {
+          "id": "ca-northwest-territories-payroll-tax",
+          "category": "Conditional",
+          "name": "Northwest Territories Payroll Tax Remittances",
+          "schedule": {
+            "type": "monthly",
+            "day": 20
+          },
+          "rule": "By the 20th of the month after each reporting period (monthly, quarterly, semi-annual or annual depending on payroll size)",
+          "applies": "Employers with employees working in Northwest Territories",
+          "description": "Employers deduct the territorial payroll tax (2% of employees' remuneration) and remit it on the schedule assigned at registration.",
+          "authority": "Government of the Northwest Territories, Department of Finance",
+          "source": "https://www.fin.gov.nt.ca/en/services/licences-taxes-et-droits/payroll-tax-employers",
+          "confidence": "high"
+        },
+        {
+          "id": "ca-northwest-territories-payroll-tax-annual",
+          "category": "Conditional",
+          "name": "Northwest Territories Payroll Tax Annual Return",
+          "schedule": {
+            "type": "annual",
+            "month": 2,
+            "day": "last"
+          },
+          "rule": "By the end of February of the following year",
+          "applies": "Employers with employees working in Northwest Territories",
+          "description": "The annual return reconciles the payroll tax deducted and remitted for the calendar year.",
+          "authority": "Government of the Northwest Territories, Department of Finance",
+          "source": "https://www.fin.gov.nt.ca/en/services/licences-taxes-et-droits/payroll-tax-employers",
+          "confidence": "high"
+        }
+      ],
+      "operatingItems": []
+    },
+    "Nunavut": {
+      "items": [
+        {
+          "id": "ca-nunavut-annual-return",
+          "category": "Mandatory Annual",
+          "name": "Nunavut Annual Return",
+          "schedule": {
+            "type": "anniversary",
+            "monthsAfter": 1,
+            "day": "last"
+          },
+          "rule": "By the last day of the month after the anniversary month of incorporation",
+          "applies": "Corporations incorporated in Nunavut",
+          "description": "Confirms the corporation's registered office and directors with the territorial registry each year; corporations that stop filing are eventually dissolved.",
+          "authority": "Nunavut Legal Registries Division",
+          "source": "https://nunavutlegalregistries.ca/",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ],
+            "incorporation": [
+              "Provincial"
+            ]
+          }
+        }
+      ],
+      "extraProvincialItems": [
+        {
+          "id": "ca-nunavut-xp-registration",
+          "category": "Event-Based",
+          "name": "Extra-Territorial Registration in Nunavut",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "Before (or promptly after) starting to carry on business in Nunavut",
+          "applies": "Corporations from outside Nunavut carrying on business there",
+          "description": "A corporation incorporated elsewhere (federally, in a province or another territory) registers as an extra-territorial corporation in Nunavut.",
+          "authority": "Nunavut Legal Registries Division",
+          "source": "https://nunavutlegalregistries.ca/cr_pdf_en/BCA/Forms/BCAFormInstructions_27.pdf",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ]
+          }
+        },
+        {
+          "id": "ca-nunavut-xp-annual",
+          "category": "Mandatory Annual",
+          "name": "Nunavut Extra-Territorial Annual Return",
+          "schedule": {
+            "type": "anniversary",
+            "monthsAfter": 1,
+            "day": "last"
+          },
+          "rule": "By the last day of the month after the anniversary month (we use the incorporation date; change it if your Nunavut anniversary differs)",
+          "applies": "Corporations from outside Nunavut registered there",
+          "description": "Extra-territorial corporations confirm their information with the Nunavut registry each year to stay registered.",
+          "authority": "Nunavut Legal Registries Division",
+          "source": "https://nunavutlegalregistries.ca/cr_pdf_en/BCA/Forms/BCAFormInstructions_27.pdf",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ca-nunavut-wcb",
+          "category": "Conditional",
+          "name": "Workers' Compensation Reporting (Workers' Safety and Compensation Commission (WSCC))",
+          "schedule": {
+            "type": "annual",
+            "month": 2,
+            "day": "last"
+          },
+          "rule": "Annual Payroll Report by 28 February",
+          "applies": "Employers with workers in Nunavut",
+          "description": "Register with the Workers' Safety and Compensation Commission (WSCC) when you hire in Nunavut, pay assessments on insurable earnings and report the year's payroll with an estimate for the coming year.",
+          "authority": "Workers' Safety and Compensation Commission (WSCC)",
+          "source": "https://wscc.nt.ca/employer-services/report-payroll",
+          "confidence": "high"
+        },
+        {
+          "id": "ca-nunavut-payroll-tax",
+          "category": "Conditional",
+          "name": "Nunavut Payroll Tax Remittances",
+          "schedule": {
+            "type": "monthly",
+            "day": 20
+          },
+          "rule": "By the 20th of the month after each reporting period (monthly, quarterly, semi-annual or annual depending on payroll size)",
+          "applies": "Employers with employees working in Nunavut",
+          "description": "Employers deduct the territorial payroll tax (2% of employees' remuneration) and remit it on the schedule assigned at registration.",
+          "authority": "Government of Nunavut, Department of Finance",
+          "source": "https://www.gov.nu.ca/en/taxation-and-insurance/payroll-tax",
+          "confidence": "high"
+        },
+        {
+          "id": "ca-nunavut-payroll-tax-annual",
+          "category": "Conditional",
+          "name": "Nunavut Payroll Tax Annual Return",
+          "schedule": {
+            "type": "annual",
+            "month": 2,
+            "day": "last"
+          },
+          "rule": "By the end of February of the following year",
+          "applies": "Employers with employees working in Nunavut",
+          "description": "The annual return reconciles the payroll tax deducted and remitted for the calendar year.",
+          "authority": "Government of Nunavut, Department of Finance",
+          "source": "https://www.gov.nu.ca/en/taxation-and-insurance/payroll-tax",
+          "confidence": "high"
+        }
+      ],
+      "operatingItems": []
     }
   }
 }

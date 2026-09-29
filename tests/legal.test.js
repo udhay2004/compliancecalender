@@ -28,7 +28,7 @@ const PAGES = {
   "/contact": /Grievance Officer/,
   "/pricing": /Registered agent renewal[\s\S]*\$125/,
   "/terms": /Governing law[\s\S]*Faridabad/,
-  "/privacy": /Anthropic[\s\S]*Cloudflare[\s\S]*Razorpay/,
+  "/privacy": /Cloudflare[\s\S]*Razorpay/,
   "/refund-policy": /Refunds go back to the original payment method/,
   "/shipping-policy": /We do not ship physical goods/,
 };

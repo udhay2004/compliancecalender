@@ -157,7 +157,7 @@ stub("lib/storage.js", {
   fileExists: async (k) => !lostKeys.has(k),
   findMissing: async (keys) => new Set(keys.filter((k) => lostKeys.has(k))),
 });
-stub("lib/claude.js", { generateCompanyCalendar: async () => ({ items: clone(generatedItems), sourceMode: "live" }) });
+stub("lib/generateCalendar.js", { generateCompanyCalendar: async () => ({ items: clone(generatedItems), sourceMode: "database" }), NotCoveredError: class extends Error {} });
 stub("lib/notify.js", {
   notifyStaff: async (n) => { notifications.push({ audience: "staff", ...n }); },
   notifyClient: async (n) => { notifications.push({ audience: "client", ...n }); },

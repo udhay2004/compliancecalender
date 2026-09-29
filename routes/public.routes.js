@@ -14,15 +14,13 @@
 //     your email to unlock the rest" anymore; getting the full calendar
 //     is a conversation with ComplyGlobally now (see /request-review).
 //
-//   - Rate-limited by IP, same reasoning as before: this calls the same
-//     Claude-backed research engine as the authenticated staff tool, so
-//     it's the obvious target for anyone trying to run up your Anthropic
-//     bill for free.
+//   - Rate-limited by IP: every submission creates a lead and emails the
+//     team, so it's the obvious target for spam.
 
 const express = require("express");
 const rateLimit = require("express-rate-limit");
 const Calendar = require("../models/Calendar");
-const { generateCompanyCalendar } = require("../lib/claude");
+const { generateCompanyCalendar, NotCoveredError } = require("../lib/generateCalendar");
 const { sendEmail } = require("../lib/mailer");
 const { loadUserFromRequest } = require("../middleware/auth");
 const { getPriceInfo } = require("../lib/complianceFees");
@@ -31,7 +29,7 @@ const { notifyStaff, notifyClient } = require("../lib/notify");
 
 const { checkProfile, formDefinition } = require("../lib/countries");
 const router = express.Router();
-const { reserveAiRun, BudgetError, verifyHuman, humanCheckEnabled, turnstileKeys } = require("../lib/abuseGuard");
+const { verifyHuman, humanCheckEnabled, turnstileKeys } = require("../lib/abuseGuard");
 
 // GET /api/public/config — what the public page needs to know before it
 // submits (the human-check site key is public by design).
@@ -79,7 +77,7 @@ const MONTH_NAMES = [
 ];
 
 // due_date here is NEVER a real parseable date string — it's a
-// human-readable rule from lib/claude.js, e.g. "31 January (Annually)",
+// human-readable rule from the compliance database, e.g. "31 January (Annually)",
 // "15th day of 4th month after FY end (15 July for this company)", or
 // "As Triggered" for event-based items. Using JS's `new Date(...)`
 // directly on these is wrong: tested directly, `new Date("31 January
@@ -210,19 +208,16 @@ router.post("/generate", generateLimiter, async (req, res) => {
   }
   contact.phone = phone;
 
-  // Bots and runaway spend (lib/abuseGuard.js): human check first, then
-  // today's AI budget. Signed-in clients skip the human check.
+  // Bots (lib/abuseGuard.js): the human check. Signed-in clients skip it.
   if (!signedInClient) {
     const human = await verifyHuman(req.body?.captchaToken, req.ip);
     if (!human.ok) return res.status(400).json({ error: human.error, code: "HUMAN_CHECK" });
   }
 
   try {
-    const { items, sourceMode } = await generateCompanyCalendar(profile, {
-      beforeLiveResearch: () => reserveAiRun(signedInClient ? "client" : "public"),
-    });
+    const { items, sourceMode } = await generateCompanyCalendar(profile);
     if (!items.length) {
-      return res.status(502).json({ error: "No calendar items returned — try again or refine the profile." });
+      return res.status(500).json({ error: "No filings matched this company profile. Please check the details and try again." });
     }
 
     if (signedInClient) {
@@ -288,10 +283,10 @@ router.post("/generate", generateLimiter, async (req, res) => {
       items: applyRevealPolicy(items, profile),
     });
   } catch (err) {
-    if (err instanceof BudgetError) return res.status(429).json({ error: err.message, code: "DAILY_LIMIT" });
+    if (err instanceof NotCoveredError) return res.status(400).json({ error: err.message });
     console.error("Public generate error:", err);
-    // Never show internal/provider error text to website visitors.
-    return res.status(502).json({ error: "We couldn't finish the research just now. Please try again in a few minutes." });
+    // Never show internal error text to website visitors.
+    return res.status(500).json({ error: "We couldn't build your calendar just now. Please try again in a few minutes." });
   }
 });
 

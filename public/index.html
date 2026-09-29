@@ -643,7 +643,7 @@
           <button class="btn btn-ghost btn-back" type="button" data-back><svg class="ic" aria-hidden="true"><use href="#i-arrow-left"/></svg>Back</button>
           <button class="btn btn-primary btn-lg" id="submit" type="button"><span class="spinner" aria-hidden="true"></span><span>Generate my calendar</span><svg class="ic btn-arrow" aria-hidden="true"><use href="#i-arrow"/></svg></button>
         </div>
-        <p class="fine-print">Most calendars are ready in a few seconds; unusual profiles are researched live and can take up to a minute. By generating your calendar you agree to our <a href="/terms" target="_blank" rel="noopener">Terms</a> and <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</p>
+        <p class="fine-print">Your calendar is ready in a few seconds. By generating your calendar you agree to our <a href="/terms" target="_blank" rel="noopener">Terms</a> and <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</p>
       </section>
     </section>
   </div>
@@ -1034,7 +1034,7 @@
             <span><i style="background:var(--brand)"></i>Further out</span>
             <span><i style="background:var(--grey-dot)"></i>Date to be confirmed</span>
           </div>
-          <p class="disclaimer">Research result — not yet a verified compliance rule. Confirm dates with an official source, or talk to our team to have it verified for you.</p>
+          <p class="disclaimer">Built from official government rules for the answers you gave. Rules change, so our team confirms each date before filing; talk to us if anything about your company is unusual.</p>
         </div>
         <aside class="case-rail" aria-label="Next steps">
           <div class="action-bar-slot" id="${caseId}-actions"></div>
@@ -1192,12 +1192,11 @@
 
   setStep(1, false);
 
-  /* ---------------- loading panel (20–40 s of live research) ---------------- */
+  /* ---------------- loading panel (a few seconds) ---------------- */
   const LOADER_STAGES = [
     { text: 'Reading your company profile', at: 0, progress: .15 },
     { text: 'Matching the filing rules for your country and region', at: 600, progress: .4 },
     { text: 'Working out your due dates', at: 1500, progress: .65 },
-    { text: 'Researching official sources for anything not in our database', at: 6000, progress: .8 },
     { text: 'Building your calendar', at: 20000, progress: .92 },
   ];
 
@@ -1208,7 +1207,7 @@
     el.innerHTML = `
       <div class="loader-panel">
         <h2 class="loader-title">Building calendar for ${escapeHtml(name)}</h2>
-        <p class="loader-sub">Matching your answers to official filing rules. Usually a few seconds; unusual profiles are researched live and take longer.</p>
+        <p class="loader-sub">Matching your answers to official filing rules. This takes a few seconds.</p>
         <div class="progress" aria-hidden="true"><span></span></div>
         <ul class="stages">
           ${LOADER_STAGES.map(s => `<li class="stage"><span class="stage-mark">${icon('check')}</span><span>${escapeHtml(s.text)}</span></li>`).join('')}

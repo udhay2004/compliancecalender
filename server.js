@@ -2,12 +2,11 @@
 //
 // Wiring only. The actual logic lives in:
 //   config/db.js              - MongoDB connection
-//   models/                   - User, Calendar, StateCache
+//   models/                   - User, Calendar, ClientOrg, …
 //   middleware/auth.js        - JWT cookie auth (page + API variants)
-//   routes/auth.routes.js     - shared login / logout / me (single team
-//                                username+password, no signup)
+//   routes/auth.routes.js     - staff and client sign-in
 //   routes/calendar.routes.js - generate / review queue / approve / reject / pdf
-//   lib/claude.js             - cache-first, live-fallback Claude calls
+//   lib/complianceDb.js       - builds calendars from data/compliance
 //   lib/pdf.js                - PDF export
 //
 // Run: npm install && npm start   (after copying .env.example to .env)
@@ -70,7 +69,7 @@ app.get("/healthz", async (req, res) => {
   }
 });
 
-const REQUIRED_ENV = ["ANTHROPIC_API_KEY", "MONGODB_URI", "JWT_SECRET"];
+const REQUIRED_ENV = ["MONGODB_URI", "JWT_SECRET"];
 const missing = REQUIRED_ENV.filter((k) => !process.env[k]);
 if (missing.length) {
   console.error(
