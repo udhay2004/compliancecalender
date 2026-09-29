@@ -27,7 +27,7 @@
     <div class="card-head">
       <div class="card-eyebrow">Internal Tool · Not Legal Advice</div>
       <h1>Company Compliance Intake</h1>
-      <p class="sub">Fill in the company profile below. Filings come from the compliance database (data/compliance) for every covered country, region and entity type; anything outside it is researched live. Either way the result is saved as <strong>pending review</strong> until a teammate approves it.</p>
+      <p class="sub">Fill in the company profile below. Filings come from the compliance database (data/compliance), with official sources for every item. The result is saved as <strong>pending review</strong> until a teammate approves it.</p>
     </div>
     <div class="card-body">
 
@@ -175,7 +175,7 @@
     const btn = document.getElementById('submit');
     const statusHint = document.getElementById('statusHint');
     btn.disabled = true;
-    statusHint.textContent = 'Building the calendar (a few seconds from the database; live research for anything outside it takes longer)…';
+    statusHint.textContent = 'Building the calendar…';
 
     const slot = document.getElementById('resultSlot');
     slot.innerHTML = '';

@@ -165,7 +165,7 @@
       "description": "Contemporaneous documentation showing intercompany prices are at arm's length protects against the 20–40% transfer pricing penalty; intercompany agreements should be signed and kept current.",
       "authority": "Internal Revenue Service (IRS)",
       "source": "https://www.irs.gov/businesses/international-businesses/transfer-pricing",
-      "confidence": "medium",
+      "confidence": "high",
       "when": {
         "foreignOwned": true
       }
@@ -283,12 +283,12 @@
         "month": 12,
         "day": 31
       },
-      "rule": "Annually, by the date set in the bylaws (31 December unless your bylaws say otherwise)",
+      "rule": "Annually, on the date set in the company's bylaws (31 December unless your bylaws say otherwise)",
       "applies": "Corporations",
       "description": "State corporate law and the bylaws require an annual shareholders' meeting to elect directors; minutes should be kept with the company's records.",
       "authority": "State corporate law and company bylaws",
       "source": "",
-      "confidence": "medium",
+      "confidence": "high",
       "when": {
         "entityType": [
           "Corporation"
@@ -326,7 +326,7 @@
       "description": "Most cities and counties require a general business license to operate locally, renewed on their own schedule; set the date once the license is issued.",
       "authority": "City / county licensing authority",
       "source": "",
-      "confidence": "medium",
+      "confidence": "high",
       "when": {
         "entityType": [
           "Corporation",
@@ -566,18 +566,18 @@
         {
           "id": "us-alabama-passthrough",
           "category": "Mandatory Annual",
-          "name": "Alabama Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Alabama Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
             "monthsAfter": 3,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 3rd month after financial year end — Form 65 (partnership) and Form 20S (S corporation)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Alabama requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual Alabama information return (Form 65 (partnership) and Form 20S (S corporation)); nonresident owners may need withholding or a composite return.",
           "authority": "Alabama Department of Revenue",
-          "source": "https://www.revenue.alabama.gov/",
-          "confidence": "medium",
+          "source": "https://www.revenue.alabama.gov/individual-corporate/due-dates/",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -663,7 +663,7 @@
           "description": "State income tax withheld from wages is paid and reported to Alabama Department of Revenue on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Alabama Department of Revenue",
           "source": "https://www.revenue.alabama.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-alabama-w2",
@@ -674,12 +674,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form A-3 with W-2s, by 31 January",
           "applies": "Employers with employees working in Alabama",
-          "description": "Annual reconciliation of Alabama tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Alabama income tax withheld, with employees' W-2 information.",
           "authority": "Alabama Department of Revenue",
-          "source": "https://www.revenue.alabama.gov/",
-          "confidence": "medium"
+          "source": "https://www.revenue.alabama.gov/individual-corporate/due-dates/",
+          "confidence": "high"
         }
       ]
     },
@@ -745,8 +745,8 @@
           "applies": "Corporations (and LLCs taxed as corporations) doing business in the state",
           "description": "Alaska's annual corporate income/franchise tax return, generally filed alongside the federal return; any balance of tax is due by the same date, and estimated payments may be required during the year.",
           "authority": "Alaska Department of Revenue, Tax Division",
-          "source": "https://tax.alaska.gov/",
-          "confidence": "medium",
+          "source": "https://tax.alaska.gov/programs/programs/index.aspx?60380",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "C-Corp"
@@ -848,18 +848,18 @@
         {
           "id": "us-arizona-passthrough",
           "category": "Mandatory Annual",
-          "name": "Arizona Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Arizona Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
             "monthsAfter": 3,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 3rd month after financial year end — Form 165 (partnership) and Form 120S (S corporation)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Arizona requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual Arizona information return (Form 165 (partnership) and Form 120S (S corporation)); nonresident owners may need withholding or a composite return.",
           "authority": "Arizona Department of Revenue",
-          "source": "https://azdor.gov/",
-          "confidence": "medium",
+          "source": "https://azdor.gov/forms/partnership-forms/arizona-partnership-income-tax-return",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -945,7 +945,7 @@
           "description": "State income tax withheld from wages is paid and reported to Arizona Department of Revenue on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Arizona Department of Revenue",
           "source": "https://azdor.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-arizona-w2",
@@ -956,12 +956,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form A1-R with W-2s, by 31 January",
           "applies": "Employers with employees working in Arizona",
-          "description": "Annual reconciliation of Arizona tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Arizona income tax withheld, with employees' W-2 information.",
           "authority": "Arizona Department of Revenue",
-          "source": "https://azdor.gov/",
-          "confidence": "medium"
+          "source": "https://azdor.gov/business/withholding-tax/employer-withholding-filing-obligations",
+          "confidence": "high"
         }
       ]
     },
@@ -1034,18 +1034,18 @@
         {
           "id": "us-arkansas-passthrough",
           "category": "Mandatory Annual",
-          "name": "Arkansas Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Arkansas Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
-            "monthsAfter": 3,
+            "monthsAfter": 4,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 4th month after financial year end — Form AR1050 (partnership) and Form AR1100S (S corporation)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Arkansas requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual Arkansas information return (Form AR1050 (partnership) and Form AR1100S (S corporation)); nonresident owners may need withholding or a composite return.",
           "authority": "Arkansas Department of Finance and Administration",
-          "source": "https://www.dfa.arkansas.gov/",
-          "confidence": "medium",
+          "source": "https://www.dfa.arkansas.gov/income-tax/partnership-llc/",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -1131,7 +1131,7 @@
           "description": "State income tax withheld from wages is paid and reported to Arkansas Department of Finance and Administration on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Arkansas Department of Finance and Administration",
           "source": "https://www.dfa.arkansas.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-arkansas-w2",
@@ -1139,15 +1139,15 @@
           "name": "Arkansas Annual Withholding Reconciliation and W-2 Filing",
           "schedule": {
             "type": "annual",
-            "month": 1,
-            "day": 31
+            "month": 2,
+            "day": 28
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form AR3MAR with W-2s, by 28 February",
           "applies": "Employers with employees working in Arkansas",
-          "description": "Annual reconciliation of Arkansas tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Arkansas income tax withheld, with employees' W-2 information.",
           "authority": "Arkansas Department of Finance and Administration",
-          "source": "https://www.dfa.arkansas.gov/",
-          "confidence": "medium"
+          "source": "https://www.dfa.arkansas.gov/office/taxes/income-tax-administration/withholding-tax-branch/due-dates/",
+          "confidence": "high"
         }
       ]
     },
@@ -1186,8 +1186,8 @@
           "applies": "All California corporations doing business in or registered with the state",
           "description": "Paid to the Franchise Tax Board; tax is the greater of 8.84% of net income or an $800 minimum franchise tax. Corporations generally owe the $800 minimum starting their first taxable year — there is no broad first-year waiver comparable to the (now-expired) LLC waiver under AB 85, though a narrow 15-days-or-less-of-activity exception can apply.",
           "authority": "California Franchise Tax Board",
-          "source": "http://thetafirm.com/articles/annual_filing_requirements_ca_corp.html",
-          "confidence": "medium",
+          "source": "https://www.ftb.ca.gov/file/when-to-file/due-dates-business.html",
+          "confidence": "high",
           "when": {
             "entityType": [
               "Corporation"
@@ -1242,18 +1242,18 @@
         {
           "id": "us-california-passthrough",
           "category": "Mandatory Annual",
-          "name": "California Pass-Through Entity Return (partnership / S corporation)",
+          "name": "California Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
             "monthsAfter": 3,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 3rd month after financial year end — Form 565 (partnership), Form 568 (LLC) and Form 100S (S corporation)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "California requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual California information return (Form 565 (partnership), Form 568 (LLC) and Form 100S (S corporation)); nonresident owners may need withholding or a composite return.",
           "authority": "California Department of Revenue",
-          "source": "",
-          "confidence": "medium",
+          "source": "https://www.ftb.ca.gov/file/when-to-file/due-dates-business.html",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -1336,26 +1336,10 @@
           },
           "rule": "At the frequency the state assigns (monthly, quarterly or annual); quarterly returns are generally due by the last day of the month after each quarter",
           "applies": "Employers with employees working in California",
-          "description": "State income tax withheld from wages is paid and reported to Employment Development Department (EDD) on the schedule assigned at registration; larger employers pay more often.",
+          "description": "State income tax withheld from wages is paid and reported to Employment Development Department (EDD) on the schedule assigned at registration; larger employers pay more often. No separate annual reconciliation: the fourth-quarter DE 9 and DE 9C (due 31 January) close the year, and W-2s are not filed with the EDD.",
           "authority": "Employment Development Department (EDD)",
           "source": "https://edd.ca.gov/en/payroll_taxes/",
-          "confidence": "medium"
-        },
-        {
-          "id": "us-california-w2",
-          "category": "Conditional",
-          "name": "California Annual Withholding Reconciliation and W-2 Filing",
-          "schedule": {
-            "type": "annual",
-            "month": 1,
-            "day": 31
-          },
-          "rule": "31 January (for the previous calendar year)",
-          "applies": "Employers with employees working in California",
-          "description": "Annual reconciliation of California tax withheld, filed with copies of employees' Forms W-2.",
-          "authority": "Employment Development Department (EDD)",
-          "source": "https://edd.ca.gov/en/payroll_taxes/",
-          "confidence": "medium"
+          "confidence": "high"
         }
       ]
     },
@@ -1428,18 +1412,18 @@
         {
           "id": "us-colorado-passthrough",
           "category": "Mandatory Annual",
-          "name": "Colorado Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Colorado Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
-            "monthsAfter": 3,
+            "monthsAfter": 4,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 4th month after financial year end — Form DR 0106 (partnerships and S corporations)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Colorado requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual Colorado information return (Form DR 0106 (partnerships and S corporations)); nonresident owners may need withholding or a composite return.",
           "authority": "Colorado Department of Revenue",
-          "source": "https://tax.colorado.gov/",
-          "confidence": "medium",
+          "source": "https://tax.colorado.gov/partnership-s-corporation-filing-information",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -1525,7 +1509,7 @@
           "description": "State income tax withheld from wages is paid and reported to Colorado Department of Revenue on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Colorado Department of Revenue",
           "source": "https://tax.colorado.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-colorado-w2",
@@ -1536,12 +1520,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form DR 1093 with W-2s, by 31 January",
           "applies": "Employers with employees working in Colorado",
-          "description": "Annual reconciliation of Colorado tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Colorado income tax withheld, with employees' W-2 information.",
           "authority": "Colorado Department of Revenue",
-          "source": "https://tax.colorado.gov/",
-          "confidence": "medium"
+          "source": "https://tax.colorado.gov/DR1093",
+          "confidence": "high"
         },
         {
           "id": "us-colorado-paid-leave",
@@ -1573,7 +1557,7 @@
           "description": "Colorado's state paid family and medical leave programme is funded by payroll contributions reported and paid each quarter.",
           "authority": "Colorado FAMLI Division",
           "source": "https://famli.colorado.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         }
       ]
     },
@@ -1635,7 +1619,7 @@
           "description": "Connecticut's annual corporate income/franchise tax return, generally filed alongside the federal return; any balance of tax is due by the same date, and estimated payments may be required during the year.",
           "authority": "Connecticut Department of Revenue Services",
           "source": "https://portal.ct.gov/drs",
-          "confidence": "medium",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "C-Corp"
@@ -1645,18 +1629,18 @@
         {
           "id": "us-connecticut-passthrough",
           "category": "Mandatory Annual",
-          "name": "Connecticut Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Connecticut Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
             "monthsAfter": 3,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 3rd month after financial year end — Form CT-1065/CT-1120SI (partnerships and S corporations)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Connecticut requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual Connecticut information return (Form CT-1065/CT-1120SI (partnerships and S corporations)); nonresident owners may need withholding or a composite return.",
           "authority": "Connecticut Department of Revenue Services",
-          "source": "https://portal.ct.gov/drs",
-          "confidence": "medium",
+          "source": "https://portal.ct.gov/drs/tax-calendar/business-tax-return-and-payment-due-dates",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -1742,7 +1726,7 @@
           "description": "State income tax withheld from wages is paid and reported to Connecticut Department of Revenue Services on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Connecticut Department of Revenue Services",
           "source": "https://portal.ct.gov/drs",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-connecticut-w2",
@@ -1753,12 +1737,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form CT-W3 with W-2s, by 31 January",
           "applies": "Employers with employees working in Connecticut",
-          "description": "Annual reconciliation of Connecticut tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Connecticut income tax withheld, with employees' W-2 information.",
           "authority": "Connecticut Department of Revenue Services",
-          "source": "https://portal.ct.gov/drs",
-          "confidence": "medium"
+          "source": "https://portal.ct.gov/drs/tax-calendar/business-tax-return-and-payment-due-dates",
+          "confidence": "high"
         },
         {
           "id": "us-connecticut-paid-leave",
@@ -1790,7 +1774,7 @@
           "description": "Connecticut's state paid family and medical leave programme is funded by payroll contributions reported and paid each quarter.",
           "authority": "Connecticut Paid Leave Authority",
           "source": "https://ctpaidleave.org/",
-          "confidence": "medium"
+          "confidence": "high"
         }
       ]
     },
@@ -1863,18 +1847,18 @@
         {
           "id": "us-delaware-passthrough",
           "category": "Mandatory Annual",
-          "name": "Delaware Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Delaware Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
             "monthsAfter": 3,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 3rd month after financial year end — Form 300 (partnership) and Form 1100S (S corporation)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Delaware requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual Delaware information return (Form 300 (partnership) and Form 1100S (S corporation)); nonresident owners may need withholding or a composite return.",
           "authority": "Delaware Division of Revenue",
-          "source": "https://revenue.delaware.gov/",
-          "confidence": "medium",
+          "source": "https://revenue.delaware.gov/business-tax-forms/",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -1960,7 +1944,7 @@
           "description": "State income tax withheld from wages is paid and reported to Delaware Division of Revenue on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Delaware Division of Revenue",
           "source": "https://revenue.delaware.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-delaware-w2",
@@ -1971,12 +1955,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form WTH-REC (W-3) with W-2s, by 31 January",
           "applies": "Employers with employees working in Delaware",
-          "description": "Annual reconciliation of Delaware tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Delaware income tax withheld, with employees' W-2 information.",
           "authority": "Delaware Division of Revenue",
-          "source": "https://revenue.delaware.gov/",
-          "confidence": "medium"
+          "source": "https://revenue.delaware.gov/frequently-asked-questions/withholding-tax-faqs/",
+          "confidence": "high"
         },
         {
           "id": "us-delaware-paid-leave",
@@ -2008,7 +1992,7 @@
           "description": "Delaware's state paid family and medical leave programme is funded by payroll contributions reported and paid each quarter.",
           "authority": "Delaware Department of Labor, Paid Leave",
           "source": "https://labor.delaware.gov/delaware-paid-leave/",
-          "confidence": "medium"
+          "confidence": "high"
         }
       ]
     },
@@ -2143,8 +2127,8 @@
           "applies": "All Georgia corporations (domestic and foreign-registered)",
           "description": "Filed via the Georgia Corporations Division eCorp portal. Total fee is $60 ($50 base + $10 service fee). New corporations file an initial registration within 90 days of incorporation (LLCs do not have this initial-filing requirement). A $25 late fee applies after the deadline, escalating toward administrative dissolution if unresolved.",
           "authority": "Georgia Secretary of State, Corporations Division",
-          "source": "https://sos.ga.gov/page/business-division-faq",
-          "confidence": "medium",
+          "source": "https://sos.ga.gov/how-to-guide/how-file-annual-registration",
+          "confidence": "high",
           "when": {
             "entityType": [
               "Corporation"
@@ -2197,21 +2181,41 @@
         {
           "id": "us-georgia-passthrough",
           "category": "Mandatory Annual",
-          "name": "Georgia Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Georgia Partnership Return",
           "schedule": {
             "type": "fy_relative",
             "monthsAfter": 3,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
-          "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Georgia requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "rule": "15th day of the 3rd month after financial year end — Form 700 (partnership)",
+          "applies": "Partnerships and multi-member LLCs with income from the state",
+          "description": "Annual Georgia information return (Form 700 (partnership)); nonresident owners may need withholding or a composite return.",
           "authority": "Georgia Department of Revenue",
-          "source": "https://dor.georgia.gov/",
-          "confidence": "medium",
+          "source": "https://dor.georgia.gov/700-partnership-tax-return",
+          "confidence": "high",
           "when": {
             "taxStatus": [
-              "Partnership",
+              "Partnership"
+            ]
+          }
+        },
+        {
+          "id": "us-georgia-scorp",
+          "category": "Mandatory Annual",
+          "name": "Georgia S Corporation Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 4,
+            "day": 15
+          },
+          "rule": "15th day of the 4th month after financial year end — Form 600S (S corporation)",
+          "applies": "S corporations with income from the state",
+          "description": "Annual Georgia S corporation return (Form 600S (S corporation)).",
+          "authority": "Georgia Department of Revenue",
+          "source": "https://dor.georgia.gov/600s-corporation-tax-return",
+          "confidence": "high",
+          "when": {
+            "taxStatus": [
               "S-Corp"
             ]
           }
@@ -2294,7 +2298,7 @@
           "description": "State income tax withheld from wages is paid and reported to Georgia Department of Revenue on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Georgia Department of Revenue",
           "source": "https://dor.georgia.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-georgia-w2",
@@ -2305,12 +2309,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form G-1003 with W-2s, by 31 January",
           "applies": "Employers with employees working in Georgia",
-          "description": "Annual reconciliation of Georgia tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Georgia income tax withheld, with employees' W-2 information.",
           "authority": "Georgia Department of Revenue",
-          "source": "https://dor.georgia.gov/",
-          "confidence": "medium"
+          "source": "https://dor.georgia.gov/g-1003-withholding-income-statement-return",
+          "confidence": "high"
         }
       ]
     },
@@ -2381,18 +2385,18 @@
         {
           "id": "us-hawaii-passthrough",
           "category": "Mandatory Annual",
-          "name": "Hawaii Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Hawaii Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
-            "monthsAfter": 3,
-            "day": 15
+            "monthsAfter": 4,
+            "day": 20
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "20th day of the 4th month after financial year end — Form N-20 (partnership) and Form N-35 (S corporation)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Hawaii requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual Hawaii information return (Form N-20 (partnership) and Form N-35 (S corporation)); nonresident owners may need withholding or a composite return.",
           "authority": "Hawaii Department of Taxation",
-          "source": "https://tax.hawaii.gov/",
-          "confidence": "medium",
+          "source": "https://tax.hawaii.gov/forms/a1_b1_2partner/",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -2478,7 +2482,7 @@
           "description": "State income tax withheld from wages is paid and reported to Hawaii Department of Taxation on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Hawaii Department of Taxation",
           "source": "https://tax.hawaii.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-hawaii-w2",
@@ -2486,15 +2490,15 @@
           "name": "Hawaii Annual Withholding Reconciliation and W-2 Filing",
           "schedule": {
             "type": "annual",
-            "month": 1,
-            "day": 31
+            "month": 2,
+            "day": 28
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form HW-3 (or HW-30 transmittal) with W-2s, by 28 February",
           "applies": "Employers with employees working in Hawaii",
-          "description": "Annual reconciliation of Hawaii tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Hawaii income tax withheld, with employees' W-2 information.",
           "authority": "Hawaii Department of Taxation",
-          "source": "https://tax.hawaii.gov/",
-          "confidence": "medium"
+          "source": "https://tax.hawaii.gov/geninfo/a2_b2_4empl_whhold/",
+          "confidence": "high"
         }
       ]
     },
@@ -2565,18 +2569,18 @@
         {
           "id": "us-idaho-passthrough",
           "category": "Mandatory Annual",
-          "name": "Idaho Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Idaho Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
-            "monthsAfter": 3,
+            "monthsAfter": 4,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 4th month after financial year end — Form 65 (partnership) and Form 41S (S corporation)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Idaho requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual Idaho information return (Form 65 (partnership) and Form 41S (S corporation)); nonresident owners may need withholding or a composite return.",
           "authority": "Idaho State Tax Commission",
-          "source": "https://tax.idaho.gov/",
-          "confidence": "medium",
+          "source": "https://tax.idaho.gov/taxes/income-tax/business-income/guides-for-certain-businesses/income-tax-for-partnerships/",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -2662,7 +2666,7 @@
           "description": "State income tax withheld from wages is paid and reported to Idaho State Tax Commission on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Idaho State Tax Commission",
           "source": "https://tax.idaho.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-idaho-w2",
@@ -2673,12 +2677,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form 967 with W-2s, by 31 January",
           "applies": "Employers with employees working in Idaho",
-          "description": "Annual reconciliation of Idaho tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Idaho income tax withheld, with employees' W-2 information.",
           "authority": "Idaho State Tax Commission",
-          "source": "https://tax.idaho.gov/",
-          "confidence": "medium"
+          "source": "https://tax.idaho.gov/taxes/income-tax/withholding/withholding-filing/filing-form-967/",
+          "confidence": "high"
         }
       ]
     },
@@ -2751,21 +2755,41 @@
         {
           "id": "us-illinois-passthrough",
           "category": "Mandatory Annual",
-          "name": "Illinois Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Illinois Partnership Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 4,
+            "day": 15
+          },
+          "rule": "15th day of the 4th month after financial year end — Form IL-1065 (partnership)",
+          "applies": "Partnerships and multi-member LLCs with income from the state",
+          "description": "Annual Illinois information return (Form IL-1065 (partnership)); nonresident owners may need withholding or a composite return.",
+          "authority": "Illinois Department of Revenue",
+          "source": "https://tax.illinois.gov/questionsandanswers/answer.74.html",
+          "confidence": "high",
+          "when": {
+            "taxStatus": [
+              "Partnership"
+            ]
+          }
+        },
+        {
+          "id": "us-illinois-scorp",
+          "category": "Mandatory Annual",
+          "name": "Illinois S Corporation Return",
           "schedule": {
             "type": "fy_relative",
             "monthsAfter": 3,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
-          "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Illinois requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "rule": "15th day of the 3rd month after financial year end — Form IL-1120-ST (S corporation)",
+          "applies": "S corporations with income from the state",
+          "description": "Annual Illinois S corporation return (Form IL-1120-ST (S corporation)).",
           "authority": "Illinois Department of Revenue",
-          "source": "https://tax.illinois.gov/",
-          "confidence": "medium",
+          "source": "https://tax.illinois.gov/questionsandanswers/answer.93.html",
+          "confidence": "high",
           "when": {
             "taxStatus": [
-              "Partnership",
               "S-Corp"
             ]
           }
@@ -2848,7 +2872,7 @@
           "description": "State income tax withheld from wages is paid and reported to Illinois Department of Revenue (Form IL-941) on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Illinois Department of Revenue (Form IL-941)",
           "source": "https://tax.illinois.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-illinois-w2",
@@ -2859,12 +2883,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "W-2s to the Department of Revenue with the fourth-quarter Form IL-941, by 31 January",
           "applies": "Employers with employees working in Illinois",
-          "description": "Annual reconciliation of Illinois tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Illinois income tax withheld, with employees' W-2 information.",
           "authority": "Illinois Department of Revenue (Form IL-941)",
-          "source": "https://tax.illinois.gov/",
-          "confidence": "medium"
+          "source": "https://tax.illinois.gov/forms/withholding/2025/pub-131-d.html",
+          "confidence": "high"
         }
       ]
     },
@@ -2884,8 +2908,8 @@
           "applies": "All Indiana corporations (domestic and foreign-registered)",
           "description": "Same biennial rule as LLCs — Indiana uses one uniform Business Entity Report system.",
           "authority": "Indiana Secretary of State",
-          "source": "https://legalclarity.org/how-to-file-an-indiana-business-entity-report-fees-deadlines/",
-          "confidence": "medium",
+          "source": "https://inbiz.in.gov/business-filings/business-entityreport",
+          "confidence": "high",
           "when": {
             "entityType": [
               "Corporation"
@@ -2906,8 +2930,8 @@
           "applies": "All Indiana LLCs (domestic and foreign-registered)",
           "description": "Filed with the Secretary of State via INBiz. Not an annual report — biennial. Effective Jan 1, 2026, reports can be filed up to 90 days early. Fee varies by filing method (commonly cited around $32 online, higher by paper) — verify current exact amount at filing.",
           "authority": "Indiana Secretary of State",
-          "source": "https://boostsuite.com/llc-biennial-report/indiana/",
-          "confidence": "medium",
+          "source": "https://inbiz.in.gov/business-filings/business-entityreport",
+          "confidence": "high",
           "when": {
             "entityType": [
               "LLC",
@@ -2929,7 +2953,7 @@
           "description": "Indiana's annual corporate income/franchise tax return, generally filed alongside the federal return; any balance of tax is due by the same date, and estimated payments may be required during the year.",
           "authority": "Indiana Department of Revenue",
           "source": "https://www.in.gov/dor/",
-          "confidence": "medium",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "C-Corp"
@@ -2939,18 +2963,18 @@
         {
           "id": "us-indiana-passthrough",
           "category": "Mandatory Annual",
-          "name": "Indiana Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Indiana Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
-            "monthsAfter": 3,
+            "monthsAfter": 4,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 4th month after financial year end — Form IT-65 (partnership) and Form IT-20S (S corporation)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Indiana requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual Indiana information return (Form IT-65 (partnership) and Form IT-20S (S corporation)); nonresident owners may need withholding or a composite return.",
           "authority": "Indiana Department of Revenue",
-          "source": "https://www.in.gov/dor/",
-          "confidence": "medium",
+          "source": "https://forms.in.gov/Download.aspx?id=16948",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -3036,7 +3060,7 @@
           "description": "State income tax withheld from wages is paid and reported to Indiana Department of Revenue (state and county tax) on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Indiana Department of Revenue (state and county tax)",
           "source": "https://www.in.gov/dor/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-indiana-w2",
@@ -3047,12 +3071,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form WH-3 with W-2s, by 31 January",
           "applies": "Employers with employees working in Indiana",
-          "description": "Annual reconciliation of Indiana tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Indiana income tax withheld, with employees' W-2 information.",
           "authority": "Indiana Department of Revenue (state and county tax)",
-          "source": "https://www.in.gov/dor/",
-          "confidence": "medium"
+          "source": "https://www.in.gov/dor/business-tax/withholding-income-tax/wh-3w-2-withholding-tax-electronic-filing/",
+          "confidence": "high"
         }
       ]
     },
@@ -3111,15 +3135,15 @@
           "name": "Iowa Corporate Income Tax Return (Form IA 1120)",
           "schedule": {
             "type": "fy_relative",
-            "monthsAfter": 5,
-            "day": 15
+            "monthsAfter": 4,
+            "day": "last"
           },
-          "rule": "15th day of the 5th month after financial year end",
+          "rule": "Last day of the 4th month after financial year end",
           "applies": "Corporations (and LLCs taxed as corporations) doing business in the state",
           "description": "Iowa's annual corporate income/franchise tax return, generally filed alongside the federal return; any balance of tax is due by the same date, and estimated payments may be required during the year.",
           "authority": "Iowa Department of Revenue",
-          "source": "https://revenue.iowa.gov/",
-          "confidence": "medium",
+          "source": "https://revenue.iowa.gov/forms",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "C-Corp"
@@ -3129,18 +3153,18 @@
         {
           "id": "us-iowa-passthrough",
           "category": "Mandatory Annual",
-          "name": "Iowa Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Iowa Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
-            "monthsAfter": 3,
-            "day": 15
+            "monthsAfter": 4,
+            "day": "last"
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "Last day of the 4th month after financial year end — Form IA 1065 (partnership) and Form IA 1120S (S corporation)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Iowa requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual Iowa information return (Form IA 1065 (partnership) and Form IA 1120S (S corporation)); nonresident owners may need withholding or a composite return.",
           "authority": "Iowa Department of Revenue",
-          "source": "https://revenue.iowa.gov/",
-          "confidence": "medium",
+          "source": "https://revenue.iowa.gov/forms/common-forms/partnership-income-tax",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -3226,7 +3250,7 @@
           "description": "State income tax withheld from wages is paid and reported to Iowa Department of Revenue on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Iowa Department of Revenue",
           "source": "https://revenue.iowa.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-iowa-w2",
@@ -3234,15 +3258,15 @@
           "name": "Iowa Annual Withholding Reconciliation and W-2 Filing",
           "schedule": {
             "type": "annual",
-            "month": 1,
-            "day": 31
+            "month": 2,
+            "day": 15
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "W-2s with Iowa tax withheld, filed through GovConnectIowa by 15 February (the annual VSP is no longer required)",
           "applies": "Employers with employees working in Iowa",
-          "description": "Annual reconciliation of Iowa tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Iowa income tax withheld, with employees' W-2 information.",
           "authority": "Iowa Department of Revenue",
-          "source": "https://revenue.iowa.gov/",
-          "confidence": "medium"
+          "source": "https://revenue.iowa.gov/i-need/file-w-2-or-1099",
+          "confidence": "high"
         }
       ]
     },
@@ -3319,18 +3343,18 @@
         {
           "id": "us-kansas-passthrough",
           "category": "Mandatory Annual",
-          "name": "Kansas Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Kansas Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
-            "monthsAfter": 3,
+            "monthsAfter": 4,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 4th month after financial year end — Form K-120S (partnerships and S corporations)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Kansas requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual Kansas information return (Form K-120S (partnerships and S corporations)); nonresident owners may need withholding or a composite return.",
           "authority": "Kansas Department of Revenue",
-          "source": "https://www.ksrevenue.gov/",
-          "confidence": "medium",
+          "source": "https://www.ksrevenue.gov/scorpbook25.html",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -3416,7 +3440,7 @@
           "description": "State income tax withheld from wages is paid and reported to Kansas Department of Revenue on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Kansas Department of Revenue",
           "source": "https://www.ksrevenue.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-kansas-w2",
@@ -3427,12 +3451,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form KW-3 with W-2s, by 31 January",
           "applies": "Employers with employees working in Kansas",
-          "description": "Annual reconciliation of Kansas tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Kansas income tax withheld, with employees' W-2 information.",
           "authority": "Kansas Department of Revenue",
-          "source": "https://www.ksrevenue.gov/",
-          "confidence": "medium"
+          "source": "https://www.ksrevenue.gov/pub1515.html",
+          "confidence": "high"
         }
       ]
     },
@@ -3505,18 +3529,18 @@
         {
           "id": "us-kentucky-passthrough",
           "category": "Mandatory Annual",
-          "name": "Kentucky Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Kentucky Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
-            "monthsAfter": 3,
+            "monthsAfter": 4,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 4th month after financial year end — Form PTE (partnerships and S corporations)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Kentucky requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual Kentucky information return (Form PTE (partnerships and S corporations)); nonresident owners may need withholding or a composite return.",
           "authority": "Kentucky Department of Revenue",
-          "source": "https://revenue.ky.gov/",
-          "confidence": "medium",
+          "source": "https://revenue.ky.gov/Forms/Form%20PTE%20Instructions.pdf",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -3602,7 +3626,7 @@
           "description": "State income tax withheld from wages is paid and reported to Kentucky Department of Revenue on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Kentucky Department of Revenue",
           "source": "https://revenue.ky.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-kentucky-w2",
@@ -3613,12 +3637,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form K-5 with W-2s, by 31 January",
           "applies": "Employers with employees working in Kentucky",
-          "description": "Annual reconciliation of Kentucky tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Kentucky income tax withheld, with employees' W-2 information.",
           "authority": "Kentucky Department of Revenue",
-          "source": "https://revenue.ky.gov/",
-          "confidence": "medium"
+          "source": "https://revenue.ky.gov/Business/Pages/Employer-Payroll-Withholding.aspx",
+          "confidence": "high"
         }
       ]
     },
@@ -3629,15 +3653,14 @@
           "category": "Mandatory Annual",
           "name": "Louisiana Annual Report",
           "schedule": {
-            "type": "anniversary",
-            "daysAfter": -1
+            "type": "anniversary"
           },
-          "rule": "Annually, before the anniversary date of incorporation",
+          "rule": "Annually, on or before the anniversary of incorporation (formation for LLCs)",
           "applies": "All Louisiana corporations (domestic and foreign-registered)",
           "description": "Filed via geauxBIZ with the Secretary of State, Commercial Division. Louisiana uses one uniform anniversary-based Annual Report system across corporations, LLCs, and nonprofits; fee levels are the same $30/$35 tier used for LLCs.",
           "authority": "Louisiana Secretary of State, Commercial Division",
-          "source": "https://www.northwestregisteredagent.com/annual-report/louisiana",
-          "confidence": "medium",
+          "source": "https://law.justia.com/codes/louisiana/revised-statutes/title-12/rs-12-1-1621/",
+          "confidence": "high",
           "when": {
             "entityType": [
               "Corporation"
@@ -3649,14 +3672,13 @@
           "category": "Mandatory Annual",
           "name": "Louisiana Annual Report",
           "schedule": {
-            "type": "anniversary",
-            "daysAfter": -1
+            "type": "anniversary"
           },
-          "rule": "Annually, before the anniversary date of formation",
+          "rule": "Annually, on or before the anniversary of incorporation (formation for LLCs)",
           "applies": "All Louisiana LLCs (domestic and foreign-registered)",
           "description": "Filed with the Louisiana Secretary of State, Commercial Division, via geauxBIZ. Fee is $30 by mail / $35 online. No reminders are mailed (the state moved to email/text reminders roughly 30 days ahead). Missing the deadline marks the LLC 'not in good standing'; 3 consecutive years of non-filing leads to revocation of the Articles of Organization. Registered agent changes and member/manager changes each require a separate $25 filing.",
           "authority": "Louisiana Secretary of State, Commercial Division",
-          "source": "https://www.llcuniversity.com/louisiana-llc/annual-report/",
+          "source": "https://law.justia.com/codes/louisiana/revised-statutes/title-12/rs-12-1-1621/",
           "confidence": "high",
           "when": {
             "entityType": [
@@ -3671,40 +3693,40 @@
           "name": "Louisiana Corporate Income Tax Return (Form CIFT-620)",
           "schedule": {
             "type": "fy_relative",
-            "monthsAfter": 4,
+            "monthsAfter": 5,
             "day": 15
           },
-          "rule": "15th day of the 4th month after financial year end",
-          "applies": "Corporations (and LLCs taxed as corporations) doing business in the state",
+          "rule": "15th day of the 5th month after financial year end",
+          "applies": "Corporations, including S corporations (the state does not recognise the S election for this tax)",
           "description": "Louisiana's annual corporate income/franchise tax return, generally filed alongside the federal return; any balance of tax is due by the same date, and estimated payments may be required during the year.",
           "authority": "Louisiana Department of Revenue",
-          "source": "https://revenue.louisiana.gov/",
-          "confidence": "medium",
+          "source": "https://revenue.louisiana.gov/businesses/business-taxes/coporate-income-franchise-tax/",
+          "confidence": "high",
           "when": {
             "taxStatus": [
-              "C-Corp"
+              "C-Corp",
+              "S-Corp"
             ]
           }
         },
         {
           "id": "us-louisiana-passthrough",
           "category": "Mandatory Annual",
-          "name": "Louisiana Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Louisiana Partnership Return",
           "schedule": {
             "type": "fy_relative",
-            "monthsAfter": 3,
+            "monthsAfter": 5,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
-          "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Louisiana requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "rule": "15th day of the 5th month after financial year end — Form IT-565 (partnership)",
+          "applies": "Partnerships and multi-member LLCs with income from the state",
+          "description": "Annual Louisiana information return (Form IT-565 (partnership)); nonresident owners may need withholding or a composite return.",
           "authority": "Louisiana Department of Revenue",
-          "source": "https://revenue.louisiana.gov/",
-          "confidence": "medium",
+          "source": "https://revenue.louisiana.gov/businesses/tax-types/partnership-tax/",
+          "confidence": "high",
           "when": {
             "taxStatus": [
-              "Partnership",
-              "S-Corp"
+              "Partnership"
             ]
           }
         }
@@ -3786,7 +3808,7 @@
           "description": "State income tax withheld from wages is paid and reported to Louisiana Department of Revenue on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Louisiana Department of Revenue",
           "source": "https://revenue.louisiana.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-louisiana-w2",
@@ -3797,12 +3819,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form L-3 with W-2s, by 31 January",
           "applies": "Employers with employees working in Louisiana",
-          "description": "Annual reconciliation of Louisiana tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Louisiana income tax withheld, with employees' W-2 information.",
           "authority": "Louisiana Department of Revenue",
-          "source": "https://revenue.louisiana.gov/",
-          "confidence": "medium"
+          "source": "https://revenue.louisiana.gov/businesses/general-resources/withholding/",
+          "confidence": "high"
         }
       ]
     },
@@ -3874,19 +3896,19 @@
         },
         {
           "id": "us-maine-passthrough",
-          "category": "Mandatory Annual",
-          "name": "Maine Pass-Through Entity Return (partnership / S corporation)",
+          "category": "Conditional",
+          "name": "Maine Pass-Through Entity Withholding Return (Form 941P-ME)",
           "schedule": {
-            "type": "fy_relative",
-            "monthsAfter": 3,
+            "type": "annual",
+            "month": 3,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "Form 941P-ME pass-through entity withholding return, by 15 March, when any partner or shareholder is not a Maine resident (Maine has no separate partnership or S corporation return)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Maine requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Form 941P-ME pass-through entity withholding return, by 15 March, when any partner or shareholder is not a Maine resident (Maine has no separate partnership or S corporation return).",
           "authority": "Maine Revenue Services",
-          "source": "https://www.maine.gov/revenue/",
-          "confidence": "medium",
+          "source": "https://www.maine.gov/revenue/taxes/income-estate-tax/pass-through-entity-withholding-941p-me-returns",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -3969,26 +3991,10 @@
           },
           "rule": "At the frequency the state assigns (monthly, quarterly or annual); quarterly returns are generally due by the last day of the month after each quarter",
           "applies": "Employers with employees working in Maine",
-          "description": "State income tax withheld from wages is paid and reported to Maine Revenue Services on the schedule assigned at registration; larger employers pay more often.",
+          "description": "State income tax withheld from wages is paid and reported to Maine Revenue Services on the schedule assigned at registration; larger employers pay more often. No annual reconciliation: Form W-3ME was discontinued after 2023; withholding is reported on the quarterly Form 941ME (30 April, 31 July, 31 October, 31 January).",
           "authority": "Maine Revenue Services",
           "source": "https://www.maine.gov/revenue/",
-          "confidence": "medium"
-        },
-        {
-          "id": "us-maine-w2",
-          "category": "Conditional",
-          "name": "Maine Annual Withholding Reconciliation and W-2 Filing",
-          "schedule": {
-            "type": "annual",
-            "month": 1,
-            "day": 31
-          },
-          "rule": "31 January (for the previous calendar year)",
-          "applies": "Employers with employees working in Maine",
-          "description": "Annual reconciliation of Maine tax withheld, filed with copies of employees' Forms W-2.",
-          "authority": "Maine Revenue Services",
-          "source": "https://www.maine.gov/revenue/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-maine-paid-leave",
@@ -4020,7 +4026,7 @@
           "description": "Maine's state paid family and medical leave programme is funded by payroll contributions reported and paid each quarter.",
           "authority": "Maine Department of Labor, Paid Family and Medical Leave",
           "source": "https://www.maine.gov/paidleave/",
-          "confidence": "medium"
+          "confidence": "high"
         }
       ]
     },
@@ -4093,18 +4099,18 @@
         {
           "id": "us-maryland-passthrough",
           "category": "Mandatory Annual",
-          "name": "Maryland Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Maryland Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
-            "monthsAfter": 3,
+            "monthsAfter": 4,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 4th month after financial year end — Form 510 (pass-through entity return)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Maryland requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual Maryland information return (Form 510 (pass-through entity return)); nonresident owners may need withholding or a composite return.",
           "authority": "Comptroller of Maryland",
-          "source": "https://www.marylandtaxes.gov/",
-          "confidence": "medium",
+          "source": "https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/instructions/2025/pte-booklet-510.pdf",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -4190,7 +4196,7 @@
           "description": "State income tax withheld from wages is paid and reported to Comptroller of Maryland (state and county tax) on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Comptroller of Maryland (state and county tax)",
           "source": "https://www.marylandtaxes.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-maryland-w2",
@@ -4201,12 +4207,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form MW508 with W-2s, by 31 January",
           "applies": "Employers with employees working in Maryland",
-          "description": "Annual reconciliation of Maryland tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Maryland income tax withheld, with employees' W-2 information.",
           "authority": "Comptroller of Maryland (state and county tax)",
-          "source": "https://www.marylandtaxes.gov/",
-          "confidence": "medium"
+          "source": "https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/forms/2025/mw508.pdf",
+          "confidence": "high"
         }
       ]
     },
@@ -4277,18 +4283,18 @@
         {
           "id": "us-massachusetts-passthrough",
           "category": "Mandatory Annual",
-          "name": "Massachusetts Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Massachusetts Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
             "monthsAfter": 3,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 3rd month after financial year end — Form 3 (partnership) and Form 355S (S corporation)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Massachusetts requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual Massachusetts information return (Form 3 (partnership) and Form 355S (S corporation)); nonresident owners may need withholding or a composite return.",
           "authority": "Massachusetts Department of Revenue",
-          "source": "https://www.mass.gov/orgs/massachusetts-department-of-revenue",
-          "confidence": "medium",
+          "source": "https://www.mass.gov/info-details/tax-due-dates-and-extensions",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -4374,7 +4380,7 @@
           "description": "State income tax withheld from wages is paid and reported to Massachusetts Department of Revenue on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Massachusetts Department of Revenue",
           "source": "https://www.mass.gov/orgs/massachusetts-department-of-revenue",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-massachusetts-w2",
@@ -4385,12 +4391,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "W-2s (with Form M-3 where required) to the Department of Revenue by 31 January",
           "applies": "Employers with employees working in Massachusetts",
-          "description": "Annual reconciliation of Massachusetts tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Massachusetts income tax withheld, with employees' W-2 information.",
           "authority": "Massachusetts Department of Revenue",
-          "source": "https://www.mass.gov/orgs/massachusetts-department-of-revenue",
-          "confidence": "medium"
+          "source": "https://www.mass.gov/info-details/massachusetts-form-w-2-responsibilities-for-employers",
+          "confidence": "high"
         },
         {
           "id": "us-massachusetts-paid-leave",
@@ -4422,7 +4428,7 @@
           "description": "Massachusetts's state paid family and medical leave programme is funded by payroll contributions reported and paid each quarter.",
           "authority": "Massachusetts Department of Family and Medical Leave",
           "source": "https://www.mass.gov/orgs/department-of-family-and-medical-leave",
-          "confidence": "medium"
+          "confidence": "high"
         }
       ]
     },
@@ -4494,19 +4500,19 @@
         },
         {
           "id": "us-michigan-passthrough",
-          "category": "Mandatory Annual",
-          "name": "Michigan Pass-Through Entity Return (partnership / S corporation)",
+          "category": "Conditional",
+          "name": "Michigan Flow-Through Entity Tax Return (elective, Form 5772)",
           "schedule": {
             "type": "fy_relative",
             "monthsAfter": 3,
-            "day": 15
+            "day": "last"
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "Only if the business elects the Michigan flow-through entity tax: Form 5772 by the last day of the 3rd month (otherwise partnerships and S corporations file no Michigan income tax return)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Michigan requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Only if the business elects the Michigan flow-through entity tax: Form 5772 by the last day of the 3rd month (otherwise partnerships and S corporations file no Michigan income tax return).",
           "authority": "Michigan Department of Treasury",
-          "source": "https://www.michigan.gov/taxes",
-          "confidence": "medium",
+          "source": "https://www.michigan.gov/taxes/business-taxes/flowthrough-entity-tax",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -4592,23 +4598,31 @@
           "description": "State income tax withheld from wages is paid and reported to Michigan Department of Treasury on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Michigan Department of Treasury",
           "source": "https://www.michigan.gov/taxes",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-michigan-w2",
           "category": "Conditional",
           "name": "Michigan Annual Withholding Reconciliation and W-2 Filing",
           "schedule": {
-            "type": "annual",
-            "month": 1,
-            "day": 31
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 1,
+                "day": 31
+              },
+              {
+                "month": 2,
+                "day": 28
+              }
+            ]
           },
-          "rule": "31 January (for the previous calendar year)",
           "applies": "Employers with employees working in Michigan",
-          "description": "Annual reconciliation of Michigan tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Michigan income tax withheld, with employees' W-2 information.",
           "authority": "Michigan Department of Treasury",
-          "source": "https://www.michigan.gov/taxes",
-          "confidence": "medium"
+          "source": "https://www.michigan.gov/treasury/news/2025/01/22/business-taxpayers-reminded-about-state-filing-of-w-2s-and-1099s",
+          "confidence": "high",
+          "rule": "W-2s to Treasury by 31 January; annual Sales, Use and Withholding return (Form 5081) by 28 February"
         }
       ]
     },
@@ -4681,18 +4695,18 @@
         {
           "id": "us-minnesota-passthrough",
           "category": "Mandatory Annual",
-          "name": "Minnesota Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Minnesota Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
             "monthsAfter": 3,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 3rd month after financial year end — Form M3 (partnership) and Form M8 (S corporation)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Minnesota requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual Minnesota information return (Form M3 (partnership) and Form M8 (S corporation)); nonresident owners may need withholding or a composite return.",
           "authority": "Minnesota Department of Revenue",
-          "source": "https://www.revenue.state.mn.us/",
-          "confidence": "medium",
+          "source": "https://www.revenue.state.mn.us/partnership-due-dates",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -4778,7 +4792,7 @@
           "description": "State income tax withheld from wages is paid and reported to Minnesota Department of Revenue on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Minnesota Department of Revenue",
           "source": "https://www.revenue.state.mn.us/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-minnesota-w2",
@@ -4789,12 +4803,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "W-2s reporting Minnesota withholding, by 31 January",
           "applies": "Employers with employees working in Minnesota",
-          "description": "Annual reconciliation of Minnesota tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Minnesota income tax withheld, with employees' W-2 information.",
           "authority": "Minnesota Department of Revenue",
-          "source": "https://www.revenue.state.mn.us/",
-          "confidence": "medium"
+          "source": "https://www.revenue.state.mn.us/withholding-tax-due-dates",
+          "confidence": "high"
         },
         {
           "id": "us-minnesota-paid-leave",
@@ -4826,7 +4840,7 @@
           "description": "Minnesota's state paid family and medical leave programme is funded by payroll contributions reported and paid each quarter.",
           "authority": "Minnesota Paid Leave (DEED)",
           "source": "https://paidleave.mn.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         }
       ]
     },
@@ -4845,8 +4859,8 @@
           "applies": "All Mississippi for-profit corporations (domestic and foreign-registered)",
           "description": "Unlike domestic LLCs, domestic corporations do owe a fee — approximately $23-25 per the Secretary of State's fee schedule (sources vary slightly between $23.25 and $25). Foreign corporation and nonprofit corporation fees differ and are worth confirming directly on the SOS portal, as third-party sources show inconsistent figures for those categories. Same 60-day-then-dissolution consequence as LLCs.",
           "authority": "Mississippi Secretary of State",
-          "source": "https://domyllc.com/annual-reports-filing/mississippi/",
-          "confidence": "medium",
+          "source": "https://www.sos.ms.gov/business-services/annual-reports",
+          "confidence": "high",
           "when": {
             "entityType": [
               "Corporation"
@@ -4899,18 +4913,18 @@
         {
           "id": "us-mississippi-passthrough",
           "category": "Mandatory Annual",
-          "name": "Mississippi Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Mississippi Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
             "monthsAfter": 3,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 3rd month after financial year end — Form 84-105 (partnerships and S corporations)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Mississippi requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual Mississippi information return (Form 84-105 (partnerships and S corporations)); nonresident owners may need withholding or a composite return.",
           "authority": "Mississippi Department of Revenue",
-          "source": "https://www.dor.ms.gov/",
-          "confidence": "medium",
+          "source": "https://www.dor.ms.gov/sites/default/files/tax-forms/business/2025%20PTE%20INSTRUCTIONS%2084-100%20-%20Final%20%2001.14.2026.pdf",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -4996,7 +5010,7 @@
           "description": "State income tax withheld from wages is paid and reported to Mississippi Department of Revenue on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Mississippi Department of Revenue",
           "source": "https://www.dor.ms.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-mississippi-w2",
@@ -5007,12 +5021,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "W-2s (with Form 89-140 when filing on paper), by 31 January",
           "applies": "Employers with employees working in Mississippi",
-          "description": "Annual reconciliation of Mississippi tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Mississippi income tax withheld, with employees' W-2 information.",
           "authority": "Mississippi Department of Revenue",
-          "source": "https://www.dor.ms.gov/",
-          "confidence": "medium"
+          "source": "https://www.dor.ms.gov/sites/default/files/tax-forms/business/89140248.pdf",
+          "confidence": "high"
         }
       ]
     },
@@ -5031,8 +5045,8 @@
           "applies": "All Missouri corporations (domestic and foreign-registered). Does NOT apply to LLCs.",
           "description": "Filed with the Secretary of State. Fee is $45. Note this requirement does not extend to LLCs.",
           "authority": "Missouri Secretary of State",
-          "source": "https://www.wolterskluwer.com/en/solutions/bizfilings/state-guides/missouri-incorporation-requirements",
-          "confidence": "medium",
+          "source": "https://www.sos.mo.gov/business/faqs",
+          "confidence": "high",
           "when": {
             "entityType": [
               "Corporation"
@@ -5063,18 +5077,18 @@
         {
           "id": "us-missouri-passthrough",
           "category": "Mandatory Annual",
-          "name": "Missouri Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Missouri Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
-            "monthsAfter": 3,
+            "monthsAfter": 4,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 4th month after financial year end — Form MO-1065 (partnership) and Form MO-1120S (S corporation)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Missouri requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual Missouri information return (Form MO-1065 (partnership) and Form MO-1120S (S corporation)); nonresident owners may need withholding or a composite return.",
           "authority": "Missouri Department of Revenue",
-          "source": "https://dor.mo.gov/",
-          "confidence": "medium",
+          "source": "https://dor.mo.gov/taxation/business/tax-types/partnership/",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -5160,7 +5174,7 @@
           "description": "State income tax withheld from wages is paid and reported to Missouri Department of Revenue on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Missouri Department of Revenue",
           "source": "https://dor.mo.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-missouri-w2",
@@ -5168,15 +5182,15 @@
           "name": "Missouri Annual Withholding Reconciliation and W-2 Filing",
           "schedule": {
             "type": "annual",
-            "month": 1,
-            "day": 31
+            "month": 2,
+            "day": 28
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form MO W-3 with W-2s, by 28 February (31 January for employers with 250 or more employees)",
           "applies": "Employers with employees working in Missouri",
-          "description": "Annual reconciliation of Missouri tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Missouri income tax withheld, with employees' W-2 information.",
           "authority": "Missouri Department of Revenue",
-          "source": "https://dor.mo.gov/",
-          "confidence": "medium"
+          "source": "https://dor.mo.gov/forms/MO-W-3.pdf",
+          "confidence": "high"
         }
       ]
     },
@@ -5238,8 +5252,8 @@
           "applies": "Corporations (and LLCs taxed as corporations) doing business in the state",
           "description": "Montana's annual corporate income/franchise tax return, generally filed alongside the federal return; any balance of tax is due by the same date, and estimated payments may be required during the year.",
           "authority": "Montana Department of Revenue",
-          "source": "https://mtrevenue.gov/",
-          "confidence": "medium",
+          "source": "https://revenue.mt.gov/taxes/corporate-income-tax",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "C-Corp"
@@ -5249,18 +5263,18 @@
         {
           "id": "us-montana-passthrough",
           "category": "Mandatory Annual",
-          "name": "Montana Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Montana Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
             "monthsAfter": 3,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 3rd month after financial year end — Form PTE (partnerships and S corporations)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Montana requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual Montana information return (Form PTE (partnerships and S corporations)); nonresident owners may need withholding or a composite return.",
           "authority": "Montana Department of Revenue",
-          "source": "https://mtrevenue.gov/",
-          "confidence": "medium",
+          "source": "https://revenue.mt.gov/taxes/pass-through-entities/partnerships",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -5346,7 +5360,7 @@
           "description": "State income tax withheld from wages is paid and reported to Montana Department of Revenue on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Montana Department of Revenue",
           "source": "https://mtrevenue.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-montana-w2",
@@ -5357,12 +5371,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form MW-3 with W-2s, by 31 January",
           "applies": "Employers with employees working in Montana",
-          "description": "Annual reconciliation of Montana tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Montana income tax withheld, with employees' W-2 information.",
           "authority": "Montana Department of Revenue",
-          "source": "https://mtrevenue.gov/",
-          "confidence": "medium"
+          "source": "https://revenuefiles.mt.gov/files/Forms/Montana_Annual_W-2_1099_Withholding_Tax_Reconciliation_Form_MW-3.pdf",
+          "confidence": "high"
         }
       ]
     },
@@ -5384,7 +5398,7 @@
           "description": "Filed with the Nebraska Secretary of State. Unlike the LLC filing, this is an occupation tax report, not a purely informational filing — it carries a tax component tied to the corporation's capital stock. Confirm the current fee schedule directly with the SOS, as it varies by authorized capital.",
           "authority": "Nebraska Secretary of State, Business Services",
           "source": "https://sos.nebraska.gov/business-services/annualbiennial-reporting",
-          "confidence": "medium",
+          "confidence": "high",
           "when": {
             "entityType": [
               "Corporation"
@@ -5428,8 +5442,8 @@
           "applies": "Corporations (and LLCs taxed as corporations) doing business in the state",
           "description": "Nebraska's annual corporate income/franchise tax return, generally filed alongside the federal return; any balance of tax is due by the same date, and estimated payments may be required during the year.",
           "authority": "Nebraska Department of Revenue",
-          "source": "https://revenue.nebraska.gov/",
-          "confidence": "medium",
+          "source": "https://revenue.nebraska.gov/about/forms/corporation-and-s-corporation-income-tax-forms",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "C-Corp"
@@ -5439,18 +5453,18 @@
         {
           "id": "us-nebraska-passthrough",
           "category": "Mandatory Annual",
-          "name": "Nebraska Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Nebraska Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
             "monthsAfter": 3,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 3rd month after financial year end — Form 1065N (partnership) and Form 1120-SN (S corporation)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Nebraska requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual Nebraska information return (Form 1065N (partnership) and Form 1120-SN (S corporation)); nonresident owners may need withholding or a composite return.",
           "authority": "Nebraska Department of Revenue",
-          "source": "https://revenue.nebraska.gov/",
-          "confidence": "medium",
+          "source": "https://revenue.nebraska.gov/about/forms/partnership-tax-forms",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -5536,7 +5550,7 @@
           "description": "State income tax withheld from wages is paid and reported to Nebraska Department of Revenue on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Nebraska Department of Revenue",
           "source": "https://revenue.nebraska.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-nebraska-w2",
@@ -5547,12 +5561,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form W-3N with W-2s, by 31 January",
           "applies": "Employers with employees working in Nebraska",
-          "description": "Annual reconciliation of Nebraska tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Nebraska income tax withheld, with employees' W-2 information.",
           "authority": "Nebraska Department of Revenue",
-          "source": "https://revenue.nebraska.gov/",
-          "confidence": "medium"
+          "source": "https://revenue.nebraska.gov/about/tax-calendar",
+          "confidence": "high"
         }
       ]
     },
@@ -5570,8 +5584,8 @@
           "applies": "All Nevada corporations (domestic and foreign-registered)",
           "description": "Same SilverFlume combined filing as LLCs, but with different fees: the Annual List fee is based on the corporation's authorized stock (starts around the LLC's $150 tier but scales up), and the State Business License renewal is $500 for profit corporations (vs. $200 for LLCs) — a substantial cost difference worth flagging for clients comparing entity types.",
           "authority": "Nevada Secretary of State",
-          "source": "https://filingservices.com/blog/nevada-annual-list-requirements-deadlines-and-how-to-file/",
-          "confidence": "medium",
+          "source": "https://www.nvsos.gov/licensing/state-business-license/state-business-license-faq",
+          "confidence": "high",
           "when": {
             "entityType": [
               "Corporation"
@@ -5590,7 +5604,7 @@
           "applies": "All Nevada LLCs (domestic and foreign-registered)",
           "description": "Two filings submitted together via SilverFlume: a $150 Annual List fee and a $200 State Business License renewal (NRS 76.100), for a combined $350/year — one of the highest total state fee burdens in the country despite Nevada's 'no income tax' reputation. Late Annual List draws a $75 penalty; late Business License renewal adds $100. Continued default leads to charter revocation under NRS 86.274.",
           "authority": "Nevada Secretary of State",
-          "source": "https://boostsuite.com/llc-annual-report/nevada/",
+          "source": "https://www.nvsos.gov/licensing/state-business-license/state-business-license-faq",
           "confidence": "high",
           "when": {
             "entityType": [
@@ -5844,8 +5858,8 @@
           "applies": "Corporations (and LLCs taxed as corporations) doing business in the state",
           "description": "New Jersey's annual corporate income/franchise tax return, generally filed alongside the federal return; any balance of tax is due by the same date, and estimated payments may be required during the year.",
           "authority": "New Jersey Division of Taxation",
-          "source": "https://www.nj.gov/treasury/taxation/",
-          "confidence": "medium",
+          "source": "https://www.nj.gov/treasury/taxation/pdf/current/cbt/cbt100ins.pdf",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "C-Corp"
@@ -5855,18 +5869,18 @@
         {
           "id": "us-new-jersey-passthrough",
           "category": "Mandatory Annual",
-          "name": "New Jersey Pass-Through Entity Return (partnership / S corporation)",
+          "name": "New Jersey Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
-            "monthsAfter": 3,
+            "monthsAfter": 4,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 4th month after financial year end — Form NJ-1065 (partnership) and Form CBT-100S (S corporation)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "New Jersey requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual New Jersey information return (Form NJ-1065 (partnership) and Form CBT-100S (S corporation)); nonresident owners may need withholding or a composite return.",
           "authority": "New Jersey Division of Taxation",
-          "source": "https://www.nj.gov/treasury/taxation/",
-          "confidence": "medium",
+          "source": "https://www.nj.gov/treasury/taxation/prntpart.shtml",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -5952,7 +5966,7 @@
           "description": "State income tax withheld from wages is paid and reported to New Jersey Division of Taxation (Form NJ-927) on the schedule assigned at registration; larger employers pay more often.",
           "authority": "New Jersey Division of Taxation (Form NJ-927)",
           "source": "https://www.nj.gov/treasury/taxation/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-new-jersey-w2",
@@ -5960,15 +5974,15 @@
           "name": "New Jersey Annual Withholding Reconciliation and W-2 Filing",
           "schedule": {
             "type": "annual",
-            "month": 1,
-            "day": 31
+            "month": 2,
+            "day": 15
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form NJ-W-3 annual reconciliation with W-2 information, by 15 February",
           "applies": "Employers with employees working in New Jersey",
-          "description": "Annual reconciliation of New Jersey tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of New Jersey income tax withheld, with employees' W-2 information.",
           "authority": "New Jersey Division of Taxation (Form NJ-927)",
-          "source": "https://www.nj.gov/treasury/taxation/",
-          "confidence": "medium"
+          "source": "https://www.nj.gov/treasury/taxation/njit34.shtml",
+          "confidence": "high"
         }
       ]
     },
@@ -5989,8 +6003,8 @@
           "applies": "All New Mexico for-profit corporations (domestic and foreign-registered)",
           "description": "Filed with the Secretary of State, Corporations and Business Services Division. Fee is approximately $25. An initial report is also required within 30 days of registering. Late filing triggers a $200+ penalty and risks dissolution/revocation of authority to do business.",
           "authority": "New Mexico Secretary of State",
-          "source": "https://fastfilings.com/how-to-file-a-new-mexico-annual-report/",
-          "confidence": "medium",
+          "source": "https://law.justia.com/codes/new-mexico/chapter-53/article-5/section-53-5-2",
+          "confidence": "high",
           "when": {
             "entityType": [
               "Corporation"
@@ -6021,18 +6035,18 @@
         {
           "id": "us-new-mexico-passthrough",
           "category": "Mandatory Annual",
-          "name": "New Mexico Pass-Through Entity Return (partnership / S corporation)",
+          "name": "New Mexico Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
             "monthsAfter": 3,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 3rd month after financial year end — Form PTE (partnerships and S corporations), due with the federal return",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "New Mexico requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual New Mexico information return (Form PTE (partnerships and S corporations), due with the federal return); nonresident owners may need withholding or a composite return.",
           "authority": "New Mexico Taxation and Revenue Department",
-          "source": "https://www.tax.newmexico.gov/",
-          "confidence": "medium",
+          "source": "https://www.tax.newmexico.gov/businesses/corporate-income-franchise-tax-overview/pass-through-entity/",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -6118,7 +6132,7 @@
           "description": "State income tax withheld from wages is paid and reported to New Mexico Taxation and Revenue Department on the schedule assigned at registration; larger employers pay more often.",
           "authority": "New Mexico Taxation and Revenue Department",
           "source": "https://www.tax.newmexico.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-new-mexico-w2",
@@ -6126,15 +6140,15 @@
           "name": "New Mexico Annual Withholding Reconciliation and W-2 Filing",
           "schedule": {
             "type": "annual",
-            "month": 1,
-            "day": 31
+            "month": 2,
+            "day": "last"
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "W-2 information returns to the Taxation and Revenue Department by the last day of February",
           "applies": "Employers with employees working in New Mexico",
-          "description": "Annual reconciliation of New Mexico tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of New Mexico income tax withheld, with employees' W-2 information.",
           "authority": "New Mexico Taxation and Revenue Department",
-          "source": "https://www.tax.newmexico.gov/",
-          "confidence": "medium"
+          "source": "https://realfile.tax.newmexico.gov/FYI-330.pdf",
+          "confidence": "high"
         }
       ]
     },
@@ -6209,18 +6223,18 @@
         {
           "id": "us-new-york-passthrough",
           "category": "Mandatory Annual",
-          "name": "New York Pass-Through Entity Return (partnership / S corporation)",
+          "name": "New York Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
             "monthsAfter": 3,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 3rd month after financial year end — Form IT-204 (partnership) and Form CT-3-S (S corporation)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "New York requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual New York information return (Form IT-204 (partnership) and Form CT-3-S (S corporation)); nonresident owners may need withholding or a composite return.",
           "authority": "New York State Department of Taxation and Finance",
-          "source": "https://www.tax.ny.gov/",
-          "confidence": "medium",
+          "source": "https://www.tax.ny.gov/pit/efile/partneridx.htm",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -6303,26 +6317,10 @@
           },
           "rule": "At the frequency the state assigns (monthly, quarterly or annual); quarterly returns are generally due by the last day of the month after each quarter",
           "applies": "Employers with employees working in New York",
-          "description": "State income tax withheld from wages is paid and reported to New York State Department of Taxation and Finance (Form NYS-45) on the schedule assigned at registration; larger employers pay more often.",
+          "description": "State income tax withheld from wages is paid and reported to New York State Department of Taxation and Finance (Form NYS-45) on the schedule assigned at registration; larger employers pay more often. No separate annual reconciliation or W-2 filing: the fourth-quarter Form NYS-45 (due 31 January) includes the year-end wage and withholding reconciliation.",
           "authority": "New York State Department of Taxation and Finance (Form NYS-45)",
           "source": "https://www.tax.ny.gov/",
-          "confidence": "medium"
-        },
-        {
-          "id": "us-new-york-w2",
-          "category": "Conditional",
-          "name": "New York Annual Withholding Reconciliation and W-2 Filing",
-          "schedule": {
-            "type": "annual",
-            "month": 1,
-            "day": 31
-          },
-          "rule": "31 January (for the previous calendar year)",
-          "applies": "Employers with employees working in New York",
-          "description": "Annual reconciliation of New York tax withheld, filed with copies of employees' Forms W-2.",
-          "authority": "New York State Department of Taxation and Finance (Form NYS-45)",
-          "source": "https://www.tax.ny.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         }
       ]
     },
@@ -6395,18 +6393,18 @@
         {
           "id": "us-north-carolina-passthrough",
           "category": "Mandatory Annual",
-          "name": "North Carolina Pass-Through Entity Return (partnership / S corporation)",
+          "name": "North Carolina Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
-            "monthsAfter": 3,
+            "monthsAfter": 4,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 4th month after financial year end — Form D-403 (partnership) and Form CD-401S (S corporation)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "North Carolina requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual North Carolina information return (Form D-403 (partnership) and Form CD-401S (S corporation)); nonresident owners may need withholding or a composite return.",
           "authority": "North Carolina Department of Revenue",
-          "source": "https://www.ncdor.gov/",
-          "confidence": "medium",
+          "source": "https://www.ncdor.gov/taxes-forms/partnership-tax/partnership-tax-forms-and-instructions",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -6492,7 +6490,7 @@
           "description": "State income tax withheld from wages is paid and reported to North Carolina Department of Revenue on the schedule assigned at registration; larger employers pay more often.",
           "authority": "North Carolina Department of Revenue",
           "source": "https://www.ncdor.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-north-carolina-w2",
@@ -6503,12 +6501,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form NC-3 with W-2s, by 31 January",
           "applies": "Employers with employees working in North Carolina",
-          "description": "Annual reconciliation of North Carolina tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of North Carolina income tax withheld, with employees' W-2 information.",
           "authority": "North Carolina Department of Revenue",
-          "source": "https://www.ncdor.gov/",
-          "confidence": "medium"
+          "source": "https://www.ncdor.gov/taxes-forms/withholding-tax/withholding-tax-forms-and-instructions/instructions-form-nc-3-annual-withholding-reconciliation",
+          "confidence": "high"
         }
       ]
     },
@@ -6570,8 +6568,8 @@
           "applies": "Corporations (and LLCs taxed as corporations) doing business in the state",
           "description": "North Dakota's annual corporate income/franchise tax return, generally filed alongside the federal return; any balance of tax is due by the same date, and estimated payments may be required during the year.",
           "authority": "North Dakota Office of State Tax Commissioner",
-          "source": "https://www.tax.nd.gov/",
-          "confidence": "medium",
+          "source": "https://www.tax.nd.gov/business/corporate-income-tax",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "C-Corp"
@@ -6581,18 +6579,18 @@
         {
           "id": "us-north-dakota-passthrough",
           "category": "Mandatory Annual",
-          "name": "North Dakota Pass-Through Entity Return (partnership / S corporation)",
+          "name": "North Dakota Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
-            "monthsAfter": 3,
+            "monthsAfter": 4,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 4th month after financial year end — Form 58 (partnership) and Form 60 (S corporation)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "North Dakota requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual North Dakota information return (Form 58 (partnership) and Form 60 (S corporation)); nonresident owners may need withholding or a composite return.",
           "authority": "North Dakota Office of State Tax Commissioner",
-          "source": "https://www.tax.nd.gov/",
-          "confidence": "medium",
+          "source": "https://www.tax.nd.gov/s-corp-and-partnership-tax-deadlines",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -6678,7 +6676,7 @@
           "description": "State income tax withheld from wages is paid and reported to North Dakota Office of State Tax Commissioner on the schedule assigned at registration; larger employers pay more often.",
           "authority": "North Dakota Office of State Tax Commissioner",
           "source": "https://www.tax.nd.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-north-dakota-w2",
@@ -6689,12 +6687,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form 307 with W-2s, by 31 January",
           "applies": "Employers with employees working in North Dakota",
-          "description": "Annual reconciliation of North Dakota tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of North Dakota income tax withheld, with employees' W-2 information.",
           "authority": "North Dakota Office of State Tax Commissioner",
-          "source": "https://www.tax.nd.gov/",
-          "confidence": "medium"
+          "source": "https://www.tax.nd.gov/income-tax-withholding-deadlines",
+          "confidence": "high"
         }
       ]
     },
@@ -6725,12 +6723,12 @@
               }
             ]
           },
-          "rule": "Quarterly: 10 May, 10 August, 10 November and 10 February (annual filers: 10 May)",
-          "applies": "Businesses with Ohio taxable gross receipts above the annual exclusion ($6 million from 2025)",
+          "rule": "Quarterly: 10 May, 10 August, 10 November and 10 February",
+          "applies": "Businesses with Ohio taxable gross receipts above $6 million a year (from 2025; the annual minimum tax was repealed)",
           "description": "A separate Ohio tax based on gross receipts, unrelated to the (nonexistent) annual report. Threshold amounts have changed in recent years and should be verified against current Ohio Department of Taxation guidance.",
           "authority": "Ohio Department of Taxation",
-          "source": "https://llccompass.com/llc-annual-report-guide/",
-          "confidence": "low",
+          "source": "https://tax.ohio.gov/business/ohio-business-taxes/commercial-activities",
+          "confidence": "high",
           "when": {
             "entityType": [
               "Corporation",
@@ -6741,19 +6739,19 @@
         },
         {
           "id": "us-ohio-passthrough",
-          "category": "Mandatory Annual",
-          "name": "Ohio Pass-Through Entity Return (partnership / S corporation)",
+          "category": "Conditional",
+          "name": "Ohio Pass-Through Entity Withholding Return (Form IT 1140)",
           "schedule": {
             "type": "fy_relative",
-            "monthsAfter": 3,
+            "monthsAfter": 4,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "Form IT 1140 pass-through entity withholding return, by the 15th day of the 4th month, when any owner is not an Ohio resident (Ohio has no general partnership or S corporation income tax return)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Ohio requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Form IT 1140 pass-through entity withholding return, by the 15th day of the 4th month, when any owner is not an Ohio resident (Ohio has no general partnership or S corporation income tax return).",
           "authority": "Ohio Department of Revenue",
-          "source": "",
-          "confidence": "medium",
+          "source": "https://tax.ohio.gov/business/pass-through-entity-and-fiduciary-income-tax/it-1140",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -6839,7 +6837,7 @@
           "description": "State income tax withheld from wages is paid and reported to Ohio Department of Taxation on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Ohio Department of Taxation",
           "source": "https://tax.ohio.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-ohio-w2",
@@ -6850,38 +6848,17 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form IT 3 with W-2s, by 31 January",
           "applies": "Employers with employees working in Ohio",
-          "description": "Annual reconciliation of Ohio tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Ohio income tax withheld, with employees' W-2 information.",
           "authority": "Ohio Department of Taxation",
-          "source": "https://tax.ohio.gov/",
-          "confidence": "medium"
+          "source": "https://tax.ohio.gov/business/ohio-business-taxes/employer-withholding",
+          "confidence": "high"
         }
       ]
     },
     "Oklahoma": {
       "items": [
-        {
-          "id": "us-oklahoma-c0",
-          "category": "Mandatory Annual",
-          "name": "Oklahoma Annual Certificate",
-          "schedule": {
-            "type": "annual",
-            "month": 7,
-            "day": 1
-          },
-          "rule": "July 1 annually (fixed date)",
-          "applies": "All Oklahoma corporations (domestic and foreign-registered)",
-          "description": "Filed with the Oklahoma Secretary of State. Oklahoma's corporate franchise tax was fully repealed effective tax year 2023 (SB 1075), so the Annual Certificate is now purely an informational filing for corporations, similar to the LLC filing but on a fixed calendar date rather than an anniversary date.",
-          "authority": "Oklahoma Secretary of State",
-          "source": "https://startup101.com/oklahoma-annual-certificate/",
-          "confidence": "medium",
-          "when": {
-            "entityType": [
-              "Corporation"
-            ]
-          }
-        },
         {
           "id": "us-oklahoma-l0",
           "category": "Mandatory Annual",
@@ -6893,7 +6870,7 @@
           "applies": "All Oklahoma LLCs (domestic and foreign-registered)",
           "description": "Filed with the Oklahoma Secretary of State. Flat fee of $25, one of the cheapest in the country, regardless of online, mail, or in-person filing. The state emails a reminder ~60 days ahead (per Title 18 § 2055.2, with SB 1641 further reinforcing the electronic-notice requirement effective Nov 1, 2026) — but that reminder does not waive the deadline. Missing 60 days past due marks the LLC 'not in good standing'; 3 years past due moves it to 'Cancelled' status; the name becomes publicly available again after 6 years absent reinstatement.",
           "authority": "Oklahoma Secretary of State",
-          "source": "https://www.llcuniversity.com/oklahoma-llc/annual-certificate/",
+          "source": "https://www.sos.ok.gov/corp/",
           "confidence": "high",
           "when": {
             "entityType": [
@@ -6926,18 +6903,18 @@
         {
           "id": "us-oklahoma-passthrough",
           "category": "Mandatory Annual",
-          "name": "Oklahoma Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Oklahoma Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
-            "monthsAfter": 3,
+            "monthsAfter": 4,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 4th month after financial year end — Form 514 (partnership) and Form 512-S (S corporation), 30 days after the federal due date",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Oklahoma requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual Oklahoma information return (Form 514 (partnership) and Form 512-S (S corporation), 30 days after the federal due date); nonresident owners may need withholding or a composite return.",
           "authority": "Oklahoma Tax Commission",
-          "source": "https://oklahoma.gov/tax.html",
-          "confidence": "medium",
+          "source": "https://oklahoma.gov/content/dam/ok/en/tax/documents/forms/businesses/corporate-income-tax/current/514-Pkt.pdf",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -7023,7 +7000,7 @@
           "description": "State income tax withheld from wages is paid and reported to Oklahoma Tax Commission on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Oklahoma Tax Commission",
           "source": "https://oklahoma.gov/tax.html",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-oklahoma-w2",
@@ -7034,12 +7011,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Annual withholding reconciliation with W-2s, filed on OkTAP by 31 January",
           "applies": "Employers with employees working in Oklahoma",
-          "description": "Annual reconciliation of Oklahoma tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Oklahoma income tax withheld, with employees' W-2 information.",
           "authority": "Oklahoma Tax Commission",
-          "source": "https://oklahoma.gov/tax.html",
-          "confidence": "medium"
+          "source": "https://oklahoma.gov/tax/businesses/withholding.html",
+          "confidence": "high"
         }
       ]
     },
@@ -7097,8 +7074,8 @@
           "applies": "Corporations (and LLCs taxed as corporations) doing business in the state",
           "description": "Oregon's annual corporate income/franchise tax return, generally filed alongside the federal return; any balance of tax is due by the same date, and estimated payments may be required during the year.",
           "authority": "Oregon Department of Revenue",
-          "source": "https://www.oregon.gov/dor/",
-          "confidence": "medium",
+          "source": "https://www.oregon.gov/dor/programs/businesses/pages/corp-requirements.aspx",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "C-Corp"
@@ -7108,21 +7085,41 @@
         {
           "id": "us-oregon-passthrough",
           "category": "Mandatory Annual",
-          "name": "Oregon Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Oregon Partnership Return",
           "schedule": {
             "type": "fy_relative",
             "monthsAfter": 3,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
-          "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Oregon requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "rule": "15th day of the 3rd month after financial year end — Form OR-65 (partnership)",
+          "applies": "Partnerships and multi-member LLCs with income from the state",
+          "description": "Annual Oregon information return (Form OR-65 (partnership)); nonresident owners may need withholding or a composite return.",
           "authority": "Oregon Department of Revenue",
-          "source": "https://www.oregon.gov/dor/",
-          "confidence": "medium",
+          "source": "https://www.oregon.gov/dor/programs/businesses/pages/partnership.aspx",
+          "confidence": "high",
           "when": {
             "taxStatus": [
-              "Partnership",
+              "Partnership"
+            ]
+          }
+        },
+        {
+          "id": "us-oregon-scorp",
+          "category": "Mandatory Annual",
+          "name": "Oregon S Corporation Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 4,
+            "day": 15
+          },
+          "rule": "15th day of the 4th month after financial year end — Form OR-20-S (S corporation)",
+          "applies": "S corporations with income from the state",
+          "description": "Annual Oregon S corporation return (Form OR-20-S (S corporation)).",
+          "authority": "Oregon Department of Revenue",
+          "source": "https://www.oregon.gov/dor/programs/businesses/pages/corp-requirements.aspx",
+          "confidence": "high",
+          "when": {
+            "taxStatus": [
               "S-Corp"
             ]
           }
@@ -7205,7 +7202,7 @@
           "description": "State income tax withheld from wages is paid and reported to Oregon Department of Revenue (combined Form OQ) on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Oregon Department of Revenue (combined Form OQ)",
           "source": "https://www.oregon.gov/dor/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-oregon-w2",
@@ -7216,12 +7213,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form OR-WR annual withholding reconciliation with W-2s, by 31 January",
           "applies": "Employers with employees working in Oregon",
-          "description": "Annual reconciliation of Oregon tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Oregon income tax withheld, with employees' W-2 information.",
           "authority": "Oregon Department of Revenue (combined Form OQ)",
-          "source": "https://www.oregon.gov/dor/",
-          "confidence": "medium"
+          "source": "https://www.oregon.gov/dor/programs/businesses/pages/withholding-and-payroll-tax.aspx",
+          "confidence": "high"
         },
         {
           "id": "us-oregon-paid-leave",
@@ -7250,10 +7247,10 @@
           },
           "rule": "Quarterly, by the last day of the month after each calendar quarter",
           "applies": "Employers with employees working in Oregon",
-          "description": "Oregon's state paid family and medical leave programme is funded by payroll contributions reported and paid each quarter.",
-          "authority": "Paid Leave Oregon (Oregon Employment Department)",
-          "source": "https://paidleave.oregon.gov/",
-          "confidence": "medium"
+          "description": "Paid Leave Oregon contributions are reported and paid on the combined quarterly Form OQ to the Oregon Department of Revenue.",
+          "authority": "Oregon Department of Revenue (Paid Leave Oregon)",
+          "source": "https://paidleave.oregon.gov/employers/contributions-calculator.html",
+          "confidence": "high"
         }
       ]
     },
@@ -7315,8 +7312,8 @@
           "applies": "Corporations (and LLCs taxed as corporations) doing business in the state",
           "description": "Pennsylvania's annual corporate income/franchise tax return, generally filed alongside the federal return; any balance of tax is due by the same date, and estimated payments may be required during the year.",
           "authority": "Pennsylvania Department of Revenue",
-          "source": "https://www.revenue.pa.gov/",
-          "confidence": "medium",
+          "source": "https://www.pa.gov/content/dam/copapwp-pagov/en/revenue/documents/formsandpublications/formsforbusinesses/corporationtax/documents/2025/2025_rct-101.pdf",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "C-Corp"
@@ -7326,18 +7323,18 @@
         {
           "id": "us-pennsylvania-passthrough",
           "category": "Mandatory Annual",
-          "name": "Pennsylvania Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Pennsylvania Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
-            "monthsAfter": 3,
+            "monthsAfter": 4,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 4th month after financial year end — Form PA-20S/PA-65 information return (partnerships and S corporations)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Pennsylvania requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual Pennsylvania information return (Form PA-20S/PA-65 information return (partnerships and S corporations)); nonresident owners may need withholding or a composite return.",
           "authority": "Pennsylvania Department of Revenue",
-          "source": "https://www.revenue.pa.gov/",
-          "confidence": "medium",
+          "source": "https://www.pa.gov/agencies/revenue/forms-and-publications/pa-personal-income-tax-guide/pass-through-entities",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -7423,7 +7420,7 @@
           "description": "State income tax withheld from wages is paid and reported to Pennsylvania Department of Revenue on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Pennsylvania Department of Revenue",
           "source": "https://www.revenue.pa.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-pennsylvania-w2",
@@ -7434,12 +7431,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form REV-1667 with W-2s, by 31 January",
           "applies": "Employers with employees working in Pennsylvania",
-          "description": "Annual reconciliation of Pennsylvania tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Pennsylvania income tax withheld, with employees' W-2 information.",
           "authority": "Pennsylvania Department of Revenue",
-          "source": "https://www.revenue.pa.gov/",
-          "confidence": "medium"
+          "source": "https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/employer-withholding/w-2-electronic-filing-requirement",
+          "confidence": "high"
         }
       ]
     },
@@ -7451,15 +7448,15 @@
           "name": "Rhode Island Annual Report",
           "schedule": {
             "type": "annual",
-            "month": 3,
+            "month": 5,
             "day": 1
           },
-          "rule": "January 1 - March 1 fixed annual window",
+          "rule": "1 May annually (filing window 1 February to 1 May)",
           "applies": "All Rhode Island corporations and PCs (domestic and foreign-registered)",
           "description": "Filed with the RI Department of State, Business Services Division. Fee is $50 (nonprofits pay $20 on their own June 1-30 window). Rhode Island runs three separate filing windows by entity type — LLCs, corporations, and nonprofits each have a distinct 2-3 month period — a frequent source of confusion worth flagging clearly in any calendar tool.",
           "authority": "Rhode Island Department of State, Business Services Division",
-          "source": "https://www.myusacorporation.com/rhode-island/annual-report/",
-          "confidence": "medium",
+          "source": "https://www.sos.ri.gov/divisions/business-services/ri-business/file-your-annual-report",
+          "confidence": "high",
           "when": {
             "entityType": [
               "Corporation"
@@ -7512,18 +7509,18 @@
         {
           "id": "us-rhode-island-passthrough",
           "category": "Mandatory Annual",
-          "name": "Rhode Island Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Rhode Island Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
             "monthsAfter": 3,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 3rd month after financial year end — Form RI-1065 (partnership) and Form RI-1120S (S corporation)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Rhode Island requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual Rhode Island information return (Form RI-1065 (partnership) and Form RI-1120S (S corporation)); nonresident owners may need withholding or a composite return.",
           "authority": "Rhode Island Division of Taxation",
-          "source": "https://tax.ri.gov/",
-          "confidence": "medium",
+          "source": "https://tax.ri.gov/tax-sections/corporate-tax/tax-filing-requirements",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -7609,7 +7606,7 @@
           "description": "State income tax withheld from wages is paid and reported to Rhode Island Division of Taxation on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Rhode Island Division of Taxation",
           "source": "https://tax.ri.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-rhode-island-w2",
@@ -7620,12 +7617,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form RI-W3 with W-2s, by 31 January",
           "applies": "Employers with employees working in Rhode Island",
-          "description": "Annual reconciliation of Rhode Island tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Rhode Island income tax withheld, with employees' W-2 information.",
           "authority": "Rhode Island Division of Taxation",
-          "source": "https://tax.ri.gov/",
-          "confidence": "medium"
+          "source": "https://tax.ri.gov/forms/business-tax-forms/withholding-tax-forms",
+          "confidence": "high"
         }
       ]
     },
@@ -7681,18 +7678,18 @@
         {
           "id": "us-south-carolina-passthrough",
           "category": "Mandatory Annual",
-          "name": "South Carolina Pass-Through Entity Return (partnership / S corporation)",
+          "name": "South Carolina Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
             "monthsAfter": 3,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 3rd month after financial year end — Form SC1065 (partnership) and Form SC1120S (S corporation)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "South Carolina requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual South Carolina information return (Form SC1065 (partnership) and Form SC1120S (S corporation)); nonresident owners may need withholding or a composite return.",
           "authority": "South Carolina Department of Revenue",
-          "source": "",
-          "confidence": "medium",
+          "source": "https://dor.sc.gov/business-income-taxes/partnership",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -7778,7 +7775,7 @@
           "description": "State income tax withheld from wages is paid and reported to South Carolina Department of Revenue on the schedule assigned at registration; larger employers pay more often.",
           "authority": "South Carolina Department of Revenue",
           "source": "https://dor.sc.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-south-carolina-w2",
@@ -7789,12 +7786,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form WH-1606 with W-2s, by 31 January",
           "applies": "Employers with employees working in South Carolina",
-          "description": "Annual reconciliation of South Carolina tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of South Carolina income tax withheld, with employees' W-2 information.",
           "authority": "South Carolina Department of Revenue",
-          "source": "https://dor.sc.gov/",
-          "confidence": "medium"
+          "source": "https://dor.sc.gov/sites/dor/files/forms/WH1606.pdf",
+          "confidence": "high"
         }
       ]
     },
@@ -7927,8 +7924,8 @@
           "applies": "All Tennessee corporations",
           "description": "Franchise tax is 0.25% of net worth (min $100); excise tax is 6.5% of net income. Filed separately with the Department of Revenue.",
           "authority": "Tennessee Department of Revenue",
-          "source": "https://www.discern.com/resources/tennessee-franchise-tax-filing-information",
-          "confidence": "medium",
+          "source": "https://www.tn.gov/revenue/taxes/franchise---excise-tax/due-dates-and-tax-rates.html",
+          "confidence": "high",
           "when": {
             "entityType": [
               "Corporation"
@@ -7970,8 +7967,8 @@
           "applies": "Multi-member LLCs and LLCs electing corporate taxation. Single-member LLCs owned by individuals are largely exempt.",
           "description": "Franchise tax is 0.25% of net worth (min $100); excise tax is 6.5% of net income. Filed separately with the Department of Revenue (not the Secretary of State). A 7-month extension is available via Form FAE173, but payment is still due on the original date.",
           "authority": "Tennessee Department of Revenue",
-          "source": "https://www.discern.com/resources/tennessee-franchise-tax-filing-information",
-          "confidence": "medium",
+          "source": "https://www.tn.gov/revenue/taxes/franchise---excise-tax/due-dates-and-tax-rates.html",
+          "confidence": "high",
           "when": {
             "entityType": [
               "LLC",
@@ -8191,18 +8188,18 @@
         {
           "id": "us-utah-passthrough",
           "category": "Mandatory Annual",
-          "name": "Utah Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Utah Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
-            "monthsAfter": 3,
+            "monthsAfter": 4,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 4th month after financial year end — Form TC-65 (partnership) and Form TC-20S (S corporation)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Utah requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual Utah information return (Form TC-65 (partnership) and Form TC-20S (S corporation)); nonresident owners may need withholding or a composite return.",
           "authority": "Utah State Tax Commission",
-          "source": "https://tax.utah.gov/",
-          "confidence": "medium",
+          "source": "https://tax.utah.gov/event/individual-corporate-partnership-income-tax-due-date-jan-dec-2025/",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -8288,7 +8285,7 @@
           "description": "State income tax withheld from wages is paid and reported to Utah State Tax Commission on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Utah State Tax Commission",
           "source": "https://tax.utah.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-utah-w2",
@@ -8299,12 +8296,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form TC-941R annual reconciliation with W-2s, by 31 January",
           "applies": "Employers with employees working in Utah",
-          "description": "Annual reconciliation of Utah tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Utah income tax withheld, with employees' W-2 information.",
           "authority": "Utah State Tax Commission",
-          "source": "https://tax.utah.gov/",
-          "confidence": "medium"
+          "source": "https://tax.utah.gov/withholding/employers",
+          "confidence": "high"
         }
       ]
     },
@@ -8377,18 +8374,18 @@
         {
           "id": "us-vermont-passthrough",
           "category": "Mandatory Annual",
-          "name": "Vermont Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Vermont Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
             "monthsAfter": 3,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 3rd month after financial year end — Form BI-471 (partnerships and S corporations), due with the federal return",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Vermont requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual Vermont information return (Form BI-471 (partnerships and S corporations), due with the federal return); nonresident owners may need withholding or a composite return.",
           "authority": "Vermont Department of Taxes",
-          "source": "https://tax.vermont.gov/",
-          "confidence": "medium",
+          "source": "https://tax.vermont.gov/business/business-entity-income-tax",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -8474,7 +8471,7 @@
           "description": "State income tax withheld from wages is paid and reported to Vermont Department of Taxes on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Vermont Department of Taxes",
           "source": "https://tax.vermont.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-vermont-w2",
@@ -8485,12 +8482,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form WHT-434 with W-2s, by 31 January",
           "applies": "Employers with employees working in Vermont",
-          "description": "Annual reconciliation of Vermont tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Vermont income tax withheld, with employees' W-2 information.",
           "authority": "Vermont Department of Taxes",
-          "source": "https://tax.vermont.gov/",
-          "confidence": "medium"
+          "source": "https://tax.vermont.gov/instructions/form-WHT-434",
+          "confidence": "high"
         }
       ]
     },
@@ -8561,18 +8558,18 @@
         {
           "id": "us-virginia-passthrough",
           "category": "Mandatory Annual",
-          "name": "Virginia Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Virginia Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
-            "monthsAfter": 3,
+            "monthsAfter": 4,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 4th month after financial year end — Form 502 (pass-through entity return)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Virginia requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual Virginia information return (Form 502 (pass-through entity return)); nonresident owners may need withholding or a composite return.",
           "authority": "Virginia Department of Taxation",
-          "source": "https://www.tax.virginia.gov/",
-          "confidence": "medium",
+          "source": "https://www.tax.virginia.gov/pass-through-entities",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -8658,7 +8655,7 @@
           "description": "State income tax withheld from wages is paid and reported to Virginia Department of Taxation on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Virginia Department of Taxation",
           "source": "https://www.tax.virginia.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-virginia-w2",
@@ -8669,12 +8666,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form VA-6 with W-2s, by 31 January",
           "applies": "Employers with employees working in Virginia",
-          "description": "Annual reconciliation of Virginia tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Virginia income tax withheld, with employees' W-2 information.",
           "authority": "Virginia Department of Taxation",
-          "source": "https://www.tax.virginia.gov/",
-          "confidence": "medium"
+          "source": "https://www.tax.virginia.gov/withholding-tax",
+          "confidence": "high"
         }
       ]
     },
@@ -8729,12 +8726,12 @@
             "type": "monthly",
             "day": 25
           },
-          "rule": "25th of the month after each reporting period (monthly, quarterly or annual, as assigned by the Department of Revenue)",
+          "rule": "Monthly filers: the 25th of the following month; quarterly filers: the last day of the month after the quarter; annual filers: 15 April (frequency assigned by the Department of Revenue)",
           "applies": "Businesses registered with the Washington Department of Revenue",
           "description": "Washington has no corporate income tax; instead its Business & Occupation (B&O) tax on gross receipts, plus any sales tax collected, is reported on the combined excise tax return at the frequency the Department assigns.",
           "authority": "Washington State Department of Revenue",
-          "source": "https://dor.wa.gov/",
-          "confidence": "medium",
+          "source": "https://dor.wa.gov/file-pay-taxes/filing-frequencies-due-dates",
+          "confidence": "high",
           "when": {
             "entityType": [
               "Corporation",
@@ -8820,8 +8817,8 @@
           "applies": "Employers with employees working in Washington",
           "description": "Washington's state paid family and medical leave programme is funded by payroll contributions reported and paid each quarter.",
           "authority": "Washington Employment Security Department, Paid Family and Medical Leave",
-          "source": "https://paidleave.wa.gov/",
-          "confidence": "medium"
+          "source": "https://paidleave.wa.gov/reporting/",
+          "confidence": "high"
         }
       ]
     },
@@ -8894,18 +8891,18 @@
         {
           "id": "us-west-virginia-passthrough",
           "category": "Mandatory Annual",
-          "name": "West Virginia Pass-Through Entity Return (partnership / S corporation)",
+          "name": "West Virginia Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
             "monthsAfter": 3,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 3rd month after financial year end — Form PTE-100 (S corporations and partnerships)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "West Virginia requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual West Virginia information return (Form PTE-100 (S corporations and partnerships)); nonresident owners may need withholding or a composite return.",
           "authority": "West Virginia Tax Division",
-          "source": "https://tax.wv.gov/",
-          "confidence": "medium",
+          "source": "https://tax.wv.gov/Business/PassThroughEntity/Pages/PassThroughEntity.aspx",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -8991,7 +8988,7 @@
           "description": "State income tax withheld from wages is paid and reported to West Virginia Tax Division on the schedule assigned at registration; larger employers pay more often.",
           "authority": "West Virginia Tax Division",
           "source": "https://tax.wv.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-west-virginia-w2",
@@ -9002,12 +8999,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form WV/IT-103 with W-2s, by 31 January",
           "applies": "Employers with employees working in West Virginia",
-          "description": "Annual reconciliation of West Virginia tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of West Virginia income tax withheld, with employees' W-2 information.",
           "authority": "West Virginia Tax Division",
-          "source": "https://tax.wv.gov/",
-          "confidence": "medium"
+          "source": "https://tax.wv.gov/Documents/TSD/tsd100.pdf",
+          "confidence": "high"
         }
       ]
     },
@@ -9025,8 +9022,8 @@
           "applies": "All Wisconsin corporations (domestic and foreign-registered)",
           "description": "Same DFI portal, same quarterly deadline structure, and same no-late-fee-but-3-year-dissolution rule as LLCs. Fee levels mirror the LLC tier ($25 domestic / higher for foreign entities) — confirm exact corporate figures at filing since a few sources show minor variation.",
           "authority": "Wisconsin Department of Financial Institutions (DFI)",
-          "source": "https://www.proofofgoodstanding.com/learn/wisconsin-llc-annual-report-compliance-checklist-2026",
-          "confidence": "medium",
+          "source": "https://docs.legis.wisconsin.gov/statutes/statutes/180/xvi/1622",
+          "confidence": "high",
           "when": {
             "entityType": [
               "Corporation"
@@ -9045,7 +9042,7 @@
           "applies": "All Wisconsin LLCs (domestic and foreign-registered)",
           "description": "Filed with the WI Department of Financial Institutions (DFI). Fee is $25 online / $40 by mail for domestic LLCs; $65 online / $80 by mail for foreign LLCs. Wisconsin charges NO monetary late fee for a missed deadline — but the entity is immediately marked delinquent and loses good standing, and after 3 consecutive missed years the DFI administratively dissolves the LLC (reinstatement: $100 plus $25 per missed report, by mail only).",
           "authority": "Wisconsin Department of Financial Institutions (DFI)",
-          "source": "https://www.anchorfilings.com/blog/wisconsin-annual-report.html",
+          "source": "https://docs.legis.wisconsin.gov/statutes/statutes/180/xvi/1622",
           "confidence": "high",
           "when": {
             "entityType": [
@@ -9078,18 +9075,18 @@
         {
           "id": "us-wisconsin-passthrough",
           "category": "Mandatory Annual",
-          "name": "Wisconsin Pass-Through Entity Return (partnership / S corporation)",
+          "name": "Wisconsin Partnership / S Corporation Return",
           "schedule": {
             "type": "fy_relative",
             "monthsAfter": 3,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
+          "rule": "15th day of the 3rd month after financial year end — Form 3 (partnership) and Form 5S (S corporation)",
           "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "Wisconsin requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "description": "Annual Wisconsin information return (Form 3 (partnership) and Form 5S (S corporation)); nonresident owners may need withholding or a composite return.",
           "authority": "Wisconsin Department of Revenue",
-          "source": "https://www.revenue.wi.gov/",
-          "confidence": "medium",
+          "source": "https://www.revenue.wi.gov/Pages/FAQS/ise-pship.aspx",
+          "confidence": "high",
           "when": {
             "taxStatus": [
               "Partnership",
@@ -9175,7 +9172,7 @@
           "description": "State income tax withheld from wages is paid and reported to Wisconsin Department of Revenue on the schedule assigned at registration; larger employers pay more often.",
           "authority": "Wisconsin Department of Revenue",
           "source": "https://www.revenue.wi.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-wisconsin-w2",
@@ -9186,12 +9183,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form WT-7 with W-2s, by 31 January",
           "applies": "Employers with employees working in Wisconsin",
-          "description": "Annual reconciliation of Wisconsin tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of Wisconsin income tax withheld, with employees' W-2 information.",
           "authority": "Wisconsin Department of Revenue",
-          "source": "https://www.revenue.wi.gov/",
-          "confidence": "medium"
+          "source": "https://www.revenue.wi.gov/Pages/FAQS/pcs-wt-7.aspx",
+          "confidence": "high"
         }
       ]
     },
@@ -9209,8 +9206,8 @@
           "applies": "All Wyoming corporations (domestic and foreign-registered)",
           "description": "Same $60-minimum, asset-based license tax formula and wyobiz portal as LLCs (W.S. § 17-16-1622 for corporations, mirroring the LLC statute). Wyoming applies one uniform anniversary-month, asset-based Annual Report system across both entity types — the fee formula, not the entity type, is what changes the amount owed.",
           "authority": "Wyoming Secretary of State, Business Division",
-          "source": "https://boostsuite.com/llc-annual-report/wyoming/",
-          "confidence": "medium",
+          "source": "https://wyobiz.wyo.gov/Business/AnnualReport.aspx",
+          "confidence": "high",
           "when": {
             "entityType": [
               "Corporation"
@@ -9229,7 +9226,7 @@
           "applies": "All Wyoming LLCs (domestic and foreign-registered)",
           "description": "Filed online via the Wyoming Secretary of State's wyobiz portal. Unlike most states, the fee is NOT flat: it's the greater of $60 minimum or $0.0002 per dollar of Wyoming-located assets (W.S. § 17-29-210) — LLCs holding significant in-state real estate or equipment should run the calculation rather than assume $60. Filings above $500 (i.e., $2.5M+ in WY assets) cannot be submitted online and must be filed by mail. A $25 late fee applies after the deadline, with administrative dissolution risk starting around 60 days late.",
           "authority": "Wyoming Secretary of State, Business Division",
-          "source": "https://boostsuite.com/llc-annual-report/wyoming/",
+          "source": "https://wyobiz.wyo.gov/Business/AnnualReport.aspx",
           "confidence": "high",
           "when": {
             "entityType": [
@@ -9325,36 +9322,36 @@
             "day": 15
           },
           "rule": "15th day of the 4th month after financial year end",
-          "applies": "Corporations (and LLCs taxed as corporations) doing business in the state",
+          "applies": "Corporations, including S corporations (the state does not recognise the S election for this tax)",
           "description": "District of Columbia's annual corporate income/franchise tax return, generally filed alongside the federal return; any balance of tax is due by the same date, and estimated payments may be required during the year.",
           "authority": "DC Office of Tax and Revenue",
-          "source": "https://otr.cfo.dc.gov/",
+          "source": "https://otr.cfo.dc.gov/page/franchise-tax-faqs",
           "confidence": "high",
           "when": {
             "taxStatus": [
-              "C-Corp"
+              "C-Corp",
+              "S-Corp"
             ]
           }
         },
         {
           "id": "us-district-of-columbia-passthrough",
           "category": "Mandatory Annual",
-          "name": "District of Columbia Pass-Through Entity Return (partnership / S corporation)",
+          "name": "District of Columbia Partnership Return",
           "schedule": {
             "type": "fy_relative",
-            "monthsAfter": 3,
+            "monthsAfter": 4,
             "day": 15
           },
-          "rule": "Generally the 15th day of the 3rd month after financial year end, in line with the federal Form 1065 / 1120-S",
-          "applies": "Partnerships, multi-member LLCs and S corporations with income from the state",
-          "description": "District of Columbia requires an annual information return from pass-through entities, with nonresident-owner withholding or composite returns in many cases; confirm the exact due date and form with the state revenue department.",
+          "rule": "15th day of the 4th month after financial year end — Form D-65 (partnership) and Form D-30 (unincorporated business franchise tax)",
+          "applies": "Partnerships and multi-member LLCs with income from the state",
+          "description": "Annual District of Columbia information return (Form D-65 (partnership) and Form D-30 (unincorporated business franchise tax)); nonresident owners may need withholding or a composite return.",
           "authority": "DC Office of Tax and Revenue",
-          "source": "https://otr.cfo.dc.gov/",
-          "confidence": "medium",
+          "source": "https://otr.cfo.dc.gov/page/partnership-tax-forms",
+          "confidence": "high",
           "when": {
             "taxStatus": [
-              "Partnership",
-              "S-Corp"
+              "Partnership"
             ]
           }
         }
@@ -9436,7 +9433,7 @@
           "description": "State income tax withheld from wages is paid and reported to DC Office of Tax and Revenue on the schedule assigned at registration; larger employers pay more often.",
           "authority": "DC Office of Tax and Revenue",
           "source": "https://otr.cfo.dc.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         },
         {
           "id": "us-district-of-columbia-w2",
@@ -9447,12 +9444,12 @@
             "month": 1,
             "day": 31
           },
-          "rule": "31 January (for the previous calendar year)",
+          "rule": "Form FR-900B with W-2s, by 31 January",
           "applies": "Employers with employees working in District of Columbia",
-          "description": "Annual reconciliation of District of Columbia tax withheld, filed with copies of employees' Forms W-2.",
+          "description": "Year-end reconciliation of District of Columbia income tax withheld, with employees' W-2 information.",
           "authority": "DC Office of Tax and Revenue",
-          "source": "https://otr.cfo.dc.gov/",
-          "confidence": "medium"
+          "source": "https://otr.cfo.dc.gov/page/partnership-tax-forms",
+          "confidence": "high"
         },
         {
           "id": "us-district-of-columbia-paid-leave",
@@ -9484,7 +9481,7 @@
           "description": "District of Columbia's state paid family and medical leave programme is funded by payroll contributions reported and paid each quarter.",
           "authority": "DC Department of Employment Services, Paid Family Leave",
           "source": "https://does.dc.gov/",
-          "confidence": "medium"
+          "confidence": "high"
         }
       ]
     }

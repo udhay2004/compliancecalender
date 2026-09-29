@@ -1,25 +1,27 @@
 # ComplyGlobally — Compliance Calendar Platform
 
-Companies (mainly US entities, with some other countries) get an
-AI-researched compliance calendar: every filing they owe, with real due
-dates. They can then ask ComplyGlobally to handle any filing. They upload
+Companies in the US, Canada, the UK, Singapore, the UAE and Germany get a
+compliance calendar built from a researched database of official filing
+rules: every filing they owe, with real due dates. They can then ask ComplyGlobally to handle any filing. They upload
 documents, pay online, and get proof when it's done. The ComplyGlobally team
 works from a staff workspace with a review queue, a pipeline, reports,
 invoices and refunds.
 
 Node.js 22 · Express 4 · MongoDB (Mongoose 8) · Cloudflare R2 · Razorpay ·
-Anthropic Claude · deployed on Railway.
+deployed on Railway.
 
 ---
 
 ## What it does
 
 **Public website** (`/`)
-- Free calendar generator. The visitor enters their company details and
-  Claude researches official sources. Some items are shown for free; the
+- Free calendar generator. The visitor answers the questions for their
+  country (state or province, entity type, tax status, free zone, VAT/GST,
+  payroll…) and the calendar is built from the compliance database
+  (`data/compliance`, see its README). Some items are shown for free; the
   full calendar comes after sign-up.
-- Protected by a "verify you are human" check (Cloudflare Turnstile,
-  optional) and a daily AI budget.
+- Protected by a per-IP rate limit and an optional "verify you are human"
+  check (Cloudflare Turnstile).
 - Company and policy pages: `/about`, `/pricing`, `/terms`, `/privacy`,
   `/refund-policy`, `/shipping-policy`, `/contact`.
 
@@ -61,7 +63,7 @@ Anthropic Claude · deployed on Railway.
 
 ```bash
 npm install
-cp .env.example .env      # fill in at least ANTHROPIC_API_KEY, MONGODB_URI, JWT_SECRET
+cp .env.example .env      # fill in at least MONGODB_URI and JWT_SECRET
 node scripts/createUser.js --email you@example.com --password "a long password" --role super_admin --name "Your Name"
 npm run dev               # http://localhost:3000
 npm test                  # all tests; no database or internet needed
@@ -76,7 +78,7 @@ keys, payments are disabled.
 - `railway.json` sets the start command, the health check (`/healthz`, which
   checks the database) and a 30-second graceful shutdown on deploys.
 - Put every setting from `.env.example` in Railway → Variables. At minimum:
-  `ANTHROPIC_API_KEY`, `MONGODB_URI`, `JWT_SECRET`, `APP_URL`,
+  `MONGODB_URI`, `JWT_SECRET`, `APP_URL`,
   `NODE_ENV=production`, the `R2_*` settings, an email provider (`RESEND_API_KEY`
   or `SMTP_*`) with `MAIL_FROM`, the `RAZORPAY_*` settings and `TOTP_ENCRYPTION_KEY`.
 - Strongly recommended: `SENTRY_DSN` (error alerts) and the
@@ -106,7 +108,6 @@ for 30 seconds per copy (`lib/workData.js`).
 | Payment problems | Admin → Check payments |
 | WhatsApp setup | Admin → Check WhatsApp (shows the template text to submit to Meta) |
 | Someone locked out | A super admin can reset their password or two-factor from the dashboard or Admin |
-| AI budget reached | The team gets a notification. Raise `AI_DAILY_LIMIT_PUBLIC` / `AI_DAILY_LIMIT_TOTAL` if it's real demand |
 
 Data kept automatically: bell notifications for 180 days
 (`NOTIFICATION_RETENTION_DAYS`), rate-limit counters until their window
@@ -127,7 +128,8 @@ middleware/upload.js      uploads: temp file on disk, type checked by content, c
 routes/                   one file per area (public, auth, portal, payments, calendars,
                           dashboard, pipeline, reports, invoices, admin, messages,
                           notifications, feeds, whatsapp, legal)
-lib/claude.js             AI research (cache first, live search when needed)
+lib/complianceDb.js       builds calendars from the compliance database (data/compliance)
+lib/countries.js          the questions asked per country (rendered by public/js/company-form.js)
 lib/deadlines.js          due-date engine (business days, US holidays, next periods)
 lib/reminders.js          the daily run: reminders, document chasing, digests
 lib/calendarView.js       what a filing looks like to clients and staff (checklist, price)
@@ -136,14 +138,15 @@ lib/invoices.js / refunds.js   GST-compliant invoices, credit notes, Razorpay re
 lib/storage.js            R2 / S3 (streamed), or local disk in development
 lib/backup.js             nightly backups (streamed, gzip, EJSON)
 lib/notify.js / mailer.js / whatsapp.js   bell + email + WhatsApp
-lib/abuseGuard.js         human check + daily AI budget
+lib/abuseGuard.js         "verify you are human" check on the free generator
 lib/jobLock.js / keyedLock.js / rateLimitStore.js   safe with several server copies
 lib/workData.js           shared cached read of all client work
 lib/lifecycle.js          graceful shutdown
 lib/monitoring.js         Sentry error alerts
 models/                   Mongoose schemas
 public/                   the web pages (plain HTML/CSS/JS, no build step)
-scripts/                  create the first user, restore a backup, seed research caches
+scripts/                  create the first user, restore a backup
+data/compliance/          the compliance database: every country's filing rules, with sources
 tests/                    node:test suites (run on every pull request by GitHub Actions)
 ```
 

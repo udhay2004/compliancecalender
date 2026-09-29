@@ -1,14 +1,14 @@
 # Compliance database
 
-Researched filing rules for every country the calendar tool covers. Calendars
-are built from these files (`lib/complianceDb.js`) with no AI call; only a
-profile outside them (for example a Canadian territory or a US general
-partnership) is researched live by `lib/claude.js`.
+Researched filing rules for every country the calendar tool covers, each
+checked against its official source. Calendars are built only from these
+files (`lib/complianceDb.js`); there is no AI research. Every answer the
+forms accept is covered, which `tests/compliance-db.test.js` checks.
 
 | File | Covers |
 | --- | --- |
 | `united-states.json` | Federal filings by tax status; every state and DC: annual reports, franchise and income tax returns, payroll (withholding, unemployment insurance, paid leave) |
-| `canada.json` | Federal filings; each province: annual returns, extra-provincial registrations, Quebec/Alberta corporate tax, provincial sales tax, employer health tax, workers' compensation |
+| `canada.json` | Federal filings; each province and territory: annual returns, extra-provincial registrations, Quebec/Alberta corporate tax, provincial sales tax, employer health tax, workers' compensation |
 | `united-kingdom.json` | Companies House and HMRC (UK-wide) |
 | `singapore.json` | ACRA, IRAS, CPF |
 | `united-arab-emirates.json` | Federal (Corporate Tax, VAT, UBO), each emirate's mainland licensing, and each free zone |

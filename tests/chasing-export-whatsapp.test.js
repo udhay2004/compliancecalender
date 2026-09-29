@@ -108,7 +108,7 @@ stub("models/Notification.js", { create: async (n) => { notifications.push(n); r
 stub("models/AuditLog.js", { find: () => query([]), create: async () => ({}) });
 stub("lib/mailer.js", { sendEmail: async (e) => { emails.push(e); }, fromAddress: () => "x" });
 stub("lib/auditLog.js", { logActivity: (e) => audit.push(e) });
-stub("lib/claude.js", { generateCompanyCalendar: async () => ({ items: [] }) });
+stub("lib/generateCalendar.js", { generateCompanyCalendar: async () => ({ items: [] }), NotCoveredError: class extends Error {} });
 stub("lib/storage.js", {
   findMissing: async () => new Set(), fileExists: async () => true, getFile: async () => null, saveFile: async () => ({}),
   describe: () => "memory", DRIVER: "memory",

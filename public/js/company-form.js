@@ -63,6 +63,8 @@
     injectStyle();
     var prefix = opts.idPrefix || 'cf';
     var locked = opts.locked || [];
+    // opts.onChange(): called after any answer changes.
+    var changed = typeof opts.onChange === 'function' ? opts.onChange : function () {};
     var state = { country: opts.country || def.countries[0], answers: Object.assign({}, opts.values || {}) };
 
     function fields() { return def.fields[state.country] || []; }
@@ -129,6 +131,7 @@
             if (sel.value) state.answers[f.key] = sel.value; else delete state.answers[f.key];
             clearError(f.key);
             render();
+            changed();
             var again = document.getElementById(id);
             if (again) again.focus();
           });
@@ -145,6 +148,7 @@
               state.answers[f.key] = o;
               clearError(f.key);
               render();
+              changed();
               var again = document.getElementById(id + '-' + o);
               if (again) again.focus();
             });
@@ -172,6 +176,7 @@
               if (cb.checked) cur.push(o);
               state.answers[f.key] = cur;
               count.textContent = cur.length ? cur.length + ' selected' : '';
+              changed();
             });
             lab.appendChild(cb);
             lab.appendChild(document.createTextNode(text(f, o)));
@@ -221,7 +226,7 @@
 
     render();
     return {
-      setCountry: function (c) { state.country = c; render(); },
+      setCountry: function (c) { state.country = c; render(); changed(); },
       country: function () { return state.country; },
       values: values,
       validate: validate,

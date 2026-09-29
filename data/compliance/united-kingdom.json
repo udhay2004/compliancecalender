@@ -545,7 +545,7 @@
       "description": "Large groups must price transactions with related parties at arm's length and keep evidence; groups with €750 million+ turnover also keep a master file and local file.",
       "authority": "HM Revenue & Customs (HMRC)",
       "source": "https://www.gov.uk/hmrc-internal-manuals/international-manual/intm410000",
-      "confidence": "medium",
+      "confidence": "high",
       "when": {
         "entityType": [
           "Private Limited Company (Ltd)",

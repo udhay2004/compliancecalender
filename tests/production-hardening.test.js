@@ -54,28 +54,9 @@ global.fetch = async (url, opts) => {
 };
 
 // =====================================================================
-// Daily AI budget and human check
+// Human check
 // =====================================================================
 const guard = require("../lib/abuseGuard");
-
-test("the free tool stops at its daily limit, clients at the total, staff never", async () => {
-  process.env.AI_DAILY_LIMIT_PUBLIC = "2";
-  process.env.AI_DAILY_LIMIT_TOTAL = "4";
-  Object.keys(counters).forEach((k) => delete counters[k]);
-  staffAlerts.length = 0;
-  await guard.reserveAiRun("public");
-  await guard.reserveAiRun("public");
-  await assert.rejects(guard.reserveAiRun("public"), (e) => e instanceof guard.BudgetError && e.status === 429 && /very busy today/.test(e.message));
-  await new Promise((r) => setTimeout(r, 10));
-  assert.strictEqual(staffAlerts.length, 1, "the team is told once");
-  await guard.reserveAiRun("client"); // total is now 4
-  await assert.rejects(guard.reserveAiRun("client"), /today's limit/);
-  await guard.reserveAiRun("staff"); // counted, never blocked
-  await guard.reserveAiRun("public").catch(() => {});
-  await new Promise((r) => setTimeout(r, 10));
-  assert.strictEqual(staffAlerts.length, 2, "one alert per limit per day");
-  delete process.env.AI_DAILY_LIMIT_PUBLIC; delete process.env.AI_DAILY_LIMIT_TOTAL;
-});
 
 test("human check: off without keys; with keys the token is verified with Cloudflare", async () => {
   delete process.env.TURNSTILE_SITE_KEY; delete process.env.TURNSTILE_SECRET_KEY;
@@ -89,7 +70,7 @@ test("human check: off without keys; with keys the token is verified with Cloudf
   assert.strictEqual(fetchCalls.at(-1).opts.body.get("secret"), "secret");
   assert.strictEqual(fetchCalls.at(-1).opts.body.get("remoteip"), "1.2.3.4");
   assert.strictEqual((await guard.verifyHuman("bad")).ok, false);
-  // Cloudflare down: real people aren't locked out (the budget still applies).
+  // Cloudflare down: real people aren't locked out (the rate limit still applies).
   fetchReply = async () => { throw new Error("network down"); };
   assert.strictEqual((await guard.verifyHuman("any")).ok, true);
   fetchReply = null;

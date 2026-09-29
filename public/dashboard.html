@@ -57,6 +57,16 @@
     padding: 6px 12px; font-size: 12.5px; font-family: var(--sans); cursor: pointer; color: var(--ink-soft);
   }
   .ghost-btn:hover { border-color: var(--stamp-red); color: var(--stamp-red); }
+  .due-filters { display: flex; flex-wrap: wrap; gap: 14px; margin: 0 0 12px; font-size: 13px; }
+  .due-filters select { margin-left: 6px; font: inherit; padding: 5px 8px; border: 1px solid var(--rule); border-radius: 6px; background: var(--card); color: var(--ink); }
+  .due-summary { margin: 0 0 10px; font-size: 13.5px; }
+  .due-cat { font-size: 12px; color: var(--grey-dot); margin-top: 2px; }
+  .due-tag { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--rule-soft); white-space: nowrap; }
+  .due-tag.soon { background: #FFF1D6; color: #8A5A00; }
+  .due-tag.overdue { background: #FDE2E1; color: #A12622; }
+  .due-who { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .due-who.customer { background: #DDF3F0; color: #1F6F69; }
+  .due-who.lead { background: #EDE7FB; color: #5B3FA6; }
   .feed { list-style: none; padding: 0; margin: 0; }
   .feed li { padding: 12px 0; border-bottom: 1px solid var(--rule-soft); font-size: 13.5px; line-height: 1.55; }
   .feed li:last-child { border-bottom: 0; }
@@ -440,7 +450,21 @@
         (data.tech ? ' \u00b7 <a href="#" id="teamFeedBtn">Add client deadlines to my calendar</a>' : '') + '</p>' +
       '<p style="margin-top:6px;"><a href="/pipeline.html">My work in the pipeline</a> \u00b7 <a href="/reports.html">Reports</a></p>' +
       '<div id="teamFeedBox" hidden class="feed-box"></div>' +
-    '</div>';
+    '</div>' +
+    // Every filing coming up, customers and leads alike (GET /api/dashboard/due).
+    '<section class="panel" id="duePanel">' +
+      '<div class="panel-head"><h2>Everything due</h2>' +
+        '<span class="panel-sub">Customers and leads, overdue first</span></div>' +
+      '<div class="due-filters">' +
+        '<label>Due within <select id="dueDays">' +
+          [30, 60, 90, 180, 365].map(function (d) { return '<option value="' + d + '"' + (d === dueState.days ? ' selected' : '') + '>' + d + ' days</option>'; }).join('') +
+        '</select></label>' +
+        '<label>Show <select id="dueWho">' +
+          [['all', 'Customers and leads'], ['customers', 'Customers only'], ['leads', 'Leads only']].map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === dueState.who ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') +
+        '</select></label>' +
+      '</div>' +
+      '<div id="dueBody"><div class="muted">Loading\u2026</div></div>' +
+    '</section>';
 
     // Order matters for the mixed roles: an admin sees delivery work
     // first because that's the day job, money second.
@@ -452,6 +476,9 @@
 
     $('root').innerHTML = html;
     labelTableCells($('root'));
+    $('dueDays').addEventListener('change', function (e) { dueState.days = Number(e.target.value); loadDue(); });
+    $('dueWho').addEventListener('change', function (e) { dueState.who = e.target.value; loadDue(); });
+    loadDue();
 
     $('navUser').textContent = user.email;
     var links = [
@@ -526,6 +553,44 @@
       }); })
       .then(function (d) { alert(d.message); load(); })
       .catch(function (err) { alert(err.message); btn.disabled = false; });
+  }
+
+  var dueState = { days: 60, who: 'all' };
+  function dueWhen(r) {
+    if (r.daysUntil < 0) return '<span class="due-tag overdue">Overdue ' + esc(-r.daysUntil) + 'd</span>';
+    if (r.daysUntil === 0) return '<span class="due-tag soon">Today</span>';
+    return '<span class="due-tag' + (r.daysUntil <= 15 ? ' soon' : '') + '">' + esc(r.daysUntil) + 'd</span>';
+  }
+  function loadDue() {
+    var body = $('dueBody');
+    if (!body) return;
+    fetch('/api/dashboard/due?days=' + dueState.days + '&who=' + dueState.who, { credentials: 'same-origin' })
+      .then(function (res) { return res.json().then(function (d) { if (!res.ok) throw new Error(d.error || 'Couldn\u2019t load what\u2019s due.'); return d; }); })
+      .then(function (d) {
+        var c = d.counts;
+        body.innerHTML =
+          '<p class="due-summary">' + esc(c.total) + ' filing' + (c.total === 1 ? '' : 's') + ': ' +
+            esc(c.customers) + ' for customers, ' + esc(c.leads) + ' for leads' + (c.overdue ? ', <strong>' + esc(c.overdue) + ' overdue</strong>' : '') + '.' +
+            (d.truncated ? ' Showing the first ' + esc(d.rows.length) + '.' : '') + '</p>' +
+          table(
+            [{ label: 'Due' }, { label: 'Date' }, { label: 'Filing' }, { label: 'Company' }, { label: 'Who' }, { label: 'Where' }],
+            d.rows.map(function (r) {
+              return '<tr>' +
+                '<td>' + dueWhen(r) + '</td>' +
+                '<td>' + esc(new Date(r.dueDate).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })) + '</td>' +
+                '<td>' + esc(r.filing) + '<div class="due-cat">' + esc(r.category) + '</div></td>' +
+                '<td><a href="/calendar.html?id=' + encodeURIComponent(r.calendarId) + '">' + esc(r.company) + '</a></td>' +
+                '<td>' + (r.customer
+                  ? '<span class="due-who customer">Customer</span><div class="due-cat">' + (r.requested ? 'Asked us to file' : 'Not asked us yet') + '</div>'
+                  : '<span class="due-who lead">Lead</span><div class="due-cat">' + esc(r.contact) + '</div>') + '</td>' +
+                '<td>' + esc(r.where) + '</td>' +
+              '</tr>';
+            }),
+            'Nothing due in this window.'
+          );
+        labelTableCells(body);
+      })
+      .catch(function (err) { body.innerHTML = '<div class="muted">' + esc(err.message) + '</div>'; });
   }
 
   function load() {

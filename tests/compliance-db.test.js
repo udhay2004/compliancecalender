@@ -55,11 +55,7 @@ test("every item in the database is well-formed, with a schedule the date engine
   }
 });
 
-test("every answer the forms offer is covered by the database (except the few researched live)", () => {
-  const LIVE = [
-    (p) => p.country === "United States" && p.entityType === "Partnership",
-    (p) => p.country === "Canada" && ["Yukon", "Northwest Territories", "Nunavut"].includes(p.state),
-  ];
+test("every answer the forms offer is covered by the database", () => {
   let checked = 0;
   const pick = (f, p) => (f.options || f.optionsFrom.map[p[f.optionsFrom.field]] || []);
   function walk(country, fields, i, profile) {
@@ -67,7 +63,6 @@ test("every answer the forms offer is covered by the database (except the few re
       const c = checkProfile(profile);
       assert.ok(c.ok, `${JSON.stringify(profile)}: ${c.error}`);
       const r = db.buildFromDatabase({ ...c.profile, incorpDate: "2021-07-15", fyEnd: "Dec" });
-      if (LIVE.some((fn) => fn(c.profile))) { assert.strictEqual(r.covered, false); return; }
       assert.ok(r.covered, `${JSON.stringify(c.profile)}: ${r.reason}`);
       assert.ok(r.items.length >= 3, `${JSON.stringify(c.profile)}: only ${r.items.length} items`);
       checked++;
@@ -187,20 +182,26 @@ test("ODI filings are added for an Indian investor, and the FLA return only for 
   assert.ok(!has(build({ ...base, odiDone: "No" }), /Annual Performance Report/));
 });
 
-test("profiles outside the database are sent to live research, and covered ones never call the AI", async () => {
-  assert.match(db.buildFromDatabase({ country: "United States", state: "Texas", entityType: "Partnership", taxStatus: "Partnership" }).reason, /Partnership/);
-  assert.match(db.buildFromDatabase({ country: "Canada", state: "Yukon", entityType: "Corporation", incorporation: "Federal" }).reason, /Yukon/);
-  assert.match(db.buildFromDatabase({ country: "France", entityType: "SAS" }).reason, /France/);
-
-  const { generateCompanyCalendar } = require("../lib/claude");
-  let aiBudgetUsed = false;
-  const r = await generateCompanyCalendar(
-    { country: "United Kingdom", entityType: "Private Limited Company (Ltd)", vat: "Quarterly", hasEmployees: "No", fyEnd: "Dec" },
-    { beforeLiveResearch: () => { aiBudgetUsed = true; } }
-  );
+test("calendars come only from the database; anything outside it is refused with the reason", async () => {
+  const { generateCompanyCalendar, NotCoveredError } = require("../lib/generateCalendar");
+  const r = await generateCompanyCalendar({ country: "United Kingdom", entityType: "Private Limited Company (Ltd)", vat: "Quarterly", hasEmployees: "No", fyEnd: "Dec" });
   assert.strictEqual(r.sourceMode, "database");
   assert.ok(r.items.length > 5);
-  assert.strictEqual(aiBudgetUsed, false);
+  await assert.rejects(generateCompanyCalendar({ country: "France", entityType: "SAS" }), (e) => e instanceof NotCoveredError && e.status === 400 && /France/.test(e.message));
+  await assert.rejects(generateCompanyCalendar({ country: "United States", state: "Texas", entityType: "Corporation", taxStatus: "Not sure" }), /tax status/);
+  assert.ok(!fs.existsSync(path.join(__dirname, "..", "lib", "claude.js")), "no AI research module");
+});
+
+test("US general partnerships and Canadian territories are covered", () => {
+  const gp = build({ country: "United States", state: "California", entityType: "Partnership", taxStatus: "Partnership", hasEmployees: "No", fyEnd: "Dec" });
+  assert.ok(has(gp, /Form 1065/) && has(gp, /California Partnership/));
+  assert.ok(!has(gp, /Statement of Information|Form 1120/), "no corporation or LLC filings");
+  const p = { country: "Canada", state: "Nunavut", entityType: "Corporation", incorporation: "Provincial", salesTax: "Not registered", hasEmployees: "Yes", fyEnd: "Dec", incorpDate: "2021-07-15" };
+  const nu = build(p);
+  assert.strictEqual(due(nu, /Nunavut Annual Return/, p), "2027-08-31");
+  assert.ok(has(nu, /Nunavut Payroll Tax Remittances/) && has(nu, /WSCC/));
+  const yk = build({ country: "Canada", state: "Ontario", entityType: "Corporation", incorporation: "Federal", operatingRegions: ["Yukon"], salesTax: "Annual", hasEmployees: "No" });
+  assert.ok(has(yk, /Yukon Extra-Territorial Annual Return/));
 });
 
 test("older calendars without the new answers still build (with sensible defaults)", () => {

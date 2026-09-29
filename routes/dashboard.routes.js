@@ -449,6 +449,88 @@ router.get("/summary", async (req, res) => {
   }
 });
 
+// ---------------------------------------------------------------------
+// Everything due: every filing coming up for every company we know about,
+// customers (a client company's calendars) and leads (calendars made on the
+// public tool by people who aren't customers yet) alike, so the team can
+// work the one and reach out to the other. Any staff member.
+// ---------------------------------------------------------------------
+const D = require("../lib/deadlines");
+const DUE_WINDOWS = [30, 60, 90, 180, 365];
+const DUE_ROW_LIMIT = 1000;
+const OVERDUE_LOOKBACK_DAYS = 60;
+
+function dueDateOf(item, profile, customer, today) {
+  // A customer's filing keeps its tracked date (staff may have set it, and a
+  // missed one should show as overdue). A lead's is worked out afresh.
+  if (customer && item.dueDateActual) return new Date(item.dueDateActual);
+  const next = D.nextOccurrence(D.scheduleFor(item), profile || {}, today, { businessDays: D.usesUsBusinessDays(item, profile) });
+  return next ? next.date : null;
+}
+
+async function buildDueList({ days, who }) {
+  const today = D.startOfDay(new Date());
+  const until = D.addDays(today, days);
+  const from = D.addDays(today, -OVERDUE_LOOKBACK_DAYS);
+  const or = [];
+  if (who !== "leads") or.push({ clientOrgId: { $ne: null } });
+  if (who !== "customers") or.push({ clientOrgId: null, source: "public", "leadContact.email": { $nin: [null, ""] } });
+  const calendars = await Calendar.find({ supersededAt: null, status: { $ne: "rejected" }, $or: or })
+    .select("clientOrgId source profile items leadContact createdAt")
+    .lean();
+  const orgs = await ClientOrg.find({ _id: { $in: calendars.map((c) => c.clientOrgId).filter(Boolean) } }).select("name").lean();
+  const orgName = new Map(orgs.map((o) => [String(o._id), o.name]));
+
+  const rows = [];
+  for (const cal of calendars) {
+    const customer = Boolean(cal.clientOrgId);
+    const profile = cal.profile || {};
+    (cal.items || []).forEach((item, index) => {
+      if (item.isHistory || item.completedAt) return;
+      const due = dueDateOf(item, profile, customer, today);
+      if (!due || due > until || due < from) return;
+      rows.push({
+        calendarId: String(cal._id),
+        index,
+        customer,
+        company: (customer && orgName.get(String(cal.clientOrgId))) || profile.companyName || "(no company name)",
+        contact: customer ? "" : [cal.leadContact?.name, cal.leadContact?.email, cal.leadContact?.phone].filter(Boolean).join(" · "),
+        where: [profile.state && profile.state !== profile.country ? profile.state : null, profile.country || "United States"].filter(Boolean).join(", "),
+        filing: item.compliance_name,
+        category: item.category,
+        requested: Boolean(item.selectedByClient),
+        dueDate: due,
+        daysUntil: D.daysBetween(today, due),
+      });
+    });
+  }
+  rows.sort((a, b) => a.dueDate - b.dueDate || a.company.localeCompare(b.company));
+  return {
+    days,
+    who,
+    counts: {
+      total: rows.length,
+      customers: rows.filter((r) => r.customer).length,
+      leads: rows.filter((r) => !r.customer).length,
+      overdue: rows.filter((r) => r.daysUntil < 0).length,
+    },
+    truncated: rows.length > DUE_ROW_LIMIT,
+    rows: rows.slice(0, DUE_ROW_LIMIT),
+  };
+}
+
+// GET /api/dashboard/due?days=60&who=all|customers|leads
+router.get("/due", async (req, res) => {
+  const days = DUE_WINDOWS.includes(Number(req.query.days)) ? Number(req.query.days) : 60;
+  const who = ["customers", "leads"].includes(req.query.who) ? req.query.who : "all";
+  try {
+    res.json(await buildDueList({ days, who }));
+  } catch (err) {
+    console.error("[dashboard] Failed to build the due list:", err);
+    res.status(500).json({ error: "Couldn't load what's due right now." });
+  }
+});
+
 // GET /api/dashboard/calendar-feed — this staff member's private link to
 // subscribe to every client deadline we're handling (Google/Outlook).
 router.get("/calendar-feed", async (req, res) => {

@@ -3,7 +3,7 @@
 // Drives the REAL portal routes, payment routes and Razorpay webhook over
 // real HTTP. Replaced with in-memory stand-ins (via the require cache,
 // same technique as tests/auth-flow.test.js): the Mongoose models, file
-// storage, the Claude research call, Razorpay's API, email and the
+// storage, the calendar generator, Razorpay's API, email and the
 // session check. Everything that decides behaviour — contact gate,
 // service selection, pricing, checklist/document reuse, carry-over on
 // regenerate, payment verification, amount checks, idempotency — is the
@@ -157,7 +157,7 @@ stub("lib/storage.js", {
   fileExists: async (k) => !lostKeys.has(k),
   findMissing: async (keys) => new Set(keys.filter((k) => lostKeys.has(k))),
 });
-stub("lib/claude.js", { generateCompanyCalendar: async () => ({ items: clone(generatedItems), sourceMode: "live" }) });
+stub("lib/generateCalendar.js", { generateCompanyCalendar: async () => ({ items: clone(generatedItems), sourceMode: "database" }), NotCoveredError: class extends Error {} });
 stub("lib/notify.js", {
   notifyStaff: async (n) => { notifications.push({ audience: "staff", ...n }); },
   notifyClient: async (n) => { notifications.push({ audience: "client", ...n }); },

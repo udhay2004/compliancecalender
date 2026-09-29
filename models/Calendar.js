@@ -1,7 +1,7 @@
 // models/Calendar.js
 //
 // A generated calendar is NEVER shown to anyone as "trusted" the moment
-// Claude produces it. It's saved with status "pending_review". A human
+// it's built. It's saved with status "pending_review". A human
 // (any logged-in team member, per the current review model) has to open
 // it, optionally edit items, and Approve or Reject it before it's treated
 // as a real source of truth. This is the human-in-the-loop step that was
@@ -30,7 +30,7 @@ const itemSchema = new mongoose.Schema(
     source_url: { type: String, default: "" },
     confidence: { type: String, enum: ["high", "medium", "low"], default: "medium" },
     // Set true once a reviewer edits this specific line item, so the diff
-    // between "what Claude said" and "what a human corrected" isn't lost.
+    // between "what was generated" and "what a human corrected" isn't lost.
     editedByReviewer: { type: Boolean, default: false },
 
     // --- Client-facing lifecycle (added for the portal) ---------------
@@ -159,7 +159,7 @@ const itemSchema = new mongoose.Schema(
     // Optional, staff-set actual calendar date this item is due. Kept
     // separate from `due_date` (a human-readable STRING like "15th day
     // of the 4th month after FY end (Annually)") on purpose — due_date
-    // is what Claude produces and a person reads, but it's free text,
+    // is what the database provides and a person reads, but it's free text,
     // not something a reminders job can reliably compute "due in 7
     // days" from. Until every item has this set, due-date reminders
     // only cover items staff has dated; payment reminders (see
@@ -254,7 +254,7 @@ const profileSchema = new mongoose.Schema(
     // Below the relevant state's small-business exemption threshold, the
     // company is generally exempt from the GRT FILING itself, but a
     // local business license is typically still required regardless of
-    // revenue — see the GRT handling notes in lib/claude.js.
+    // revenue. (Kept for older calendars; not asked any more.)
     quarterlyGrossReceipts: Number,
     // Country questions (lib/countries.js), used to pick filings from the
     // compliance database (lib/complianceDb.js).
@@ -327,10 +327,9 @@ const calendarSchema = new mongoose.Schema(
     reviewNotes: { type: String, default: "" },
 
     // Where the item data came from, for transparency in the UI:
-    // "cache" = fully from StateComplianceCache, no live research needed
-    // "live"  = fresh Claude + web_search research was run
-    // "mixed" = cache used for base items, live call for FY-specific/ODI parts
-    // "database" = built entirely from the compliance database (data/compliance)
+    // "database" = built from the compliance database (data/compliance)
+    // "cache" / "live" / "mixed" = AI-researched calendars made before the
+    //   database existed (kept so older calendars still load)
     sourceMode: { type: String, enum: ["database", "cache", "live", "mixed"], default: "live" },
   },
   { timestamps: true }

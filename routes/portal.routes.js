@@ -19,14 +19,13 @@ const ClientOrg = require("../models/ClientOrg");
 const { requireAuth, requireClientRole } = require("../middleware/auth");
 const { upload, acceptUploads } = require("../middleware/upload");
 const storage = require("../lib/storage");
-const { generateCompanyCalendar } = require("../lib/claude");
+const { generateCompanyCalendar, NotCoveredError } = require("../lib/generateCalendar");
 const { toView, missingContactFields, normalizePhone, missingKeysFor } = require("../lib/calendarView");
 const { sendStoredFile } = require("../lib/download");
 const { notifyStaff, notifyClient } = require("../lib/notify");
 const { applyListPrice, removeListPrice, PRICE_LIST_ACTOR, formatUSD } = require("../lib/complianceFees");
 const { logActivity } = require("../lib/auditLog");
 const whatsapp = require("../lib/whatsapp");
-const { reserveAiRun, BudgetError } = require("../lib/abuseGuard");
 const { checkProfile } = require("../lib/countries");
 const { orgIcs, feedLinksFor } = require("./feeds.routes");
 const { sendIcs } = require("../lib/ics");
@@ -395,8 +394,8 @@ router.get("/calendars/:id/items/:index/documents/:docIndex/download", async (re
 // Regenerate
 // ---------------------------------------------------------------------
 
-// Research calls cost real money (Claude + web search), so a client can
-// regenerate a few times a day, not in a loop. Per company, counted in
+// Each regeneration creates a new calendar version and notifies the team,
+// so a client can regenerate a few times a day, not in a loop. Per company, counted in
 // MongoDB (lib/rateLimitStore.js) so it holds across deploys and servers.
 const REGEN_LIMIT_PER_DAY = 3;
 const regenRateLimited = (orgId) => require("../lib/rateLimitStore").overLimit("regenerate", orgId, REGEN_LIMIT_PER_DAY, 24 * 60 * 60 * 1000);
@@ -484,9 +483,9 @@ router.post("/calendars/regenerate", requireCompleteContact, async (req, res) =>
   Object.assign(profile, checked.profile);
 
   try {
-    const { items, sourceMode } = await generateCompanyCalendar(profile, { beforeLiveResearch: () => reserveAiRun("client") });
+    const { items, sourceMode } = await generateCompanyCalendar(profile);
     if (!items.length) {
-      return res.status(502).json({ error: "The research came back empty. Try again in a few minutes." });
+      return res.status(500).json({ error: "No filings matched these details. Please check them and try again." });
     }
     const { items: mergedItems, carried } = carryOverProgress(base, items);
 
@@ -537,9 +536,9 @@ router.post("/calendars/regenerate", requireCompleteContact, async (req, res) =>
       actorName: who,
     });
   } catch (err) {
-    if (err instanceof BudgetError) return res.status(429).json({ error: err.message, code: "DAILY_LIMIT" });
+    if (err instanceof NotCoveredError) return res.status(400).json({ error: err.message });
     console.error("Client regenerate error:", err);
-    res.status(502).json({ error: "We couldn't finish the research just now. Please try again in a few minutes." });
+    res.status(500).json({ error: "We couldn't update your calendar just now. Please try again in a few minutes." });
   }
 });
 

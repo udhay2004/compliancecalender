@@ -317,6 +317,17 @@
   .days-pill.later { color: var(--brand-text); background: var(--later-bg); }
   .days-pill.unknown { color: var(--ink-soft); background: var(--grey-bg); }
 
+  /* ---- signed in: the calendar builds as the questions are answered ---- */
+  .live-preview { grid-column: 1 / -1; margin-top: 6px; padding: 16px 18px; background: var(--paper); border: 1px solid #D5E3E1; border-radius: 14px; }
+  .live-preview h3 { margin: 0 0 4px; font-size: 15px; }
+  .live-preview .lp-sub { margin: 0 0 10px; font-size: 13px; color: var(--ink-soft); }
+  .live-preview ul { list-style: none; margin: 0; padding: 0; max-height: 260px; overflow-y: auto; }
+  .live-preview li { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-top: 1px solid #E3ECEB; font-size: 13.5px; }
+  .live-preview li:first-child { border-top: 0; }
+  .live-preview .lp-cat { display: block; font-size: 12px; color: var(--ink-soft); }
+  .live-preview .lp-days { flex: none; font-size: 12.5px; font-weight: 600; color: var(--ink-soft); white-space: nowrap; }
+  .live-preview .lp-todo { margin: 10px 0 0; font-size: 12.5px; color: var(--ink-soft); }
+  .locked-panel .btn { margin-top: 16px; }
   .no-match { display: flex; align-items: center; gap: 14px; padding: 22px; margin-bottom: 16px; color: var(--ink-soft); background: #fff; border: 1.5px dashed #C8D8D6; border-radius: 16px; font-size: 14px; }
   .no-match .ic { font-size: 24px; color: var(--brand); }
   .no-match strong { display: block; color: var(--ink); font-size: 14.5px; }
@@ -587,6 +598,9 @@
           <!-- State / province / emirate, entity type and the country's own
                questions (public/js/company-form.js, lib/countries.js). -->
           <div id="countryFields" style="display:contents"></div>
+          <!-- Signed in: the calendar so far, updated as questions are answered
+               (POST /api/public/preview). -->
+          <div class="live-preview" id="livePreview" hidden aria-live="polite"></div>
           <div class="field">
             <label for="incorpDate">Date of incorporation</label>
             <input type="date" id="incorpDate">
@@ -643,7 +657,7 @@
           <button class="btn btn-ghost btn-back" type="button" data-back><svg class="ic" aria-hidden="true"><use href="#i-arrow-left"/></svg>Back</button>
           <button class="btn btn-primary btn-lg" id="submit" type="button"><span class="spinner" aria-hidden="true"></span><span>Generate my calendar</span><svg class="ic btn-arrow" aria-hidden="true"><use href="#i-arrow"/></svg></button>
         </div>
-        <p class="fine-print">Most calendars are ready in a few seconds; unusual profiles are researched live and can take up to a minute. By generating your calendar you agree to our <a href="/terms" target="_blank" rel="noopener">Terms</a> and <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</p>
+        <p class="fine-print">Your calendar is ready in a few seconds. By generating your calendar you agree to our <a href="/terms" target="_blank" rel="noopener">Terms</a> and <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</p>
       </section>
     </section>
   </div>
@@ -682,8 +696,9 @@
   let companyForm = null;
   const formReady = CompanyForm.load().then((def) => {
     fillSelect('country', def.countries, 0);
-    companyForm = CompanyForm.create(document.getElementById('countryFields'), def, { country: def.countries[0] });
+    companyForm = CompanyForm.create(document.getElementById('countryFields'), def, { country: def.countries[0], onChange: schedulePreview });
     document.getElementById('country').addEventListener('change', (e) => companyForm.setCountry(e.target.value));
+    ['incorpDate', 'fyEnd'].forEach((id) => document.getElementById(id).addEventListener('change', schedulePreview));
     return def;
   }).catch((err) => {
     document.getElementById('countryFields').innerHTML = '<div class="field span2"><div class="field-error">' + escapeHtml(err.message) + '</div></div>';
@@ -895,6 +910,7 @@
           ${urgentLine}
           <p>Missed compliance deadlines can mean penalties, interest, or loss of good standing with the state — and these get harder to track the more of them there are. Our compliance team can take this off your plate entirely.</p>
           <div class="locked-cats">${catTags}</div>
+          <a class="btn btn-primary" href="${escapeHtml(startFilingHref(calendarId))}">Sign in to see the complete calendar</a>
         </div>
       </div>`;
   }
@@ -1034,7 +1050,7 @@
             <span><i style="background:var(--brand)"></i>Further out</span>
             <span><i style="background:var(--grey-dot)"></i>Date to be confirmed</span>
           </div>
-          <p class="disclaimer">Research result — not yet a verified compliance rule. Confirm dates with an official source, or talk to our team to have it verified for you.</p>
+          <p class="disclaimer">Built from official government rules for the answers you gave. Rules change, so our team confirms each date before filing; talk to us if anything about your company is unusual.</p>
         </div>
         <aside class="case-rail" aria-label="Next steps">
           <div class="action-bar-slot" id="${caseId}-actions"></div>
@@ -1192,12 +1208,11 @@
 
   setStep(1, false);
 
-  /* ---------------- loading panel (20–40 s of live research) ---------------- */
+  /* ---------------- loading panel (a few seconds) ---------------- */
   const LOADER_STAGES = [
     { text: 'Reading your company profile', at: 0, progress: .15 },
     { text: 'Matching the filing rules for your country and region', at: 600, progress: .4 },
     { text: 'Working out your due dates', at: 1500, progress: .65 },
-    { text: 'Researching official sources for anything not in our database', at: 6000, progress: .8 },
     { text: 'Building your calendar', at: 20000, progress: .92 },
   ];
 
@@ -1208,7 +1223,7 @@
     el.innerHTML = `
       <div class="loader-panel">
         <h2 class="loader-title">Building calendar for ${escapeHtml(name)}</h2>
-        <p class="loader-sub">Matching your answers to official filing rules. Usually a few seconds; unusual profiles are researched live and take longer.</p>
+        <p class="loader-sub">Matching your answers to official filing rules. This takes a few seconds.</p>
         <div class="progress" aria-hidden="true"><span></span></div>
         <ul class="stages">
           ${LOADER_STAGES.map(s => `<li class="stage"><span class="stage-mark">${icon('check')}</span><span>${escapeHtml(s.text)}</span></li>`).join('')}
@@ -1287,10 +1302,52 @@
 
   document.getElementById('submit').addEventListener('click', handleSubmit);
 
+  // Signed in: the calendar builds while the questions are answered. Only
+  // filings no remaining answer could rule out are listed, so it only grows;
+  // "Generate" then saves the comprehensive calendar.
+  let signedIn = false;
+  let previewTimer = null;
+  let previewSeq = 0;
+  function schedulePreview() {
+    if (!signedIn) return;
+    clearTimeout(previewTimer);
+    previewTimer = setTimeout(runPreview, 300);
+  }
+  async function runPreview() {
+    const box = document.getElementById('livePreview');
+    const seq = ++previewSeq;
+    try {
+      const response = await fetch('/api/public/preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profile: readProfile() }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (seq !== previewSeq) return; // a newer answer is on its way
+      if (!response.ok) { box.hidden = true; return; }
+      const todo = (data.unanswered || []).map(u => u.label);
+      const rows = (data.items || []).map(it => `
+        <li><span>${escapeHtml(it.compliance_name)}<span class="lp-cat">${escapeHtml(it.category)}</span></span>
+        <span class="lp-days">${escapeHtml(it.daysUntil === null || it.daysUntil === undefined ? 'When it happens' : pillAria(it.daysUntil))}</span></li>`).join('');
+      box.innerHTML = `
+        <h3>${data.complete ? 'Your complete calendar' : 'Your calendar so far'}: ${data.itemCount} filing${data.itemCount === 1 ? '' : 's'}</h3>
+        <p class="lp-sub">${data.complete
+          ? 'Every question is answered. Generate it below to save it to your portal.'
+          : 'This grows as you answer. Filings that depend on an unanswered question are added once you answer it.'}</p>
+        ${rows ? `<ul>${rows}</ul>` : ''}
+        ${todo.length ? `<p class="lp-todo">Still to answer: ${todo.map(escapeHtml).join(' · ')}</p>` : ''}`;
+      box.hidden = false;
+    } catch (_) {
+      if (seq === previewSeq) box.hidden = true;
+    }
+  }
+
   // Signed in already (a client opening /?new=1 from the portal)? Prefill
   // their contact details so they only fill in the company part.
   fetch('/api/portal/profile').then(r => r.ok ? r.json() : null).then(d => {
     if (!d || !d.profile) return;
+    signedIn = true;
+    formReady.then(schedulePreview);
     const p = d.profile;
     if (p.contactName) document.getElementById('contactName').value = p.contactName;
     if (p.email || p.loginEmail) document.getElementById('contactEmail').value = p.email || p.loginEmail;
