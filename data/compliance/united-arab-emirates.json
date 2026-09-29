@@ -1,0 +1,1537 @@
+{
+  "country": "United Arab Emirates",
+  "updated": "2026-09-29",
+  "notes": "items apply everywhere (filtered by zoneType); regions[emirate].items are the emirate's mainland licensing items; freeZones[zone].items apply to companies in that free zone. Economic Substance Regulations were repealed for periods ending after 31 December 2022 and are not included.",
+  "items": [
+    {
+      "id": "ae-ct-register",
+      "category": "Event-Based",
+      "name": "Corporate Tax Registration",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "By the FTA deadline set by the licence issue date (new companies: within 3 months of incorporation)",
+      "applies": "Every UAE company, free zone company and registered branch",
+      "description": "Registration on EmaraTax gives the Tax Registration Number; missing the deadline carries an AED 10,000 penalty.",
+      "authority": "Federal Tax Authority (FTA)",
+      "source": "https://tax.gov.ae/en/taxes/corporate.tax.aspx",
+      "confidence": "high"
+    },
+    {
+      "id": "ae-ct-return",
+      "category": "Mandatory Annual",
+      "name": "Corporate Tax Return and Payment",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 9,
+        "day": "last"
+      },
+      "rule": "Within 9 months after the end of the tax period (financial year)",
+      "applies": "Every taxable person, even if no tax is due",
+      "description": "Filed on EmaraTax; 9% above AED 375,000 of taxable income, 0% for qualifying income of Qualifying Free Zone Persons; Small Business Relief may apply for revenue up to AED 3 million (tax periods ending by 31 December 2026).",
+      "authority": "Federal Tax Authority (FTA), Federal Decree-Law No. 47 of 2022",
+      "source": "https://tax.gov.ae/en/taxes/corporate.tax.aspx",
+      "confidence": "high"
+    },
+    {
+      "id": "ae-audited-fs-ct",
+      "category": "Conditional",
+      "name": "Audited Financial Statements for Corporate Tax",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 9,
+        "day": "last"
+      },
+      "rule": "Ready by the Corporate Tax return due date",
+      "applies": "Businesses with revenue over AED 50 million, and every Qualifying Free Zone Person",
+      "description": "Ministerial Decision No. 82 of 2023 requires audited financial statements for these taxpayers; they may be requested by the FTA.",
+      "authority": "Federal Tax Authority (FTA)",
+      "source": "https://tax.gov.ae/en/taxes/corporate.tax.aspx",
+      "confidence": "high"
+    },
+    {
+      "id": "ae-vat-register",
+      "category": "Event-Based",
+      "name": "VAT Registration",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Within 30 days once taxable supplies exceeded AED 375,000 in the last 12 months (or are expected to in the next 30 days)",
+      "applies": "Businesses not yet VAT-registered",
+      "description": "Voluntary registration is possible from AED 187,500.",
+      "authority": "Federal Tax Authority (FTA), Federal Decree-Law No. 8 of 2017",
+      "source": "https://tax.gov.ae/en/taxes/Vat.aspx",
+      "confidence": "high",
+      "when": {
+        "vat": [
+          "Not registered"
+        ]
+      }
+    },
+    {
+      "id": "ae-vat-quarterly",
+      "category": "Conditional",
+      "name": "VAT Return and Payment (quarterly)",
+      "schedule": {
+        "type": "fy_quarterly",
+        "monthsAfter": 1,
+        "day": 28
+      },
+      "rule": "By the 28th day of the month after each tax period (periods as assigned by the FTA; we assume they follow your financial year)",
+      "applies": "VAT-registered businesses on quarterly periods",
+      "description": "Filed on EmaraTax; payment is due by the same date.",
+      "authority": "Federal Tax Authority (FTA)",
+      "source": "https://tax.gov.ae/en/taxes/Vat.aspx",
+      "confidence": "high",
+      "when": {
+        "vat": [
+          "Quarterly"
+        ]
+      }
+    },
+    {
+      "id": "ae-vat-monthly",
+      "category": "Conditional",
+      "name": "VAT Return and Payment (monthly)",
+      "schedule": {
+        "type": "monthly",
+        "day": 28
+      },
+      "rule": "By the 28th day of the month after each monthly tax period",
+      "applies": "VAT-registered businesses on monthly periods",
+      "description": "Filed on EmaraTax; payment is due by the same date.",
+      "authority": "Federal Tax Authority (FTA)",
+      "source": "https://tax.gov.ae/en/taxes/Vat.aspx",
+      "confidence": "high",
+      "when": {
+        "vat": [
+          "Monthly"
+        ]
+      }
+    },
+    {
+      "id": "ae-ubo",
+      "category": "Event-Based",
+      "name": "Ultimate Beneficial Owner (UBO) Register Update",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Within 15 days of any change in beneficial ownership",
+      "applies": "Companies and branches (mainland and free zone)",
+      "description": "Cabinet Decision No. 109 of 2023 requires a UBO register, a partners/shareholders register and a nominee register, filed with the licensing authority and kept current.",
+      "authority": "Licensing authority (Ministry of Economy / DED / free zone registrar)",
+      "source": "https://www.moec.gov.ae/",
+      "confidence": "high"
+    },
+    {
+      "id": "ae-goaml",
+      "category": "Conditional",
+      "name": "AML/CFT Registration and goAML Reporting",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Before starting a designated activity; suspicious transactions reported without delay",
+      "applies": "Designated non-financial businesses and professions (e.g. real estate, precious metals and stones, corporate service providers, auditors)",
+      "description": "These businesses register on goAML with the Financial Intelligence Unit and keep an AML/CFT compliance programme.",
+      "authority": "UAE Financial Intelligence Unit / Ministry of Economy",
+      "source": "https://www.uaefiu.gov.ae/en/",
+      "confidence": "medium"
+    },
+    {
+      "id": "ae-tp",
+      "category": "Transfer Pricing",
+      "name": "Transfer Pricing Disclosure Form and Master/Local File",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 9,
+        "day": "last"
+      },
+      "rule": "Disclosure filed with the Corporate Tax return; master and local files kept and provided within 30 days of an FTA request",
+      "applies": "Businesses with related-party transactions (disclosure over AED 40 million; files if revenue is AED 200 million or more, or the group's is AED 3.15 billion or more)",
+      "description": "Related-party and connected-person transactions must be at arm's length under Article 34 of the Corporate Tax Law.",
+      "authority": "Federal Tax Authority (FTA)",
+      "source": "https://tax.gov.ae/en/taxes/corporate.tax.aspx",
+      "confidence": "high",
+      "when": {
+        "foreignOwned": true
+      }
+    },
+    {
+      "id": "ae-mainland-agm",
+      "category": "Mandatory Annual",
+      "name": "Annual General Assembly and Audited Accounts (LLC)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 4,
+        "day": "last"
+      },
+      "rule": "Within 4 months after financial year end",
+      "applies": "Mainland limited liability companies",
+      "description": "The general assembly approves the audited financial statements and the auditor's report under the Commercial Companies Law (Federal Decree-Law No. 32 of 2021).",
+      "authority": "Commercial Companies Law (Federal Decree-Law No. 32 of 2021)",
+      "source": "https://www.moec.gov.ae/",
+      "confidence": "medium",
+      "when": {
+        "zoneType": [
+          "Mainland"
+        ],
+        "entityType": [
+          "Mainland LLC"
+        ]
+      }
+    },
+    {
+      "id": "ae-moe-branch",
+      "category": "Mandatory Annual",
+      "name": "Ministry of Economy Branch Registration Renewal",
+      "schedule": {
+        "type": "anniversary"
+      },
+      "rule": "Annually, before the registration certificate expires",
+      "applies": "Mainland branches of foreign companies",
+      "description": "Renewal is filed with the audited branch accounts; the parent's good-standing documents are refreshed periodically.",
+      "authority": "UAE Ministry of Economy",
+      "source": "https://www.moec.gov.ae/",
+      "confidence": "medium",
+      "when": {
+        "zoneType": [
+          "Mainland"
+        ],
+        "entityType": [
+          "Branch of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "ae-wps",
+      "category": "Conditional",
+      "name": "Wage Protection System (WPS) Salary Payments",
+      "schedule": {
+        "type": "monthly",
+        "day": 15
+      },
+      "rule": "Salaries paid through WPS each month, no later than 15 days after they fall due",
+      "applies": "Mainland employers registered with MOHRE",
+      "description": "Late or missing WPS payments lead to MOHRE penalties and a block on new work permits.",
+      "authority": "Ministry of Human Resources and Emiratisation (MOHRE)",
+      "source": "https://www.mohre.gov.ae/",
+      "confidence": "medium",
+      "when": {
+        "zoneType": [
+          "Mainland"
+        ],
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "ae-emiratisation-50",
+      "category": "Conditional",
+      "name": "Emiratisation Targets (50+ employees)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 6,
+            "day": 30
+          },
+          {
+            "month": 12,
+            "day": 31
+          }
+        ]
+      },
+      "rule": "+1% of skilled roles by 30 June and a further +1% by 31 December each year",
+      "applies": "Mainland private companies with 50 or more employees",
+      "description": "Unmet targets are charged monthly per missing Emirati (AED 9,000 a month in 2026); Emiratis must be registered with pension (GPSSA).",
+      "authority": "MOHRE / Nafis",
+      "source": "https://www.mohre.gov.ae/",
+      "confidence": "high",
+      "when": {
+        "zoneType": [
+          "Mainland"
+        ],
+        "hasEmployees": true,
+        "employeeBand": [
+          "50 or more"
+        ]
+      }
+    },
+    {
+      "id": "ae-emiratisation-20",
+      "category": "Conditional",
+      "name": "Emiratisation Target (20–49 employees, 14 sectors)",
+      "schedule": {
+        "type": "annual",
+        "month": 12,
+        "day": 31
+      },
+      "rule": "Hire the required number of UAE nationals by 31 December each year",
+      "applies": "Mainland companies with 20–49 employees in the 14 sectors named by MOHRE",
+      "description": "Companies in scope must employ at least two UAE nationals from 2025 and keep them registered with pension.",
+      "authority": "MOHRE / Nafis",
+      "source": "https://www.mohre.gov.ae/",
+      "confidence": "medium",
+      "when": {
+        "zoneType": [
+          "Mainland"
+        ],
+        "hasEmployees": true,
+        "employeeBand": [
+          "20–49"
+        ]
+      }
+    },
+    {
+      "id": "ae-qfzp",
+      "category": "Conditional",
+      "name": "Qualifying Free Zone Person Review",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 9,
+        "day": "last"
+      },
+      "rule": "Each tax period, with the Corporate Tax return",
+      "applies": "Free zone companies claiming the 0% rate",
+      "description": "Check substance in the free zone, qualifying income, the de minimis limit (non-qualifying revenue under 5% or AED 5 million) and transfer pricing; failing any condition removes the 0% rate for 5 years.",
+      "authority": "Federal Tax Authority (FTA)",
+      "source": "https://tax.gov.ae/en/taxes/corporate.tax.aspx",
+      "confidence": "high",
+      "when": {
+        "zoneType": [
+          "Free Zone"
+        ]
+      }
+    },
+    {
+      "id": "ae-pension",
+      "category": "Conditional",
+      "name": "Pension Contributions for UAE and GCC National Employees",
+      "schedule": {
+        "type": "monthly",
+        "day": 15
+      },
+      "rule": "By the 15th of the month after each salary month",
+      "applies": "Employers of UAE nationals (GCC nationals under their home scheme)",
+      "description": "Registration with GPSSA (or the Abu Dhabi Pension Fund for Abu Dhabi-based employers) is required when a national is hired; penalties accrue daily after the due date.",
+      "authority": "General Pension and Social Security Authority (GPSSA) / Abu Dhabi Pension Fund",
+      "source": "https://gpssa.gov.ae/pages/en",
+      "confidence": "high",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "ae-health-insurance",
+      "category": "Event-Based",
+      "name": "Employee Health Insurance and Work Permits",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Before each employee starts; renewed with visas",
+      "applies": "Employers",
+      "description": "Health insurance is mandatory for employees across the UAE; work permits and residence visas are issued through MOHRE or the free zone authority.",
+      "authority": "MOHRE / free zone authority / emirate health authority",
+      "source": "https://u.ae/en/information-and-services/jobs",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    }
+  ],
+  "regions": {
+    "Dubai": {
+      "items": [
+        {
+          "id": "ae-dubai-licence",
+          "category": "Mandatory Annual",
+          "name": "Trade Licence Renewal (Dubai Department of Economy and Tourism)",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of issue)",
+          "applies": "Mainland businesses licensed in Dubai",
+          "description": "Renewal requires a valid registered tenancy and up-to-date UBO information; trading on an expired licence attracts fines.",
+          "authority": "Dubai Department of Economy and Tourism (DET)",
+          "source": "https://www.dubaidet.gov.ae/",
+          "confidence": "high",
+          "when": {
+            "zoneType": [
+              "Mainland"
+            ]
+          }
+        },
+        {
+          "id": "ae-dubai-tenancy",
+          "category": "Conditional",
+          "name": "Office Tenancy Registration (Ejari (Dubai Land Department))",
+          "schedule": {
+            "type": "anniversary",
+            "daysAfter": -30
+          },
+          "rule": "Renew before the trade licence renewal",
+          "applies": "Mainland businesses in Dubai",
+          "description": "The registered tenancy contract must be valid for the licence renewal.",
+          "authority": "Ejari (Dubai Land Department)",
+          "source": "https://www.dubaidet.gov.ae/",
+          "confidence": "medium",
+          "when": {
+            "zoneType": [
+              "Mainland"
+            ]
+          }
+        }
+      ]
+    },
+    "Abu Dhabi": {
+      "items": [
+        {
+          "id": "ae-abu-dhabi-licence",
+          "category": "Mandatory Annual",
+          "name": "Trade Licence Renewal (Abu Dhabi Department of Economic Development)",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of issue)",
+          "applies": "Mainland businesses licensed in Abu Dhabi",
+          "description": "Renewal requires a valid registered tenancy and up-to-date UBO information; trading on an expired licence attracts fines.",
+          "authority": "Abu Dhabi Department of Economic Development (ADDED)",
+          "source": "https://www.added.gov.ae/",
+          "confidence": "high",
+          "when": {
+            "zoneType": [
+              "Mainland"
+            ]
+          }
+        },
+        {
+          "id": "ae-abu-dhabi-tenancy",
+          "category": "Conditional",
+          "name": "Office Tenancy Registration (Tawtheeq (Abu Dhabi Municipality))",
+          "schedule": {
+            "type": "anniversary",
+            "daysAfter": -30
+          },
+          "rule": "Renew before the trade licence renewal",
+          "applies": "Mainland businesses in Abu Dhabi",
+          "description": "The registered tenancy contract must be valid for the licence renewal.",
+          "authority": "Tawtheeq (Abu Dhabi Municipality)",
+          "source": "https://www.added.gov.ae/",
+          "confidence": "medium",
+          "when": {
+            "zoneType": [
+              "Mainland"
+            ]
+          }
+        }
+      ]
+    },
+    "Sharjah": {
+      "items": [
+        {
+          "id": "ae-sharjah-licence",
+          "category": "Mandatory Annual",
+          "name": "Trade Licence Renewal (Sharjah Economic Development Department)",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of issue)",
+          "applies": "Mainland businesses licensed in Sharjah",
+          "description": "Renewal requires a valid registered tenancy and up-to-date UBO information; trading on an expired licence attracts fines.",
+          "authority": "Sharjah Economic Development Department (SEDD)",
+          "source": "https://www.sedd.ae/",
+          "confidence": "high",
+          "when": {
+            "zoneType": [
+              "Mainland"
+            ]
+          }
+        },
+        {
+          "id": "ae-sharjah-tenancy",
+          "category": "Conditional",
+          "name": "Office Tenancy Registration (Sharjah Municipality tenancy attestation)",
+          "schedule": {
+            "type": "anniversary",
+            "daysAfter": -30
+          },
+          "rule": "Renew before the trade licence renewal",
+          "applies": "Mainland businesses in Sharjah",
+          "description": "The registered tenancy contract must be valid for the licence renewal.",
+          "authority": "Sharjah Municipality tenancy attestation",
+          "source": "https://www.sedd.ae/",
+          "confidence": "medium",
+          "when": {
+            "zoneType": [
+              "Mainland"
+            ]
+          }
+        }
+      ]
+    },
+    "Ajman": {
+      "items": [
+        {
+          "id": "ae-ajman-licence",
+          "category": "Mandatory Annual",
+          "name": "Trade Licence Renewal (Ajman Department of Economic Development)",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of issue)",
+          "applies": "Mainland businesses licensed in Ajman",
+          "description": "Renewal requires a valid registered tenancy and up-to-date UBO information; trading on an expired licence attracts fines.",
+          "authority": "Ajman Department of Economic Development",
+          "source": "https://ajmanded.ae/",
+          "confidence": "high",
+          "when": {
+            "zoneType": [
+              "Mainland"
+            ]
+          }
+        },
+        {
+          "id": "ae-ajman-tenancy",
+          "category": "Conditional",
+          "name": "Office Tenancy Registration (Ajman tenancy registration)",
+          "schedule": {
+            "type": "anniversary",
+            "daysAfter": -30
+          },
+          "rule": "Renew before the trade licence renewal",
+          "applies": "Mainland businesses in Ajman",
+          "description": "The registered tenancy contract must be valid for the licence renewal.",
+          "authority": "Ajman tenancy registration",
+          "source": "https://ajmanded.ae/",
+          "confidence": "medium",
+          "when": {
+            "zoneType": [
+              "Mainland"
+            ]
+          }
+        }
+      ]
+    },
+    "Ras Al Khaimah": {
+      "items": [
+        {
+          "id": "ae-ras-al-khaimah-licence",
+          "category": "Mandatory Annual",
+          "name": "Trade Licence Renewal (Ras Al Khaimah Department of Economic Development)",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of issue)",
+          "applies": "Mainland businesses licensed in Ras Al Khaimah",
+          "description": "Renewal requires a valid registered tenancy and up-to-date UBO information; trading on an expired licence attracts fines.",
+          "authority": "Ras Al Khaimah Department of Economic Development",
+          "source": "https://ded.rak.ae/",
+          "confidence": "high",
+          "when": {
+            "zoneType": [
+              "Mainland"
+            ]
+          }
+        },
+        {
+          "id": "ae-ras-al-khaimah-tenancy",
+          "category": "Conditional",
+          "name": "Office Tenancy Registration (RAK tenancy registration)",
+          "schedule": {
+            "type": "anniversary",
+            "daysAfter": -30
+          },
+          "rule": "Renew before the trade licence renewal",
+          "applies": "Mainland businesses in Ras Al Khaimah",
+          "description": "The registered tenancy contract must be valid for the licence renewal.",
+          "authority": "RAK tenancy registration",
+          "source": "https://ded.rak.ae/",
+          "confidence": "medium",
+          "when": {
+            "zoneType": [
+              "Mainland"
+            ]
+          }
+        }
+      ]
+    },
+    "Fujairah": {
+      "items": [
+        {
+          "id": "ae-fujairah-licence",
+          "category": "Mandatory Annual",
+          "name": "Trade Licence Renewal (Fujairah Department of Industry and Economy)",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of issue)",
+          "applies": "Mainland businesses licensed in Fujairah",
+          "description": "Renewal requires a valid registered tenancy and up-to-date UBO information; trading on an expired licence attracts fines.",
+          "authority": "Fujairah Department of Industry and Economy",
+          "source": "https://www.fujairah.ae/",
+          "confidence": "high",
+          "when": {
+            "zoneType": [
+              "Mainland"
+            ]
+          }
+        },
+        {
+          "id": "ae-fujairah-tenancy",
+          "category": "Conditional",
+          "name": "Office Tenancy Registration (Fujairah tenancy registration)",
+          "schedule": {
+            "type": "anniversary",
+            "daysAfter": -30
+          },
+          "rule": "Renew before the trade licence renewal",
+          "applies": "Mainland businesses in Fujairah",
+          "description": "The registered tenancy contract must be valid for the licence renewal.",
+          "authority": "Fujairah tenancy registration",
+          "source": "https://www.fujairah.ae/",
+          "confidence": "medium",
+          "when": {
+            "zoneType": [
+              "Mainland"
+            ]
+          }
+        }
+      ]
+    },
+    "Umm Al Quwain": {
+      "items": [
+        {
+          "id": "ae-umm-al-quwain-licence",
+          "category": "Mandatory Annual",
+          "name": "Trade Licence Renewal (Umm Al Quwain Department of Economic Development)",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of issue)",
+          "applies": "Mainland businesses licensed in Umm Al Quwain",
+          "description": "Renewal requires a valid registered tenancy and up-to-date UBO information; trading on an expired licence attracts fines.",
+          "authority": "Umm Al Quwain Department of Economic Development",
+          "source": "https://www.uaq.gov.ae/",
+          "confidence": "high",
+          "when": {
+            "zoneType": [
+              "Mainland"
+            ]
+          }
+        },
+        {
+          "id": "ae-umm-al-quwain-tenancy",
+          "category": "Conditional",
+          "name": "Office Tenancy Registration (UAQ tenancy registration)",
+          "schedule": {
+            "type": "anniversary",
+            "daysAfter": -30
+          },
+          "rule": "Renew before the trade licence renewal",
+          "applies": "Mainland businesses in Umm Al Quwain",
+          "description": "The registered tenancy contract must be valid for the licence renewal.",
+          "authority": "UAQ tenancy registration",
+          "source": "https://www.uaq.gov.ae/",
+          "confidence": "medium",
+          "when": {
+            "zoneType": [
+              "Mainland"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "freeZones": {
+    "DMCC": {
+      "emirate": "Dubai",
+      "items": [
+        {
+          "id": "ae-fz-dmcc-licence",
+          "category": "Mandatory Annual",
+          "name": "DMCC Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by DMCC",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "DMCC free zone authority",
+          "source": "",
+          "confidence": "high"
+        },
+        {
+          "id": "ae-fz-dmcc-audit",
+          "category": "Mandatory Annual",
+          "name": "Audited Financial Statements to DMCC",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 6,
+            "day": "last"
+          },
+          "rule": "Within 6 months after financial year end",
+          "applies": "Companies licensed by DMCC",
+          "description": "DMCC requires its companies to submit audited financial statements each year; they are also needed for licence renewal.",
+          "authority": "DMCC free zone authority",
+          "source": "https://www.dmcc.ae/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "JAFZA": {
+      "emirate": "Dubai",
+      "items": [
+        {
+          "id": "ae-fz-jafza-licence",
+          "category": "Mandatory Annual",
+          "name": "JAFZA Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by JAFZA",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "JAFZA free zone authority",
+          "source": "",
+          "confidence": "high"
+        },
+        {
+          "id": "ae-fz-jafza-audit",
+          "category": "Mandatory Annual",
+          "name": "Audited Financial Statements to JAFZA",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 3,
+            "day": "last"
+          },
+          "rule": "Within 90 days after financial year end",
+          "applies": "Companies licensed by JAFZA",
+          "description": "JAFZA requires its companies to submit audited financial statements each year; they are also needed for licence renewal.",
+          "authority": "JAFZA free zone authority",
+          "source": "https://www.jafza.ae/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "DAFZA": {
+      "emirate": "Dubai",
+      "items": [
+        {
+          "id": "ae-fz-dafza-licence",
+          "category": "Mandatory Annual",
+          "name": "DAFZA Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by DAFZA",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "DAFZA free zone authority",
+          "source": "",
+          "confidence": "high"
+        },
+        {
+          "id": "ae-fz-dafza-audit",
+          "category": "Mandatory Annual",
+          "name": "Audited Financial Statements to DAFZA",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 3,
+            "day": "last"
+          },
+          "rule": "Within 90 days after financial year end",
+          "applies": "Companies licensed by DAFZA",
+          "description": "DAFZA requires its companies to submit audited financial statements each year; they are also needed for licence renewal.",
+          "authority": "DAFZA free zone authority",
+          "source": "https://www.dafz.ae/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "DIFC": {
+      "emirate": "Dubai",
+      "items": [
+        {
+          "id": "ae-fz-difc-licence",
+          "category": "Mandatory Annual",
+          "name": "DIFC Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by DIFC",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "DIFC free zone authority",
+          "source": "",
+          "confidence": "high"
+        },
+        {
+          "id": "ae-fz-difc-cs",
+          "category": "Mandatory Annual",
+          "name": "DIFC Confirmation Statement",
+          "schedule": {
+            "type": "anniversary",
+            "daysAfter": 30
+          },
+          "rule": "With the annual licence renewal, no later than 30 days after licence expiry",
+          "applies": "DIFC companies",
+          "description": "Confirms the registered office, directors, shareholders and beneficial owners held by the DIFC Registrar of Companies.",
+          "authority": "DIFC Registrar of Companies",
+          "source": "https://www.difc.ae/",
+          "confidence": "high"
+        },
+        {
+          "id": "ae-fz-difc-accounts",
+          "category": "Mandatory Annual",
+          "name": "DIFC Annual Accounts (audited if above the small-company thresholds)",
+          "schedule": {
+            "type": "anniversary",
+            "daysAfter": 30
+          },
+          "rule": "Prepared for each financial year and filed with the Registrar as required at licence renewal",
+          "applies": "DIFC companies",
+          "description": "Accounts follow internationally accepted standards; companies above the small-company exemption appoint a DIFC-registered auditor.",
+          "authority": "DIFC Registrar of Companies",
+          "source": "https://www.difc.ae/",
+          "confidence": "medium"
+        },
+        {
+          "id": "ae-fz-difc-dp",
+          "category": "Mandatory Annual",
+          "name": "DIFC Data Protection Notification Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, with the licence renewal",
+          "applies": "DIFC entities processing personal data",
+          "description": "Controllers register with the DIFC Commissioner of Data Protection and renew each year.",
+          "authority": "DIFC Commissioner of Data Protection",
+          "source": "https://www.difc.ae/",
+          "confidence": "high"
+        },
+        {
+          "id": "ae-fz-difc-dews",
+          "category": "Conditional",
+          "name": "DEWS Employee Savings Contributions",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "Monthly, for each month's salary",
+          "applies": "DIFC employers (for non-Emirati employees)",
+          "description": "The DIFC Employee Workplace Savings scheme replaces end-of-service gratuity for employees in the DIFC.",
+          "authority": "DIFC Authority",
+          "source": "https://www.difc.ae/",
+          "confidence": "medium",
+          "when": {
+            "hasEmployees": true
+          }
+        }
+      ]
+    },
+    "Dubai Silicon Oasis (DSO / DIEZ)": {
+      "emirate": "Dubai",
+      "items": [
+        {
+          "id": "ae-fz-dubai-silicon-oasis-dso-diez--licence",
+          "category": "Mandatory Annual",
+          "name": "Dubai Silicon Oasis (DSO / DIEZ) Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by Dubai Silicon Oasis (DSO / DIEZ)",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "Dubai Silicon Oasis (DSO / DIEZ) free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "IFZA": {
+      "emirate": "Dubai",
+      "items": [
+        {
+          "id": "ae-fz-ifza-licence",
+          "category": "Mandatory Annual",
+          "name": "IFZA Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by IFZA",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "IFZA free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "Meydan Free Zone": {
+      "emirate": "Dubai",
+      "items": [
+        {
+          "id": "ae-fz-meydan-free-zone-licence",
+          "category": "Mandatory Annual",
+          "name": "Meydan Free Zone Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by Meydan Free Zone",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "Meydan Free Zone free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "Dubai South": {
+      "emirate": "Dubai",
+      "items": [
+        {
+          "id": "ae-fz-dubai-south-licence",
+          "category": "Mandatory Annual",
+          "name": "Dubai South Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by Dubai South",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "Dubai South free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "Dubai World Trade Centre (DWTC)": {
+      "emirate": "Dubai",
+      "items": [
+        {
+          "id": "ae-fz-dubai-world-trade-centre-dwtc--licence",
+          "category": "Mandatory Annual",
+          "name": "Dubai World Trade Centre (DWTC) Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by Dubai World Trade Centre (DWTC)",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "Dubai World Trade Centre (DWTC) free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "Dubai Internet City / Dubai Media City (TECOM)": {
+      "emirate": "Dubai",
+      "items": [
+        {
+          "id": "ae-fz-dubai-internet-city-dubai-media-city-tecom--licence",
+          "category": "Mandatory Annual",
+          "name": "Dubai Internet City / Dubai Media City (TECOM) Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by Dubai Internet City / Dubai Media City (TECOM)",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "Dubai Internet City / Dubai Media City (TECOM) free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "Dubai Healthcare City": {
+      "emirate": "Dubai",
+      "items": [
+        {
+          "id": "ae-fz-dubai-healthcare-city-licence",
+          "category": "Mandatory Annual",
+          "name": "Dubai Healthcare City Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by Dubai Healthcare City",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "Dubai Healthcare City free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "Dubai Design District (d3)": {
+      "emirate": "Dubai",
+      "items": [
+        {
+          "id": "ae-fz-dubai-design-district-d3--licence",
+          "category": "Mandatory Annual",
+          "name": "Dubai Design District (d3) Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by Dubai Design District (d3)",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "Dubai Design District (d3) free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "Other free zone (Dubai)": {
+      "emirate": "Dubai",
+      "items": [
+        {
+          "id": "ae-fz-other-dubai-licence",
+          "category": "Mandatory Annual",
+          "name": "Free zone Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by Free zone",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "Free zone free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "ADGM": {
+      "emirate": "Abu Dhabi",
+      "items": [
+        {
+          "id": "ae-fz-adgm-licence",
+          "category": "Mandatory Annual",
+          "name": "ADGM Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by ADGM",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "ADGM free zone authority",
+          "source": "",
+          "confidence": "high"
+        },
+        {
+          "id": "ae-fz-adgm-cs",
+          "category": "Mandatory Annual",
+          "name": "ADGM Confirmation Statement",
+          "schedule": {
+            "type": "anniversary",
+            "monthsAfter": 1
+          },
+          "rule": "Within 1 month after each anniversary of incorporation",
+          "applies": "ADGM companies",
+          "description": "Made up to the anniversary of incorporation; late filing carries a fine.",
+          "authority": "ADGM Registration Authority",
+          "source": "https://en.adgm.thomsonreuters.com/rulebook/778-duty-deliver-confirmation-statements",
+          "confidence": "high"
+        },
+        {
+          "id": "ae-fz-adgm-accounts",
+          "category": "Mandatory Annual",
+          "name": "ADGM Annual Accounts",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 9,
+            "day": "last"
+          },
+          "rule": "Within 9 months after the accounting reference date (private companies)",
+          "applies": "ADGM private companies",
+          "description": "Filed with the Registration Authority under the Companies Regulations 2020; an extension of up to 3 months can be requested.",
+          "authority": "ADGM Registration Authority",
+          "source": "https://www.adgm.com/operating-in-adgm/obligations-of-adgm-registered-entities/annual-filings/annual-accounts",
+          "confidence": "high"
+        },
+        {
+          "id": "ae-fz-adgm-dp",
+          "category": "Mandatory Annual",
+          "name": "ADGM Data Protection Registration Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, with the licence renewal",
+          "applies": "ADGM entities processing personal data",
+          "description": "Controllers register with the ADGM Office of Data Protection and pay the annual fee.",
+          "authority": "ADGM Office of Data Protection",
+          "source": "https://www.adgm.com/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "KEZAD": {
+      "emirate": "Abu Dhabi",
+      "items": [
+        {
+          "id": "ae-fz-kezad-licence",
+          "category": "Mandatory Annual",
+          "name": "KEZAD Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by KEZAD",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "KEZAD free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "Masdar City Free Zone": {
+      "emirate": "Abu Dhabi",
+      "items": [
+        {
+          "id": "ae-fz-masdar-city-free-zone-licence",
+          "category": "Mandatory Annual",
+          "name": "Masdar City Free Zone Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by Masdar City Free Zone",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "Masdar City Free Zone free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "twofour54": {
+      "emirate": "Abu Dhabi",
+      "items": [
+        {
+          "id": "ae-fz-twofour54-licence",
+          "category": "Mandatory Annual",
+          "name": "twofour54 Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by twofour54",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "twofour54 free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "Abu Dhabi Airports Free Zone (ADAFZ)": {
+      "emirate": "Abu Dhabi",
+      "items": [
+        {
+          "id": "ae-fz-abu-dhabi-airports-free-zone-adafz--licence",
+          "category": "Mandatory Annual",
+          "name": "Abu Dhabi Airports Free Zone (ADAFZ) Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by Abu Dhabi Airports Free Zone (ADAFZ)",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "Abu Dhabi Airports Free Zone (ADAFZ) free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "Other free zone (Abu Dhabi)": {
+      "emirate": "Abu Dhabi",
+      "items": [
+        {
+          "id": "ae-fz-other-abu-dhabi-licence",
+          "category": "Mandatory Annual",
+          "name": "Free zone Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by Free zone",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "Free zone free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "SAIF Zone": {
+      "emirate": "Sharjah",
+      "items": [
+        {
+          "id": "ae-fz-saif-zone-licence",
+          "category": "Mandatory Annual",
+          "name": "SAIF Zone Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by SAIF Zone",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "SAIF Zone free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "Hamriyah Free Zone": {
+      "emirate": "Sharjah",
+      "items": [
+        {
+          "id": "ae-fz-hamriyah-free-zone-licence",
+          "category": "Mandatory Annual",
+          "name": "Hamriyah Free Zone Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by Hamriyah Free Zone",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "Hamriyah Free Zone free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "SHAMS": {
+      "emirate": "Sharjah",
+      "items": [
+        {
+          "id": "ae-fz-shams-licence",
+          "category": "Mandatory Annual",
+          "name": "SHAMS Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by SHAMS",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "SHAMS free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "Sharjah Research Technology and Innovation Park (SRTIP)": {
+      "emirate": "Sharjah",
+      "items": [
+        {
+          "id": "ae-fz-sharjah-research-technology-and-innovation-park-srtip--licence",
+          "category": "Mandatory Annual",
+          "name": "Sharjah Research Technology and Innovation Park (SRTIP) Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by Sharjah Research Technology and Innovation Park (SRTIP)",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "Sharjah Research Technology and Innovation Park (SRTIP) free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "Sharjah Publishing City": {
+      "emirate": "Sharjah",
+      "items": [
+        {
+          "id": "ae-fz-sharjah-publishing-city-licence",
+          "category": "Mandatory Annual",
+          "name": "Sharjah Publishing City Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by Sharjah Publishing City",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "Sharjah Publishing City free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "Other free zone (Sharjah)": {
+      "emirate": "Sharjah",
+      "items": [
+        {
+          "id": "ae-fz-other-sharjah-licence",
+          "category": "Mandatory Annual",
+          "name": "Free zone Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by Free zone",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "Free zone free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "Ajman Free Zone": {
+      "emirate": "Ajman",
+      "items": [
+        {
+          "id": "ae-fz-ajman-free-zone-licence",
+          "category": "Mandatory Annual",
+          "name": "Ajman Free Zone Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by Ajman Free Zone",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "Ajman Free Zone free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "Ajman NuVentures Centre Free Zone": {
+      "emirate": "Ajman",
+      "items": [
+        {
+          "id": "ae-fz-ajman-nuventures-centre-free-zone-licence",
+          "category": "Mandatory Annual",
+          "name": "Ajman NuVentures Centre Free Zone Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by Ajman NuVentures Centre Free Zone",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "Ajman NuVentures Centre Free Zone free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "Other free zone (Ajman)": {
+      "emirate": "Ajman",
+      "items": [
+        {
+          "id": "ae-fz-other-ajman-licence",
+          "category": "Mandatory Annual",
+          "name": "Free zone Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by Free zone",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "Free zone free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "RAKEZ": {
+      "emirate": "Ras Al Khaimah",
+      "items": [
+        {
+          "id": "ae-fz-rakez-licence",
+          "category": "Mandatory Annual",
+          "name": "RAKEZ Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by RAKEZ",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "RAKEZ free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "RAK Maritime City": {
+      "emirate": "Ras Al Khaimah",
+      "items": [
+        {
+          "id": "ae-fz-rak-maritime-city-licence",
+          "category": "Mandatory Annual",
+          "name": "RAK Maritime City Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by RAK Maritime City",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "RAK Maritime City free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "Other free zone (Ras Al Khaimah)": {
+      "emirate": "Ras Al Khaimah",
+      "items": [
+        {
+          "id": "ae-fz-other-ras-al-khaimah-licence",
+          "category": "Mandatory Annual",
+          "name": "Free zone Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by Free zone",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "Free zone free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "Fujairah Free Zone": {
+      "emirate": "Fujairah",
+      "items": [
+        {
+          "id": "ae-fz-fujairah-free-zone-licence",
+          "category": "Mandatory Annual",
+          "name": "Fujairah Free Zone Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by Fujairah Free Zone",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "Fujairah Free Zone free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "Fujairah Creative City": {
+      "emirate": "Fujairah",
+      "items": [
+        {
+          "id": "ae-fz-fujairah-creative-city-licence",
+          "category": "Mandatory Annual",
+          "name": "Fujairah Creative City Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by Fujairah Creative City",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "Fujairah Creative City free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "Other free zone (Fujairah)": {
+      "emirate": "Fujairah",
+      "items": [
+        {
+          "id": "ae-fz-other-fujairah-licence",
+          "category": "Mandatory Annual",
+          "name": "Free zone Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by Free zone",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "Free zone free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "UAQ Free Trade Zone": {
+      "emirate": "Umm Al Quwain",
+      "items": [
+        {
+          "id": "ae-fz-uaq-free-trade-zone-licence",
+          "category": "Mandatory Annual",
+          "name": "UAQ Free Trade Zone Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by UAQ Free Trade Zone",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "UAQ Free Trade Zone free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    },
+    "Other free zone (Umm Al Quwain)": {
+      "emirate": "Umm Al Quwain",
+      "items": [
+        {
+          "id": "ae-fz-other-umm-al-quwain-licence",
+          "category": "Mandatory Annual",
+          "name": "Free zone Licence Renewal",
+          "schedule": {
+            "type": "anniversary"
+          },
+          "rule": "Annually, on or before the licence expiry date (normally the anniversary of incorporation)",
+          "applies": "Companies licensed by Free zone",
+          "description": "Renewal usually requires the lease or flexi-desk agreement, updated registers and, where the zone requires them, audited financial statements.",
+          "authority": "Free zone free zone authority",
+          "source": "",
+          "confidence": "high"
+        }
+      ]
+    }
+  },
+  "freeZonesByEmirate": {
+    "Dubai": [
+      "DMCC",
+      "JAFZA",
+      "DAFZA",
+      "DIFC",
+      "Dubai Silicon Oasis (DSO / DIEZ)",
+      "IFZA",
+      "Meydan Free Zone",
+      "Dubai South",
+      "Dubai World Trade Centre (DWTC)",
+      "Dubai Internet City / Dubai Media City (TECOM)",
+      "Dubai Healthcare City",
+      "Dubai Design District (d3)",
+      "Other free zone (Dubai)"
+    ],
+    "Abu Dhabi": [
+      "ADGM",
+      "KEZAD",
+      "Masdar City Free Zone",
+      "twofour54",
+      "Abu Dhabi Airports Free Zone (ADAFZ)",
+      "Other free zone (Abu Dhabi)"
+    ],
+    "Sharjah": [
+      "SAIF Zone",
+      "Hamriyah Free Zone",
+      "SHAMS",
+      "Sharjah Research Technology and Innovation Park (SRTIP)",
+      "Sharjah Publishing City",
+      "Other free zone (Sharjah)"
+    ],
+    "Ajman": [
+      "Ajman Free Zone",
+      "Ajman NuVentures Centre Free Zone",
+      "Other free zone (Ajman)"
+    ],
+    "Ras Al Khaimah": [
+      "RAKEZ",
+      "RAK Maritime City",
+      "Other free zone (Ras Al Khaimah)"
+    ],
+    "Fujairah": [
+      "Fujairah Free Zone",
+      "Fujairah Creative City",
+      "Other free zone (Fujairah)"
+    ],
+    "Umm Al Quwain": [
+      "UAQ Free Trade Zone",
+      "Other free zone (Umm Al Quwain)"
+    ]
+  }
+}

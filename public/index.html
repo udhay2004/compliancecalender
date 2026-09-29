@@ -154,7 +154,7 @@
   label .req { color: var(--urgent-text); margin-left: 2px; }
   label .opt { font-weight: 500; color: var(--ink-soft); }
 
-  /* Styled by tag/ancestor — refreshStateField() swaps #state and #entityType with fresh, class-less elements */
+  /* Styled by tag/ancestor — company-form.js renders the country questions as fresh, class-less elements */
   /* font-size MUST be >= 16px here: iOS Safari auto-zooms the whole page
      in when a focused input/select is rendered smaller than 16px, and on
      this wizard (tap a field on step 1, the zoom carries into steps 2/3)
@@ -520,12 +520,12 @@
     <aside class="hero">
       <span class="hero-pill"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg>Free tool, not legal advice</span>
       <h1>What compliance does your company actually owe?</h1>
-      <p class="sub">Tell us a bit about your company and where you'd like us to send your calendar. Then we'll research your obligations from official sources.</p>
+      <p class="sub">Tell us a bit about your company and where you'd like us to send your calendar. Then we'll build your calendar from our database of official rules.</p>
 
       <ul class="benefits">
-        <li><span class="benefit-ic"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg></span>Researched live from official government sources</li>
+        <li><span class="benefit-ic"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg></span>Built from researched official government rules</li>
         <li><span class="benefit-ic"><svg class="ic" aria-hidden="true"><use href="#i-calendar"/></svg></span>Every deadline, form and authority in one calendar</li>
-        <li><span class="benefit-ic"><svg class="ic" aria-hidden="true"><use href="#i-globe"/></svg></span>Covers the US, Canada, UK, Germany, UAE, Singapore and more</li>
+        <li><span class="benefit-ic"><svg class="ic" aria-hidden="true"><use href="#i-globe"/></svg></span>Covers the US, Canada, UK, Germany, UAE and Singapore</li>
       </ul>
 
       <div class="sample-wrap" aria-hidden="true">
@@ -584,24 +584,9 @@
             <label for="companyName">Company name</label>
             <input type="text" id="companyName" placeholder="e.g. Prism IT Global Inc." autocomplete="organization">
           </div>
-          <div class="field">
-            <label for="state" id="stateLabel">State of Incorporation</label>
-            <select id="state"></select>
-            <div class="field-hint" id="stateHint" style="display:none;">We're still building our verified database for this country — your calendar will be researched live and may take a little longer.</div>
-          </div>
-          <div class="field">
-            <label for="entityType">Entity type</label>
-            <select id="entityType">
-              <option value="Corporation">Corporation</option>
-              <option value="LLC">LLC</option>
-              <option value="Partnership">Partnership</option>
-              <option value="Disregarded Entity">Disregarded Entity</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="taxStatus">Tax status</label>
-            <select id="taxStatus"></select>
-          </div>
+          <!-- State / province / emirate, entity type and the country's own
+               questions (public/js/company-form.js, lib/countries.js). -->
+          <div id="countryFields" style="display:contents"></div>
           <div class="field">
             <label for="incorpDate">Date of incorporation</label>
             <input type="date" id="incorpDate">
@@ -658,7 +643,7 @@
           <button class="btn btn-ghost btn-back" type="button" data-back><svg class="ic" aria-hidden="true"><use href="#i-arrow-left"/></svg>Back</button>
           <button class="btn btn-primary btn-lg" id="submit" type="button"><span class="spinner" aria-hidden="true"></span><span>Generate my calendar</span><svg class="ic btn-arrow" aria-hidden="true"><use href="#i-arrow"/></svg></button>
         </div>
-        <p class="fine-print">Research from official sources takes about 20–40 seconds. By generating your calendar you agree to our <a href="/terms" target="_blank" rel="noopener">Terms</a> and <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</p>
+        <p class="fine-print">Most calendars are ready in a few seconds; unusual profiles are researched live and can take up to a minute. By generating your calendar you agree to our <a href="/terms" target="_blank" rel="noopener">Terms</a> and <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</p>
       </section>
     </section>
   </div>
@@ -673,16 +658,8 @@
 
 </main>
 
+<script src="/js/company-form.js"></script>
 <script>
-  // Only countries with researched data (same list as lib/countries.js).
-  const COUNTRIES = ["United States", "Canada", "Singapore", "United Arab Emirates", "United Kingdom", "Germany"];
-  const US_STATES = ["Delaware","California","Texas","Florida","Wyoming","New York","Illinois","Washington","Massachusetts",
-    "Alabama","Alaska","Arizona","Arkansas","Colorado","Connecticut","Georgia","Hawaii","Idaho","Indiana","Iowa","Kansas",
-    "Kentucky","Louisiana","Maine","Maryland","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada",
-    "New Hampshire","New Jersey","New Mexico","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania",
-    "Rhode Island","South Carolina","South Dakota","Tennessee","Utah","Vermont","Virginia","West Virginia","Wisconsin",
-    "District of Columbia"];
-  const TAX_STATUSES = ["C-Corp","S-Corp","Partnership","LLP","Disregarded Entity","Not sure — research applicable options"];
   const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
   const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -697,96 +674,20 @@
       el.appendChild(opt);
     });
   }
-  fillSelect('country', COUNTRIES, 0);
-  fillSelect('taxStatus', TAX_STATUSES, 0);
   fillSelect('fyStart', MONTHS, 0);
   fillSelect('fyEnd', MONTHS, 11);
 
-  const ENTITY_TYPES_BY_COUNTRY = {
-    "United States": ["Corporation", "LLC", "Partnership", "Disregarded Entity"],
-    "Germany": ["GmbH", "UG (haftungsbeschränkt)", "AG"],
-    // UAE — see data/presearched-uae.json. Values must match entityType
-    // exactly (case-sensitive) or the cache lookup in lib/claude.js misses.
-    "United Arab Emirates": ["Mainland LLC", "Free Zone Company (FZE/FZCO)", "Branch of Foreign Company", "Civil Company"],
-    // Singapore — see data/presearched-singapore.json. Same case-sensitive
-    // matching requirement as above.
-    "Singapore": ["Private Limited Company (Pte Ltd)", "Limited Liability Partnership (LLP)", "Sole Proprietorship", "Branch Office of Foreign Company"],
-    // Canada — see data/presearched-canada.json. Deliberately federal-level
-    // only for now (Corporations Canada / CBCA), not split by province, to
-    // match the "keyed on country, not region" pattern used above. A
-    // provincial-incorporation entity type (e.g. Ontario OBCA) is a
-    // reasonable next addition but wasn't in scope for this pass.
-    "Canada": ["Federal Corporation (CBCA)", "Sole Proprietorship", "General Partnership"],
-    // United Kingdom — see data/presearched-uk.json. This entry was
-    // missing entirely, which meant selecting "United Kingdom" fell back
-    // to __default__ below (Corporation/LLC/Partnership/Other) — none of
-    // which match the real entityType strings in the UK data file, so the
-    // cache lookup in lib/claude.js could never hit and every UK calendar
-    // was silently going live despite fully-researched data existing.
-    "United Kingdom": ["Private Limited Company (Ltd)", "Limited Liability Partnership (LLP)", "Public Limited Company (PLC)", "Sole Trader"],
-    // Safety net only; every country in COUNTRIES has its own list above.
-    "__default__": ["Corporation", "LLC", "Partnership"],
-  };
-
-  // Countries without a US-style "State of Incorporation" concept get a
-  // free-text field instead. Germany specifically has real pre-researched
-  // data (data/presearched-germany.json) keyed by country, so it skips
-  // the "still building" hint that every other non-US country still gets.
-  function refreshStateField() {
-    const country = document.getElementById('country').value;
-    const stateLabel = document.getElementById('stateLabel');
-    const stateHint = document.getElementById('stateHint');
-
-    if (country === "United States") {
-      stateLabel.textContent = "State of Incorporation";
-      stateHint.style.display = 'none';
-      const select = document.createElement('select');
-      select.id = 'state';
-      fillSelectInto(select, US_STATES, 0);
-      document.getElementById('state').replaceWith(select);
-    } else {
-      stateLabel.textContent = "State / Province / Region";
-      // Germany, UAE, Singapore, Canada, and the UK are all keyed on the
-      // country itself (see data/presearched-*.json) since entity type is
-      // what actually drives which rules apply, not the specific region.
-      // This field is informational only for all five — for Canada
-      // specifically, it does NOT select a province's own compliance
-      // regime (see note in ENTITY_TYPES_BY_COUNTRY above); it's just a
-      // free-text note field.
-      // Every country in the list has researched data, so no warning hint.
-      stateHint.style.display = 'none';
-      const input = document.createElement('input');
-      input.type = 'text'; input.id = 'state';
-      input.placeholder = country === 'Germany'
-        ? 'e.g. Berlin (optional — compliance rules are national)'
-        : country === 'United Arab Emirates'
-          ? 'e.g. Dubai, DIFC, or leave blank (informational — entity type drives the rules)'
-          : country === 'Singapore'
-            ? 'Optional — Singapore compliance rules are national, not region-specific'
-            : country === 'Canada'
-              ? 'e.g. Ontario (optional — federal rules apply nationally; provincial items like QC/AB tax are called out separately)'
-              : country === 'United Kingdom'
-                ? 'Optional — UK compliance rules are national (Companies House / HMRC), not region-specific'
-                : 'e.g. Dubai, DIFC, or leave blank if not applicable';
-      document.getElementById('state').replaceWith(input);
-    }
-
-    const entityTypes = ENTITY_TYPES_BY_COUNTRY[country] || ENTITY_TYPES_BY_COUNTRY.__default__;
-    const entitySelect = document.createElement('select');
-    entitySelect.id = 'entityType';
-    fillSelectInto(entitySelect, entityTypes, 0);
-    document.getElementById('entityType').replaceWith(entitySelect);
-  }
-  function fillSelectInto(el, values, selectedIndex) {
-    values.forEach((v,i) => {
-      const opt = document.createElement('option');
-      opt.value = v; opt.textContent = v;
-      if (i === selectedIndex) opt.selected = true;
-      el.appendChild(opt);
-    });
-  }
-  fillSelect('state', US_STATES, 0); // initial render before refreshStateField wires the swap
-  document.getElementById('country').addEventListener('change', refreshStateField);
+  // Country-specific questions come from lib/countries.js, the same list the
+  // server checks, so the form and the compliance database never disagree.
+  let companyForm = null;
+  const formReady = CompanyForm.load().then((def) => {
+    fillSelect('country', def.countries, 0);
+    companyForm = CompanyForm.create(document.getElementById('countryFields'), def, { country: def.countries[0] });
+    document.getElementById('country').addEventListener('change', (e) => companyForm.setCountry(e.target.value));
+    return def;
+  }).catch((err) => {
+    document.getElementById('countryFields').innerHTML = '<div class="field span2"><div class="field-error">' + escapeHtml(err.message) + '</div></div>';
+  });
 
   document.getElementById('hasForeignParent').addEventListener('change', e => {
     document.getElementById('foreignBlock').classList.toggle('visible', e.target.checked);
@@ -1054,9 +955,7 @@
     return {
       companyName: document.getElementById('companyName').value.trim(),
       country: document.getElementById('country').value,
-      state: document.getElementById('state').value,
-      entityType: document.getElementById('entityType').value,
-      taxStatus: document.getElementById('taxStatus').value,
+      ...(companyForm ? companyForm.values() : {}),
       incorpDate: document.getElementById('incorpDate').value,
       fyStart: document.getElementById('fyStart').value,
       fyEnd: document.getElementById('fyEnd').value,
@@ -1246,6 +1145,10 @@
       }
       showPhoneError('');
     }
+    if (n === 2) {
+      if (!companyForm) return false;
+      if (!companyForm.validate().ok) return false;
+    }
     return true;
   }
 
@@ -1291,10 +1194,11 @@
 
   /* ---------------- loading panel (20–40 s of live research) ---------------- */
   const LOADER_STAGES = [
-    { text: 'Reading your company profile', at: 0, progress: .12 },
-    { text: 'Searching official sources (IRS, Secretary of State, revenue authority)', at: 4000, progress: .42 },
-    { text: 'Extracting due dates', at: 14000, progress: .7 },
-    { text: 'Building your calendar', at: 24000, progress: .9 },
+    { text: 'Reading your company profile', at: 0, progress: .15 },
+    { text: 'Matching the filing rules for your country and region', at: 600, progress: .4 },
+    { text: 'Working out your due dates', at: 1500, progress: .65 },
+    { text: 'Researching official sources for anything not in our database', at: 6000, progress: .8 },
+    { text: 'Building your calendar', at: 20000, progress: .92 },
   ];
 
   function buildLoader(profile) {
@@ -1304,7 +1208,7 @@
     el.innerHTML = `
       <div class="loader-panel">
         <h2 class="loader-title">Building calendar for ${escapeHtml(name)}</h2>
-        <p class="loader-sub">Live research from official sources — this can take 20–40 seconds.</p>
+        <p class="loader-sub">Matching your answers to official filing rules. Usually a few seconds; unusual profiles are researched live and take longer.</p>
         <div class="progress" aria-hidden="true"><span></span></div>
         <ul class="stages">
           ${LOADER_STAGES.map(s => `<li class="stage"><span class="stage-mark">${icon('check')}</span><span>${escapeHtml(s.text)}</span></li>`).join('')}
@@ -1332,8 +1236,7 @@
   async function handleSubmit() {
     const profile = readProfile();
     const contact = readContact();
-    // State is a free-text, optional note for non-US countries, so only entity type is required here.
-    if (!profile.entityType) return;
+    if (!companyForm || !companyForm.validate().ok) { setStep(2, true); if (companyForm) companyForm.validate(); return; }
     if (!contact.email || !isValidEmail(contact.email)) {
       setStep(1, true);
       showEmailError('Enter a valid email so we can send you your calendar.');
@@ -1352,7 +1255,7 @@
     const btn = document.getElementById('submit');
     const statusHint = document.getElementById('statusHint');
     btn.disabled = true;
-    statusHint.textContent = 'Researching official sources for this profile — this can take 20-40s…';
+    statusHint.textContent = 'Building your calendar…';
 
     const loader = buildLoader(profile);
     document.getElementById('emptyState')?.remove();

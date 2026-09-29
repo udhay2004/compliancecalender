@@ -27,34 +27,23 @@
     <div class="card-head">
       <div class="card-eyebrow">Internal Tool · Not Legal Advice</div>
       <h1>Company Compliance Intake</h1>
-      <p class="sub">Fill in the company profile below. State-level requirements are pulled from the cached database when available and only re-researched live when the cache is missing or stale — either way, the result is saved as <strong>pending review</strong>, not shown as final until a teammate approves it.</p>
+      <p class="sub">Fill in the company profile below. Filings come from the compliance database (data/compliance) for every covered country, region and entity type; anything outside it is researched live. Either way the result is saved as <strong>pending review</strong> until a teammate approves it.</p>
     </div>
     <div class="card-body">
 
       <div class="grid">
-        <div class="field span2">
+        <div class="field">
+          <label for="country">Country</label>
+          <select id="country"></select>
+        </div>
+        <div class="field">
           <label for="companyName">Company Name</label>
           <input type="text" id="companyName" placeholder="e.g. Prism IT Global Inc.">
         </div>
 
-        <div class="field">
-          <label for="state">State of Incorporation</label>
-          <select id="state"></select>
-        </div>
-        <div class="field">
-          <label for="entityType">Entity Type</label>
-          <select id="entityType">
-            <option value="Corporation">Corporation</option>
-            <option value="LLC">LLC</option>
-            <option value="Partnership">Partnership</option>
-            <option value="Disregarded Entity">Disregarded Entity</option>
-          </select>
-        </div>
+        <!-- The country's own questions (public/js/company-form.js, lib/countries.js). -->
+        <div id="countryFields" style="display:contents"></div>
 
-        <div class="field">
-          <label for="taxStatus">Tax Status</label>
-          <select id="taxStatus"></select>
-        </div>
         <div class="field">
           <label for="incorpDate">Date of Incorporation</label>
           <input type="date" id="incorpDate">
@@ -99,19 +88,6 @@
         <span class="toggle-label">Company has a foreign parent or related-party (intercompany) transactions</span>
       </div>
 
-      <div class="divider-label">Employees in Other States</div>
-      <div class="field span2">
-        <label for="employeeStates">States (other than state of incorporation) where employees work — each is a separate withholding/unemployment-insurance registration</label>
-        <select id="employeeStates" multiple size="6"></select>
-      </div>
-
-      <div class="divider-label">Revenue (for Gross Receipts Tax check)</div>
-      <div class="field">
-        <label for="quarterlyGrossReceipts">Average Quarterly Gross Receipts ($)</label>
-        <input type="number" id="quarterlyGrossReceipts" min="0" step="1000" placeholder="e.g. 250000">
-        <span class="field-hint">At or below $300,000/quarter is generally exempt from GRT filing — a local business license is still required either way.</span>
-      </div>
-
       <div class="submit-row">
         <span class="hint" id="statusHint"></span>
         <button class="primary" id="submit">Generate Calendar →</button>
@@ -129,6 +105,7 @@
 
 </div>
 
+<script src="/js/company-form.js"></script>
 <script>
   function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
 
@@ -147,13 +124,6 @@
   }
   loadUser();
 
-  const STATES = ["Delaware","California","Texas","Florida","Wyoming","New York","Illinois","Washington","Massachusetts",
-    "Alabama","Alaska","Arizona","Arkansas","Colorado","Connecticut","Georgia","Hawaii","Idaho","Indiana","Iowa","Kansas",
-    "Kentucky","Louisiana","Maine","Maryland","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada",
-    "New Hampshire","New Jersey","New Mexico","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania",
-    "Rhode Island","South Carolina","South Dakota","Tennessee","Utah","Vermont","Virginia","West Virginia","Wisconsin",
-    "District of Columbia"];
-  const TAX_STATUSES = ["C-Corp","S-Corp","Partnership","LLP","Disregarded Entity","Not sure — research applicable options"];
   const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
   function fillSelect(id, values, selectedIndex) {
@@ -165,21 +135,15 @@
       el.appendChild(opt);
     });
   }
-  fillSelect('state', STATES, 0);
-  fillSelect('taxStatus', TAX_STATUSES, 0);
   fillSelect('fyStart', MONTHS, 0);
   fillSelect('fyEnd', MONTHS, 11);
 
-  // employeeStates is a plain multi-select (not fillSelect, since nothing
-  // should be pre-selected) — cmd/ctrl-click to pick more than one state.
-  (function fillEmployeeStates() {
-    const el = document.getElementById('employeeStates');
-    STATES.forEach(v => {
-      const opt = document.createElement('option');
-      opt.value = v; opt.textContent = v;
-      el.appendChild(opt);
-    });
-  })();
+  let companyForm = null;
+  CompanyForm.load().then((def) => {
+    fillSelect('country', def.countries, 0);
+    companyForm = CompanyForm.create(document.getElementById('countryFields'), def, { country: def.countries[0] });
+    document.getElementById('country').addEventListener('change', (e) => companyForm.setCountry(e.target.value));
+  }).catch((err) => { document.getElementById('statusHint').textContent = err.message; });
 
   document.getElementById('odiDone').addEventListener('change', e => {
     const isYes = e.target.value === 'Yes';
@@ -192,31 +156,26 @@
   function readProfile() {
     return {
       companyName: document.getElementById('companyName').value.trim(),
-      state: document.getElementById('state').value,
-      entityType: document.getElementById('entityType').value,
-      taxStatus: document.getElementById('taxStatus').value,
+      country: document.getElementById('country').value,
+      ...(companyForm ? companyForm.values() : {}),
       incorpDate: document.getElementById('incorpDate').value,
       fyStart: document.getElementById('fyStart').value,
       fyEnd: document.getElementById('fyEnd').value,
       hasForeignParent: document.getElementById('hasForeignParent').checked,
       odiDone: document.getElementById('odiDone').value,
       odiInvestorType: document.getElementById('odiInvestorType').value,
-      employeeStates: Array.from(document.getElementById('employeeStates').selectedOptions).map(o => o.value),
-      quarterlyGrossReceipts: document.getElementById('quarterlyGrossReceipts').value
-        ? Number(document.getElementById('quarterlyGrossReceipts').value)
-        : undefined,
     };
   }
 
-  const SOURCE_LABEL = { cache: 'From cached state data', live: 'Freshly researched', mixed: 'Cache + live research' };
+  const SOURCE_LABEL = { database: 'Compliance database', cache: 'From cached state data', live: 'Freshly researched', mixed: 'Cache + live research' };
 
   async function handleSubmit() {
+    if (!companyForm || !companyForm.validate().ok) return;
     const profile = readProfile();
-    if (!profile.state || !profile.entityType) return;
     const btn = document.getElementById('submit');
     const statusHint = document.getElementById('statusHint');
     btn.disabled = true;
-    statusHint.textContent = 'Researching — this can take 20-40s (less if the state is already cached)…';
+    statusHint.textContent = 'Building the calendar (a few seconds from the database; live research for anything outside it takes longer)…';
 
     const slot = document.getElementById('resultSlot');
     slot.innerHTML = '';

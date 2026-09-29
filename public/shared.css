@@ -172,7 +172,7 @@ button.danger:hover:not(:disabled) { background: var(--stamp-red-bg); }
 .badge.pending_review { color: var(--seal-gold); background: var(--seal-gold-bg); }
 .badge.approved { color: var(--brand-dark); background: var(--teal-bg); }
 .badge.rejected { color: var(--stamp-red); background: var(--stamp-red-bg); }
-.badge.cache { color: var(--ink-soft); background: var(--grey-bg); }
+.badge.cache, .badge.database { color: var(--ink-soft); background: var(--grey-bg); }
 .badge.live, .badge.mixed { color: var(--ink-soft); background: var(--grey-bg); }
 
 /* ---- calendars list / queue table ---- */

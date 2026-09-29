@@ -1,0 +1,343 @@
+{
+  "country": "Germany",
+  "updated": "2026-09-29",
+  "notes": "National rules; the Bundesland (region) doesn't change these deadlines. Tax return dates assume a calendar financial year.",
+  "items": [
+    {
+      "id": "de-accounts",
+      "category": "Mandatory Annual",
+      "name": "Annual Financial Statements — Preparation and Publication (Jahresabschluss)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 12,
+        "day": "last"
+      },
+      "rule": "Published via the Unternehmensregister within 12 months after financial year end (4 months for capital-market companies)",
+      "applies": "GmbH, UG and AG",
+      "description": "Prepared under the HGB within 3 months (6 months for small companies) and published; the Federal Office of Justice fines late publication.",
+      "authority": "Bundesamt für Justiz / Unternehmensregister (HGB §§ 264, 325, 335)",
+      "source": "https://www.unternehmensregister.de/",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "GmbH",
+          "UG (haftungsbeschränkt)",
+          "AG"
+        ]
+      }
+    },
+    {
+      "id": "de-shareholder-approval",
+      "category": "Mandatory Annual",
+      "name": "Shareholders' Approval of the Annual Accounts",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 8,
+        "day": "last"
+      },
+      "rule": "Within 8 months after financial year end (11 months for small GmbH)",
+      "applies": "GmbH and UG",
+      "description": "Shareholders adopt the annual accounts and decide on the use of profit (GmbHG §42a).",
+      "authority": "GmbHG §42a",
+      "source": "https://www.gesetze-im-internet.de/gmbhg/__42a.html",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "GmbH",
+          "UG (haftungsbeschränkt)"
+        ]
+      }
+    },
+    {
+      "id": "de-agm",
+      "category": "Mandatory Annual",
+      "name": "Annual General Meeting (Hauptversammlung)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 8,
+        "day": "last"
+      },
+      "rule": "Within the first 8 months of the financial year",
+      "applies": "AG",
+      "description": "The AGM receives the adopted accounts and resolves on the appropriation of profit and discharge of the boards (AktG §175).",
+      "authority": "AktG §175",
+      "source": "https://www.gesetze-im-internet.de/aktg/__175.html",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "AG"
+        ]
+      }
+    },
+    {
+      "id": "de-kst",
+      "category": "Mandatory Annual",
+      "name": "Corporate Income Tax and Trade Tax Returns (KSt / GewSt)",
+      "schedule": {
+        "type": "annual",
+        "month": 7,
+        "day": 31
+      },
+      "rule": "31 July of the following year (extended to the end of February of the second following year when a tax adviser files)",
+      "applies": "GmbH, UG and AG",
+      "description": "Filed electronically via ELSTER with the e-balance sheet (E-Bilanz); trade tax is assessed by the municipality.",
+      "authority": "Finanzamt (local tax office)",
+      "source": "https://www.elster.de/",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "GmbH",
+          "UG (haftungsbeschränkt)",
+          "AG"
+        ]
+      }
+    },
+    {
+      "id": "de-prepayments",
+      "category": "Conditional",
+      "name": "Corporate Income Tax and Trade Tax Prepayments",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 2,
+            "day": 15
+          },
+          {
+            "month": 3,
+            "day": 10
+          },
+          {
+            "month": 5,
+            "day": 15
+          },
+          {
+            "month": 6,
+            "day": 10
+          },
+          {
+            "month": 8,
+            "day": 15
+          },
+          {
+            "month": 9,
+            "day": 10
+          },
+          {
+            "month": 11,
+            "day": 15
+          },
+          {
+            "month": 12,
+            "day": 10
+          }
+        ]
+      },
+      "rule": "Corporate income tax: 10 March, 10 June, 10 September, 10 December; trade tax: 15 February, 15 May, 15 August, 15 November",
+      "applies": "Companies with prepayment assessments",
+      "description": "Quarterly advance payments set by the tax office and municipality based on the last assessment.",
+      "authority": "Finanzamt (local tax office) / municipality",
+      "source": "https://www.elster.de/",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "GmbH",
+          "UG (haftungsbeschränkt)",
+          "AG"
+        ]
+      }
+    },
+    {
+      "id": "de-vat-annual",
+      "category": "Mandatory Annual",
+      "name": "Annual VAT Return (Umsatzsteuerjahreserklärung)",
+      "schedule": {
+        "type": "annual",
+        "month": 7,
+        "day": 31
+      },
+      "rule": "31 July of the following year (later when a tax adviser files)",
+      "applies": "VAT-registered businesses (not small businesses under §19 UStG)",
+      "description": "Reconciles the year's advance returns.",
+      "authority": "Finanzamt (local tax office)",
+      "source": "https://www.elster.de/",
+      "confidence": "high",
+      "when": {
+        "not": {
+          "vat": [
+            "Not registered"
+          ]
+        }
+      }
+    },
+    {
+      "id": "de-vat-monthly",
+      "category": "Conditional",
+      "name": "VAT Advance Return (Umsatzsteuer-Voranmeldung, monthly)",
+      "schedule": {
+        "type": "monthly",
+        "day": 10
+      },
+      "rule": "10th of the following month (one month later with a permanent extension)",
+      "applies": "Businesses with prior-year VAT over €9,000, and new businesses in their first two years",
+      "description": "Filed via ELSTER with payment by the same date.",
+      "authority": "Finanzamt (local tax office)",
+      "source": "https://www.elster.de/",
+      "confidence": "high",
+      "when": {
+        "vat": [
+          "Monthly"
+        ]
+      }
+    },
+    {
+      "id": "de-vat-quarterly",
+      "category": "Conditional",
+      "name": "VAT Advance Return (Umsatzsteuer-Voranmeldung, quarterly)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 4,
+            "day": 10
+          },
+          {
+            "month": 7,
+            "day": 10
+          },
+          {
+            "month": 10,
+            "day": 10
+          },
+          {
+            "month": 1,
+            "day": 10
+          }
+        ]
+      },
+      "rule": "10 April, 10 July, 10 October and 10 January",
+      "applies": "Businesses with prior-year VAT between €2,000 and €9,000",
+      "description": "Filed via ELSTER with payment by the same date.",
+      "authority": "Finanzamt (local tax office)",
+      "source": "https://www.elster.de/",
+      "confidence": "high",
+      "when": {
+        "vat": [
+          "Quarterly"
+        ]
+      }
+    },
+    {
+      "id": "de-transparency",
+      "category": "Event-Based",
+      "name": "Transparency Register (Transparenzregister)",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "On formation and without delay after any change in beneficial ownership",
+      "applies": "GmbH, UG and AG",
+      "description": "Beneficial owners must be reported to the Transparency Register under the Money Laundering Act (GwG).",
+      "authority": "Transparenzregister (GwG)",
+      "source": "https://www.transparenzregister.de/",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "GmbH",
+          "UG (haftungsbeschränkt)",
+          "AG"
+        ]
+      }
+    },
+    {
+      "id": "de-lohnsteuer",
+      "category": "Conditional",
+      "name": "Payroll Tax Return (Lohnsteuer-Anmeldung)",
+      "schedule": {
+        "type": "monthly",
+        "day": 10
+      },
+      "rule": "10th of the following month (quarterly or annually for small payrolls)",
+      "applies": "Employers",
+      "description": "Wage tax, solidarity surcharge and church tax withheld are declared and paid to the tax office.",
+      "authority": "Finanzamt (local tax office)",
+      "source": "https://www.elster.de/",
+      "confidence": "high",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "de-social-security",
+      "category": "Conditional",
+      "name": "Social Security Contributions (Sozialversicherungsbeiträge)",
+      "schedule": {
+        "type": "monthly",
+        "day": "last"
+      },
+      "rule": "Third-to-last banking day of each month (contribution statement two banking days earlier)",
+      "applies": "Employers",
+      "description": "Employer and employee contributions for pension, health, long-term care and unemployment insurance are paid to the employees' health insurance funds.",
+      "authority": "Statutory health insurance funds (Krankenkassen)",
+      "source": "https://www.deutsche-rentenversicherung.de/",
+      "confidence": "high",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "de-lohnsteuerbescheinigung",
+      "category": "Conditional",
+      "name": "Annual Payroll Tax Certificates (Lohnsteuerbescheinigung)",
+      "schedule": {
+        "type": "annual",
+        "month": 2,
+        "day": "last"
+      },
+      "rule": "End of February (for the previous calendar year)",
+      "applies": "Employers",
+      "description": "Transmitted electronically for every employee.",
+      "authority": "Finanzamt (local tax office)",
+      "source": "https://www.elster.de/",
+      "confidence": "high",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "de-bg",
+      "category": "Conditional",
+      "name": "Accident Insurance Wage Statement (Berufsgenossenschaft)",
+      "schedule": {
+        "type": "annual",
+        "month": 2,
+        "day": 16
+      },
+      "rule": "16 February (for the previous calendar year)",
+      "applies": "Employers",
+      "description": "The digital wage statement to the employer's liability insurance association.",
+      "authority": "Berufsgenossenschaft (statutory accident insurance)",
+      "source": "https://www.dguv.de/",
+      "confidence": "high",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "de-tp",
+      "category": "Transfer Pricing",
+      "name": "Transfer Pricing Documentation",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Provided within 30 days of a tax audit request (extraordinary transactions documented within 6 months of year end)",
+      "applies": "Companies with cross-border related-party transactions",
+      "description": "Master file and local file requirements depend on group size and transaction volumes (§90(3) AO).",
+      "authority": "Finanzamt (local tax office)",
+      "source": "https://www.gesetze-im-internet.de/ao_1977/__90.html",
+      "confidence": "high",
+      "when": {
+        "foreignOwned": true
+      }
+    }
+  ]
+}

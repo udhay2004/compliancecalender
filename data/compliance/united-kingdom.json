@@ -1,0 +1,558 @@
+{
+  "country": "United Kingdom",
+  "updated": "2026-09-29",
+  "notes": "UK-wide rules (England, Wales, Scotland and Northern Ireland) from Companies House and HMRC; devolved differences such as Scottish income tax rates don't change these deadlines.",
+  "items": [
+    {
+      "id": "uk-cs01",
+      "category": "Mandatory Annual",
+      "name": "Confirmation Statement (CS01)",
+      "schedule": {
+        "type": "anniversary",
+        "daysAfter": 14
+      },
+      "rule": "Within 14 days after the end of each 12-month review period (the anniversary of incorporation, or of the last statement)",
+      "applies": "Every company and LLP, including dormant ones",
+      "description": "Confirms the registered office, officers, people with significant control, shareholders and SIC codes, plus the registered email address and lawful-purpose statement; the fee is paid with it.",
+      "authority": "Companies House, Companies Act 2006 s.853A",
+      "source": "https://www.gov.uk/guidance/confirmation-statement-guidance",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Private Limited Company (Ltd)",
+          "Public Limited Company (PLC)",
+          "Limited Liability Partnership (LLP)"
+        ]
+      }
+    },
+    {
+      "id": "uk-accounts-ltd",
+      "category": "Mandatory Annual",
+      "name": "Annual Accounts to Companies House",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 9,
+        "day": "last"
+      },
+      "rule": "9 months after the accounting reference date (first accounts: 21 months after incorporation)",
+      "applies": "Private limited companies and LLPs",
+      "description": "Statutory accounts are filed every year even if the company is dormant or made a loss; late filing penalties start at £150 and double if late two years running.",
+      "authority": "Companies House, Companies Act 2006 Part 15",
+      "source": "https://www.gov.uk/annual-accounts",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Private Limited Company (Ltd)",
+          "Limited Liability Partnership (LLP)"
+        ]
+      }
+    },
+    {
+      "id": "uk-accounts-plc",
+      "category": "Mandatory Annual",
+      "name": "Annual Accounts to Companies House (PLC)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 6,
+        "day": "last"
+      },
+      "rule": "6 months after the accounting reference date",
+      "applies": "Public limited companies",
+      "description": "Public companies have a shorter filing deadline than private companies, and their accounts must be laid before an AGM.",
+      "authority": "Companies House, Companies Act 2006 s.442",
+      "source": "https://www.gov.uk/annual-accounts",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Public Limited Company (PLC)"
+        ]
+      }
+    },
+    {
+      "id": "uk-plc-agm",
+      "category": "Mandatory Annual",
+      "name": "Annual General Meeting (PLC)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 6,
+        "day": "last"
+      },
+      "rule": "Within 6 months beginning with the day after the accounting reference date",
+      "applies": "Public limited companies",
+      "description": "A PLC must hold an AGM every year, within 6 months after its financial year end.",
+      "authority": "Companies Act 2006 s.336",
+      "source": "https://www.legislation.gov.uk/ukpga/2006/46/section/336",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Public Limited Company (PLC)"
+        ]
+      }
+    },
+    {
+      "id": "uk-ct-pay",
+      "category": "Mandatory Annual",
+      "name": "Corporation Tax Payment",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 10,
+        "day": 1
+      },
+      "rule": "9 months and 1 day after the end of the accounting period (large companies pay in quarterly instalments)",
+      "applies": "Companies with taxable profits",
+      "description": "Companies with profits over £1.5 million pay by quarterly instalments starting in the 7th month of the period; everyone else pays 9 months and 1 day after the period ends.",
+      "authority": "HM Revenue & Customs (HMRC)",
+      "source": "https://www.gov.uk/pay-corporation-tax",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Private Limited Company (Ltd)",
+          "Public Limited Company (PLC)"
+        ]
+      }
+    },
+    {
+      "id": "uk-ct600",
+      "category": "Mandatory Annual",
+      "name": "Company Tax Return (CT600)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 12,
+        "day": "last"
+      },
+      "rule": "12 months after the end of the accounting period",
+      "applies": "Every company within the charge to Corporation Tax",
+      "description": "Filed online with iXBRL-tagged accounts and computations, even when no tax is owed.",
+      "authority": "HM Revenue & Customs (HMRC)",
+      "source": "https://www.gov.uk/company-tax-returns",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Private Limited Company (Ltd)",
+          "Public Limited Company (PLC)"
+        ]
+      }
+    },
+    {
+      "id": "uk-ct-register",
+      "category": "Event-Based",
+      "name": "Register for Corporation Tax",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Within 3 months of starting to trade",
+      "applies": "New companies",
+      "description": "Tell HMRC the company has become active (trading, buying, selling, employing or advertising).",
+      "authority": "HM Revenue & Customs (HMRC)",
+      "source": "https://www.gov.uk/limited-company-formation/set-up-your-company-for-corporation-tax",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Private Limited Company (Ltd)",
+          "Public Limited Company (PLC)"
+        ]
+      }
+    },
+    {
+      "id": "uk-changes",
+      "category": "Event-Based",
+      "name": "Report Changes to Companies House (officers, PSCs, registered office)",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Within 14 days of the change",
+      "applies": "Companies and LLPs",
+      "description": "Appointments and resignations of directors or LLP members, changes of people with significant control and of the registered office must be filed promptly; new directors and PSCs must also verify their identity with Companies House.",
+      "authority": "Companies House",
+      "source": "https://www.gov.uk/running-a-limited-company/company-changes-you-must-report",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Private Limited Company (Ltd)",
+          "Public Limited Company (PLC)",
+          "Limited Liability Partnership (LLP)"
+        ]
+      }
+    },
+    {
+      "id": "uk-idv",
+      "category": "Event-Based",
+      "name": "Identity Verification for Directors and PSCs",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "New directors before appointment; existing directors and PSCs by the company's next confirmation statement after 18 November 2025",
+      "applies": "Directors, LLP members and people with significant control",
+      "description": "Under the Economic Crime and Corporate Transparency Act 2023, everyone who controls a company must verify their identity with Companies House and provide a personal code.",
+      "authority": "Companies House",
+      "source": "https://www.gov.uk/guidance/verifying-your-identity-for-companies-house",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Private Limited Company (Ltd)",
+          "Public Limited Company (PLC)",
+          "Limited Liability Partnership (LLP)"
+        ]
+      }
+    },
+    {
+      "id": "uk-sa-return",
+      "category": "Mandatory Annual",
+      "name": "Self Assessment Tax Return",
+      "schedule": {
+        "type": "annual",
+        "month": 1,
+        "day": 31
+      },
+      "rule": "31 January after the end of the tax year (5 April) for online returns; 31 October for paper",
+      "applies": "Sole traders and LLP members",
+      "description": "Business profits are reported on the individual return (SA100 with self-employment or partnership pages).",
+      "authority": "HM Revenue & Customs (HMRC)",
+      "source": "https://www.gov.uk/self-assessment-tax-returns/deadlines",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Sole Trader",
+          "Limited Liability Partnership (LLP)"
+        ]
+      }
+    },
+    {
+      "id": "uk-sa-poa",
+      "category": "Conditional",
+      "name": "Self Assessment Balancing Payment and Payments on Account",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 1,
+            "day": 31
+          },
+          {
+            "month": 7,
+            "day": 31
+          }
+        ]
+      },
+      "rule": "31 January and 31 July",
+      "applies": "Individuals whose last tax bill was over £1,000 (unless most was taxed at source)",
+      "description": "The balancing payment plus the first payment on account are due 31 January; the second payment on account is due 31 July.",
+      "authority": "HM Revenue & Customs (HMRC)",
+      "source": "https://www.gov.uk/understand-self-assessment-bill/payments-on-account",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Sole Trader",
+          "Limited Liability Partnership (LLP)"
+        ]
+      }
+    },
+    {
+      "id": "uk-mtd-itsa",
+      "category": "Conditional",
+      "name": "Making Tax Digital for Income Tax — Quarterly Updates",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 8,
+            "day": 7
+          },
+          {
+            "month": 11,
+            "day": 7
+          },
+          {
+            "month": 2,
+            "day": 7
+          },
+          {
+            "month": 5,
+            "day": 7
+          }
+        ]
+      },
+      "rule": "7 August, 7 November, 7 February and 7 May",
+      "applies": "Sole traders with qualifying income over £50,000 (from 6 April 2026; £30,000 from April 2027)",
+      "description": "Digital records and quarterly updates through compatible software, followed by an end-of-year final declaration by 31 January.",
+      "authority": "HM Revenue & Customs (HMRC)",
+      "source": "https://www.gov.uk/guidance/find-out-if-and-when-you-need-to-use-making-tax-digital-for-income-tax",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Sole Trader"
+        ]
+      }
+    },
+    {
+      "id": "uk-sa800",
+      "category": "Mandatory Annual",
+      "name": "Partnership Tax Return (SA800)",
+      "schedule": {
+        "type": "annual",
+        "month": 1,
+        "day": 31
+      },
+      "rule": "31 January after the end of the tax year (online)",
+      "applies": "LLPs",
+      "description": "The LLP's return shows each member's share of profit; each member then reports it on their own return.",
+      "authority": "HM Revenue & Customs (HMRC)",
+      "source": "https://www.gov.uk/government/publications/self-assessment-partnership-tax-return-sa800",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Limited Liability Partnership (LLP)"
+        ]
+      }
+    },
+    {
+      "id": "uk-sa-register",
+      "category": "Event-Based",
+      "name": "Register for Self Assessment",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "By 5 October after the end of the tax year in which the business (or LLP membership) started",
+      "applies": "Sole traders and new LLP members",
+      "description": "Registering late can lead to failure-to-notify penalties.",
+      "authority": "HM Revenue & Customs (HMRC)",
+      "source": "https://www.gov.uk/register-for-self-assessment",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Sole Trader",
+          "Limited Liability Partnership (LLP)"
+        ]
+      }
+    },
+    {
+      "id": "uk-vat-register",
+      "category": "Event-Based",
+      "name": "VAT Registration",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Within 30 days of the end of the month in which taxable turnover for the last 12 months went over £90,000",
+      "applies": "Businesses not yet VAT-registered",
+      "description": "You must also register if you expect to go over £90,000 in the next 30 days alone.",
+      "authority": "HM Revenue & Customs (HMRC)",
+      "source": "https://www.gov.uk/register-for-vat",
+      "confidence": "high",
+      "when": {
+        "vat": [
+          "Not registered"
+        ]
+      }
+    },
+    {
+      "id": "uk-vat-quarterly",
+      "category": "Conditional",
+      "name": "VAT Return and Payment (quarterly)",
+      "schedule": {
+        "type": "fy_quarterly",
+        "monthsAfter": 2,
+        "day": 7
+      },
+      "rule": "1 calendar month and 7 days after the end of each VAT quarter (quarters as set by HMRC; we assume they follow your financial year)",
+      "applies": "VAT-registered businesses on quarterly returns",
+      "description": "Returns are filed through Making Tax Digital software; payment is due by the same date.",
+      "authority": "HM Revenue & Customs (HMRC)",
+      "source": "https://www.gov.uk/vat-returns",
+      "confidence": "high",
+      "when": {
+        "vat": [
+          "Quarterly"
+        ]
+      }
+    },
+    {
+      "id": "uk-vat-monthly",
+      "category": "Conditional",
+      "name": "VAT Return and Payment (monthly)",
+      "schedule": {
+        "type": "monthly",
+        "day": 7
+      },
+      "rule": "1 calendar month and 7 days after the end of each month",
+      "applies": "VAT-registered businesses on monthly returns",
+      "description": "Returns are filed through Making Tax Digital software; payment is due by the same date.",
+      "authority": "HM Revenue & Customs (HMRC)",
+      "source": "https://www.gov.uk/vat-returns",
+      "confidence": "high",
+      "when": {
+        "vat": [
+          "Monthly"
+        ]
+      }
+    },
+    {
+      "id": "uk-vat-annual",
+      "category": "Conditional",
+      "name": "VAT Return (Annual Accounting Scheme)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 2,
+        "day": "last"
+      },
+      "rule": "2 months after the end of the VAT accounting year (interim payments during the year)",
+      "applies": "Businesses using the VAT Annual Accounting Scheme",
+      "description": "One return a year, with 9 monthly or 3 quarterly interim payments based on the previous year's VAT.",
+      "authority": "HM Revenue & Customs (HMRC)",
+      "source": "https://www.gov.uk/vat-annual-accounting-scheme",
+      "confidence": "high",
+      "when": {
+        "vat": [
+          "Annual"
+        ]
+      }
+    },
+    {
+      "id": "uk-paye-register",
+      "category": "Event-Based",
+      "name": "Register as an Employer (PAYE)",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Before the first payday (up to 2 months ahead)",
+      "applies": "Employers",
+      "description": "Registering sets up the PAYE reference used for all payroll submissions.",
+      "authority": "HM Revenue & Customs (HMRC)",
+      "source": "https://www.gov.uk/register-employer",
+      "confidence": "high",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "uk-fps",
+      "category": "Conditional",
+      "name": "Full Payment Submission (FPS)",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "On or before every payday",
+      "applies": "Employers",
+      "description": "Real Time Information: each pay run is reported to HMRC on or before the day employees are paid.",
+      "authority": "HM Revenue & Customs (HMRC)",
+      "source": "https://www.gov.uk/running-payroll/reporting-to-hmrc",
+      "confidence": "high",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "uk-paye-pay",
+      "category": "Conditional",
+      "name": "PAYE and National Insurance Payment",
+      "schedule": {
+        "type": "monthly",
+        "day": 22
+      },
+      "rule": "22nd of the month after each tax month ends on the 5th (19th if paying by cheque); quarterly if under £1,500 a month",
+      "applies": "Employers",
+      "description": "Income tax, employee and employer National Insurance and student loan deductions, less any Employment Allowance.",
+      "authority": "HM Revenue & Customs (HMRC)",
+      "source": "https://www.gov.uk/pay-paye-tax",
+      "confidence": "high",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "uk-eps",
+      "category": "Conditional",
+      "name": "Employer Payment Summary (EPS)",
+      "schedule": {
+        "type": "monthly",
+        "day": 19
+      },
+      "rule": "By the 19th of the following tax month, when there is something to claim or report",
+      "applies": "Employers",
+      "description": "Used to claim Employment Allowance or statutory pay recovery, or to tell HMRC no employees were paid in a month.",
+      "authority": "HM Revenue & Customs (HMRC)",
+      "source": "https://www.gov.uk/running-payroll/reporting-to-hmrc",
+      "confidence": "high",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "uk-p60",
+      "category": "Conditional",
+      "name": "P60s to Employees",
+      "schedule": {
+        "type": "annual",
+        "month": 5,
+        "day": 31
+      },
+      "rule": "31 May",
+      "applies": "Employers",
+      "description": "Every employee on the payroll at 5 April receives a P60 summarising the tax year's pay and deductions.",
+      "authority": "HM Revenue & Customs (HMRC)",
+      "source": "https://www.gov.uk/running-payroll/end-of-year",
+      "confidence": "high",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "uk-p11d",
+      "category": "Conditional",
+      "name": "P11D and P11D(b) (benefits in kind)",
+      "schedule": {
+        "type": "annual",
+        "month": 7,
+        "day": 6
+      },
+      "rule": "6 July (Class 1A National Insurance paid by 22 July)",
+      "applies": "Employers providing benefits or expenses not payrolled",
+      "description": "Reports benefits such as company cars and private medical insurance; Class 1A NIC on them is paid by 22 July.",
+      "authority": "HM Revenue & Customs (HMRC)",
+      "source": "https://www.gov.uk/employer-reporting-expenses-benefits",
+      "confidence": "high",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "uk-auto-enrolment",
+      "category": "Event-Based",
+      "name": "Workplace Pension Auto-Enrolment and Re-Declaration",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Duties start on the first employee's start date; declaration of compliance within 5 months; re-enrolment and re-declaration every 3 years",
+      "applies": "Employers",
+      "description": "Eligible staff must be enrolled in a qualifying pension scheme with minimum contributions, and compliance declared to The Pensions Regulator.",
+      "authority": "The Pensions Regulator",
+      "source": "https://www.thepensionsregulator.gov.uk/en/employers",
+      "confidence": "high",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "uk-tp",
+      "category": "Transfer Pricing",
+      "name": "Transfer Pricing Records",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 12,
+        "day": "last"
+      },
+      "rule": "Kept in support of the Company Tax Return",
+      "applies": "Large companies with related-party transactions (small and medium-sized enterprises are generally exempt)",
+      "description": "Large groups must price transactions with related parties at arm's length and keep evidence; groups with €750 million+ turnover also keep a master file and local file.",
+      "authority": "HM Revenue & Customs (HMRC)",
+      "source": "https://www.gov.uk/hmrc-internal-manuals/international-manual/intm410000",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Private Limited Company (Ltd)",
+          "Public Limited Company (PLC)"
+        ],
+        "foreignOwned": true
+      }
+    }
+  ]
+}
