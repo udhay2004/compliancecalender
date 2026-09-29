@@ -7,12 +7,15 @@
 //     step. Every submission through this route is a real lead the
 //     moment it's created.
 //
-//   - Reveal policy: the two nearest upcoming deadlines come back in
-//     full detail. Everything else is redacted down to just its category
-//     and how many days until it's due — no compliance_name, no
-//     description, nothing identifying. There's no self-serve "enter
-//     your email to unlock the rest" anymore; getting the full calendar
-//     is a conversation with ComplyGlobally now (see /request-review).
+//   - Three levels of calendar:
+//       1. Not signed in (/generate): the basic calendar. The PREVIEW_COUNT
+//          nearest deadlines come back in full; the rest only as a
+//          category and how many days until it's due.
+//       2. Signed in, still answering the questions (/preview): the
+//          filings already certain from the answers so far, growing with
+//          each answer. Nothing is saved.
+//       3. Signed in, every question answered (/generate): the
+//          comprehensive calendar, saved to the portal.
 //
 //   - Rate-limited by IP: every submission creates a lead and emails the
 //     team, so it's the obvious target for spam.
@@ -20,7 +23,7 @@
 const express = require("express");
 const rateLimit = require("express-rate-limit");
 const Calendar = require("../models/Calendar");
-const { generateCompanyCalendar, NotCoveredError } = require("../lib/generateCalendar");
+const { generateCompanyCalendar, previewCalendar, NotCoveredError } = require("../lib/generateCalendar");
 const { sendEmail } = require("../lib/mailer");
 const { loadUserFromRequest } = require("../middleware/auth");
 const { getPriceInfo } = require("../lib/complianceFees");
@@ -64,12 +67,10 @@ const reviewLimiter = rateLimit({
   message: { error: "Too many requests. Please try again later." },
 });
 
-// How much of the calendar comes back fully detailed. You said "hide
-// roughly 30%, not everything" — so this locks the FARTHEST-OUT ~30% of
-// items (by due date) rather than a fixed count. With a 28-item
-// calendar that's ~20 shown, ~8 locked — enough to be genuinely useful
-// on its own, with a real reason to talk to your team for the rest.
-const UNLOCK_RATIO = 0.7;
+// How much of the basic (signed-out) calendar comes back fully detailed:
+// the nearest few deadlines. The rest shows only its category and days
+// until due; signing in shows the comprehensive calendar.
+const PREVIEW_COUNT = 5;
 
 const MONTH_NAMES = [
   "january", "february", "march", "april", "may", "june",
@@ -126,9 +127,9 @@ function daysUntilOf(dueDateStr) {
   return Math.ceil((candidate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 }
 
-// Sorts nearest-due first, unlocks the nearest UNLOCK_RATIO of items in
-// full, and reduces the farthest-out remainder to { locked, category,
-// daysUntil } — no name, no description.
+// Sorts nearest-due first, shows the nearest PREVIEW_COUNT items in full,
+// and reduces the rest to { locked, category, daysUntil } — no name, no
+// description.
 // Days until the next real due date (lib/deadlines.js: weekends,
 // holidays, fiscal-year and anniversary rules), or null if event-based.
 function daysUntilFor(item, profile) {
@@ -142,7 +143,7 @@ function applyRevealPolicy(items, profile) {
     .map((it) => ({ ...it, daysUntil: daysUntilFor(it, profile) }))
     .sort((a, b) => (a.daysUntil ?? Infinity) - (b.daysUntil ?? Infinity));
 
-  const unlockedCount = Math.max(2, Math.round(withDays.length * UNLOCK_RATIO));
+  const unlockedCount = PREVIEW_COUNT;
 
   return withDays.map((it, idx) => {
     if (idx < unlockedCount) {
@@ -288,6 +289,32 @@ router.post("/generate", generateLimiter, async (req, res) => {
     // Never show internal error text to website visitors.
     return res.status(500).json({ error: "We couldn't build your calendar just now. Please try again in a few minutes." });
   }
+});
+
+// POST /api/public/preview — signed in only.
+// Body: { profile } with any number of questions answered.
+// The calendar that grows while the form is filled in: the filings already
+// certain from the answers so far, and the questions still to answer.
+// Nothing is saved; submitting the finished form goes through /generate.
+const previewLimiter = rateLimit({
+  store: mongoStore("public-preview"),
+  windowMs: 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests. Please slow down." },
+});
+router.post("/preview", previewLimiter, async (req, res) => {
+  const viewer = await loadUserFromRequest(req).catch(() => null);
+  if (!viewer) return res.status(401).json({ error: "Sign in to see your calendar build as you answer." });
+  const checked = checkProfile(req.body?.profile, { requireAll: false });
+  if (!checked.ok) return res.status(400).json({ error: checked.error, field: checked.field });
+  const { items, unanswered } = previewCalendar(checked.profile, checked.unanswered);
+  const withDays = items
+    .map((it) => ({ ...it, daysUntil: daysUntilFor(it, checked.profile), price: getPriceInfo(it) }))
+    .sort((a, b) => (a.daysUntil ?? Infinity) - (b.daysUntil ?? Infinity));
+  res.set("Cache-Control", "no-store");
+  return res.json({ complete: unanswered.length === 0, unanswered, itemCount: withDays.length, items: withDays });
 });
 
 // POST /api/public/:id/request-review

@@ -70,7 +70,7 @@ test("human check: off without keys; with keys the token is verified with Cloudf
   assert.strictEqual(fetchCalls.at(-1).opts.body.get("secret"), "secret");
   assert.strictEqual(fetchCalls.at(-1).opts.body.get("remoteip"), "1.2.3.4");
   assert.strictEqual((await guard.verifyHuman("bad")).ok, false);
-  // Cloudflare down: real people aren't locked out (the budget still applies).
+  // Cloudflare down: real people aren't locked out (the rate limit still applies).
   fetchReply = async () => { throw new Error("network down"); };
   assert.strictEqual((await guard.verifyHuman("any")).ok, true);
   fetchReply = null;
