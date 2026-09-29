@@ -228,11 +228,8 @@ const profileSchema = new mongoose.Schema(
   {
     companyName: String,
     // Defaults to United States for every calendar generated before this
-    // field existed. Non-US countries are NOT backed by StateCache yet —
-    // they always take the live-research path in lib/claude.js (which
-    // still needs a prompt update to stop assuming a US company; see
-    // FRONTEND_BACKEND_NOTES.md) and are simply never cache-hits until a
-    // presearched dataset is built for them the same way US states were.
+    // field existed. Covered countries are built from the compliance
+    // database (data/compliance, lib/complianceDb.js).
     country: { type: String, default: "United States" },
     state: String,
     entityType: String,
@@ -259,6 +256,17 @@ const profileSchema = new mongoose.Schema(
     // local business license is typically still required regardless of
     // revenue — see the GRT handling notes in lib/claude.js.
     quarterlyGrossReceipts: Number,
+    // Country questions (lib/countries.js), used to pick filings from the
+    // compliance database (lib/complianceDb.js).
+    hasEmployees: String, // "Yes" | "No"
+    employeeBand: String, // UAE mainland: Emiratisation bands
+    incorporation: String, // Canada: "Federal" | "Provincial"
+    operatingRegions: { type: [String], default: undefined }, // Canada: other provinces
+    salesTax: String, // Canada GST/HST filing frequency, or "Not registered"
+    vat: String, // UK / UAE / Germany VAT
+    gst: String, // Singapore GST
+    zoneType: String, // UAE: "Mainland" | "Free Zone"
+    freeZone: String, // UAE free zone
   },
   { _id: false }
 );
@@ -322,7 +330,8 @@ const calendarSchema = new mongoose.Schema(
     // "cache" = fully from StateComplianceCache, no live research needed
     // "live"  = fresh Claude + web_search research was run
     // "mixed" = cache used for base items, live call for FY-specific/ODI parts
-    sourceMode: { type: String, enum: ["cache", "live", "mixed"], default: "live" },
+    // "database" = built entirely from the compliance database (data/compliance)
+    sourceMode: { type: String, enum: ["database", "cache", "live", "mixed"], default: "live" },
   },
   { timestamps: true }
 );

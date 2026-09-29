@@ -136,15 +136,13 @@
 <dialog class="sheet" id="regenDialog">
   <form method="dialog" class="sheet-body" id="regenForm">
     <h2>Update details and regenerate</h2>
-    <p class="section-sub" style="margin-bottom:16px;">We'll research your calendar again with these details. Your selected services, uploaded documents and payments carry over to every filing that's still on the new calendar, and today's version is kept as a previous version you can still open.</p>
+    <p class="section-sub" style="margin-bottom:16px;">We'll rebuild your calendar with these details. Your selected services, uploaded documents and payments carry over to every filing that's still on the new calendar, and today's version is kept as a previous version you can still open.</p>
     <div class="edit-grid">
       <div class="field span2"><label for="rgCompany">Company name</label><input id="rgCompany" type="text"></div>
-      <div class="field"><label for="rgEntity">Entity type</label>
-        <select id="rgEntity"><option>Corporation</option><option>LLC</option><option>Partnership</option><option>Disregarded Entity</option></select></div>
-      <div class="field"><label for="rgTax">Tax status</label><input id="rgTax" type="text" placeholder="e.g. C-Corp"></div>
+      <div id="rgCountryFields" style="display:contents"></div>
       <div class="field"><label for="rgIncorp">Date of incorporation</label><input id="rgIncorp" type="date"></div>
-      <div class="field"><label for="rgFyEnd">Financial year end</label><input id="rgFyEnd" type="text" placeholder="e.g. December"></div>
-      <div class="field span2"><label for="rgEmp">Other states with employees</label><input id="rgEmp" type="text" placeholder="Comma-separated, e.g. California, New York"></div>
+      <div class="field"><label for="rgFyEnd">Financial year end</label>
+        <select id="rgFyEnd"><option>Jan</option><option>Feb</option><option>Mar</option><option>Apr</option><option>May</option><option>Jun</option><option>Jul</option><option>Aug</option><option>Sep</option><option>Oct</option><option>Nov</option><option>Dec</option></select></div>
       <div class="field span2" style="flex-direction:row;align-items:center;gap:8px;"><input id="rgForeign" type="checkbox" style="width:auto;"><label for="rgForeign" style="margin:0;">Has a foreign parent company</label></div>
     </div>
     <div class="submit-row">
@@ -837,17 +835,29 @@
 
   // ---------------- Regenerate ----------------
   const regenDialog = document.getElementById('regenDialog');
-  function openRegen() {
+  // Which legal entity this is (its state, emirate, free zone, incorporating
+  // jurisdiction) can't change on a regenerate; that's a new company.
+  const REGEN_LOCKED = ['state', 'zoneType', 'freeZone', 'incorporation'];
+  const FY_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  let regenForm = null;
+  async function openRegen() {
     if (!contactComplete()) { document.getElementById('contactGate').scrollIntoView({ behavior: 'smooth' }); return; }
     const p = calendar.profile || {};
+    const hint = document.getElementById('regenHint');
+    hint.textContent = ''; hint.classList.remove('err');
+    try {
+      const def = await CompanyForm.load();
+      const country = def.countries.includes(p.country) ? p.country : 'United States';
+      const values = { ...p };
+      if (country === 'Canada' && values.entityType === 'Federal Corporation (CBCA)') { values.entityType = 'Corporation'; values.incorporation = values.incorporation || 'Federal'; }
+      if (typeof values.hasEmployees === 'boolean') values.hasEmployees = values.hasEmployees ? 'Yes' : 'No';
+      regenForm = CompanyForm.create(document.getElementById('rgCountryFields'), def, { country, values, locked: REGEN_LOCKED, idPrefix: 'rg' });
+    } catch (err) { hint.textContent = err.message; hint.classList.add('err'); }
     document.getElementById('rgCompany').value = p.companyName || '';
-    document.getElementById('rgEntity').value = p.entityType || 'Corporation';
-    document.getElementById('rgTax').value = p.taxStatus || '';
     document.getElementById('rgIncorp').value = (p.incorpDate || '').slice(0, 10);
-    document.getElementById('rgFyEnd').value = p.fyEnd || '';
-    document.getElementById('rgEmp').value = (p.employeeStates || []).join(', ');
+    const fyEnd = String(p.fyEnd || 'Dec').slice(0, 3);
+    document.getElementById('rgFyEnd').value = FY_MONTHS.includes(fyEnd) ? fyEnd : 'Dec';
     document.getElementById('rgForeign').checked = !!p.hasForeignParent;
-    document.getElementById('regenHint').textContent = '';
     regenDialog.showModal();
   }
   document.getElementById('regenCancel').addEventListener('click', () => regenDialog.close());
@@ -855,20 +865,19 @@
     e.preventDefault();
     const btn = document.getElementById('regenSubmit');
     const hint = document.getElementById('regenHint');
+    if (!regenForm || !regenForm.validate().ok) return;
     btn.disabled = true; hint.classList.remove('err');
-    hint.textContent = 'Researching your filings from official sources. This usually takes one to two minutes; keep this window open.';
+    hint.textContent = 'Building your updated calendar. Usually a few seconds; keep this window open.';
     try {
       const data = await api('/api/portal/calendars/regenerate', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           calendarId: calendar._id,
           profile: {
+            ...regenForm.values(),
             companyName: document.getElementById('rgCompany').value.trim(),
-            entityType: document.getElementById('rgEntity').value,
-            taxStatus: document.getElementById('rgTax').value.trim(),
             incorpDate: document.getElementById('rgIncorp').value,
-            fyEnd: document.getElementById('rgFyEnd').value.trim(),
-            employeeStates: document.getElementById('rgEmp').value.split(',').map(s => s.trim()).filter(Boolean),
+            fyEnd: document.getElementById('rgFyEnd').value,
             hasForeignParent: document.getElementById('rgForeign').checked,
           },
         }),
@@ -898,6 +907,7 @@
     loadChat();
   })();
 </script>
+<script src="/js/company-form.js" defer></script>
 <script src="/js/notifications.js" defer></script>
 <!--SITE_FOOTER-->
 </body>

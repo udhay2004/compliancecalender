@@ -1,0 +1,90 @@
+{
+  "country": "India (ODI reporting by the investor)",
+  "updated": "2026-09-29",
+  "notes": "Applies when an Indian company or resident individual holds an overseas direct investment in this company. These are Indian filings made through the investor's authorised dealer bank, not filings in the company's own country.",
+  "items": [
+    {
+      "id": "odi-apr",
+      "category": "Foreign Reporting (ODI/FEMA)",
+      "name": "Annual Performance Report (APR)",
+      "schedule": {
+        "type": "annual",
+        "month": 12,
+        "day": 31
+      },
+      "rule": "By 31 December each year, based on the foreign entity's latest audited accounts",
+      "applies": "Indian investors holding ODI (resident individuals without control and under 10% are exempt)",
+      "description": "Filed through the AD bank for each foreign entity; late filing needs a late submission fee.",
+      "authority": "Reserve Bank of India (Overseas Investment Directions, 2022)",
+      "source": "https://www.rbi.org.in/Scripts/BS_ViewMasDirections.aspx?id=12380",
+      "confidence": "high",
+      "when": {
+        "investorType": [
+          "Indian Company",
+          "Resident Individual"
+        ]
+      }
+    },
+    {
+      "id": "odi-fla",
+      "category": "Foreign Reporting (ODI/FEMA)",
+      "name": "Foreign Liabilities and Assets (FLA) Return",
+      "schedule": {
+        "type": "annual",
+        "month": 7,
+        "day": 15
+      },
+      "rule": "By 15 July each year",
+      "applies": "Indian companies with outward (or inward) foreign direct investment",
+      "description": "Filed on the RBI FLAIR portal with the Indian company's audited (or provisional) figures.",
+      "authority": "Reserve Bank of India",
+      "source": "https://flair.rbi.org.in/",
+      "confidence": "high",
+      "when": {
+        "investorType": [
+          "Indian Company"
+        ]
+      }
+    },
+    {
+      "id": "odi-events",
+      "category": "Foreign Reporting (ODI/FEMA)",
+      "name": "ODI Event Reporting (further investment, restructuring, disinvestment)",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Within 30 days of the event (Form FC for new financial commitments; Form ODI Part III for disinvestment)",
+      "applies": "Indian investors holding ODI",
+      "description": "Every new financial commitment, change in shareholding structure, restructuring or disinvestment is reported through the AD bank.",
+      "authority": "Reserve Bank of India",
+      "source": "https://www.rbi.org.in/Scripts/BS_ViewMasDirections.aspx?id=12380",
+      "confidence": "high",
+      "when": {
+        "investorType": [
+          "Indian Company",
+          "Resident Individual"
+        ]
+      }
+    },
+    {
+      "id": "odi-evidence",
+      "category": "Foreign Reporting (ODI/FEMA)",
+      "name": "Evidence of Investment (share certificate)",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Within 6 months of each remittance",
+      "applies": "Indian investors holding ODI",
+      "description": "Share certificates or other evidence of the investment are submitted to the AD bank.",
+      "authority": "Reserve Bank of India",
+      "source": "https://www.rbi.org.in/Scripts/BS_ViewMasDirections.aspx?id=12380",
+      "confidence": "high",
+      "when": {
+        "investorType": [
+          "Indian Company",
+          "Resident Individual"
+        ]
+      }
+    }
+  ]
+}

@@ -27,6 +27,7 @@ const { applyListPrice, removeListPrice, PRICE_LIST_ACTOR, formatUSD } = require
 const { logActivity } = require("../lib/auditLog");
 const whatsapp = require("../lib/whatsapp");
 const { reserveAiRun, BudgetError } = require("../lib/abuseGuard");
+const { checkProfile } = require("../lib/countries");
 const { orgIcs, feedLinksFor } = require("./feeds.routes");
 const { sendIcs } = require("../lib/ics");
 
@@ -403,6 +404,10 @@ const regenRateLimited = (orgId) => require("../lib/rateLimitStore").overLimit("
 const EDITABLE_PROFILE_FIELDS = [
   "companyName", "entityType", "taxStatus", "incorpDate", "fyStart", "fyEnd",
   "hasForeignParent", "odiDone", "odiInvestorType", "employeeStates", "quarterlyGrossReceipts",
+  // Country questions (lib/countries.js). The state/province/emirate, free
+  // zone and incorporating jurisdiction stay fixed: changing those is a
+  // different company.
+  "hasEmployees", "employeeBand", "operatingRegions", "salesTax", "vat", "gst",
 ];
 
 function nameKey(name) {
@@ -465,15 +470,21 @@ router.post("/calendars/regenerate", requireCompleteContact, async (req, res) =>
   const baseProfile = base.profile.toObject ? base.profile.toObject() : { ...base.profile };
   const changes = req.body?.profile || {};
   const profile = { ...baseProfile };
-  EDITABLE_PROFILE_FIELDS.forEach((f) => {
+  // Country / state define a different legal entity — that's a new
+  // calendar from the public tool, not a regeneration of this one. The one
+  // exception: an older calendar whose region no longer matches the current
+  // lists (e.g. free text) may have it corrected, or it could never regenerate.
+  const baseValid = checkProfile(baseProfile, { requireAll: false }).ok;
+  const editable = baseValid ? EDITABLE_PROFILE_FIELDS : [...EDITABLE_PROFILE_FIELDS, "state", "zoneType", "freeZone", "incorporation"];
+  editable.forEach((f) => {
     if (changes[f] !== undefined) profile[f] = changes[f];
   });
-  // Country / state define a different legal entity — that's a new
-  // calendar from the public tool, not a regeneration of this one.
+  const checked = checkProfile(profile, { requireAll: false });
+  if (!checked.ok) return res.status(400).json({ error: checked.error, field: checked.field });
+  Object.assign(profile, checked.profile);
 
   try {
-    await reserveAiRun("client");
-    const { items, sourceMode } = await generateCompanyCalendar(profile);
+    const { items, sourceMode } = await generateCompanyCalendar(profile, { beforeLiveResearch: () => reserveAiRun("client") });
     if (!items.length) {
       return res.status(502).json({ error: "The research came back empty. Try again in a few minutes." });
     }

@@ -1,0 +1,337 @@
+{
+  "country": "Singapore",
+  "updated": "2026-09-29",
+  "notes": "Singapore rules are national; no region is needed.",
+  "items": [
+    {
+      "id": "sg-agm",
+      "category": "Mandatory Annual",
+      "name": "Annual General Meeting (AGM)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 6,
+        "day": "last"
+      },
+      "rule": "Within 6 months after financial year end",
+      "applies": "Private companies (unless dispensed with by shareholders, or financial statements are sent within 5 months)",
+      "description": "Financial statements are laid before shareholders at the AGM; private companies can dispense with AGMs by resolution.",
+      "authority": "Accounting and Corporate Regulatory Authority (ACRA), Companies Act 1967 s.175",
+      "source": "https://www.acra.gov.sg/",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Private Limited Company (Pte Ltd)"
+        ]
+      }
+    },
+    {
+      "id": "sg-annual-return",
+      "category": "Mandatory Annual",
+      "name": "Annual Return to ACRA (with XBRL financial statements)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 7,
+        "day": "last"
+      },
+      "rule": "Within 7 months after financial year end",
+      "applies": "Private companies (exempt private companies may file a simplified version)",
+      "description": "Filed on BizFile+ with the financial statements (XBRL where required); late filing attracts penalties.",
+      "authority": "Accounting and Corporate Regulatory Authority (ACRA), Companies Act 1967 s.197",
+      "source": "https://www.acra.gov.sg/",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Private Limited Company (Pte Ltd)"
+        ]
+      }
+    },
+    {
+      "id": "sg-eci",
+      "category": "Mandatory Annual",
+      "name": "Estimated Chargeable Income (ECI)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 3,
+        "day": "last"
+      },
+      "rule": "Within 3 months after financial year end",
+      "applies": "Companies (not required if annual revenue is S$5 million or less and ECI is nil)",
+      "description": "An estimate of taxable income for the year of assessment; filing early allows payment by instalments.",
+      "authority": "Inland Revenue Authority of Singapore (IRAS)",
+      "source": "https://www.iras.gov.sg/taxes/corporate-income-tax",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Private Limited Company (Pte Ltd)",
+          "Branch Office of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "sg-form-c",
+      "category": "Mandatory Annual",
+      "name": "Corporate Income Tax Return (Form C-S / C-S (Lite) / C)",
+      "schedule": {
+        "type": "annual",
+        "month": 11,
+        "day": 30
+      },
+      "rule": "30 November each year (for the year of assessment)",
+      "applies": "Companies",
+      "description": "Filed online through myTax Portal; the form depends on revenue and complexity.",
+      "authority": "Inland Revenue Authority of Singapore (IRAS)",
+      "source": "https://www.iras.gov.sg/taxes/corporate-income-tax",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Private Limited Company (Pte Ltd)",
+          "Branch Office of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "sg-rorc",
+      "category": "Event-Based",
+      "name": "Registers of Registrable Controllers and Nominee Directors",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Keep current; lodge updates on ACRA's central register within 2 business days of updating the company's register",
+      "applies": "Companies, LLPs and foreign company branches",
+      "description": "Controllers are asked to confirm their particulars and changes are recorded promptly.",
+      "authority": "Accounting and Corporate Regulatory Authority (ACRA)",
+      "source": "https://www.acra.gov.sg/",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Private Limited Company (Pte Ltd)",
+          "Limited Liability Partnership (LLP)",
+          "Branch Office of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "sg-branch-accounts",
+      "category": "Mandatory Annual",
+      "name": "Foreign Company Annual Return with Head Office and Branch Accounts",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Within 60 days after the foreign company's AGM (or within the extended period ACRA allows)",
+      "applies": "Branches of foreign companies",
+      "description": "Both the foreign company's and the Singapore branch's financial statements are lodged each year.",
+      "authority": "Accounting and Corporate Regulatory Authority (ACRA)",
+      "source": "https://www.acra.gov.sg/",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Branch Office of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "sg-llp-declaration",
+      "category": "Mandatory Annual",
+      "name": "LLP Annual Declaration of Solvency or Insolvency",
+      "schedule": {
+        "type": "annual",
+        "month": 12,
+        "day": 31
+      },
+      "rule": "At least once each calendar year, no more than 15 months after the previous declaration",
+      "applies": "Limited liability partnerships",
+      "description": "Partners declare whether the LLP is able to pay its debts as they fall due.",
+      "authority": "Accounting and Corporate Regulatory Authority (ACRA), Limited Liability Partnerships Act 2005",
+      "source": "https://www.acra.gov.sg/",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Limited Liability Partnership (LLP)"
+        ]
+      }
+    },
+    {
+      "id": "sg-form-p",
+      "category": "Mandatory Annual",
+      "name": "Partnership Income Tax Return (Form P)",
+      "schedule": {
+        "type": "annual",
+        "month": 4,
+        "day": 18
+      },
+      "rule": "18 April (e-filing)",
+      "applies": "Limited liability partnerships",
+      "description": "The precedent partner reports the partnership's income; each partner then reports their share on Form B.",
+      "authority": "Inland Revenue Authority of Singapore (IRAS)",
+      "source": "https://www.iras.gov.sg/taxes/individual-income-tax/self-employed-and-partnerships",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Limited Liability Partnership (LLP)"
+        ]
+      }
+    },
+    {
+      "id": "sg-form-b",
+      "category": "Mandatory Annual",
+      "name": "Individual Income Tax Return (Form B)",
+      "schedule": {
+        "type": "annual",
+        "month": 4,
+        "day": 18
+      },
+      "rule": "18 April (e-filing)",
+      "applies": "Sole proprietors and individual partners",
+      "description": "Business income is declared on Form B with the 4-line statement or certified accounts.",
+      "authority": "Inland Revenue Authority of Singapore (IRAS)",
+      "source": "https://www.iras.gov.sg/taxes/individual-income-tax/self-employed-and-partnerships",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Sole Proprietorship",
+          "Limited Liability Partnership (LLP)"
+        ]
+      }
+    },
+    {
+      "id": "sg-bn-renewal",
+      "category": "Mandatory Annual",
+      "name": "Business Registration Renewal",
+      "schedule": {
+        "type": "anniversary",
+        "daysAfter": -1
+      },
+      "rule": "Before the registration expires (every 1 or 3 years, renewable up to 60 days early)",
+      "applies": "Sole proprietorships",
+      "description": "Renewal requires any outstanding MediSave contributions to be paid or on an instalment plan.",
+      "authority": "Accounting and Corporate Regulatory Authority (ACRA)",
+      "source": "https://www.acra.gov.sg/",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Sole Proprietorship"
+        ]
+      }
+    },
+    {
+      "id": "sg-gst-register",
+      "category": "Event-Based",
+      "name": "GST Registration",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Within 30 days once taxable turnover exceeded S$1 million in a calendar year, or is expected to in the next 12 months",
+      "applies": "Businesses not yet GST-registered",
+      "description": "Voluntary registration is possible below the threshold.",
+      "authority": "Inland Revenue Authority of Singapore (IRAS)",
+      "source": "https://www.iras.gov.sg/taxes/goods-services-tax-(gst)/gst-registration-deregistration/do-i-need-to-register-for-gst",
+      "confidence": "high",
+      "when": {
+        "gst": [
+          "Not registered"
+        ]
+      }
+    },
+    {
+      "id": "sg-gst-quarterly",
+      "category": "Conditional",
+      "name": "GST Return (GST F5) and Payment",
+      "schedule": {
+        "type": "fy_quarterly",
+        "monthsAfter": 1,
+        "day": "last"
+      },
+      "rule": "1 month after the end of each quarterly accounting period",
+      "applies": "GST-registered businesses on quarterly periods",
+      "description": "Returns are filed electronically, even for periods with no transactions.",
+      "authority": "Inland Revenue Authority of Singapore (IRAS)",
+      "source": "https://www.iras.gov.sg/taxes/goods-services-tax-(gst)/filing-gst",
+      "confidence": "high",
+      "when": {
+        "gst": [
+          "Quarterly"
+        ]
+      }
+    },
+    {
+      "id": "sg-gst-monthly",
+      "category": "Conditional",
+      "name": "GST Return (GST F5) and Payment (monthly)",
+      "schedule": {
+        "type": "monthly",
+        "day": "last"
+      },
+      "rule": "1 month after the end of each monthly accounting period",
+      "applies": "GST-registered businesses on monthly periods",
+      "description": "Returns are filed electronically, even for periods with no transactions.",
+      "authority": "Inland Revenue Authority of Singapore (IRAS)",
+      "source": "https://www.iras.gov.sg/taxes/goods-services-tax-(gst)/filing-gst",
+      "confidence": "high",
+      "when": {
+        "gst": [
+          "Monthly"
+        ]
+      }
+    },
+    {
+      "id": "sg-cpf",
+      "category": "Conditional",
+      "name": "CPF Contributions and Skills Development Levy",
+      "schedule": {
+        "type": "monthly",
+        "day": 14
+      },
+      "rule": "By the 14th of the following month",
+      "applies": "Employers (CPF for Singapore citizens and PRs; SDL for all employees)",
+      "description": "Employer and employee CPF contributions plus the Skills Development Levy are paid monthly; late payment attracts interest.",
+      "authority": "Central Provident Fund Board",
+      "source": "https://www.cpf.gov.sg/employer",
+      "confidence": "high",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "sg-ir8a",
+      "category": "Conditional",
+      "name": "Employment Income Records (IR8A / AIS)",
+      "schedule": {
+        "type": "annual",
+        "month": 3,
+        "day": 1
+      },
+      "rule": "1 March (for the previous calendar year)",
+      "applies": "Employers",
+      "description": "Employee income is submitted to IRAS under the Auto-Inclusion Scheme.",
+      "authority": "Inland Revenue Authority of Singapore (IRAS)",
+      "source": "https://www.iras.gov.sg/taxes/individual-income-tax/employers/auto-inclusion-scheme-(ais)-for-employment-income",
+      "confidence": "high",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "sg-tp",
+      "category": "Transfer Pricing",
+      "name": "Transfer Pricing Documentation",
+      "schedule": {
+        "type": "annual",
+        "month": 11,
+        "day": 30
+      },
+      "rule": "Prepared by the Form C filing due date (30 November)",
+      "applies": "Companies with gross revenue over S$10 million and related-party transactions above the thresholds",
+      "description": "Contemporaneous documentation must exist by the filing date; companies with related-party transactions over S$15 million also file the Form for Reporting Related Party Transactions.",
+      "authority": "Inland Revenue Authority of Singapore (IRAS)",
+      "source": "https://www.iras.gov.sg/taxes/corporate-income-tax",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Private Limited Company (Pte Ltd)",
+          "Branch Office of Foreign Company"
+        ],
+        "foreignOwned": true
+      }
+    }
+  ]
+}

@@ -44,18 +44,18 @@ router.post("/generate", async (req, res) => {
     return res.status(429).json({ error: "Rate limit reached. Try again later." });
   }
 
-  const profile = req.body?.profile;
-  if (!profile || !profile.state || !profile.entityType) {
-    return res.status(400).json({ error: "Missing required profile fields (state, entityType)." });
-  }
+  const checked = require("../lib/countries").checkProfile(req.body?.profile);
+  if (!checked.ok) return res.status(400).json({ error: checked.error, field: checked.field });
+  const profile = checked.profile;
   // Optional — links this calendar to a client company (models/ClientOrg.js)
   // so it can later appear in that client's portal once approved. Left
   // null for internal/test calendars with no client attached yet.
   const clientOrgId = req.body?.clientOrgId || null;
 
   try {
-    await require("../lib/abuseGuard").reserveAiRun("staff"); // counted, never blocked
-    const { items, sourceMode } = await generateCompanyCalendar(profile);
+    const { items, sourceMode } = await generateCompanyCalendar(profile, {
+      beforeLiveResearch: () => require("../lib/abuseGuard").reserveAiRun("staff"), // counted, never blocked
+    });
     if (!items.length) {
       return res.status(502).json({ error: "No calendar items returned — try again or refine the profile." });
     }

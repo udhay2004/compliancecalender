@@ -1,0 +1,1650 @@
+{
+  "country": "Canada",
+  "updated": "2026-09-29",
+  "notes": "items apply nationally; regions[P].items apply to the home province (province of incorporation, or of the registered office for federal corporations, or of operation for unincorporated businesses); extraProvincialItems apply to each other province where a corporation carries on business (and to the home province of a federal corporation); operatingItems apply to every province where the business operates; employerItems apply where employees work. Territories are not covered yet.",
+  "items": [
+    {
+      "id": "ca-t2",
+      "category": "Mandatory Annual",
+      "name": "T2 Corporation Income Tax Return",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 6,
+        "day": "last"
+      },
+      "rule": "Within 6 months after financial year end",
+      "applies": "Every corporation resident in Canada, including inactive corporations",
+      "description": "The federal corporate income tax return; provincial corporate tax for every province except Quebec and Alberta is calculated and filed on the T2 as well. Late filing costs 5% of unpaid tax plus 1% a month.",
+      "authority": "Canada Revenue Agency (CRA)",
+      "source": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/corporations/corporation-income-tax-return.html",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Corporation"
+        ]
+      }
+    },
+    {
+      "id": "ca-t2-balance",
+      "category": "Mandatory Annual",
+      "name": "Corporate Income Tax Balance Payment",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 2,
+        "day": "last"
+      },
+      "rule": "2 months after financial year end (3 months for eligible Canadian-controlled private corporations)",
+      "applies": "Corporations with tax owing for the year",
+      "description": "The balance of federal and provincial corporate tax is due before the T2 itself; interest runs from the balance-due date.",
+      "authority": "Canada Revenue Agency (CRA)",
+      "source": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/corporations/corporation-payments.html",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Corporation"
+        ]
+      }
+    },
+    {
+      "id": "ca-instalments",
+      "category": "Conditional",
+      "name": "Corporate Tax Instalments",
+      "schedule": {
+        "type": "monthly",
+        "day": "last"
+      },
+      "rule": "Monthly, by the last day of each month of the financial year (quarterly for eligible small CCPCs)",
+      "applies": "Corporations whose tax payable was more than $3,000 in the current or previous year",
+      "description": "Instalments are based on the prior years' tax; small Canadian-controlled private corporations that qualify may pay quarterly instead.",
+      "authority": "Canada Revenue Agency (CRA)",
+      "source": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/corporations/corporation-payments.html",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Corporation"
+        ]
+      }
+    },
+    {
+      "id": "ca-cbca-annual",
+      "category": "Mandatory Annual",
+      "name": "CBCA Annual Return (with Individuals with Significant Control)",
+      "schedule": {
+        "type": "anniversary",
+        "daysAfter": 60
+      },
+      "rule": "Within 60 days after each anniversary of incorporation (none in the year of incorporation)",
+      "applies": "Federally incorporated corporations (CBCA)",
+      "description": "Filed online with Corporations Canada, confirming directors, addresses and the individuals with significant control; missing it for a year risks dissolution.",
+      "authority": "Corporations Canada (ISED), Canada Business Corporations Act",
+      "source": "https://ised-isde.canada.ca/site/corporations-canada/en/keep-your-corporation-good-shape/annual-return",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Corporation"
+        ],
+        "incorporation": [
+          "Federal"
+        ]
+      }
+    },
+    {
+      "id": "ca-cbca-changes",
+      "category": "Event-Based",
+      "name": "Notify Corporations Canada of Changes (directors, office, significant control)",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Within 15 days of the change",
+      "applies": "Federally incorporated corporations (CBCA)",
+      "description": "Changes of directors or registered office address, and changes to the individuals with significant control, must be filed with Corporations Canada within 15 days; the ISC register must be updated as well.",
+      "authority": "Corporations Canada (ISED)",
+      "source": "https://ised-isde.canada.ca/site/corporations-canada/en",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Corporation"
+        ],
+        "incorporation": [
+          "Federal"
+        ]
+      }
+    },
+    {
+      "id": "ca-isc-register",
+      "category": "Mandatory Annual",
+      "name": "Individuals with Significant Control Register — Annual Review",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 0,
+        "day": "last"
+      },
+      "rule": "At least once each financial year",
+      "applies": "Corporations",
+      "description": "Corporations must keep a register of individuals with significant control and take reasonable steps to update it at least once a year.",
+      "authority": "Corporations Canada / provincial corporate law",
+      "source": "https://ised-isde.canada.ca/site/corporations-canada/en/individuals-significant-control",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Corporation"
+        ]
+      }
+    },
+    {
+      "id": "ca-agm",
+      "category": "Mandatory Annual",
+      "name": "Annual Shareholders' Meeting and Financial Statements",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 6,
+        "day": "last"
+      },
+      "rule": "Within 6 months after financial year end (and no more than 15 months after the last meeting)",
+      "applies": "Corporations (a written resolution signed by all shareholders can replace the meeting)",
+      "description": "Directors place the annual financial statements before the shareholders; shareholders may consent in writing to waive an audit where the law allows.",
+      "authority": "Canada Business Corporations Act / provincial Business Corporations Acts",
+      "source": "https://laws-lois.justice.gc.ca/eng/acts/c-44/",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Corporation"
+        ]
+      }
+    },
+    {
+      "id": "ca-t5",
+      "category": "Conditional",
+      "name": "T5 Slips and Summary (dividends paid)",
+      "schedule": {
+        "type": "annual",
+        "month": 2,
+        "day": "last"
+      },
+      "rule": "Last day of February (for the previous calendar year)",
+      "applies": "Corporations that paid dividends or interest to residents",
+      "description": "Dividends paid to Canadian-resident shareholders are reported on T5 slips.",
+      "authority": "Canada Revenue Agency (CRA)",
+      "source": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/payroll.html",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Corporation"
+        ]
+      }
+    },
+    {
+      "id": "ca-t1",
+      "category": "Mandatory Annual",
+      "name": "T1 Income Tax Return with Business Income (Form T2125)",
+      "schedule": {
+        "type": "annual",
+        "month": 6,
+        "day": 15
+      },
+      "rule": "15 June (balance of tax still due 30 April)",
+      "applies": "Sole proprietors",
+      "description": "Self-employed individuals file by 15 June, but any tax owing is due 30 April and interest runs from then.",
+      "authority": "Canada Revenue Agency (CRA)",
+      "source": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/sole-proprietorships-partnerships/report-business-income-expenses.html",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Sole Proprietorship"
+        ]
+      }
+    },
+    {
+      "id": "ca-t1-balance",
+      "category": "Mandatory Annual",
+      "name": "Personal Tax Balance Payment",
+      "schedule": {
+        "type": "annual",
+        "month": 4,
+        "day": 30
+      },
+      "rule": "30 April",
+      "applies": "Sole proprietors and individual partners",
+      "description": "The balance of personal income tax for the previous year is due 30 April even though the self-employed return itself is due 15 June.",
+      "authority": "Canada Revenue Agency (CRA)",
+      "source": "https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/about-your-tax-return.html",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Sole Proprietorship",
+          "General Partnership"
+        ]
+      }
+    },
+    {
+      "id": "ca-instalments-individual",
+      "category": "Conditional",
+      "name": "Personal Tax Instalments",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 3,
+            "day": 15
+          },
+          {
+            "month": 6,
+            "day": 15
+          },
+          {
+            "month": 9,
+            "day": 15
+          },
+          {
+            "month": 12,
+            "day": 15
+          }
+        ]
+      },
+      "rule": "15 March, 15 June, 15 September and 15 December",
+      "applies": "Individuals whose net tax owing exceeded $3,000 ($1,800 in Quebec) in the current and one of the two previous years",
+      "description": "The CRA sends instalment reminders showing the suggested amounts.",
+      "authority": "Canada Revenue Agency (CRA)",
+      "source": "https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/about-your-tax-return.html",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Sole Proprietorship",
+          "General Partnership"
+        ]
+      }
+    },
+    {
+      "id": "ca-t5013",
+      "category": "Mandatory Annual",
+      "name": "T5013 Partnership Information Return",
+      "schedule": {
+        "type": "annual",
+        "month": 3,
+        "day": 31
+      },
+      "rule": "31 March if all partners are individuals (5 months after year end if any partner is a corporation)",
+      "applies": "Partnerships with more than $2 million of revenue plus expenses or $5 million of assets, or with a corporate or trust partner",
+      "description": "Reports the partnership's income and each partner's share on T5013 slips.",
+      "authority": "Canada Revenue Agency (CRA)",
+      "source": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/sole-proprietorships-partnerships/t5013-partnership-information-return-filing-requirements.html",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "General Partnership"
+        ]
+      }
+    },
+    {
+      "id": "ca-gst-register",
+      "category": "Event-Based",
+      "name": "GST/HST Registration",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Once taxable sales exceed $30,000 in a single quarter or over four consecutive quarters",
+      "applies": "Businesses not yet registered for GST/HST",
+      "description": "Small suppliers under $30,000 may register voluntarily; once over the threshold you must register and start charging GST/HST.",
+      "authority": "Canada Revenue Agency (CRA)",
+      "source": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/when-register-charge.html",
+      "confidence": "high",
+      "when": {
+        "salesTax": [
+          "Not registered"
+        ]
+      }
+    },
+    {
+      "id": "ca-gst-annual",
+      "category": "Conditional",
+      "name": "GST/HST Return (annual filer)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 3,
+        "day": "last"
+      },
+      "rule": "3 months after financial year end (individuals with business income: 15 June, with payment by 30 April)",
+      "applies": "GST/HST registrants with annual reporting periods",
+      "description": "Annual filers with net tax of $3,000 or more for the previous year also pay quarterly instalments.",
+      "authority": "Canada Revenue Agency (CRA)",
+      "source": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses.html",
+      "confidence": "high",
+      "when": {
+        "salesTax": [
+          "Annual"
+        ]
+      }
+    },
+    {
+      "id": "ca-gst-quarterly",
+      "category": "Conditional",
+      "name": "GST/HST Return (quarterly filer)",
+      "schedule": {
+        "type": "fy_quarterly",
+        "monthsAfter": 1,
+        "day": "last"
+      },
+      "rule": "1 month after the end of each quarter of the financial year",
+      "applies": "GST/HST registrants with quarterly reporting periods",
+      "description": "Returns and payment are due one month after each reporting period; filing electronically is mandatory for most registrants.",
+      "authority": "Canada Revenue Agency (CRA)",
+      "source": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses.html",
+      "confidence": "high",
+      "when": {
+        "salesTax": [
+          "Quarterly"
+        ]
+      }
+    },
+    {
+      "id": "ca-gst-monthly",
+      "category": "Conditional",
+      "name": "GST/HST Return (monthly filer)",
+      "schedule": {
+        "type": "monthly",
+        "day": "last"
+      },
+      "rule": "1 month after the end of each month",
+      "applies": "GST/HST registrants with monthly reporting periods (required over $6 million of sales)",
+      "description": "Each month's return and payment are due by the end of the following month.",
+      "authority": "Canada Revenue Agency (CRA)",
+      "source": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses.html",
+      "confidence": "high",
+      "when": {
+        "salesTax": [
+          "Monthly"
+        ]
+      }
+    },
+    {
+      "id": "ca-payroll-account",
+      "category": "Event-Based",
+      "name": "Payroll Program Account (RP) Registration",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Before the first payroll remittance is due",
+      "applies": "Employers",
+      "description": "Open a CRA payroll account before paying employees; deduct CPP, EI and income tax from every pay.",
+      "authority": "Canada Revenue Agency (CRA)",
+      "source": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/payroll.html",
+      "confidence": "high",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "ca-source-deductions",
+      "category": "Conditional",
+      "name": "Payroll Source Deductions Remittance (CPP, EI, income tax)",
+      "schedule": {
+        "type": "monthly",
+        "day": 15
+      },
+      "rule": "By the 15th of the month after the pay date (regular remitters; larger employers remit more often)",
+      "applies": "Employers",
+      "description": "Employee deductions plus the employer's CPP and EI share are remitted to the CRA; outside Quebec provincial income tax is included.",
+      "authority": "Canada Revenue Agency (CRA)",
+      "source": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/payroll/remitting-source-deductions/how-when-remit-due-dates.html",
+      "confidence": "high",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "ca-t4",
+      "category": "Conditional",
+      "name": "T4 Slips and Summary",
+      "schedule": {
+        "type": "annual",
+        "month": 2,
+        "day": "last"
+      },
+      "rule": "Last day of February (for the previous calendar year)",
+      "applies": "Employers",
+      "description": "Each employee receives a T4 slip, and the T4 summary reconciles the year's remittances.",
+      "authority": "Canada Revenue Agency (CRA)",
+      "source": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/payroll.html",
+      "confidence": "high",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "ca-roe",
+      "category": "Event-Based",
+      "name": "Record of Employment (ROE)",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Within 5 calendar days after the end of the pay period in which an employee's earnings are interrupted",
+      "applies": "Employers",
+      "description": "Issued electronically to Service Canada whenever an employee stops working (leaves, is laid off, or goes on leave).",
+      "authority": "Service Canada",
+      "source": "https://www.canada.ca/en/employment-social-development/programs/ei/ei-list/reports/roe-guide.html",
+      "confidence": "high",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "ca-t106",
+      "category": "Transfer Pricing",
+      "name": "T106 Information Return (transactions with non-resident related parties)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 6,
+        "day": "last"
+      },
+      "rule": "With the T2, within 6 months after financial year end",
+      "applies": "Corporations whose reportable transactions with non-arm's-length non-residents exceed $1 million in the year",
+      "description": "Discloses each non-resident related party and the transactions with it; penalties apply per slip for late filing.",
+      "authority": "Canada Revenue Agency (CRA)",
+      "source": "https://www.canada.ca/en/revenue-agency/services/forms-publications/forms/t106.html",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Corporation"
+        ],
+        "foreignOwned": true
+      }
+    },
+    {
+      "id": "ca-tp-docs",
+      "category": "Transfer Pricing",
+      "name": "Contemporaneous Transfer Pricing Documentation (s.247)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 6,
+        "day": "last"
+      },
+      "rule": "In place by the T2 filing due date",
+      "applies": "Corporations with non-resident related-party transactions",
+      "description": "Documentation supporting arm's-length pricing must exist by the filing due date and be provided within 3 months of a CRA request, or a 10% transfer pricing penalty can apply.",
+      "authority": "Canada Revenue Agency (CRA)",
+      "source": "https://www.canada.ca/en/revenue-agency/services/tax/international-non-residents/information-been-moved/transfer-pricing.html",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Corporation"
+        ],
+        "foreignOwned": true
+      }
+    },
+    {
+      "id": "ca-part13",
+      "category": "Transfer Pricing",
+      "name": "Non-Resident Withholding (Part XIII) and NR4 Return",
+      "schedule": {
+        "type": "annual",
+        "month": 3,
+        "day": 31
+      },
+      "rule": "Withholding remitted by the 15th of the month after payment; NR4 slips and summary by 31 March",
+      "applies": "Corporations paying dividends, interest, rent or management fees to a non-resident parent or other non-residents",
+      "description": "Withholding tax of 25% (reduced by tax treaty) applies to many payments to non-residents; each year's payments are reported on NR4 slips.",
+      "authority": "Canada Revenue Agency (CRA)",
+      "source": "https://www.canada.ca/en/revenue-agency/services/tax/international-non-residents.html",
+      "confidence": "high",
+      "when": {
+        "entityType": [
+          "Corporation"
+        ],
+        "foreignOwned": true
+      }
+    }
+  ],
+  "regions": {
+    "Ontario": {
+      "items": [
+        {
+          "id": "ca-ontario-annual-return",
+          "category": "Mandatory Annual",
+          "name": "Ontario Annual Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 6,
+            "day": "last"
+          },
+          "rule": "Within 6 months after financial year end",
+          "applies": "Corporations incorporated in Ontario",
+          "description": "Confirms the corporation's registered office, directors and officers with the provincial registry each year; corporations that stop filing are eventually dissolved.",
+          "authority": "Ontario Business Registry (Corporations Information Act)",
+          "source": "https://www.ontario.ca/page/ontario-business-registry",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ],
+            "incorporation": [
+              "Provincial"
+            ]
+          }
+        },
+        {
+          "id": "ca-on-business-name",
+          "category": "Conditional",
+          "name": "Ontario Business Name Registration Renewal",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "Every 5 years from registration (renewable up to 6 months early)",
+          "applies": "Sole proprietors and partnerships operating under a name other than the owners' own names",
+          "description": "Registrations under the Business Names Act expire after 5 years; set the renewal date from the registration certificate.",
+          "authority": "Ontario Business Registry",
+          "source": "https://www.ontario.ca/page/registering-your-business-name",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship",
+              "General Partnership"
+            ]
+          }
+        }
+      ],
+      "extraProvincialItems": [
+        {
+          "id": "ca-ontario-xp-registration",
+          "category": "Event-Based",
+          "name": "Extra-Provincial Registration in Ontario",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "Before (or promptly after) starting to carry on business in Ontario",
+          "applies": "Corporations from outside Ontario carrying on business there",
+          "description": "Corporations from other Canadian jurisdictions file an initial return under the Corporations Information Act within 60 days of starting business in Ontario; federal and other-province corporations do not file Ontario annual returns.",
+          "authority": "Ontario Business Registry (Corporations Information Act)",
+          "source": "https://www.ontario.ca/page/ontario-business-registry",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ca-on-eht",
+          "category": "Conditional",
+          "name": "Ontario Employer Health Tax (EHT) Annual Return",
+          "schedule": {
+            "type": "annual",
+            "month": 3,
+            "day": 15
+          },
+          "rule": "15 March (monthly instalments by the 15th if Ontario payroll exceeds $5 million)",
+          "applies": "Employers whose total Ontario payroll exceeds the $1 million exemption",
+          "description": "Eligible employers are exempt on the first $1 million of Ontario remuneration; employers above it file an annual return.",
+          "authority": "Ontario Ministry of Finance",
+          "source": "https://www.ontario.ca/document/employer-health-tax-eht",
+          "confidence": "high"
+        },
+        {
+          "id": "ca-ontario-wcb",
+          "category": "Conditional",
+          "name": "Workers' Compensation Reporting (Workplace Safety and Insurance Board (WSIB))",
+          "schedule": {
+            "type": "annual",
+            "month": 3,
+            "day": 31
+          },
+          "rule": "Premiums monthly or quarterly; annual reconciliation by 31 March",
+          "applies": "Employers with workers in Ontario (most industries)",
+          "description": "Register with Workplace Safety and Insurance Board (WSIB) when you hire in Ontario, pay premiums on insurable earnings and report the year's payroll.",
+          "authority": "Workplace Safety and Insurance Board (WSIB)",
+          "source": "https://www.wsib.ca/",
+          "confidence": "medium"
+        }
+      ],
+      "operatingItems": []
+    },
+    "British Columbia": {
+      "items": [
+        {
+          "id": "ca-british-columbia-annual-return",
+          "category": "Mandatory Annual",
+          "name": "BC Annual Report",
+          "schedule": {
+            "type": "anniversary",
+            "monthsAfter": 2
+          },
+          "rule": "Within 2 months after each anniversary of incorporation",
+          "applies": "Corporations incorporated in British Columbia",
+          "description": "Confirms the corporation's registered office, directors and officers with the provincial registry each year; corporations that stop filing are eventually dissolved.",
+          "authority": "BC Registries and Online Services",
+          "source": "https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/companies",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ],
+            "incorporation": [
+              "Provincial"
+            ]
+          }
+        }
+      ],
+      "extraProvincialItems": [
+        {
+          "id": "ca-british-columbia-xp-registration",
+          "category": "Event-Based",
+          "name": "Extra-Provincial Registration in British Columbia",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "Before (or promptly after) starting to carry on business in British Columbia",
+          "applies": "Corporations from outside British Columbia carrying on business there",
+          "description": "A corporation incorporated elsewhere (federally or in another province) registers extra-provincially in British Columbia and appoints an attorney for service where required.",
+          "authority": "BC Registries and Online Services",
+          "source": "https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/companies",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ]
+          }
+        },
+        {
+          "id": "ca-british-columbia-xp-annual",
+          "category": "Mandatory Annual",
+          "name": "British Columbia Extra-Provincial Annual Return",
+          "schedule": {
+            "type": "anniversary",
+            "monthsAfter": 2
+          },
+          "rule": "Within 2 months after each anniversary of registration in BC (we use the incorporation date; change it if the registration date differs)",
+          "applies": "Corporations from outside British Columbia registered there (not corporations from Alberta, Saskatchewan, Manitoba, under the New West Partnership)",
+          "description": "Extra-provincially registered corporations confirm their information with the British Columbia registry each year to stay in good standing.",
+          "authority": "BC Registries and Online Services",
+          "source": "https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/companies",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ],
+            "not": {
+              "provincialHome": [
+                "Alberta",
+                "Saskatchewan",
+                "Manitoba"
+              ]
+            }
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ca-bc-eht",
+          "category": "Conditional",
+          "name": "BC Employer Health Tax (EHT) Return",
+          "schedule": {
+            "type": "annual",
+            "month": 3,
+            "day": 31
+          },
+          "rule": "31 March (instalments on 15 June, 15 September and 15 December for larger payrolls)",
+          "applies": "Employers whose BC payroll exceeds the $1 million exemption",
+          "description": "Employers register once BC remuneration exceeds $1 million in a calendar year.",
+          "authority": "BC Ministry of Finance",
+          "source": "https://www2.gov.bc.ca/gov/content/taxes/employer-health-tax/employer-health-tax-overview",
+          "confidence": "high"
+        },
+        {
+          "id": "ca-british-columbia-wcb",
+          "category": "Conditional",
+          "name": "Workers' Compensation Reporting (WorkSafeBC)",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 4,
+                "day": 20
+              },
+              {
+                "month": 7,
+                "day": 20
+              },
+              {
+                "month": 10,
+                "day": 20
+              },
+              {
+                "month": 1,
+                "day": 20
+              }
+            ]
+          },
+          "rule": "Quarterly payroll reports and premiums, by the 20th of the month after each quarter",
+          "applies": "Employers with workers in British Columbia (most industries)",
+          "description": "Register with WorkSafeBC when you hire in British Columbia, pay premiums on insurable earnings and report the year's payroll.",
+          "authority": "WorkSafeBC",
+          "source": "https://www.worksafebc.com/",
+          "confidence": "medium"
+        }
+      ],
+      "operatingItems": [
+        {
+          "id": "ca-bc-pst",
+          "category": "Conditional",
+          "name": "BC Provincial Sales Tax (PST) Return",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "By the last day of the month after each reporting period (monthly, quarterly or annual, as assigned)",
+          "applies": "Businesses registered to collect BC PST",
+          "description": "Businesses selling taxable goods or services in BC register for PST separately from GST.",
+          "authority": "BC Ministry of Finance",
+          "source": "https://www2.gov.bc.ca/gov/content/taxes/sales-taxes/pst",
+          "confidence": "high"
+        }
+      ]
+    },
+    "Alberta": {
+      "items": [
+        {
+          "id": "ca-alberta-annual-return",
+          "category": "Mandatory Annual",
+          "name": "Alberta Annual Return",
+          "schedule": {
+            "type": "anniversary",
+            "monthsAfter": 1,
+            "day": "last"
+          },
+          "rule": "By the end of the month after the anniversary month of incorporation",
+          "applies": "Corporations incorporated in Alberta",
+          "description": "Confirms the corporation's registered office, directors and officers with the provincial registry each year; corporations that stop filing are eventually dissolved.",
+          "authority": "Alberta Corporate Registry",
+          "source": "https://www.alberta.ca/corporations-cooperatives-organizations-annual-returns",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ],
+            "incorporation": [
+              "Provincial"
+            ]
+          }
+        }
+      ],
+      "extraProvincialItems": [
+        {
+          "id": "ca-alberta-xp-registration",
+          "category": "Event-Based",
+          "name": "Extra-Provincial Registration in Alberta",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "Before (or promptly after) starting to carry on business in Alberta",
+          "applies": "Corporations from outside Alberta carrying on business there",
+          "description": "A corporation incorporated elsewhere (federally or in another province) registers extra-provincially in Alberta and appoints an attorney for service where required.",
+          "authority": "Alberta Corporate Registry",
+          "source": "https://www.alberta.ca/corporations-cooperatives-organizations-annual-returns",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ]
+          }
+        },
+        {
+          "id": "ca-alberta-xp-annual",
+          "category": "Mandatory Annual",
+          "name": "Alberta Extra-Provincial Annual Return",
+          "schedule": {
+            "type": "anniversary",
+            "monthsAfter": 1,
+            "day": "last"
+          },
+          "rule": "By the end of the month after the anniversary month of registration in Alberta (we use the incorporation date; change it if the registration date differs)",
+          "applies": "Corporations from outside Alberta registered there (not corporations from British Columbia, Saskatchewan, Manitoba, under the New West Partnership)",
+          "description": "Extra-provincially registered corporations confirm their information with the Alberta registry each year to stay in good standing.",
+          "authority": "Alberta Corporate Registry",
+          "source": "https://www.alberta.ca/corporations-cooperatives-organizations-annual-returns",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ],
+            "not": {
+              "provincialHome": [
+                "British Columbia",
+                "Saskatchewan",
+                "Manitoba"
+              ]
+            }
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ca-alberta-wcb",
+          "category": "Conditional",
+          "name": "Workers' Compensation Reporting (WCB-Alberta)",
+          "schedule": {
+            "type": "annual",
+            "month": 2,
+            "day": "last"
+          },
+          "rule": "Annual return of insurable earnings by the last day of February",
+          "applies": "Employers with workers in Alberta (most industries)",
+          "description": "Register with WCB-Alberta when you hire in Alberta, pay premiums on insurable earnings and report the year's payroll.",
+          "authority": "WCB-Alberta",
+          "source": "https://www.wcb.ab.ca/",
+          "confidence": "medium"
+        }
+      ],
+      "operatingItems": [
+        {
+          "id": "ca-alberta-at1",
+          "category": "Mandatory Annual",
+          "name": "Alberta Corporate Income Tax Return (AT1)",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 6,
+            "day": "last"
+          },
+          "rule": "Within 6 months after financial year end",
+          "applies": "Corporations with a permanent establishment in Alberta",
+          "description": "Alberta administers its own corporate income tax, so an AT1 is filed with Alberta Tax and Revenue Administration as well as the federal T2.",
+          "authority": "Alberta Tax and Revenue Administration",
+          "source": "https://www.alberta.ca/corporate-income-tax",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ]
+          }
+        }
+      ]
+    },
+    "Saskatchewan": {
+      "items": [
+        {
+          "id": "ca-saskatchewan-annual-return",
+          "category": "Mandatory Annual",
+          "name": "Saskatchewan Annual Return",
+          "schedule": {
+            "type": "anniversary",
+            "monthsAfter": 1,
+            "day": "last"
+          },
+          "rule": "By the end of the month after the anniversary month of incorporation",
+          "applies": "Corporations incorporated in Saskatchewan",
+          "description": "Confirms the corporation's registered office, directors and officers with the provincial registry each year; corporations that stop filing are eventually dissolved.",
+          "authority": "Saskatchewan Corporate Registry (ISC)",
+          "source": "https://www.saskregistries.ca/corporateregistry/maintainandamendyourbusinessinformation/maintainingabusinesscorporation",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ],
+            "incorporation": [
+              "Provincial"
+            ]
+          }
+        }
+      ],
+      "extraProvincialItems": [
+        {
+          "id": "ca-saskatchewan-xp-registration",
+          "category": "Event-Based",
+          "name": "Extra-Provincial Registration in Saskatchewan",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "Before (or promptly after) starting to carry on business in Saskatchewan",
+          "applies": "Corporations from outside Saskatchewan carrying on business there",
+          "description": "A corporation incorporated elsewhere (federally or in another province) registers extra-provincially in Saskatchewan and appoints an attorney for service where required.",
+          "authority": "Saskatchewan Corporate Registry (ISC)",
+          "source": "https://www.saskregistries.ca/corporateregistry/maintainandamendyourbusinessinformation/maintainingabusinesscorporation",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ]
+          }
+        },
+        {
+          "id": "ca-saskatchewan-xp-annual",
+          "category": "Mandatory Annual",
+          "name": "Saskatchewan Extra-Provincial Annual Return",
+          "schedule": {
+            "type": "anniversary",
+            "monthsAfter": 1,
+            "day": "last"
+          },
+          "rule": "By the end of the month after the anniversary month of registration in Saskatchewan (we use the incorporation date; change it if the registration date differs)",
+          "applies": "Corporations from outside Saskatchewan registered there (not corporations from British Columbia, Alberta, Manitoba, under the New West Partnership)",
+          "description": "Extra-provincially registered corporations confirm their information with the Saskatchewan registry each year to stay in good standing.",
+          "authority": "Saskatchewan Corporate Registry (ISC)",
+          "source": "https://www.saskregistries.ca/corporateregistry/maintainandamendyourbusinessinformation/maintainingabusinesscorporation",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ],
+            "not": {
+              "provincialHome": [
+                "British Columbia",
+                "Alberta",
+                "Manitoba"
+              ]
+            }
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ca-saskatchewan-wcb",
+          "category": "Conditional",
+          "name": "Workers' Compensation Reporting (Saskatchewan Workers' Compensation Board)",
+          "schedule": {
+            "type": "annual",
+            "month": 2,
+            "day": "last"
+          },
+          "rule": "Annual statement of payroll by the last day of February",
+          "applies": "Employers with workers in Saskatchewan (most industries)",
+          "description": "Register with Saskatchewan Workers' Compensation Board when you hire in Saskatchewan, pay premiums on insurable earnings and report the year's payroll.",
+          "authority": "Saskatchewan Workers' Compensation Board",
+          "source": "https://www.wcbsask.com/",
+          "confidence": "medium"
+        }
+      ],
+      "operatingItems": [
+        {
+          "id": "ca-sk-pst",
+          "category": "Conditional",
+          "name": "Saskatchewan Provincial Sales Tax (PST) Return",
+          "schedule": {
+            "type": "monthly",
+            "day": 20
+          },
+          "rule": "By the 20th of the month after each reporting period",
+          "applies": "Businesses registered to collect Saskatchewan PST",
+          "description": "Saskatchewan PST is reported to the Ministry of Finance separately from GST.",
+          "authority": "Saskatchewan Ministry of Finance",
+          "source": "https://www.saskatchewan.ca/business/taxes-licensing-and-reporting/provincial-taxes-policies-and-bulletins/provincial-sales-tax",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Manitoba": {
+      "items": [
+        {
+          "id": "ca-manitoba-annual-return",
+          "category": "Mandatory Annual",
+          "name": "Manitoba Annual Return",
+          "schedule": {
+            "type": "anniversary",
+            "monthsAfter": 1,
+            "day": "last"
+          },
+          "rule": "By the end of the month after the anniversary month of incorporation",
+          "applies": "Corporations incorporated in Manitoba",
+          "description": "Confirms the corporation's registered office, directors and officers with the provincial registry each year; corporations that stop filing are eventually dissolved.",
+          "authority": "Manitoba Companies Office",
+          "source": "https://companiesoffice.gov.mb.ca/updating_manitoba_corporation.html",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ],
+            "incorporation": [
+              "Provincial"
+            ]
+          }
+        }
+      ],
+      "extraProvincialItems": [
+        {
+          "id": "ca-manitoba-xp-registration",
+          "category": "Event-Based",
+          "name": "Extra-Provincial Registration in Manitoba",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "Before (or promptly after) starting to carry on business in Manitoba",
+          "applies": "Corporations from outside Manitoba carrying on business there",
+          "description": "A corporation incorporated elsewhere (federally or in another province) registers extra-provincially in Manitoba and appoints an attorney for service where required.",
+          "authority": "Manitoba Companies Office",
+          "source": "https://companiesoffice.gov.mb.ca/updating_manitoba_corporation.html",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ]
+          }
+        },
+        {
+          "id": "ca-manitoba-xp-annual",
+          "category": "Mandatory Annual",
+          "name": "Manitoba Extra-Provincial Annual Return",
+          "schedule": {
+            "type": "anniversary",
+            "monthsAfter": 1,
+            "day": "last"
+          },
+          "rule": "By the end of the month after the anniversary month of registration in Manitoba (we use the incorporation date; change it if the registration date differs)",
+          "applies": "Corporations from outside Manitoba registered there (not corporations from British Columbia, Alberta, Saskatchewan, under the New West Partnership)",
+          "description": "Extra-provincially registered corporations confirm their information with the Manitoba registry each year to stay in good standing.",
+          "authority": "Manitoba Companies Office",
+          "source": "https://companiesoffice.gov.mb.ca/updating_manitoba_corporation.html",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ],
+            "not": {
+              "provincialHome": [
+                "British Columbia",
+                "Alberta",
+                "Saskatchewan"
+              ]
+            }
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ca-mb-levy",
+          "category": "Conditional",
+          "name": "Manitoba Health and Post-Secondary Education Tax Levy",
+          "schedule": {
+            "type": "monthly",
+            "day": 15
+          },
+          "rule": "Monthly by the 15th of the following month, with an annual return by 31 March",
+          "applies": "Employers whose Manitoba payroll exceeds the $2.5 million exemption (2026)",
+          "description": "The payroll levy applies above the annual exemption, at a reduced rate up to $5 million of payroll.",
+          "authority": "Manitoba Finance, Taxation Division",
+          "source": "https://www.gov.mb.ca/finance/taxation/taxes/payroll.html",
+          "confidence": "medium"
+        },
+        {
+          "id": "ca-manitoba-wcb",
+          "category": "Conditional",
+          "name": "Workers' Compensation Reporting (WCB Manitoba)",
+          "schedule": {
+            "type": "annual",
+            "month": 2,
+            "day": "last"
+          },
+          "rule": "Annual payroll report by the last day of February",
+          "applies": "Employers with workers in Manitoba (most industries)",
+          "description": "Register with WCB Manitoba when you hire in Manitoba, pay premiums on insurable earnings and report the year's payroll.",
+          "authority": "WCB Manitoba",
+          "source": "https://www.wcb.mb.ca/",
+          "confidence": "medium"
+        }
+      ],
+      "operatingItems": [
+        {
+          "id": "ca-mb-rst",
+          "category": "Conditional",
+          "name": "Manitoba Retail Sales Tax (RST) Return",
+          "schedule": {
+            "type": "monthly",
+            "day": 20
+          },
+          "rule": "By the 20th of the month after each reporting period",
+          "applies": "Businesses registered to collect Manitoba RST",
+          "description": "Manitoba RST is reported to Manitoba Finance separately from GST.",
+          "authority": "Manitoba Finance, Taxation Division",
+          "source": "https://www.gov.mb.ca/finance/taxation/taxes/retail.html",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "New Brunswick": {
+      "items": [
+        {
+          "id": "ca-new-brunswick-annual-return",
+          "category": "Mandatory Annual",
+          "name": "New Brunswick Annual Return",
+          "schedule": {
+            "type": "anniversary",
+            "monthsAfter": 1,
+            "day": "last"
+          },
+          "rule": "By the end of the month after the anniversary month of incorporation",
+          "applies": "Corporations incorporated in New Brunswick",
+          "description": "Confirms the corporation's registered office, directors and officers with the provincial registry each year; corporations that stop filing are eventually dissolved.",
+          "authority": "Corporate Registry of New Brunswick (Service New Brunswick)",
+          "source": "https://www2.snb.ca/content/snb/en/sites/corporate-registry/annual-return.html",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ],
+            "incorporation": [
+              "Provincial"
+            ]
+          }
+        }
+      ],
+      "extraProvincialItems": [
+        {
+          "id": "ca-new-brunswick-xp-registration",
+          "category": "Event-Based",
+          "name": "Extra-Provincial Registration in New Brunswick",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "Before (or promptly after) starting to carry on business in New Brunswick",
+          "applies": "Corporations from outside New Brunswick carrying on business there",
+          "description": "A corporation incorporated elsewhere (federally or in another province) registers extra-provincially in New Brunswick and appoints an attorney for service where required.",
+          "authority": "Corporate Registry of New Brunswick (Service New Brunswick)",
+          "source": "https://www2.snb.ca/content/snb/en/sites/corporate-registry/annual-return.html",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ]
+          }
+        },
+        {
+          "id": "ca-new-brunswick-xp-annual",
+          "category": "Mandatory Annual",
+          "name": "New Brunswick Extra-Provincial Annual Return",
+          "schedule": {
+            "type": "anniversary",
+            "monthsAfter": 1,
+            "day": "last"
+          },
+          "rule": "By the end of the month after the anniversary month of registration in New Brunswick (we use the incorporation date; change it if the registration date differs)",
+          "applies": "Corporations from outside New Brunswick registered there",
+          "description": "Extra-provincially registered corporations confirm their information with the New Brunswick registry each year to stay in good standing.",
+          "authority": "Corporate Registry of New Brunswick (Service New Brunswick)",
+          "source": "https://www2.snb.ca/content/snb/en/sites/corporate-registry/annual-return.html",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ca-new-brunswick-wcb",
+          "category": "Conditional",
+          "name": "Workers' Compensation Reporting (WorkSafeNB)",
+          "schedule": {
+            "type": "annual",
+            "month": 2,
+            "day": "last"
+          },
+          "rule": "Annual payroll report by the last day of February",
+          "applies": "Employers with workers in New Brunswick (most industries)",
+          "description": "Register with WorkSafeNB when you hire in New Brunswick, pay premiums on insurable earnings and report the year's payroll.",
+          "authority": "WorkSafeNB",
+          "source": "https://www.worksafenb.ca/",
+          "confidence": "medium"
+        }
+      ],
+      "operatingItems": []
+    },
+    "Nova Scotia": {
+      "items": [
+        {
+          "id": "ca-nova-scotia-annual-return",
+          "category": "Mandatory Annual",
+          "name": "Nova Scotia Annual Renewal",
+          "schedule": {
+            "type": "anniversary",
+            "day": "last"
+          },
+          "rule": "During the anniversary month of incorporation",
+          "applies": "Corporations incorporated in Nova Scotia",
+          "description": "Confirms the corporation's registered office, directors and officers with the provincial registry each year; corporations that stop filing are eventually dissolved.",
+          "authority": "Nova Scotia Registry of Joint Stock Companies",
+          "source": "https://www.novascotia.ca/renew-business-or-non-profit-registration-registry-joint-stock-companies",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ],
+            "incorporation": [
+              "Provincial"
+            ]
+          }
+        },
+        {
+          "id": "ca-ns-business-renewal",
+          "category": "Mandatory Annual",
+          "name": "Nova Scotia Business Registration Renewal",
+          "schedule": {
+            "type": "anniversary",
+            "day": "last"
+          },
+          "rule": "Annually, during the anniversary month of registration",
+          "applies": "Sole proprietorships and partnerships registered in Nova Scotia",
+          "description": "Registered business names and partnerships renew with the Registry of Joint Stock Companies each year.",
+          "authority": "Nova Scotia Registry of Joint Stock Companies",
+          "source": "https://www.novascotia.ca/renew-business-or-non-profit-registration-registry-joint-stock-companies",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship",
+              "General Partnership"
+            ]
+          }
+        }
+      ],
+      "extraProvincialItems": [
+        {
+          "id": "ca-nova-scotia-xp-registration",
+          "category": "Event-Based",
+          "name": "Extra-Provincial Registration in Nova Scotia",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "Before (or promptly after) starting to carry on business in Nova Scotia",
+          "applies": "Corporations from outside Nova Scotia carrying on business there",
+          "description": "A corporation incorporated elsewhere (federally or in another province) registers extra-provincially in Nova Scotia and appoints an attorney for service where required.",
+          "authority": "Nova Scotia Registry of Joint Stock Companies",
+          "source": "https://www.novascotia.ca/renew-business-or-non-profit-registration-registry-joint-stock-companies",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ]
+          }
+        },
+        {
+          "id": "ca-nova-scotia-xp-annual",
+          "category": "Mandatory Annual",
+          "name": "Nova Scotia Extra-Provincial Annual Return",
+          "schedule": {
+            "type": "anniversary",
+            "day": "last"
+          },
+          "rule": "During the anniversary month of registration in Nova Scotia (we use the incorporation date; change it if the registration date differs)",
+          "applies": "Corporations from outside Nova Scotia registered there",
+          "description": "Extra-provincially registered corporations confirm their information with the Nova Scotia registry each year to stay in good standing.",
+          "authority": "Nova Scotia Registry of Joint Stock Companies",
+          "source": "https://www.novascotia.ca/renew-business-or-non-profit-registration-registry-joint-stock-companies",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ca-nova-scotia-wcb",
+          "category": "Conditional",
+          "name": "Workers' Compensation Reporting (Workers' Compensation Board of Nova Scotia)",
+          "schedule": {
+            "type": "annual",
+            "month": 2,
+            "day": "last"
+          },
+          "rule": "Annual payroll report by the last day of February",
+          "applies": "Employers with workers in Nova Scotia (most industries)",
+          "description": "Register with Workers' Compensation Board of Nova Scotia when you hire in Nova Scotia, pay premiums on insurable earnings and report the year's payroll.",
+          "authority": "Workers' Compensation Board of Nova Scotia",
+          "source": "https://www.wcb.ns.ca/",
+          "confidence": "medium"
+        }
+      ],
+      "operatingItems": []
+    },
+    "Newfoundland and Labrador": {
+      "items": [
+        {
+          "id": "ca-newfoundland-and-labrador-annual-return",
+          "category": "Mandatory Annual",
+          "name": "Newfoundland and Labrador Annual Return",
+          "schedule": {
+            "type": "anniversary",
+            "daysAfter": 60
+          },
+          "rule": "Within 60 days after each anniversary of incorporation",
+          "applies": "Corporations incorporated in Newfoundland and Labrador",
+          "description": "Confirms the corporation's registered office, directors and officers with the provincial registry each year; corporations that stop filing are eventually dissolved.",
+          "authority": "Newfoundland and Labrador Registry of Companies",
+          "source": "https://www.gov.nl.ca/gs/registries/companies/annual-returns/",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ],
+            "incorporation": [
+              "Provincial"
+            ]
+          }
+        }
+      ],
+      "extraProvincialItems": [
+        {
+          "id": "ca-newfoundland-and-labrador-xp-registration",
+          "category": "Event-Based",
+          "name": "Extra-Provincial Registration in Newfoundland and Labrador",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "Before (or promptly after) starting to carry on business in Newfoundland and Labrador",
+          "applies": "Corporations from outside Newfoundland and Labrador carrying on business there",
+          "description": "A corporation incorporated elsewhere (federally or in another province) registers extra-provincially in Newfoundland and Labrador and appoints an attorney for service where required.",
+          "authority": "Newfoundland and Labrador Registry of Companies",
+          "source": "https://www.gov.nl.ca/gs/registries/companies/annual-returns/",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ]
+          }
+        },
+        {
+          "id": "ca-newfoundland-and-labrador-xp-annual",
+          "category": "Mandatory Annual",
+          "name": "Newfoundland and Labrador Extra-Provincial Annual Return",
+          "schedule": {
+            "type": "anniversary",
+            "daysAfter": 60
+          },
+          "rule": "Within 60 days after each anniversary of registration (we use the incorporation date; change it if the registration date differs)",
+          "applies": "Corporations from outside Newfoundland and Labrador registered there",
+          "description": "Extra-provincially registered corporations confirm their information with the Newfoundland and Labrador registry each year to stay in good standing.",
+          "authority": "Newfoundland and Labrador Registry of Companies",
+          "source": "https://www.gov.nl.ca/gs/registries/companies/annual-returns/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ca-nl-hapset",
+          "category": "Conditional",
+          "name": "Health and Post-Secondary Education Tax (HAPSET)",
+          "schedule": {
+            "type": "monthly",
+            "day": 20
+          },
+          "rule": "Monthly remittances, with an annual return after year end",
+          "applies": "Employers whose Newfoundland and Labrador payroll exceeds the $2 million exemption",
+          "description": "A 2% payroll tax on remuneration above the exemption.",
+          "authority": "Newfoundland and Labrador Department of Finance",
+          "source": "https://www.gov.nl.ca/fin/",
+          "confidence": "medium"
+        },
+        {
+          "id": "ca-newfoundland-and-labrador-wcb",
+          "category": "Conditional",
+          "name": "Workers' Compensation Reporting (WorkplaceNL)",
+          "schedule": {
+            "type": "annual",
+            "month": 2,
+            "day": "last"
+          },
+          "rule": "Annual payroll report by the last day of February",
+          "applies": "Employers with workers in Newfoundland and Labrador (most industries)",
+          "description": "Register with WorkplaceNL when you hire in Newfoundland and Labrador, pay premiums on insurable earnings and report the year's payroll.",
+          "authority": "WorkplaceNL",
+          "source": "https://workplacenl.ca/",
+          "confidence": "medium"
+        }
+      ],
+      "operatingItems": []
+    },
+    "Prince Edward Island": {
+      "items": [
+        {
+          "id": "ca-prince-edward-island-annual-return",
+          "category": "Mandatory Annual",
+          "name": "PEI Annual Return",
+          "schedule": {
+            "type": "anniversary",
+            "daysAfter": 60
+          },
+          "rule": "Within 60 days after each anniversary of incorporation",
+          "applies": "Corporations incorporated in Prince Edward Island",
+          "description": "Confirms the corporation's registered office, directors and officers with the provincial registry each year; corporations that stop filing are eventually dissolved.",
+          "authority": "PEI Corporate Registry",
+          "source": "https://www.princeedwardisland.ca/en/feature/pei-business-corporate-registry",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ],
+            "incorporation": [
+              "Provincial"
+            ]
+          }
+        }
+      ],
+      "extraProvincialItems": [
+        {
+          "id": "ca-prince-edward-island-xp-registration",
+          "category": "Event-Based",
+          "name": "Extra-Provincial Registration in Prince Edward Island",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "Before (or promptly after) starting to carry on business in Prince Edward Island",
+          "applies": "Corporations from outside Prince Edward Island carrying on business there",
+          "description": "A corporation incorporated elsewhere (federally or in another province) registers extra-provincially in Prince Edward Island and appoints an attorney for service where required.",
+          "authority": "PEI Corporate Registry",
+          "source": "https://www.princeedwardisland.ca/en/feature/pei-business-corporate-registry",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ]
+          }
+        },
+        {
+          "id": "ca-prince-edward-island-xp-annual",
+          "category": "Mandatory Annual",
+          "name": "Prince Edward Island Extra-Provincial Annual Return",
+          "schedule": {
+            "type": "anniversary",
+            "daysAfter": 60
+          },
+          "rule": "Within 60 days after each anniversary of registration (we use the incorporation date; change it if the registration date differs)",
+          "applies": "Corporations from outside Prince Edward Island registered there",
+          "description": "Extra-provincially registered corporations confirm their information with the Prince Edward Island registry each year to stay in good standing.",
+          "authority": "PEI Corporate Registry",
+          "source": "https://www.princeedwardisland.ca/en/feature/pei-business-corporate-registry",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ca-prince-edward-island-wcb",
+          "category": "Conditional",
+          "name": "Workers' Compensation Reporting (Workers Compensation Board of PEI)",
+          "schedule": {
+            "type": "annual",
+            "month": 2,
+            "day": "last"
+          },
+          "rule": "Annual payroll report by the last day of February",
+          "applies": "Employers with workers in Prince Edward Island (most industries)",
+          "description": "Register with Workers Compensation Board of PEI when you hire in Prince Edward Island, pay premiums on insurable earnings and report the year's payroll.",
+          "authority": "Workers Compensation Board of PEI",
+          "source": "https://www.wcb.pe.ca/",
+          "confidence": "medium"
+        }
+      ],
+      "operatingItems": []
+    },
+    "Quebec": {
+      "items": [],
+      "extraProvincialItems": [
+        {
+          "id": "ca-quebec-xp-registration",
+          "category": "Event-Based",
+          "name": "Extra-Provincial Registration in Quebec",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "Before (or promptly after) starting to carry on business in Quebec",
+          "applies": "Corporations from outside Quebec carrying on business there",
+          "description": "A corporation incorporated elsewhere (federally or in another province) registers extra-provincially in Quebec and appoints an attorney for service where required.",
+          "authority": "Registraire des entreprises du Québec",
+          "source": "https://www.quebec.ca/en/businesses-and-self-employed-workers",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ca-quebec-source-deductions",
+          "category": "Conditional",
+          "name": "Quebec Source Deductions and Employer Contributions (Revenu Québec)",
+          "schedule": {
+            "type": "monthly",
+            "day": 15
+          },
+          "rule": "By the 15th of the month after the pay date (regular remitters)",
+          "applies": "Employers with employees working in Quebec",
+          "description": "Quebec income tax, QPP, QPIP and the employer's Health Services Fund contribution are remitted to Revenu Québec instead of (or as well as) the CRA.",
+          "authority": "Revenu Québec",
+          "source": "https://www.revenuquebec.ca/en/businesses/source-deductions-and-employer-contributions/",
+          "confidence": "high"
+        },
+        {
+          "id": "ca-quebec-rl1",
+          "category": "Conditional",
+          "name": "RL-1 Slips and RLZ-1.S Summary",
+          "schedule": {
+            "type": "annual",
+            "month": 2,
+            "day": "last"
+          },
+          "rule": "Last day of February (for the previous calendar year)",
+          "applies": "Employers with employees working in Quebec",
+          "description": "The Quebec equivalent of T4 slips, with the summary reconciling source deductions, the Health Services Fund, CNT and WSDRF contributions.",
+          "authority": "Revenu Québec",
+          "source": "https://www.revenuquebec.ca/en/businesses/rl-slips-and-summaries/",
+          "confidence": "high"
+        },
+        {
+          "id": "ca-quebec-wcb",
+          "category": "Conditional",
+          "name": "Workers' Compensation Reporting (CNESST)",
+          "schedule": {
+            "type": "annual",
+            "month": 3,
+            "day": 15
+          },
+          "rule": "Annual statement of wages by 15 March",
+          "applies": "Employers with workers in Quebec (most industries)",
+          "description": "Register with CNESST when you hire in Quebec, pay premiums on insurable earnings and report the year's payroll.",
+          "authority": "CNESST",
+          "source": "https://www.cnesst.gouv.qc.ca/",
+          "confidence": "medium"
+        }
+      ],
+      "operatingItems": [
+        {
+          "id": "ca-quebec-declaration-corp",
+          "category": "Mandatory Annual",
+          "name": "Quebec Annual Updating Declaration and Registration Fee",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 6,
+            "day": "last"
+          },
+          "rule": "With the Quebec corporate tax return, within 6 months after financial year end (fee within 2 months); otherwise between 15 May and 15 November",
+          "applies": "Corporations registered in Quebec",
+          "description": "Every enterprise registered with the Registraire des entreprises (including corporations from outside Quebec) confirms its information each year and pays the annual registration fee; corporations usually file it with their Quebec income tax return.",
+          "authority": "Registraire des entreprises du Québec",
+          "source": "https://www.quebec.ca/en/businesses-and-self-employed-workers/updating-information/update-information-enterprise-register/annual-updating-declaration",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ]
+          }
+        },
+        {
+          "id": "ca-quebec-declaration-individual",
+          "category": "Mandatory Annual",
+          "name": "Quebec Annual Updating Declaration and Registration Fee",
+          "schedule": {
+            "type": "annual",
+            "month": 6,
+            "day": 15
+          },
+          "rule": "Between 1 January and 15 June (fee by 30 April if filed with the income tax return)",
+          "applies": "Sole proprietorships and partnerships registered in Quebec",
+          "description": "Every enterprise registered with the Registraire des entreprises (including corporations from outside Quebec) confirms its information each year and pays the annual registration fee; corporations usually file it with their Quebec income tax return.",
+          "authority": "Registraire des entreprises du Québec",
+          "source": "https://www.quebec.ca/en/businesses-and-self-employed-workers/updating-information/update-information-enterprise-register/annual-updating-declaration",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship",
+              "General Partnership"
+            ]
+          }
+        },
+        {
+          "id": "ca-quebec-co17",
+          "category": "Mandatory Annual",
+          "name": "Quebec Corporation Income Tax Return (CO-17)",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 6,
+            "day": "last"
+          },
+          "rule": "Within 6 months after financial year end",
+          "applies": "Corporations with an establishment in Quebec",
+          "description": "Quebec collects its own corporate income tax, so a CO-17 is filed with Revenu Québec in addition to the federal T2.",
+          "authority": "Revenu Québec",
+          "source": "https://www.revenuquebec.ca/en/businesses/income-tax/corporation-income-tax/",
+          "confidence": "high",
+          "when": {
+            "entityType": [
+              "Corporation"
+            ]
+          }
+        },
+        {
+          "id": "ca-quebec-qst",
+          "category": "Conditional",
+          "name": "Quebec Sales Tax (QST) Return",
+          "schedule": {
+            "type": "fy_quarterly",
+            "monthsAfter": 1,
+            "day": "last"
+          },
+          "rule": "Same reporting periods and due dates as the GST/HST return (Revenu Québec administers both in Quebec)",
+          "applies": "Businesses registered for QST (making taxable supplies in Quebec over $30,000)",
+          "description": "QST is reported to Revenu Québec, generally together with GST, for the same periods.",
+          "authority": "Revenu Québec",
+          "source": "https://www.revenuquebec.ca/en/businesses/consumption-taxes/gsthst-and-qst/",
+          "confidence": "medium",
+          "when": {
+            "not": {
+              "salesTax": [
+                "Not registered"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

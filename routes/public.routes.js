@@ -29,7 +29,7 @@ const { getPriceInfo } = require("../lib/complianceFees");
 const { normalizePhone } = require("../lib/calendarView");
 const { notifyStaff, notifyClient } = require("../lib/notify");
 
-const { checkProfile } = require("../lib/countries");
+const { checkProfile, formDefinition } = require("../lib/countries");
 const router = express.Router();
 const { reserveAiRun, BudgetError, verifyHuman, humanCheckEnabled, turnstileKeys } = require("../lib/abuseGuard");
 
@@ -38,6 +38,13 @@ const { reserveAiRun, BudgetError, verifyHuman, humanCheckEnabled, turnstileKeys
 router.get("/config", (req, res) => {
   res.set("Cache-Control", "no-store");
   res.json({ humanCheck: humanCheckEnabled() ? { provider: "turnstile", siteKey: turnstileKeys().siteKey } : null });
+});
+
+// GET /api/public/form — the countries and the questions asked for each
+// (lib/countries.js), rendered by public/js/company-form.js on every form.
+router.get("/form", (req, res) => {
+  res.set("Cache-Control", "public, max-age=300");
+  res.json(formDefinition());
 });
 
 const { mongoStore } = require("../lib/rateLimitStore");
@@ -128,7 +135,7 @@ function daysUntilOf(dueDateStr) {
 // holidays, fiscal-year and anniversary rules), or null if event-based.
 function daysUntilFor(item, profile) {
   const D = require("../lib/deadlines");
-  const next = D.nextOccurrence(D.scheduleFor(item), profile || {}, new Date(), { businessDays: D.usesUsBusinessDays(item) });
+  const next = D.nextOccurrence(D.scheduleFor(item), profile || {}, new Date(), { businessDays: D.usesUsBusinessDays(item, profile) });
   return next ? D.daysBetween(new Date(), next.date) : daysUntilOf(item.due_date);
 }
 
@@ -211,8 +218,9 @@ router.post("/generate", generateLimiter, async (req, res) => {
   }
 
   try {
-    await reserveAiRun(signedInClient ? "client" : "public");
-    const { items, sourceMode } = await generateCompanyCalendar(profile);
+    const { items, sourceMode } = await generateCompanyCalendar(profile, {
+      beforeLiveResearch: () => reserveAiRun(signedInClient ? "client" : "public"),
+    });
     if (!items.length) {
       return res.status(502).json({ error: "No calendar items returned — try again or refine the profile." });
     }
