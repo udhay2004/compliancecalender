@@ -84,7 +84,7 @@ if (process.env.NODE_ENV === "production") {
   if (!process.env.APP_URL) warn("APP_URL is not set: links in emails, webhooks and calendar feeds will be wrong.");
   if (!process.env.MAIL_FROM && !process.env.SMTP_FROM) warn("MAIL_FROM is not set: emails are sent from a default address that may not be verified for your domain, and can land in spam.");
   if (!process.env.TOTP_ENCRYPTION_KEY) warn("TOTP_ENCRYPTION_KEY is not set: staff two-factor secrets are protected with a key derived from JWT_SECRET. Set a separate key once and never change it.");
-  if (!process.env.TURNSTILE_SITE_KEY || !process.env.TURNSTILE_SECRET_KEY) warn("The \"verify you are human\" check is OFF (TURNSTILE_SITE_KEY / TURNSTILE_SECRET_KEY). The daily AI limit still applies.");
+  if (!process.env.TURNSTILE_SITE_KEY || !process.env.TURNSTILE_SECRET_KEY) warn("The \"verify you are human\" check is OFF (TURNSTILE_SITE_KEY / TURNSTILE_SECRET_KEY). The per-IP rate limit still applies.");
   if (!process.env.SENTRY_DSN) warn("SENTRY_DSN is not set: errors are only written to the logs, nobody is alerted.");
 }
 {
