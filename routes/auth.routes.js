@@ -84,6 +84,13 @@ router.post("/login", loginLimiter, async (req, res) => {
       needsOtp: true,
     });
   }
+  // A client who has only ever used email codes or Google.
+  if (user.role === "client" && !user.passwordHash) {
+    return res.status(409).json({
+      error: "You haven't set a password yet. Sign in with an email code (or Google), then add a password in your portal.",
+      needsOtp: true,
+    });
+  }
   const ok = await user.checkPassword(password);
   if (!ok) {
     return res.status(401).json({ error: "Invalid email or password." });
@@ -334,7 +341,9 @@ router.post("/password/set", async (req, res) => {
 
   // Changing an existing password requires proving you know the old one
   // — otherwise a borrowed unlocked laptop is a permanent takeover.
-  if (!viaSetupToken) {
+  // A client adding their first password (they've only used email codes
+  // or Google) has none to give; the emailed notice below tells them.
+  if (!viaSetupToken && user.passwordHash) {
     if (!currentPassword) {
       return res.status(400).json({ error: "Enter your current password." });
     }
@@ -348,6 +357,7 @@ router.post("/password/set", async (req, res) => {
   if (!verdict.ok) {
     return res.status(400).json({ error: verdict.error });
   }
+  const firstPassword = viaSetupToken || !user.passwordHash;
 
   // Bumps tokenVersion, which invalidates every session anywhere.
   await user.setPassword(password);
@@ -364,9 +374,9 @@ router.post("/password/set", async (req, res) => {
     .catch((err) => console.error("[otp] Password-change notice failed (non-fatal):", err.message));
 
   logActivity({
-    action: viaSetupToken ? "password_set" : "password_changed",
+    action: firstPassword ? "password_set" : "password_changed",
     actor: user,
-    summary: viaSetupToken
+    summary: firstPassword
       ? `${user.email} set their password for the first time.`
       : `${user.email} changed their password.`,
   });

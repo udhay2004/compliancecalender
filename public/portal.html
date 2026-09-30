@@ -125,6 +125,7 @@
       <div id="detailsPanel"></div>
       <div id="whatsappPanel"></div>
       <div id="calendarExportPanel"></div>
+      <div id="passwordPanel"></div>
       <div id="invoicesPanel"></div>
       <div id="pricesPanel"></div>
       <div id="contactPanel"></div>
@@ -177,6 +178,8 @@
     const { user } = await res.json();
     if (user.role !== 'client') { location.href = '/dashboard.html'; return false; }
     me = user;
+    // The login page opens on the right form next time (see login.html).
+    try { localStorage.setItem("cc_last_sign_in", JSON.stringify({ email: user.email, client: true, hasPassword: Boolean(user.hasPassword) })); } catch (_) {}
     document.getElementById('navUser').innerHTML = `<span>${escapeHtml(user.name || user.email)}</span><button id="logoutBtn">Log out</button>`;
     document.getElementById('logoutBtn').addEventListener('click', async () => {
       await fetch('/api/auth/logout', { method: 'POST' });
@@ -311,6 +314,52 @@
         h.classList.toggle('err', !data.whatsappTest.ok);
       } else if (body.whatsappOn === false) { h.textContent = 'WhatsApp messages are off. You\'ll still get emails.'; }
     } catch (err) { hint.textContent = err.message; hint.classList.add('err'); }
+  }
+
+  // ---------------- Password (optional for clients) ----------------
+  // Clients sign in with an emailed code or Google; a password is an
+  // optional faster way in. The login page remembers it on this browser.
+  function renderPasswordPanel(message) {
+    const el = document.getElementById('passwordPanel');
+    const has = Boolean(me && me.hasPassword);
+    el.innerHTML = `
+      <div class="list-section" style="margin-top:28px;">
+        <div class="section-title">${has ? 'Your password' : 'Sign in faster with a password'}</div>
+        <div class="contact-card">
+          <div class="contact-card-row">${has
+            ? 'You can sign in with your password, an email code or Google.'
+            : 'Add a password to sign in without waiting for an email code. Email codes and Google keep working.'}</div>
+          <form id="pwForm" class="edit-grid" style="margin-top:8px;">
+            <input type="email" autocomplete="username" value="${escapeHtml(me ? me.email : '')}" hidden>
+            ${has ? '<div class="field span2"><label for="pwCurrent">Current password</label><input id="pwCurrent" type="password" autocomplete="current-password" required></div>' : ''}
+            <div class="field span2"><label for="pwNew">${has ? 'New password' : 'Password'}</label><input id="pwNew" type="password" autocomplete="new-password" minlength="12" required></div>
+            <div class="field span2"><label for="pwConfirm">Confirm password</label><input id="pwConfirm" type="password" autocomplete="new-password" minlength="12" required></div>
+            <div class="mini-note span2">At least 12 characters, with letters and numbers.</div>
+            <div class="mini-actions span2"><button class="mini-btn solid" type="submit" id="pwSave">${has ? 'Change password' : 'Save password'}</button></div>
+            <div class="mini-note span2" id="pwHint" role="status">${escapeHtml(message || '')}</div>
+          </form>
+        </div>
+      </div>`;
+    document.getElementById('pwForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const hint = document.getElementById('pwHint');
+      const password = document.getElementById('pwNew').value;
+      const confirmPassword = document.getElementById('pwConfirm').value;
+      hint.classList.remove('err');
+      if (password !== confirmPassword) { hint.textContent = "The two passwords don't match."; hint.classList.add('err'); return; }
+      const body = { password, confirmPassword };
+      if (has) body.currentPassword = document.getElementById('pwCurrent').value;
+      const btn = document.getElementById('pwSave');
+      btn.disabled = true; hint.textContent = 'Saving…';
+      try {
+        const data = await api('/api/auth/password/set', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        me = data.user || Object.assign({}, me, { hasPassword: true });
+        try { localStorage.setItem('cc_last_sign_in', JSON.stringify({ email: me.email, client: true, hasPassword: true })); } catch (_) {}
+        renderPasswordPanel(has ? 'Password changed. Other devices have been signed out.' : 'Password saved. Next time you can sign in with it.');
+      } catch (err) {
+        btn.disabled = false; hint.textContent = err.message; hint.classList.add('err');
+      }
+    });
   }
 
   // ---------------- Add deadlines to your own calendar ----------------
@@ -903,6 +952,7 @@
     await loadCalendars();
     renderWhatsappPanel();
     renderCalendarExport();
+    renderPasswordPanel();
     loadContact();
     loadChat();
   })();

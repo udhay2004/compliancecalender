@@ -25,6 +25,17 @@ let googleProfile = null;
 let idCounter = 0;
 const hexId = () => (++idCounter).toString(16).padStart(24, "0");
 
+// The real account rules (models/User.js validation), password hashing and
+// safe JSON, on top of the in-memory store: a stand-in that skipped them
+// once hid a bug where accounts made by email code failed to save.
+const mongoose = require("mongoose");
+const RealUser = require("../models/User");
+async function validateLikeTheDatabase(u) {
+  const { _id, ...fields } = u;
+  const doc = new RealUser({ ...fields, clientOrgId: u.clientOrgId ? new mongoose.Types.ObjectId() : null });
+  await doc.validate();
+}
+
 class FakeUser {
   constructor(attrs) {
     Object.assign(this, {
@@ -34,15 +45,17 @@ class FakeUser {
     }, attrs);
   }
   isLocked() { return Boolean(this.lockedUntil && this.lockedUntil > new Date()); }
-  checkPassword() { return Promise.resolve(false); }
-  toSafeJSON() { return { id: this._id, email: this.email, name: this.name, role: this.role, clientOrgId: this.clientOrgId }; }
-  async save() { return this; }
+  checkPassword(pw) { return RealUser.schema.methods.checkPassword.call(this, pw); }
+  setPassword(pw) { return RealUser.schema.methods.setPassword.call(this, pw); }
+  toSafeJSON() { return RealUser.schema.methods.toSafeJSON.call(this); }
+  async save() { await validateLikeTheDatabase(this); return this; }
 }
 FakeUser.findOne = async (q) => users.find((u) => (q.email !== undefined ? u.email === q.email : u.googleId === q.googleId)) || null;
 FakeUser.findById = async (id) => users.find((u) => String(u._id) === String(id)) || null;
 FakeUser.create = async (attrs) => {
   if (users.some((u) => u.email === attrs.email)) { const e = new Error("dup"); e.code = 11000; throw e; }
   const u = new FakeUser(attrs);
+  await validateLikeTheDatabase(u);
   users.push(u);
   return u;
 };
@@ -321,4 +334,45 @@ test("Google sign-in for an existing client still works from the Sign in tab", a
   const back = await c.get(`/api/auth/google/callback?code=abc&state=${state}`);
   assert.strictEqual(back.location, "/portal.html");
   assert.strictEqual(users.find((u) => u.email === "owner@acme.com").googleId, "g-acme");
+});
+
+test("a client adds a password in the portal, and the next sign-in can use it", async () => {
+  const c = makeClient();
+  const noPassword = await c.post("/api/auth/login", { email: "owner@acme.com", password: "anything-at-all-1" });
+  assert.strictEqual(noPassword.status, 409, "told to use a code first");
+  assert.strictEqual(noPassword.data.needsOtp, true);
+
+  await c.post("/api/auth/client/code/request", { email: "owner@acme.com", mode: "signin" });
+  const signedIn = await c.post("/api/auth/client/code/verify", { email: "owner@acme.com", code: lastCodeFor("owner@acme.com"), mode: "signin" });
+  assert.strictEqual(signedIn.data.user.hasPassword, false);
+
+  // The first password needs no "current password": there isn't one.
+  const set = await c.post("/api/auth/password/set", { password: "Blue-harbour-2026", confirmPassword: "Blue-harbour-2026" });
+  assert.strictEqual(set.status, 200, JSON.stringify(set.data));
+  assert.strictEqual(set.data.user.hasPassword, true);
+  assert.strictEqual(set.data.redirect, "/portal.html");
+  assert.strictEqual((await c.get("/api/auth/me")).status, 200, "still signed in on this device");
+
+  // A new browser: the password works, a wrong one doesn't.
+  const other = makeClient();
+  assert.strictEqual((await other.post("/api/auth/login", { email: "owner@acme.com", password: "wrong-password-99" })).status, 401);
+  const login = await other.post("/api/auth/login", { email: "owner@acme.com", password: "Blue-harbour-2026" });
+  assert.strictEqual(login.status, 200);
+  assert.strictEqual(login.data.redirect, "/portal.html");
+  assert.strictEqual(login.data.user.hasPassword, true);
+
+  // Changing it now needs the current one; email codes keep working.
+  assert.strictEqual((await other.post("/api/auth/password/set", { password: "Green-harbour-2027", confirmPassword: "Green-harbour-2027" })).status, 400);
+  assert.strictEqual((await other.post("/api/auth/password/set", { password: "Green-harbour-2027", confirmPassword: "Green-harbour-2027", currentPassword: "Blue-harbour-2026" })).status, 200);
+  const code = makeClient();
+  await code.post("/api/auth/client/code/request", { email: "owner@acme.com", mode: "signin" });
+  assert.strictEqual((await code.post("/api/auth/client/code/verify", { email: "owner@acme.com", code: lastCodeFor("owner@acme.com"), mode: "signin" })).status, 200);
+  assert.strictEqual((await code.post("/api/auth/login", { email: "owner@acme.com", password: "Green-harbour-2027" })).status, 200, "the password is kept after a code sign-in");
+});
+
+test("clients may have no password; team accounts always need a way in", async () => {
+  const client = new RealUser({ email: "a@b.io", role: "client", clientOrgId: new mongoose.Types.ObjectId() });
+  await client.validate();
+  const staff = new RealUser({ email: "s@b.io", role: "staff" });
+  await assert.rejects(staff.validate(), /passwordHash, a googleId, or mustSetPassword/);
 });

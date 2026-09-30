@@ -77,6 +77,7 @@
   .or-divider { display: flex; align-items: center; gap: 12px; margin: 18px 0 6px; color: var(--ink-soft); font-size: 12.5px; }
   .or-divider::before, .or-divider::after { content: ''; flex: 1; border-top: 1px solid var(--rule); }
   #stepClient:not(.signup) .signup-only { display: none; }
+  #stepClient.signup .signin-only { display: none; }
 </style>
 </head>
 <body>
@@ -166,7 +167,10 @@
             <button type="submit" class="primary" id="clientSubmit">Email me a code →</button>
           </div>
         </form>
-        <div class="form-foot" style="margin-top:16px;" id="clientSwitch"></div>
+        <div class="form-foot signin-only" style="margin-top:16px;">
+          Set a password in your portal? <a href="#" id="clientUsePassword">Sign in with it instead</a>
+        </div>
+        <div class="form-foot" style="margin-top:8px;" id="clientSwitch"></div>
       </div>
     </div>
 
@@ -294,7 +298,7 @@
     <!-- Existing-password sign-in, offered once an account has one -->
     <div class="step" id="stepPasswordLogin">
       <div class="card-head">
-        <button type="button" class="back-link" data-back="stepDoor">← Back</button>
+        <button type="button" class="back-link" id="passwordBack">← Back</button>
         <div class="card-eyebrow">Returning</div>
         <h1>Sign in with your password</h1>
       </div>
@@ -302,7 +306,7 @@
         <form id="loginForm">
           <div class="grid full">
             <div class="field">
-              <label for="loginEmail">Work email</label>
+              <label for="loginEmail">Email</label>
               <input type="email" id="loginEmail" autocomplete="username" required>
             </div>
             <div class="field">
@@ -327,6 +331,22 @@
 <script>
 (function () {
   'use strict';
+
+  // This browser's last sign-in (address, and whether the account has a
+  // password), so the page opens on the right form next time.
+  var REMEMBER_KEY = 'cc_last_sign_in';
+  function remember(user) {
+    if (!user || !user.email) return;
+    try {
+      localStorage.setItem(REMEMBER_KEY, JSON.stringify({ email: user.email, client: user.role === 'client', hasPassword: Boolean(user.hasPassword) }));
+    } catch (_) {}
+  }
+  function recalled() {
+    try {
+      var v = JSON.parse(localStorage.getItem(REMEMBER_KEY) || 'null');
+      return v && typeof v.email === 'string' ? v : null;
+    } catch (_) { return null; }
+  }
 
   var state = { portal: 'staff', email: '', resendAt: 0 };
 
@@ -558,7 +578,7 @@
       companyName: $('clientCompany').value.trim(),
       calendarId: client.calendarId
     })
-      .then(function (data) { location.href = data.redirect || '/portal.html'; })
+      .then(function (data) { remember(data.user); location.href = data.redirect || '/portal.html'; })
       .catch(function (err) {
         btn.disabled = false;
         if (err.code) { handleClientError(err, 'clientCodeHint'); return; }
@@ -599,18 +619,41 @@
     backs[b].addEventListener('click', function () { show(this.getAttribute('data-back')); });
   }
 
+  // The password form serves both doors; "back" and "use a code instead"
+  // return to the one it was opened from.
+  var passwordFor = 'staff';
+  function openPasswordLogin(who, email) {
+    passwordFor = who;
+    if (email) $('loginEmail').value = email;
+    setHint('loginHint', '');
+    show('stepPasswordLogin');
+    ($('loginEmail').value ? $('loginPassword') : $('loginEmail')).focus();
+  }
+  function leavePasswordLogin() {
+    if (passwordFor === 'client') {
+      if ($('loginEmail').value) $('clientEmail').value = $('loginEmail').value;
+      openClient('signin');
+    } else {
+      if ($('loginEmail').value) $('email').value = $('loginEmail').value;
+      show('stepEmail');
+    }
+  }
+  $('passwordBack').addEventListener('click', leavePasswordLogin);
+
   $('useCodeInstead').addEventListener('click', function (e) {
     e.preventDefault();
     // Carry whatever they'd already typed across rather than making
     // them enter the same address a second time.
-    if ($('loginEmail').value) $('email').value = $('loginEmail').value;
-    show('stepEmail');
+    leavePasswordLogin();
   });
 
   $('usePasswordInstead').addEventListener('click', function (e) {
     e.preventDefault();
-    if ($('email').value) $('loginEmail').value = $('email').value;
-    show('stepPasswordLogin');
+    openPasswordLogin('staff', $('email').value);
+  });
+  $('clientUsePassword').addEventListener('click', function (e) {
+    e.preventDefault();
+    openPasswordLogin('client', $('clientEmail').value.trim().toLowerCase());
   });
 
   // --- step 2: request a code ----------------------------------------
@@ -680,6 +723,7 @@
           show('stepPassword');
           return;
         }
+        remember(data.user);
         location.href = data.redirect || '/dashboard.html';
       })
       .catch(function (err) {
@@ -722,7 +766,7 @@
     btn.disabled = true;
     setHint('passwordHint', 'Saving…');
     post('/api/auth/password/set', { password: pw, confirmPassword: confirm })
-      .then(function (data) { location.href = data.redirect || '/dashboard.html'; })
+      .then(function (data) { remember(data.user); location.href = data.redirect || '/dashboard.html'; })
       .catch(function (err) {
         setHint('passwordHint', err.message, true);
         btn.disabled = false;
@@ -740,6 +784,7 @@
       password: $('loginPassword').value
     })
       .then(function (data) {
+        remember(data.user);
         location.href = params.get('next') || data.redirect || '/dashboard.html';
       })
       .catch(function (err) {
@@ -750,7 +795,16 @@
 
   // ?mode=password deep-links straight to the returning-user form, which
   // is where a bookmark from a daily user should land.
-  if (params.get('mode') === 'password') show('stepPasswordLogin');
+  if (params.get('mode') === 'password') openPasswordLogin(params.get('as') === 'client' ? 'client' : 'staff');
+  else if (!params.get('as') && !reason) {
+    // Coming back on this browser: open the way in used last time, with the
+    // address filled in (only the address and whether a password exists
+    // are kept, never the password itself).
+    var last = recalled();
+    if (last && last.hasPassword) openPasswordLogin(last.client ? 'client' : 'staff', last.email);
+    else if (last && last.client) { $('clientEmail').value = last.email; openClient('signin'); }
+    else if (last) { $('email').value = last.email; }
+  }
 })();
 </script>
 <!--SITE_FOOTER-->

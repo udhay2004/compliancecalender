@@ -114,7 +114,10 @@ userSchema.pre("validate", function (next) {
   // An account awaiting its first OTP login legitimately has neither a
   // password nor a Google link yet — that's the whole point of
   // mustSetPassword. Every other account still needs one of the two.
-  if (!this.passwordHash && !this.googleId && !this.mustSetPassword) {
+  // Clients may have no password at all: they sign in with an emailed code
+  // (or Google) and can add a password later in the portal. Team accounts
+  // always need a way in that isn't "anyone who knows the address".
+  if (this.role !== "client" && !this.passwordHash && !this.googleId && !this.mustSetPassword) {
     return next(new Error("A user needs either a passwordHash, a googleId, or mustSetPassword."));
   }
   if (this.role !== "staff" && this.department) {
@@ -159,6 +162,7 @@ userSchema.methods.toSafeJSON = function () {
     clientOrgId: this.clientOrgId,
     active: this.active,
     mustSetPassword: this.mustSetPassword,
+    hasPassword: Boolean(this.passwordHash),
     lastLoginAt: this.lastLoginAt,
   };
 };
