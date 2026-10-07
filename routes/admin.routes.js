@@ -83,7 +83,7 @@ router.get("/payments-health", async (req, res) => {
   }
   add("Webhook secret is set", report.webhookSecretSet, report.webhookSecretSet ? "" : "Without it, payments where the client closes the window early are never recorded.",
     `Razorpay → Webhooks → Add webhook: URL ${report.webhookUrl}, events payment.captured, payment.failed, order.paid. Put its secret in RAZORPAY_WEBHOOK_SECRET.`);
-  if (!report.appUrlSet) add("APP_URL is set", false, "Needed for the webhook URL and links in emails.", "Set APP_URL to your site's address, e.g. https://yourapp.up.railway.app");
+  if (!report.appUrlSet) add("APP_URL is set", false, "Needed for the webhook URL and links in emails.", "Set APP_URL to your site's address, e.g. https://compliance.complyglobally.com");
 
   report.ok = report.steps.every((s) => s.ok);
   res.json(report);
