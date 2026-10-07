@@ -69,6 +69,11 @@ app.get("/healthz", async (req, res) => {
   }
 });
 
+// Pages opened on any address other than APP_URL (e.g. the old
+// *.up.railway.app one) go to the same page on APP_URL. Registered after
+// /healthz so Railway's health check is never redirected.
+app.use(require("./lib/canonicalHost").canonicalHost);
+
 const REQUIRED_ENV = ["MONGODB_URI", "JWT_SECRET"];
 const missing = REQUIRED_ENV.filter((k) => !process.env[k]);
 if (missing.length) {
