@@ -42,6 +42,9 @@ const auditLogSchema = new mongoose.Schema(
         "proof_removed",
         "user_deactivated",
         "user_reactivated",
+        "user_created",
+        "user_role_changed",
+        "password_reset_by_admin",
         // Account-security events. Worth keeping alongside the
         // business events: "who set a password, and when" is the first
         // question asked after any suspected account compromise.

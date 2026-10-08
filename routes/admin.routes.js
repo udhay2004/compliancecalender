@@ -22,6 +22,8 @@ const Calendar = require("../models/Calendar");
 const AuditLog = require("../models/AuditLog");
 const { logActivity } = require("../lib/auditLog");
 const { requireAuth, requireRole } = require("../middleware/auth");
+const mongoose = require("mongoose");
+const { checkPassword } = require("../lib/passwordPolicy");
 
 const router = express.Router();
 router.use(requireAuth, requireRole("admin"));
@@ -336,8 +338,11 @@ router.patch("/client-orgs/:id", async (req, res) => {
 // POST /api/admin/users — create a staff, admin, super_admin, or client account.
 router.post("/users", async (req, res) => {
   const { email, password, name, role, clientOrgId } = req.body || {};
-  if (!email || !password || !role) {
+  if (typeof email !== "string" || typeof password !== "string" || !email.trim() || !password || !role) {
     return res.status(400).json({ error: "email, password, and role are required." });
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+    return res.status(400).json({ error: "Enter a valid email address." });
   }
   if (!User.ROLES.includes(role) || role === "pending") {
     return res.status(400).json({ error: `role must be one of: client, staff, admin, super_admin` });
@@ -349,15 +354,27 @@ router.post("/users", async (req, res) => {
     return res.status(400).json({ error: "clientOrgId is required when role is 'client'." });
   }
 
+  // The same rules as a password someone picks for themselves
+  // (lib/passwordPolicy.js): a temporary password is still a working
+  // password until it's changed.
+  const verdict = checkPassword(password, { email: email.trim().toLowerCase(), name: typeof name === "string" ? name : "" });
+  if (!verdict.ok) return res.status(400).json({ error: verdict.error });
   try {
     const user = new User({
       email: email.trim().toLowerCase(),
-      name: name || "",
+      name: typeof name === "string" ? name.trim().slice(0, 200) : "",
       role,
       clientOrgId: role === "client" ? clientOrgId : null,
     });
     await user.setPassword(password);
     await user.save();
+    logActivity({
+      action: "user_created",
+      actor: req.user,
+      clientOrgId: user.clientOrgId || null,
+      summary: `Created the ${user.role} account ${user.email}.`,
+      meta: { targetUserId: String(user._id), targetEmail: user.email, role: user.role },
+    });
     res.status(201).json({ user: user.toSafeJSON() });
   } catch (err) {
     if (err.code === 11000) return res.status(409).json({ error: "A user with that email already exists." });
@@ -368,8 +385,9 @@ router.post("/users", async (req, res) => {
 // GET /api/admin/users — optionally ?role=client&clientOrgId=... to filter
 router.get("/users", async (req, res) => {
   const filter = {};
-  if (req.query.role) filter.role = req.query.role;
-  if (req.query.clientOrgId) filter.clientOrgId = req.query.clientOrgId;
+  // Plain values only: ?role[$ne]=x would otherwise reach the database as an operator.
+  if (typeof req.query.role === "string" && req.query.role) filter.role = req.query.role;
+  if (typeof req.query.clientOrgId === "string" && mongoose.isValidObjectId(req.query.clientOrgId)) filter.clientOrgId = req.query.clientOrgId;
   const users = await User.find(filter).sort({ createdAt: -1 });
   res.json({ users: users.map((u) => u.toSafeJSON()) });
 });
@@ -409,17 +427,56 @@ router.patch("/users/:id", async (req, res) => {
 
   const { name, active, password, role } = req.body || {};
   const activeChanged = active !== undefined && !!active !== target.active;
-  if (name !== undefined) target.name = name;
-  if (active !== undefined) target.active = !!active;
-  if (role !== undefined) {
+  const roleBefore = target.role;
+  const newPassword = password !== undefined && password !== null && password !== "";
+  if (name !== undefined) target.name = typeof name === "string" ? name.trim().slice(0, 200) : "";
+  if (active !== undefined) {
+    // Switching off your own account is a lock-out you can't undo yourself.
+    if (!active && String(target._id) === String(req.user._id)) {
+      return res.status(400).json({ error: "You can't deactivate your own account. Ask another admin." });
+    }
+    target.active = !!active;
+  }
+  if (role !== undefined && role !== target.role) {
+    if (typeof role !== "string" || !User.ROLES.includes(role)) {
+      return res.status(400).json({ error: "role must be one of: client, staff, admin, super_admin" });
+    }
     if (!canManageTargetRole(req.user.role, role)) {
       return res.status(403).json({ error: "Only a super_admin can grant admin or super_admin." });
     }
+    if (String(target._id) === String(req.user._id)) {
+      return res.status(400).json({ error: "You can't change your own role. Ask another owner account." });
+    }
+    // A client login belongs to one company and a team login to none
+    // (models/User.js), so one can't simply be turned into the other.
+    if ((role === "client") !== (target.role === "client")) {
+      return res.status(400).json({ error: "A client login can't become a team login (or the reverse). Create a separate account instead." });
+    }
     target.role = role;
+    if (role !== "staff") target.department = "";
   }
-  if (password) await target.setPassword(password);
-
+  if (newPassword) {
+    const verdict = checkPassword(password, { email: target.email, name: target.name });
+    if (!verdict.ok) return res.status(400).json({ error: verdict.error });
+    await target.setPassword(password);
+  }
   await target.save();
+  if (target.role !== roleBefore) {
+    logActivity({
+      action: "user_role_changed",
+      actor: req.user,
+      summary: `Changed ${target.email} from ${roleBefore} to ${target.role}.`,
+      meta: { targetUserId: String(target._id), targetEmail: target.email, from: roleBefore, to: target.role },
+    });
+  }
+  if (newPassword) {
+    logActivity({
+      action: "password_reset_by_admin",
+      actor: req.user,
+      summary: `${req.user.email} set a new password for ${target.email}.`,
+      meta: { targetUserId: String(target._id), targetEmail: target.email },
+    });
+  }
 
   if (activeChanged) {
     logActivity({
@@ -449,7 +506,8 @@ router.patch("/users/:id", async (req, res) => {
 router.get("/leads", async (req, res) => {
   const leads = await Calendar.find({ source: "public", leadContact: { $ne: null } })
     .sort({ "leadContact.unlockedAt": -1 })
-    .select("profile leadContact createdAt itemCount items")
+    .select("profile leadContact createdAt items.category")
+    .limit(500) // the newest 500; the list grows with every visitor
     .lean();
 
   res.json({
@@ -476,7 +534,7 @@ router.get("/leads", async (req, res) => {
 // today the admin.html activity tab shows the unfiltered global feed).
 router.get("/activity", async (req, res) => {
   const filter = {};
-  if (req.query.clientOrgId) filter.clientOrgId = req.query.clientOrgId;
+  if (typeof req.query.clientOrgId === "string" && mongoose.isValidObjectId(req.query.clientOrgId)) filter.clientOrgId = req.query.clientOrgId;
   const entries = await AuditLog.find(filter).sort({ createdAt: -1 }).limit(200);
   res.json({ entries });
 });
