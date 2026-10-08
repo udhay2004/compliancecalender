@@ -976,8 +976,12 @@
       fyStart: document.getElementById('fyStart').value,
       fyEnd: document.getElementById('fyEnd').value,
       hasForeignParent: document.getElementById('hasForeignParent').checked,
-      odiDone: document.getElementById('odiDone').value,
-      odiInvestorType: document.getElementById('odiInvestorType').value,
+      // The two ODI questions are only asked (and only sent) when the
+      // switch above them is on; hidden, they'd still report "Yes".
+      ...(document.getElementById('hasForeignParent').checked ? {
+        odiDone: document.getElementById('odiDone').value,
+        odiInvestorType: document.getElementById('odiInvestorType').value,
+      } : {}),
     };
   }
 

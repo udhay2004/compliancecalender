@@ -48,9 +48,14 @@ router.get("/form", (req, res) => {
   res.json(formDefinition());
 });
 
-const { mongoStore } = require("../lib/rateLimitStore");
+const { mongoStore, overLimit } = require("../lib/rateLimitStore");
+const rateLimitStores = {
+  generate: mongoStore("public-generate"),
+  review: mongoStore("public-review"),
+  preview: mongoStore("public-preview"),
+};
 const generateLimiter = rateLimit({
-  store: mongoStore("public-generate"),
+  store: rateLimitStores.generate,
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 5,
   standardHeaders: true,
@@ -59,7 +64,7 @@ const generateLimiter = rateLimit({
 });
 
 const reviewLimiter = rateLimit({
-  store: mongoStore("public-review"),
+  store: rateLimitStores.review,
   windowMs: 60 * 60 * 1000,
   max: 10,
   standardHeaders: true,
@@ -187,7 +192,11 @@ function notifyAdminOfLead(calendar, contact, { isReviewRequest = false } = {}) 
 // contact.email is REQUIRED — this is the lead capture, now the FIRST
 // step instead of something requested after seeing a locked preview.
 router.post("/generate", generateLimiter, async (req, res) => {
-  const contact = req.body?.contact || {};
+  // Only text, and only as much as a name or an email can be: these go
+  // into the database and into an email to the team.
+  const rawContact = req.body?.contact && typeof req.body.contact === "object" ? req.body.contact : {};
+  const text = (v, max) => (typeof v === "string" ? v.replace(/\s+/g, " ").trim().slice(0, max) : "");
+  const contact = { name: text(rawContact.name, 100), email: text(rawContact.email, 254), phone: text(rawContact.phone, 40) };
 
   // Only the countries we cover (lib/countries.js). Outside the US the
   // region is optional; it used to be required here, so a German or UK
@@ -297,7 +306,7 @@ router.post("/generate", generateLimiter, async (req, res) => {
 // certain from the answers so far, and the questions still to answer.
 // Nothing is saved; submitting the finished form goes through /generate.
 const previewLimiter = rateLimit({
-  store: mongoStore("public-preview"),
+  store: rateLimitStores.preview,
   windowMs: 60 * 1000,
   max: 60,
   standardHeaders: true,
@@ -324,14 +333,22 @@ router.post("/preview", previewLimiter, async (req, res) => {
 // calendar walked through with them, which is a stronger signal than
 // the original generation.
 router.post("/:id/request-review", reviewLimiter, async (req, res) => {
+  if (!/^[a-f0-9]{24}$/i.test(String(req.params.id))) return res.status(404).json({ error: "Not found." });
   const calendar = await Calendar.findOne({ _id: req.params.id, source: "public" });
   if (!calendar) return res.status(404).json({ error: "Not found." });
   if (!calendar.leadContact?.email) {
     return res.status(400).json({ error: "No contact info on file for this calendar." });
   }
 
-  notifyAdminOfLead(calendar, calendar.leadContact, { isReviewRequest: true });
+  // The team is emailed once a day per calendar, however often the button
+  // is pressed and from however many addresses, so one calendar id can't
+  // be used to flood the team inbox. The visitor gets the same answer.
+  if (!(await overLimit("public-review-calendar", String(calendar._id), 1, 24 * 60 * 60 * 1000))) {
+    notifyAdminOfLead(calendar, calendar.leadContact, { isReviewRequest: true });
+  }
   return res.json({ ok: true });
 });
 
 module.exports = router;
+// For the test suite, and for clearing a counter by hand (same as routes/auth.routes.js).
+module.exports.rateLimitStores = rateLimitStores;
