@@ -24,6 +24,11 @@ process.env.NODE_ENV = "test";
 process.env.TWO_FACTOR_REQUIRED = "false"; // switched on inside the test that covers it
 process.env.RAZORPAY_KEY_ID = "rzp_test_key";
 process.env.RAZORPAY_KEY_SECRET = "rzp_test_secret";
+// Uploads in this suite go to their own temporary folder. Suites run side by
+// side, and tests/client-flow.test.js counts the files in the shared one.
+const PRIVATE_TMP = fs.mkdtempSync(path.join(require("node:os").tmpdir(), "cc-isolation-"));
+["TMPDIR", "TEMP", "TMP"].forEach((k) => { process.env[k] = PRIVATE_TMP; });
+test.after(() => fs.rmSync(PRIVATE_TMP, { recursive: true, force: true }));
 
 const root = path.join(__dirname, "..");
 const RealCalendarSchema = require("../models/Calendar").schema;
