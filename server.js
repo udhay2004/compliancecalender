@@ -237,7 +237,7 @@ app.get("/", tryPageAuth, (req, res) => {
 // Browsers ask for /favicon.ico on every page; answer with the site icon.
 app.get("/favicon.ico", (req, res) => {
   res.setHeader("Cache-Control", "public, max-age=86400");
-  res.type("image/svg+xml").sendFile(path.join(__dirname, "public", "favicon.svg"));
+  res.type("image/png").sendFile(path.join(__dirname, "public", "favicon.png"));
 });
 
 // Pages always re-check for a newer version; scripts, styles and images are
@@ -283,7 +283,7 @@ async function start() {
   const today = () => new Date().toISOString().slice(0, 10);
 
   const server = app.listen(PORT, () => {
-    console.log(`Compliance Calendar Generator running at http://localhost:${PORT}`);
+    console.log(`Compliance Calendar by ComplyGlobally running at http://localhost:${PORT}`);
   });
   // Slightly longer than Railway's proxy keep-alive, so idle connections
   // are closed by the proxy first (avoids rare "connection reset" errors).
