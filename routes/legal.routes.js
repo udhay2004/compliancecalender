@@ -17,7 +17,6 @@ const { renderPage, footerHtml, FOOTER_CSS, PAGE_PATHS } = require("../lib/legal
 const router = express.Router();
 
 const ALIASES = {
-  "/about-us": "/about",
   "/contact-us": "/contact",
   "/prices": "/pricing",
   "/terms-and-conditions": "/terms",
@@ -32,6 +31,21 @@ const ALIASES = {
   "/delivery-policy": "/shipping-policy",
   "/shipping-and-delivery": "/shipping-policy",
 };
+
+// Company pages live on the main ComplyGlobally website. These addresses
+// (and the old in-app /about page) send people to the page there.
+const { businessInfo } = require("../lib/businessInfo");
+const MAIN_SITE_PAGES = {
+  "/about": "about",
+  "/about-us": "about",
+  "/countries": "countries",
+  "/global-presence": "countries",
+  "/main-site": "home",
+  "/complyglobally": "home",
+};
+Object.entries(MAIN_SITE_PAGES).forEach(([p, key]) => {
+  router.get([p, `${p}.html`], (req, res) => res.redirect(302, businessInfo().mainSite[key]));
+});
 
 function send(res, pagePath) {
   const html = renderPage(pagePath);

@@ -415,6 +415,7 @@
             <div class="contact-card-row">${escapeHtml(person ? (person.name || person.email) : company.name || 'ComplyGlobally')}</div>
             <div class="contact-card-row">${email ? `<a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a>` : '—'}</div>
             ${company.phone ? `<div class="contact-card-row"><a href="tel:${escapeHtml(company.phone.replace(/[^\d+]/g, ''))}">${escapeHtml(company.phone)}</a></div>` : ''}
+            ${/^https:\/\//.test(company.website || '') ? `<div class="contact-card-row"><a href="${escapeHtml(company.website)}">Visit the ComplyGlobally website</a></div>` : ''}
           </div>
         </div>`;
     } catch { el.innerHTML = ''; }
