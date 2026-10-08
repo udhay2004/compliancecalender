@@ -246,9 +246,18 @@ router.get("/calendars/pending", async (req, res) => {
     clientOrgId: req.user.clientOrgId,
     status: "pending_review",
   })
-    .select("profile createdAt items")
+    .select("profile createdAt items.compliance_name items.category")
     .sort({ createdAt: -1 });
-  res.json({ calendars });
+  // Not yet checked by the team: the client sees that it exists and how
+  // many filings it has, nothing more.
+  res.json({
+    calendars: calendars.map((c) => ({
+      _id: c._id,
+      profile: c.profile,
+      createdAt: c.createdAt,
+      items: (c.items || []).map((it) => ({ compliance_name: it.compliance_name, category: it.category })),
+    })),
+  });
 });
 
 // GET /api/portal/calendars/:id
