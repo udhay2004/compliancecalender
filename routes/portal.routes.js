@@ -581,12 +581,15 @@ router.get("/invoices/:id/pdf", async (req, res) => {
 // GET /api/portal/contact — who to reach for help.
 router.get("/contact", async (req, res) => {
   const org = await ClientOrg.findById(req.user.clientOrgId).populate("assignedStaff", "name email");
+  const info = require("../lib/businessInfo").businessInfo();
   res.json({
     yourContact: org?.assignedStaff ? { name: org.assignedStaff.name, email: org.assignedStaff.email } : null,
     company: {
       name: "ComplyGlobally",
-      email: process.env.SUPPORT_EMAIL || "support@complyglobally.com",
-      phone: process.env.SUPPORT_PHONE || "",
+      email: info.SUPPORT_EMAIL,
+      phone: info.SUPPORT_PHONE,
+      website: info.mainSite.home,
+      contactPage: info.mainSite.contact,
     },
   });
 });

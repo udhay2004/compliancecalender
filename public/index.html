@@ -90,6 +90,10 @@
   .brand-pill { font: 600 12px/1 var(--sans); letter-spacing: 0; color: var(--brand-text); background: var(--brand-tint); padding: 7px 11px; border-radius: 999px; white-space: nowrap; }
   .topbar-actions { display: flex; align-items: center; gap: 6px; }
   .staff-link { white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 600; color: var(--ink-soft); text-decoration: none; padding: 9px 12px; border-radius: 10px; transition: color .15s, background .15s; }
+  /* Back to the main ComplyGlobally website. */
+  .site-link { white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--ink-soft); text-decoration: none; padding: 8px 10px; border-radius: 10px; transition: color .15s, background .15s; }
+  .site-link:hover { color: var(--brand-text); background: var(--brand-tint); }
+  @media (max-width: 760px) { .site-link { display: none; } }
   .staff-link:hover { color: var(--brand-text); background: var(--brand-tint); }
   .client-link { white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 700; color: var(--brand-text); text-decoration: none; padding: 8px 14px; border: 1.5px solid var(--brand); border-radius: 10px; background: #fff; transition: background .15s; }
   .client-link:hover { background: var(--brand-tint); }
@@ -585,6 +589,7 @@
   <div class="topbar-actions">
     <button class="btn btn-ghost js-results" type="button" aria-label="View your calendar" style="height:40px;padding:0 14px;font-size:13.5px"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg><span class="lbl-new">View calendar</span></button>
     <button class="btn btn-ghost js-new" type="button" aria-label="New calendar" style="height:40px;padding:0 14px;font-size:13.5px"><svg class="ic" aria-hidden="true"><use href="#i-calendar"/></svg><span class="lbl-new">New calendar</span></button>
+    <a class="site-link" href="https://complyglobally.com/" title="Back to the ComplyGlobally website"><svg class="ic" aria-hidden="true"><use href="#i-arrow-left"/></svg>complyglobally.com</a>
     <a class="client-link" href="/login?as=client">Client login <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
     <a class="staff-link" href="/login">Staff login</a>
   </div>
