@@ -512,6 +512,51 @@
   .dl-price { margin-top: 10px; display: inline-flex; gap: 8px; align-items: baseline; padding: 6px 12px; border-radius: 999px; background: var(--brand-soft, #E3F5F3); font-size: 13px; }
   .dl-price span { color: #5C6E72; }
   .dl-price b { color: #1B2A2E; }
+  /* ============================================================
+     Laptops and desktops: a denser scale.
+     The sizes above were tuned for touch (48 px fields, 16 px text so
+     iOS doesn't zoom) and read as "zoomed in" on a laptop: at 1280 px
+     wide the first step didn't fit on one screen. From 1024 px up
+     (mouse-sized screens) everything steps down a size, so step 1 —
+     heading, fields and Continue — is visible without scrolling on a
+     1280 x 600 window. Phones and tablets keep the sizes above.
+     ============================================================ */
+  @media (min-width: 1024px) {
+    :root { --topbar-h: 56px; }
+    .landing { gap: 24px; padding-top: 20px; }
+
+    .hero { min-height: min(520px, calc(100vh - var(--topbar-h) - 44px)); padding: 28px 30px 26px; border-radius: 20px; top: calc(var(--topbar-h) + 20px); }
+    .hero-pill { font-size: 12px; padding: 6px 11px; }
+    .hero h1 { font-size: clamp(26px, 2.5vw, 36px); margin: 16px 0 10px; }
+    .hero .sub { font-size: 14.5px; line-height: 1.55; }
+    .benefits { margin-top: 18px; gap: 9px; }
+    .benefits li { font-size: 14px; gap: 10px; align-items: center; }
+    .benefit-ic { width: 28px; height: 28px; border-radius: 8px; font-size: 14px; }
+    .trust { margin-top: 16px; padding-top: 14px; font-size: 12.5px; }
+    .sample-wrap { padding-top: 20px; }
+
+    .intake { padding: 24px 28px 26px; border-radius: 20px; }
+    .stepper { margin-bottom: 20px; }
+    .step-dot { font-size: 13px; gap: 8px; }
+    .step-dot .num { width: 30px; height: 30px; font-size: 13px; }
+    .step-title { font-size: 20px; margin-bottom: 4px; }
+    .step-sub { font-size: 13.5px; margin-bottom: 16px; }
+    .grid { gap: 14px 16px; }
+    label { font-size: 12.5px; margin-bottom: 5px; }
+    .field input, .field select { height: 42px; font-size: 14.5px; border-radius: 10px; padding: 0 12px; }
+    .field select { padding-right: 38px; background-position: right 14px center; }
+    .field.lead select { height: 46px; font-size: 15px; }
+    .field input[type="date"] { min-height: 42px; }
+    .toggle-card { padding: 13px 15px; border-radius: 12px; }
+    .toggle-copy strong { font-size: 14px; }
+    .step-nav { margin-top: 20px; }
+    .status-hint { margin-top: 14px; }
+    .btn { height: 42px; padding: 0 18px; font-size: 14px; border-radius: 10px; }
+    .btn-lg { height: 46px; padding: 0 22px; font-size: 15px; }
+
+    .stat { padding: 14px 16px; gap: 12px; border-radius: 14px; }
+    .stat-num { font-size: 26px; }
+  }
 </style>
 </head>
 <body data-view="landing">
