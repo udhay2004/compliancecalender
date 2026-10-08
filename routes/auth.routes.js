@@ -45,6 +45,7 @@ const router = express.Router();
 const { mongoStore } = require("../lib/rateLimitStore");
 const rateLimitStores = {
   login: mongoStore("login"),
+  loginAccount: mongoStore("login-account"),
   otpRequest: mongoStore("otp-request"),
   otpVerify: mongoStore("otp-verify"),
 };
@@ -61,9 +62,27 @@ const loginLimiter = rateLimit({
   message: { error: "Too many login attempts. Please wait a few minutes and try again." },
 });
 
-router.post("/login", loginLimiter, async (req, res) => {
+// The limit above is per address, so someone guessing from many addresses
+// (a botnet, rotating proxies) was not slowed down at all. This one counts
+// wrong passwords per ACCOUNT, wherever they come from. It can't lock the
+// owner out for good: it lasts 15 minutes, only wrong passwords count, and
+// signing in with an email code (or Google) is never affected by it.
+const loginEmail = (req) => (typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase().slice(0, 254) : "");
+const loginAccountLimiter = rateLimit({
+  store: rateLimitStores.loginAccount,
+  keyGenerator: loginEmail,
+  skip: (req) => !loginEmail(req),
+  skipSuccessfulRequests: true,
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: false,
+  legacyHeaders: false,
+  message: { error: "Too many wrong passwords for this account. Wait 15 minutes, or sign in with an email code instead." },
+});
+
+router.post("/login", loginLimiter, loginAccountLimiter, async (req, res) => {
   const { email, password } = req.body || {};
-  if (!email || !password) {
+  if (typeof email !== "string" || typeof password !== "string" || !email || !password) {
     return res.status(400).json({ error: "Email and password required." });
   }
 
@@ -746,7 +765,8 @@ router.post("/2fa/verify", loginLimiter, async (req, res) => {
   if (usedRecovery) {
     logActivity({ action: "two_factor_recovery_used", actor: u, summary: `${u.email} signed in with a recovery code (${u.totpRecoveryCodes.length} left).` });
   }
-  const next = typeof req.body?.next === "string" && req.body.next.startsWith("/") && !req.body.next.startsWith("//") ? req.body.next : null;
+  // Only a path on this site: "//host" and "/\host" are read by browsers as another site.
+  const next = typeof req.body?.next === "string" && /^\/(?![\/\\])[^\\\s]*$/.test(req.body.next) ? req.body.next : null;
   res.json({ ok: true, redirect: next || destinationFor(u), recoveryCodesLeft: u.totpRecoveryCodes.length, usedRecovery });
 });
 

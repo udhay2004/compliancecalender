@@ -451,3 +451,117 @@ test("a whole office can sign in from one address; only wrong passwords count to
   }
   assert.ok(limited, "password guessing is still stopped");
 });
+
+// ---------------------------------------------------------------------
+// Password guessing from many addresses
+// ---------------------------------------------------------------------
+test("wrong passwords are counted per account, not only per address", async () => {
+  const email = "finance@theconnectventures.com";
+  const setup = makeClient();
+  await setup.post("/api/auth/otp/request", { email, portal: "staff" });
+  await setup.post("/api/auth/otp/verify", { email, code: lastCodeFor(email) });
+  await setup.post("/api/auth/password/set", { password: "Quiet-Ledger-98", confirmPassword: "Quiet-Ledger-98" });
+  Object.values(authRoutes.rateLimitStores).forEach((store) => store.resetAll());
+
+  // Each guess arrives from a "new address": the per-address counter is
+  // wiped before every attempt, as it would be for a botnet.
+  let refusedAt = null;
+  for (let i = 1; i <= 14; i++) {
+    authRoutes.rateLimitStores.login.resetAll();
+    const bad = await makeClient().post("/api/auth/login", { email, password: "wrong-guess-" + i });
+    if (bad.status === 429) { refusedAt = i; break; }
+    assert.strictEqual(bad.status, 401);
+  }
+  assert.strictEqual(refusedAt, 11, "the 11th wrong password for one account is refused wherever it comes from");
+
+  // While it lasts, even the right password is refused for this account…
+  authRoutes.rateLimitStores.login.resetAll();
+  const right = await makeClient().post("/api/auth/login", { email, password: "Quiet-Ledger-98" });
+  assert.strictEqual(right.status, 429);
+  assert.match(right.data.error, /email code/);
+
+  // …the email-code door stays open, so the owner is never locked out…
+  const owner = makeClient();
+  await owner.post("/api/auth/otp/request", { email, portal: "staff" });
+  const viaCode = await owner.post("/api/auth/otp/verify", { email, code: lastCodeFor(email) });
+  assert.strictEqual(viaCode.status, 200);
+  assert.strictEqual((await owner.get("/protected")).status, 200);
+
+  // …and nobody else's account is affected.
+  const other = makeClient();
+  await other.post("/api/auth/otp/request", { email: "tech@theconnectventures.com", portal: "staff" });
+  await other.post("/api/auth/otp/verify", { email: "tech@theconnectventures.com", code: lastCodeFor("tech@theconnectventures.com") });
+  await other.post("/api/auth/password/set", { password: "Copper-Wharf-31", confirmPassword: "Copper-Wharf-31" });
+  authRoutes.rateLimitStores.login.resetAll();
+  const fine = await makeClient().post("/api/auth/login", { email: "tech@theconnectventures.com", password: "Copper-Wharf-31" });
+  assert.strictEqual(fine.status, 200);
+});
+
+test("the per-account count ignores capitals and spaces in the email", async () => {
+  const variants = ["client@acme.com", "CLIENT@acme.com", " Client@Acme.com "];
+  let refused = false;
+  for (let i = 0; i < 12; i++) {
+    authRoutes.rateLimitStores.login.resetAll();
+    const r = await makeClient().post("/api/auth/login", { email: variants[i % 3], password: "nope-" + i });
+    if (r.status === 429) { refused = true; break; }
+  }
+  assert.ok(refused);
+});
+
+test("sign-in answers 400, not a crash, when the email or password isn't text", async () => {
+  for (const body of [
+    { email: { $ne: null }, password: "x" },
+    { email: ["tech@theconnectventures.com"], password: "x" },
+    { email: "tech@theconnectventures.com", password: { $gt: "" } },
+    { email: 12345, password: 67890 },
+  ]) {
+    const r = await makeClient().post("/api/auth/login", body);
+    assert.strictEqual(r.status, 400, JSON.stringify(body));
+  }
+});
+
+test("a deactivated account and an unknown one get the same answer", async () => {
+  const email = "finance@theconnectventures.com";
+  const setup = makeClient();
+  await setup.post("/api/auth/otp/request", { email, portal: "staff" });
+  await setup.post("/api/auth/otp/verify", { email, code: lastCodeFor(email) });
+  await setup.post("/api/auth/password/set", { password: "Quiet-Ledger-98", confirmPassword: "Quiet-Ledger-98" });
+  users.find((u) => u.email === email).active = false;
+
+  const gone = await makeClient().post("/api/auth/login", { email, password: "Quiet-Ledger-98" });
+  const never = await makeClient().post("/api/auth/login", { email: "nobody@nowhere.example", password: "Quiet-Ledger-98" });
+  assert.strictEqual(gone.status, 401);
+  assert.deepStrictEqual(gone.data, never.data);
+  // The session it already had stops working at once.
+  assert.strictEqual((await setup.get("/protected")).status, 401);
+
+  // Same for the emailed code: identical reply, no email sent.
+  sentEmails.length = 0;
+  const a = await makeClient().post("/api/auth/otp/request", { email, portal: "staff" });
+  const b = await makeClient().post("/api/auth/otp/request", { email: "nobody@nowhere.example", portal: "staff" });
+  assert.deepStrictEqual(a.data, b.data);
+  assert.strictEqual(sentEmails.length, 0);
+});
+
+test("a session cookie that was tampered with, expired or signed with another key is refused", async () => {
+  const jwt = require("jsonwebtoken");
+  const user = users.find((u) => u.email === "tech@theconnectventures.com");
+  user.mustSetPassword = false;
+  user.passwordHash = "x";
+  const tryCookie = async (token) => {
+    const c = makeClient();
+    c.jar.set("cc_session", token);
+    return (await c.get("/protected")).status;
+  };
+  const good = { id: user._id, p: "session", v: 0, m: 0 };
+  assert.strictEqual(await tryCookie(jwt.sign(good, process.env.JWT_SECRET, { expiresIn: "1h" })), 200, "control: a valid one works");
+  assert.strictEqual(await tryCookie(jwt.sign(good, "some-other-secret", { expiresIn: "1h" })), 401, "wrong key");
+  assert.strictEqual(await tryCookie(jwt.sign(good, process.env.JWT_SECRET, { expiresIn: -10 })), 401, "expired");
+  assert.strictEqual(await tryCookie(jwt.sign({ ...good, p: "setup" }, process.env.JWT_SECRET, { expiresIn: "1h" })), 401, "a setup token is not a session");
+  assert.strictEqual(await tryCookie(jwt.sign({ ...good, v: 7 }, process.env.JWT_SECRET, { expiresIn: "1h" })), 401, "issued before a password change");
+  // Unsigned ("alg: none") and edited payloads.
+  const b64 = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
+  assert.strictEqual(await tryCookie(`${b64({ alg: "none", typ: "JWT" })}.${b64({ ...good, exp: Math.floor(Date.now() / 1000) + 3600 })}.`), 401, "unsigned");
+  const [h, , sig] = jwt.sign(good, process.env.JWT_SECRET, { expiresIn: "1h" }).split(".");
+  assert.strictEqual(await tryCookie(`${h}.${b64({ ...good, id: "user_3", exp: Math.floor(Date.now() / 1000) + 3600 })}.${sig}`), 401, "payload swapped to another user");
+});
