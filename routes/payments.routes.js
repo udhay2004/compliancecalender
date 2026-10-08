@@ -83,6 +83,11 @@ function ordersForItem(item) {
   return orders;
 }
 
+// True when a price change cancelled this order (routes/calendar.routes.js).
+function orderVoided(item, orderId) {
+  return (item.paymentEvents || []).some((e) => e.event === "order_voided" && e.razorpayOrderId === orderId);
+}
+
 function alreadyRecorded(item, eventName, paymentId) {
   return (item.paymentEvents || []).some((e) => e.event === eventName && e.razorpayPaymentId === paymentId);
 }
@@ -95,11 +100,24 @@ function applyCapturedPayment(item, { orderId, paymentId, amountCents, currency,
   if (item.paymentStatus === "Paid" && item.razorpayPaymentId === paymentId) return "duplicate";
 
   const expected = ordersForItem(item).get(orderId);
-  const expectedAmount = expected?.amountCents ?? item.feeAmountCents;
-  const expectedCurrency = (expected?.currency || CURRENCY).toUpperCase();
-  const amountOk =
+  let expectedAmount = expected?.amountCents ?? item.feeAmountCents;
+  let expectedCurrency = (expected?.currency || CURRENCY).toUpperCase();
+  let amountOk =
     typeof amountCents !== "number" || // amount unknown (Razorpay API unreachable) — rely on signature
     (amountCents === expectedAmount && (!currency || currency.toUpperCase() === expectedCurrency));
+
+  // An order voided by a price change stays payable at Razorpay. Money paid
+  // on it only settles the item if it equals TODAY's price; otherwise the
+  // client would be marked Paid at the old price. An order is always paid
+  // in full, so when Razorpay couldn't tell us the amount, the order's own
+  // amount is what was paid.
+  if (orderVoided(item, orderId)) {
+    const paid = typeof amountCents === "number" ? amountCents : expected?.amountCents;
+    const paidCurrency = (currency || expected?.currency || CURRENCY).toUpperCase();
+    let now = null;
+    try { now = chargeFor(item.feeAmountCents); } catch {}
+    amountOk = Boolean(now) && paid === now.amount && paidCurrency === now.currency;
+  }
 
   if (!amountOk) {
     if (!alreadyRecorded(item, "amount_mismatch", paymentId)) {

@@ -524,6 +524,88 @@ test("a second successful payment for an already-paid item is flagged for refund
   assert.ok(cal.items[0].paymentEvents.some((e) => e.event === "duplicate_payment" && e.razorpayPaymentId === "pay_b"));
 });
 
+test("closed tab and no webhook: the payment is found at Razorpay the next time the client presses Pay", async () => {
+  const { cal } = setup();
+  readyToPay(cal);
+  const { body: order } = await call("POST", `/api/portal/payments/calendars/${cal._id}/items/0/create-order`);
+  // Paid at Razorpay, but neither /verify nor the webhook ever reached us.
+  rzp.orders[order.orderId].status = "paid";
+  rzp.payments.pay_lost = { id: "pay_lost", order_id: order.orderId, amount: 12500, currency: "USD", status: "captured" };
+  assert.strictEqual(cal.items[0].paymentStatus, "Invoiced");
+
+  const r = await call("POST", `/api/portal/payments/calendars/${cal._id}/items/0/create-order`);
+  assert.strictEqual(r.status, 409, "no second order, no second charge");
+  assert.strictEqual(rzp.created, 1);
+  assert.strictEqual(cal.items[0].paymentStatus, "Paid");
+  assert.strictEqual(cal.items[0].razorpayPaymentId, "pay_lost");
+  assert.ok(cal.items[0].paymentEvents.some((e) => e.event === "reconciled" && e.razorpayPaymentId === "pay_lost"));
+  assert.strictEqual(r.body.calendar.items[0].paymentStatus, "Paid");
+
+  // The webhook turning up late changes nothing and tells nobody twice.
+  await new Promise((r) => setImmediate(r));
+  const told = notifications.filter((n) => n.type === "payment_received" && n.audience === "client").length;
+  await webhook(captured(order.orderId, "pay_lost"));
+  assert.strictEqual(cal.items[0].paymentEvents.filter((e) => e.razorpayPaymentId === "pay_lost").length, 1);
+  assert.strictEqual(notifications.filter((n) => n.type === "payment_received" && n.audience === "client").length, told);
+});
+
+test("the browser and the webhook confirming the same payment record it once", async () => {
+  const { cal } = setup();
+  readyToPay(cal);
+  const { body: order } = await call("POST", `/api/portal/payments/calendars/${cal._id}/items/0/create-order`);
+  rzp.payments.pay_both = { id: "pay_both", order_id: order.orderId, amount: 12500, currency: "USD", status: "captured" };
+  const [v, w] = await Promise.all([
+    call("POST", `/api/portal/payments/calendars/${cal._id}/items/0/verify`, {
+      body: { razorpay_order_id: order.orderId, razorpay_payment_id: "pay_both", razorpay_signature: sign(order.orderId, "pay_both") },
+    }),
+    webhook(captured(order.orderId, "pay_both")),
+  ]);
+  assert.strictEqual(v.status, 200);
+  assert.strictEqual(w.status, 200);
+  await new Promise((r) => setImmediate(r));
+  assert.strictEqual(cal.items[0].paymentEvents.filter((e) => e.razorpayPaymentId === "pay_both" && /verify_ok|webhook_captured/.test(e.event)).length, 1);
+  assert.strictEqual(notifications.filter((n) => n.type === "payment_received" && n.audience === "client").length, 1);
+  assert.strictEqual(invoiceDocs.filter((d) => d.kind === "invoice").length, 1);
+});
+
+test("without a webhook secret every webhook call is refused, signed or not", async () => {
+  const { cal } = setup();
+  readyToPay(cal);
+  const { body: order } = await call("POST", `/api/portal/payments/calendars/${cal._id}/items/0/create-order`);
+  const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+  delete process.env.RAZORPAY_WEBHOOK_SECRET;
+  try {
+    const raw = JSON.stringify(captured(order.orderId, "pay_forged"));
+    // What an attacker would send if the secret were treated as "".
+    const sig = crypto.createHmac("sha256", "").update(raw).digest("hex");
+    const r = await call("POST", "/api/webhooks/razorpay", { user: "nobody", body: raw, headers: { "x-razorpay-signature": sig } });
+    assert.strictEqual(r.status, 500);
+    assert.strictEqual(cal.items[0].paymentStatus, "Invoiced");
+  } finally {
+    process.env.RAZORPAY_WEBHOOK_SECRET = secret;
+  }
+});
+
+test("the amount paid comes from Razorpay, never from the browser", async () => {
+  const { cal } = setup();
+  readyToPay(cal);
+  const { body: order } = await call("POST", `/api/portal/payments/calendars/${cal._id}/items/0/create-order`);
+  rzp.payments.pay_low = { id: "pay_low", order_id: order.orderId, amount: 100, currency: "USD", status: "captured" };
+  const r = await call("POST", `/api/portal/payments/calendars/${cal._id}/items/0/verify`, {
+    body: { razorpay_order_id: order.orderId, razorpay_payment_id: "pay_low", razorpay_signature: sign(order.orderId, "pay_low"), amount: 12500, amountCents: 12500, currency: "USD" },
+  });
+  assert.strictEqual(r.status, 409);
+  assert.strictEqual(cal.items[0].paymentStatus, "Invoiced");
+
+  // A payment that belongs to a different order can't be attached here.
+  rzp.payments.pay_other = { id: "pay_other", order_id: "order_someone_else", amount: 12500, currency: "USD", status: "captured" };
+  const x = await call("POST", `/api/portal/payments/calendars/${cal._id}/items/0/verify`, {
+    body: { razorpay_order_id: order.orderId, razorpay_payment_id: "pay_other", razorpay_signature: sign(order.orderId, "pay_other") },
+  });
+  assert.strictEqual(x.status, 400);
+  assert.strictEqual(cal.items[0].paymentStatus, "Invoiced");
+});
+
 test("a payment on a superseded calendar shows as paid on the new one", async () => {
   const { cal } = setup();
   readyToPay(cal);
@@ -584,6 +666,44 @@ test("changing a price voids the open Razorpay order so the old price can't be p
   const again = await call("POST", `/api/portal/payments/calendars/${cal._id}/items/0/create-order`);
   assert.strictEqual(again.body.amount, 15000);
   assert.notStrictEqual(again.body.orderId, order.orderId);
+});
+
+test("paying an order voided by a price change is flagged, never marked paid at the old price", async () => {
+  // Through Razorpay's webhook…
+  let { cal } = setup();
+  users.staff = { _id: oid(), email: "tech@firm.com", name: "Tech", role: "staff" };
+  readyToPay(cal);
+  let old = (await call("POST", `/api/portal/payments/calendars/${cal._id}/items/0/create-order`)).body.orderId;
+  await call("POST", `/api/calendars/${cal._id}/items/0/quote`, { user: "staff", body: { feeAmountUSD: 500 } });
+  let r = await webhook(captured(old, "pay_old_price", 12500));
+  assert.strictEqual(r.status, 200);
+  assert.strictEqual(cal.items[0].paymentStatus, "Invoiced", "$125 must not settle a $500 invoice");
+  assert.ok(cal.items[0].paymentEvents.some((e) => e.event === "amount_mismatch" && e.razorpayPaymentId === "pay_old_price"));
+  assert.ok(notifications.some((n) => n.audience === "staff" && n.type === "payment_failed"), "the team is told to check and refund");
+  assert.strictEqual(invoiceDocs.length, 0, "no invoice for a payment that didn't settle the item");
+
+  // …and through the browser's own confirmation, even when Razorpay's API
+  // can't be reached to report the amount.
+  ({ cal } = setup());
+  readyToPay(cal);
+  old = (await call("POST", `/api/portal/payments/calendars/${cal._id}/items/0/create-order`)).body.orderId;
+  await call("POST", `/api/calendars/${cal._id}/items/0/quote`, { user: "staff", body: { feeAmountUSD: 500 } });
+  r = await call("POST", `/api/portal/payments/calendars/${cal._id}/items/0/verify`, {
+    body: { razorpay_order_id: old, razorpay_payment_id: "pay_unknown_amount", razorpay_signature: sign(old, "pay_unknown_amount") },
+  });
+  assert.strictEqual(r.status, 409, JSON.stringify(r.body));
+  assert.strictEqual(cal.items[0].paymentStatus, "Invoiced");
+});
+
+test("an order voided and then re-priced back to the same amount can still be paid", async () => {
+  const { cal } = setup();
+  users.staff = { _id: oid(), email: "tech@firm.com", name: "Tech", role: "staff" };
+  readyToPay(cal);
+  const old = (await call("POST", `/api/portal/payments/calendars/${cal._id}/items/0/create-order`)).body.orderId;
+  await call("POST", `/api/calendars/${cal._id}/items/0/quote`, { user: "staff", body: { feeAmountUSD: 500 } });
+  await call("POST", `/api/calendars/${cal._id}/items/0/quote`, { user: "staff", body: { feeAmountUSD: 125 } });
+  await webhook(captured(old, "pay_same_price", 12500));
+  assert.strictEqual(cal.items[0].paymentStatus, "Paid");
 });
 
 test("a paid item can't be re-priced", async () => {
