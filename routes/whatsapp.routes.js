@@ -57,7 +57,7 @@ async function handleEvent(ev) {
       org.whatsappOptOutAt = new Date();
       await org.save();
       logActivity({ actor: { name: `${org.name} (WhatsApp reply)` }, action: "whatsapp_opt_out", summary: `${org.name} replied STOP — WhatsApp messages switched off.`, clientOrgId: org._id });
-      notifyStaff({ clientOrgId: org._id, type: "profile_updated", title: `${org.name} switched off WhatsApp messages`, body: "They replied STOP. They'll still get emails.", link: "/admin.html", email: false });
+      notifyStaff({ clientOrgId: org._id, type: "profile_updated", title: `${org.name} switched off WhatsApp messages`, body: "They replied STOP. They'll still get emails.", link: "/admin", email: false });
     }
     return;
   }
@@ -91,7 +91,7 @@ async function handleEvent(ev) {
     type: "message",
     title: `WhatsApp reply from ${org.name}`,
     body: `${text.slice(0, 600)}\n\nReply in the client's chat (it's saved there). WhatsApp only lets us reply freely within 24 hours of their message; after that our reminders use the approved templates.`,
-    link: "/dashboard.html",
+    link: "/dashboard",
   });
 }
 

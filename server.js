@@ -161,29 +161,41 @@ app.use(cookieParser());
 // Protected pages MUST be registered before the static middleware, since
 // express.static would otherwise serve the file straight off disk before
 // the auth guard ever runs. Each page gets the guard matching its
-// audience — a client landing on /app.html would see a working-looking
+// audience — a client landing on /app would see a working-looking
 // UI whose every API call then 403s, which is a worse experience than
 // just redirecting them away at the page level.
 // ---------------------------------------------------------------------
-const STAFF_PAGES = ["/app.html", "/review.html", "/calendar.html", "/pipeline.html", "/reports.html"];
+// Page addresses have no ".html": /dashboard, /portal, /login … The files
+// in public/ keep their names. Old addresses (bookmarks, links in emails
+// and notifications already sent) go to the new one, query string included.
+// Registered before everything else that serves pages, so a guarded page
+// can never be reached as a plain file.
+const PAGE_NAMES = ["app", "review", "calendar", "pipeline", "reports", "admin", "dashboard", "portal", "login", "two-factor", "index"];
+app.get(PAGE_NAMES.map((name) => `/${name}.html`), (req, res) => {
+  const name = req.path.slice(1, -".html".length);
+  res.redirect(301, (name === "index" ? "/" : `/${name}`) + req.originalUrl.slice(req.path.length));
+});
+const pageFile = (route) => path.join(__dirname, "public", `${route.slice(1)}.html`);
+
+const STAFF_PAGES = ["/app", "/review", "/calendar", "/pipeline", "/reports"];
 STAFF_PAGES.forEach((route) => {
   app.get(route, requirePageAuth, requirePageRole("staff"), (req, res) => {
-    res.sendFile(path.join(__dirname, "public", route));
+    res.sendFile(pageFile(route));
   });
 });
 
-app.get("/admin.html", requirePageAuth, requirePageRole("admin"), (req, res) => {
+app.get("/admin", requirePageAuth, requirePageRole("admin"), (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
 
 // The role-aware landing screen every internal account gets after
 // signing in. One file, three faces — which panels it can populate is
 // decided by routes/dashboard.routes.js, not by the page.
-app.get("/dashboard.html", requirePageAuth, requirePageRole("staff"), (req, res) => {
+app.get("/dashboard", requirePageAuth, requirePageRole("staff"), (req, res) => {
   res.sendFile(path.join(__dirname, "public", "dashboard.html"));
 });
 
-app.get("/portal.html", requirePageAuth, requirePageClientRole, (req, res) => {
+app.get("/portal", requirePageAuth, requirePageClientRole, (req, res) => {
   sendPageWithFooter(res, "portal.html");
 });
 
@@ -193,10 +205,16 @@ app.use(require("./routes/feeds.routes"));
 // Company and policy pages (/terms, /privacy, /refund-policy, /pricing …):
 // public, server-rendered and linked from the footer of every public page.
 app.use(legalRoutes);
-app.get("/login.html", (req, res) => sendPageWithFooter(res, "login.html"));
+app.get("/login", (req, res) => sendPageWithFooter(res, "login.html"));
+// The two-factor screen is reached mid-sign-in, so it has no guard of its
+// own; its API calls decide what it can do.
+app.get("/two-factor", (req, res) => {
+  res.setHeader("Cache-Control", "no-cache");
+  res.sendFile(pageFile("/two-factor"));
+});
 // Old address for creating an account; account creation now lives on the
 // client tab of the sign-in page.
-app.get(["/signup", "/signup.html"], (req, res) => res.redirect("/login.html?as=client&mode=signup"));
+app.get(["/signup", "/signup.html"], (req, res) => res.redirect("/login?as=client&mode=signup"));
 
 // "/" routes by role rather than always going to the staff app, since a
 // client hitting the root of the site should land in their portal, not
@@ -208,7 +226,7 @@ app.get("/", tryPageAuth, (req, res) => {
   // calendar for another entity — it's saved straight to their portal
   // (see routes/public.routes.js).
   if (req.user && !(req.user.role === "client" && req.query.new === "1")) {
-    return res.redirect(req.user.role === "client" ? "/portal.html" : "/dashboard.html");
+    return res.redirect(req.user.role === "client" ? "/portal" : "/dashboard");
   }
   sendPageWithFooter(res, "index.html");
 });

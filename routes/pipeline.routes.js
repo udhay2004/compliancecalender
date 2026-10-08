@@ -118,7 +118,7 @@ router.patch("/:calendarId/items/:index/assign", async (req, res) => {
 
   // Tell the new owner, unless they assigned it to themselves.
   if (user && String(user._id) !== String(req.user._id)) {
-    const link = `/calendar.html?id=${calendar._id}#item-${idx}`;
+    const link = `/calendar?id=${calendar._id}#item-${idx}`;
     Notification.create({
       audience: "staff", clientOrgId: calendar.clientOrgId, calendarId: calendar._id, itemIndex: idx,
       type: "filing_assigned", title: `${byName} assigned you: ${item.compliance_name} (${company})`.slice(0, 200),
@@ -127,7 +127,7 @@ router.patch("/:calendarId/items/:index/assign", async (req, res) => {
     sendEmail({
       to: user.email,
       subject: `Assigned to you: ${item.compliance_name} — ${company}`,
-      text: `${byName} assigned "${item.compliance_name}" for ${company} to you.${item.dueDateActual ? `\nDue: ${new Date(item.dueDateActual).toDateString()}` : ""}\n\nOpen: ${process.env.APP_URL || ""}${link}\nYour work: ${process.env.APP_URL || ""}/pipeline.html?owner=me`,
+      text: `${byName} assigned "${item.compliance_name}" for ${company} to you.${item.dueDateActual ? `\nDue: ${new Date(item.dueDateActual).toDateString()}` : ""}\n\nOpen: ${process.env.APP_URL || ""}${link}\nYour work: ${process.env.APP_URL || ""}/pipeline?owner=me`,
       logPrefix: "[pipeline]",
     }).catch((err) => console.error("[pipeline] email failed (non-fatal):", err.message));
   }

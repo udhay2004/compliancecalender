@@ -194,7 +194,7 @@ async function announcePayment(calendar, item, outcome) {
       type: "payment_received",
       title: `${company} paid ${amount} for ${item.compliance_name}`,
       body: `Razorpay payment ${item.razorpayPaymentId}. The filing can go ahead.`,
-      link: `/calendar.html?id=${calendar._id}`,
+      link: `/calendar?id=${calendar._id}`,
     });
     notifyClient({
       clientOrgId: calendar.clientOrgId,
@@ -203,7 +203,7 @@ async function announcePayment(calendar, item, outcome) {
       title: `Payment received: ${amount} for ${item.compliance_name}`,
       body: `Thank you — we've received your payment of ${amount} for ${item.compliance_name} (payment reference ${item.razorpayPaymentId}). We'll start on the filing and keep you posted.` +
         (invoice ? `\n\nYour invoice ${invoice.number} is ready to download: ${process.env.APP_URL || ""}/api/portal/invoices/${invoice._id}/pdf` : ""),
-      link: `/portal.html?calendar=${calendar._id}`,
+      link: `/portal?calendar=${calendar._id}`,
     });
   } else if (outcome === "mismatch") {
     logActivity({
@@ -220,7 +220,7 @@ async function announcePayment(calendar, item, outcome) {
       type: "payment_failed",
       title: `Check payment for ${item.compliance_name} (${company})`,
       body: "Razorpay reported a payment that doesn't match the invoice, or a second payment for an item that was already paid. It has NOT been marked paid automatically. Check the Razorpay dashboard and refund if needed.",
-      link: `/calendar.html?id=${calendar._id}`,
+      link: `/calendar?id=${calendar._id}`,
     });
   }
 }
@@ -346,7 +346,7 @@ router.post("/calendars/:id/items/:index/create-order", async (req, res) => {
         type: "payment_failed",
         title: "Online payments are failing",
         body: `A client tried to pay and Razorpay refused. ${why.reason}\n\nHow to fix: ${why.fix}\n\nRazorpay's message: ${why.description}`,
-        link: "/admin.html",
+        link: "/admin",
       });
     });
     const temporary = why.reason.startsWith("The server couldn't reach Razorpay");
@@ -490,14 +490,14 @@ async function handleRefundEvent(event) {
       clientOrgId: calendar.clientOrgId, calendarId: calendar._id, type: "payment_failed",
       title: `Refund FAILED: ${amount} to ${company}`,
       body: `Razorpay could not complete the refund of ${amount} for ${item.compliance_name} (${refund.razorpayRefundId}). The credit note has been voided. Check the Razorpay dashboard, then try again from the service's page.`,
-      link: `/calendar.html?id=${calendar._id}#item-${itemIndex}`,
+      link: `/calendar?id=${calendar._id}#item-${itemIndex}`,
     });
   } else if (refund.status === "processed") {
     notifyClient({
       clientOrgId: calendar.clientOrgId, calendarId: calendar._id, type: "payment_received", email: false,
       title: `Refund of ${amount} is on its way`,
       body: `Razorpay has processed your refund of ${amount} for ${item.compliance_name}. Your bank may take a few days to show it.`,
-      link: `/portal.html?calendar=${calendar._id}`,
+      link: `/portal?calendar=${calendar._id}`,
     });
   }
 }

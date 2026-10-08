@@ -228,7 +228,7 @@
           Already set a password? <a href="#" id="usePasswordInstead">Sign in with it instead</a>
         </div>
         <div class="form-foot" style="margin-top:8px;">
-          Are you a client? <a href="/login.html?as=client">Client login</a>
+          Are you a client? <a href="/login?as=client">Client login</a>
         </div>
       </div>
     </div>
@@ -578,7 +578,7 @@
       companyName: $('clientCompany').value.trim(),
       calendarId: client.calendarId
     })
-      .then(function (data) { remember(data.user); location.href = data.redirect || '/portal.html'; })
+      .then(function (data) { remember(data.user); location.href = data.redirect || '/portal'; })
       .catch(function (err) {
         btn.disabled = false;
         if (err.code) { handleClientError(err, 'clientCodeHint'); return; }
@@ -724,7 +724,7 @@
           return;
         }
         remember(data.user);
-        location.href = data.redirect || '/dashboard.html';
+        location.href = data.redirect || '/dashboard';
       })
       .catch(function (err) {
         setHint('codeHint', err.message, true);
@@ -766,7 +766,7 @@
     btn.disabled = true;
     setHint('passwordHint', 'Saving…');
     post('/api/auth/password/set', { password: pw, confirmPassword: confirm })
-      .then(function (data) { remember(data.user); location.href = data.redirect || '/dashboard.html'; })
+      .then(function (data) { remember(data.user); location.href = data.redirect || '/dashboard'; })
       .catch(function (err) {
         setHint('passwordHint', err.message, true);
         btn.disabled = false;
@@ -785,7 +785,7 @@
     })
       .then(function (data) {
         remember(data.user);
-        location.href = params.get('next') || data.redirect || '/dashboard.html';
+        location.href = params.get('next') || data.redirect || '/dashboard';
       })
       .catch(function (err) {
         setHint('loginHint', err.message, true);

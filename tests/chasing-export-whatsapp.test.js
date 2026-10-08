@@ -372,7 +372,7 @@ test("client events say who files what; the team feed only has filings we handle
   assert.strictEqual(client.length, 2);
   assert.ok(client[0].description.startsWith("ComplyGlobally is handling this"));
   assert.ok(client.find((e) => e.summary.endsWith("(you file)")));
-  assert.ok(client[0].url.startsWith("https://app.example.com/portal.html?calendar="));
+  assert.ok(client[0].url.startsWith("https://app.example.com/portal?calendar="));
   const team = ics.calendarEvents(cal, { audience: "staff", company: "Acme Inc" });
   assert.strictEqual(team.length, 1);
   assert.match(team[0].summary, /^Acme Inc: Delaware Annual Report/);

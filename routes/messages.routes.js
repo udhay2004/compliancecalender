@@ -158,7 +158,7 @@ async function notifyOtherSide(org, sender, text, isFromClient) {
     type: "message",
     title: isFromClient ? `New message from ${org.name}` : "New message from ComplyGlobally",
     body: preview.slice(0, 1000),
-    link: isFromClient ? "/dashboard.html" : "/portal.html",
+    link: isFromClient ? "/dashboard" : "/portal",
     actorName: sender.name || sender.email,
   }).catch((err) => console.error("[messages] notification insert failed (non-fatal):", err.message));
 
@@ -174,8 +174,8 @@ async function notifyOtherSide(org, sender, text, isFromClient) {
       .select("_id")
       .sort({ reviewedAt: -1 });
     const link = calendar
-      ? `${process.env.APP_URL || ""}/calendar.html?id=${calendar._id}`
-      : `${process.env.APP_URL || ""}/admin.html`;
+      ? `${process.env.APP_URL || ""}/calendar?id=${calendar._id}`
+      : `${process.env.APP_URL || ""}/admin`;
     await sendEmail({
       to,
       subject: `New message from ${org.name}`,
@@ -193,7 +193,7 @@ async function notifyOtherSide(org, sender, text, isFromClient) {
     await sendEmail({
       to: org.primaryContactEmail,
       subject: `New message from ComplyGlobally`,
-      text: `${sender.name || sender.email} wrote:\n\n"${preview}"\n\nReply here: ${process.env.APP_URL || ""}/portal.html`,
+      text: `${sender.name || sender.email} wrote:\n\n"${preview}"\n\nReply here: ${process.env.APP_URL || ""}/portal`,
       logPrefix: "[messages]",
     });
   }

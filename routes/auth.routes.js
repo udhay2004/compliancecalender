@@ -120,7 +120,7 @@ router.post("/login", loginLimiter, loginAccountLimiter, async (req, res) => {
   await user.save();
 
   const step = setSessionCookie(res, user);
-  return res.json({ user: user.toSafeJSON(), redirect: step === "mfa" ? "/two-factor.html" : destinationFor(user), mfaRequired: step === "mfa" });
+  return res.json({ user: user.toSafeJSON(), redirect: step === "mfa" ? "/two-factor" : destinationFor(user), mfaRequired: step === "mfa" });
 });
 
 // POST /api/auth/logout-everywhere — invalidate every session this
@@ -176,8 +176,8 @@ const PORTALS = {
 
 // Where each account type lands after a successful sign-in.
 function destinationFor(user) {
-  if (user.role === "client") return "/portal.html";
-  return "/dashboard.html";
+  if (user.role === "client") return "/portal";
+  return "/dashboard";
 }
 
 // Deliberately tighter than the password limiter: each request here
@@ -322,7 +322,7 @@ router.post("/otp/verify", otpVerifyLimiter, async (req, res) => {
     ok: true,
     setupRequired: false,
     user: user.toSafeJSON(),
-    redirect: step === "mfa" ? "/two-factor.html" : destinationFor(user),
+    redirect: step === "mfa" ? "/two-factor" : destinationFor(user),
     mfaRequired: step === "mfa",
   });
 });
@@ -403,7 +403,7 @@ router.post("/password/set", async (req, res) => {
   return res.json({
     ok: true,
     user: user.toSafeJSON(),
-    redirect: step === "mfa" ? "/two-factor.html" : destinationFor(user),
+    redirect: step === "mfa" ? "/two-factor" : destinationFor(user),
   });
 });
 
@@ -597,10 +597,10 @@ router.get("/google/callback", async (req, res) => {
   res.clearCookie(GOOGLE_INTENT_COOKIE);
 
   if (error) {
-    return res.redirect("/login.html?as=client&reason=google_denied");
+    return res.redirect("/login?as=client&reason=google_denied");
   }
   if (!code || !state || !expectedState || state !== expectedState) {
-    return res.redirect("/login.html?as=client&reason=google_invalid_state");
+    return res.redirect("/login?as=client&reason=google_invalid_state");
   }
 
   let profile;
@@ -608,7 +608,7 @@ router.get("/google/callback", async (req, res) => {
     profile = await verifyCodeAndGetProfile(code);
   } catch (err) {
     console.error("Google sign-in failed:", err.message);
-    return res.redirect("/login.html?as=client&reason=google_failed");
+    return res.redirect("/login?as=client&reason=google_failed");
   }
 
   let user = await User.findOne({ googleId: profile.googleId });
@@ -629,7 +629,7 @@ router.get("/google/callback", async (req, res) => {
     // Pressed Google on the "Sign in" tab, but this Google account has
     // never been used here: say so, and offer to create the account.
     if (intent === "signin") {
-      return res.redirect("/login.html?as=client&mode=signup&reason=no_account_google");
+      return res.redirect("/login?as=client&mode=signup&reason=no_account_google");
     }
     user = await createClientAccount({
       email: profile.email,
@@ -640,11 +640,11 @@ router.get("/google/callback", async (req, res) => {
   }
 
   if (!user.active) {
-    return res.redirect("/login.html?as=client&reason=account_deactivated");
+    return res.redirect("/login?as=client&reason=account_deactivated");
   }
 
   const loginStep = setSessionCookie(res, user);
-  if (loginStep === "mfa") return res.redirect("/two-factor.html");
+  if (loginStep === "mfa") return res.redirect("/two-factor");
   if (user.role !== "client") return res.redirect(destinationFor(user));
 
   user.lastLoginAt = new Date();

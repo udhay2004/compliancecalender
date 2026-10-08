@@ -112,7 +112,7 @@ router.get("/filings.csv", async (req, res) => {
         ot === null ? "" : ot ? "Yes" : "No",
         R.turnaroundDays(it) ?? "",
         owner.name || "", it.completedByName || it.completedBy || "",
-        `${process.env.APP_URL || ""}/calendar.html?id=${r.calendarId}#item-${r.itemIndex}`,
+        `${process.env.APP_URL || ""}/calendar?id=${r.calendarId}#item-${r.itemIndex}`,
       ];
     });
   const csv = R.toCsv(

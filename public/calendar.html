@@ -95,13 +95,13 @@
 </head>
 <body>
 <div class="topbar">
-  <div class="brand"><a href="/app.html">Compliance Calendar <strong>Generator</strong></a></div>
+  <div class="brand"><a href="/app">Compliance Calendar <strong>Generator</strong></a></div>
   <div class="nav-links" id="navLinks">
-    <a href="/dashboard.html">Dashboard</a>
-    <a href="/pipeline.html">Pipeline</a>
-    <a href="/reports.html">Reports</a>
-    <a href="/app.html">Generate</a>
-    <a href="/review.html">Review Queue</a>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/pipeline">Pipeline</a>
+    <a href="/reports">Reports</a>
+    <a href="/app">Generate</a>
+    <a href="/review">Review Queue</a>
   </div>
   <div class="nav-user" id="navUser"></div>
 </div>
@@ -118,21 +118,21 @@
   async function loadUser() {
     try {
       const res = await fetch('/api/auth/me');
-      if (!res.ok) { location.href = '/login.html?next=' + encodeURIComponent(location.pathname + location.search); return; }
+      if (!res.ok) { location.href = '/login?next=' + encodeURIComponent(location.pathname + location.search); return; }
       const { user } = await res.json();
       const el = document.getElementById('navUser');
       el.innerHTML = `<span>${escapeHtml(user.name || user.email)}</span><button id="logoutBtn">Log out</button>`;
       if (user.role === 'admin' || user.role === 'super_admin') {
         const navLinks = document.getElementById('navLinks');
-        if (navLinks && !navLinks.querySelector('a[href="/admin.html"]')) {
-          navLinks.insertAdjacentHTML('beforeend', '<a href="/admin.html">Admin</a>');
+        if (navLinks && !navLinks.querySelector('a[href="/admin"]')) {
+          navLinks.insertAdjacentHTML('beforeend', '<a href="/admin">Admin</a>');
         }
       }
       document.getElementById('logoutBtn').addEventListener('click', async () => {
         await fetch('/api/auth/logout', { method: 'POST' });
-        location.href = '/login.html';
+        location.href = '/login';
       });
-    } catch (e) { location.href = '/login.html'; }
+    } catch (e) { location.href = '/login'; }
   }
   loadUser();
 
@@ -320,7 +320,7 @@
             <div class="case-actions">
               <a class="ghost" style="text-decoration:none; padding:10px 18px; display:inline-block;" href="/api/calendars/${id}/pdf">Download PDF ↓</a>
               <a class="ghost" style="text-decoration:none; padding:10px 18px; display:inline-block;" href="/api/calendars/${id}/ics" title="Deadlines as a calendar file for Google/Outlook/Apple">Download .ics ↓</a>
-              <a class="ghost" style="text-decoration:none; padding:10px 18px; display:inline-block;" href="/review.html">← Back to queue</a>
+              <a class="ghost" style="text-decoration:none; padding:10px 18px; display:inline-block;" href="/review">← Back to queue</a>
             </div>
             ${catHtml}
             <div class="legend">
@@ -775,7 +775,7 @@
     const el = document.getElementById('clientItemsList');
     if (!el) return;
     if (!billingLoaded) { billingLoaded = true; await Promise.all([loadBilling(), loadTeam()]); }
-    // Links like /calendar.html?id=…#item-3 (from the finance screen) open
+    // Links like /calendar?id=…#item-3 (from the finance screen) open
     // that service's card and scroll to it, once.
     const hashIdx = !jumpedToHash && /^#item-(\d+)$/.test(location.hash) ? +location.hash.slice(6) : null;
     if (hashIdx !== null && calendar.items[hashIdx]) {

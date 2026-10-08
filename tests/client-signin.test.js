@@ -229,7 +229,7 @@ test("a new client creates an account by email code and lands in their portal", 
   const ok = await c.post("/api/auth/client/code/verify", { email: "new@beta.io", code, mode: "signup", name: "Bea Ta", companyName: "Beta Labs" });
   assert.strictEqual(ok.status, 200);
   assert.strictEqual(ok.data.created, true);
-  assert.strictEqual(ok.data.redirect, "/portal.html");
+  assert.strictEqual(ok.data.redirect, "/portal");
   const user = users.find((u) => u.email === "new@beta.io");
   assert.strictEqual(user.role, "client");
   assert.strictEqual(user.name, "Bea Ta");
@@ -248,7 +248,7 @@ test("an existing client signs in by email code", async () => {
   const ok = await c.post("/api/auth/client/code/verify", { email: "owner@acme.com", code: lastCodeFor("owner@acme.com"), mode: "signin" });
   assert.strictEqual(ok.status, 200);
   assert.strictEqual(ok.data.created, false);
-  assert.strictEqual(ok.data.redirect, "/portal.html");
+  assert.strictEqual(ok.data.redirect, "/portal");
   assert.strictEqual((await c.get("/api/auth/me")).data.user.email, "owner@acme.com");
 });
 
@@ -286,7 +286,7 @@ test("every calendar generated with the email before sign-up is saved to the new
   }
   assert.strictEqual(taken.clientOrgId, "org_other", "a calendar someone already owns is never moved");
   assert.strictEqual(ok.data.calendarsSaved, 3);
-  assert.strictEqual(ok.data.redirect, `/portal.html?calendar=${fromButton._id}`, "opens the calendar they came from");
+  assert.strictEqual(ok.data.redirect, `/portal?calendar=${fromButton._id}`, "opens the calendar they came from");
   assert.strictEqual(staffNotes.length, 3);
 });
 
@@ -297,7 +297,7 @@ test("an existing client signing in also collects calendars generated with their
   const ok = await c.post("/api/auth/client/code/verify", { email: "owner@acme.com", code: lastCodeFor("owner@acme.com"), mode: "signin" });
   assert.strictEqual(ok.status, 200);
   assert.strictEqual(later.clientOrgId, "org_acme");
-  assert.strictEqual(ok.data.redirect, `/portal.html?calendar=${later._id}`);
+  assert.strictEqual(ok.data.redirect, `/portal?calendar=${later._id}`);
 });
 
 test("Google on the Sign in tab with an unknown account goes to Create account, and creates nothing", async () => {
@@ -308,7 +308,7 @@ test("Google on the Sign in tab with an unknown account goes to Create account, 
   const state = new URL(start.location).searchParams.get("state");
   const back = await c.get(`/api/auth/google/callback?code=abc&state=${state}`);
   assert.strictEqual(back.status, 302);
-  assert.match(back.location, /\/login\.html\?as=client&mode=signup&reason=no_account_google/);
+  assert.strictEqual(back.location, "/login?as=client&mode=signup&reason=no_account_google");
   assert.ok(!users.some((u) => u.email === "fresh@gmail.com"));
 });
 
@@ -320,7 +320,7 @@ test("Google from Create account (or after generating a calendar) creates the ac
   const state = new URL(start.location).searchParams.get("state");
   const back = await c.get(`/api/auth/google/callback?code=abc&state=${state}`);
   assert.strictEqual(back.status, 302);
-  assert.strictEqual(back.location, `/portal.html?calendar=${cal._id}`);
+  assert.strictEqual(back.location, `/portal?calendar=${cal._id}`);
   const user = users.find((u) => u.email === "gnew@gmail.com");
   assert.ok(user && user.role === "client" && user.googleId === "g-456");
   assert.strictEqual(cal.clientOrgId, user.clientOrgId);
@@ -332,7 +332,7 @@ test("Google sign-in for an existing client still works from the Sign in tab", a
   const start = await c.get("/api/auth/google?intent=signin");
   const state = new URL(start.location).searchParams.get("state");
   const back = await c.get(`/api/auth/google/callback?code=abc&state=${state}`);
-  assert.strictEqual(back.location, "/portal.html");
+  assert.strictEqual(back.location, "/portal");
   assert.strictEqual(users.find((u) => u.email === "owner@acme.com").googleId, "g-acme");
 });
 
@@ -350,7 +350,7 @@ test("a client adds a password in the portal, and the next sign-in can use it", 
   const set = await c.post("/api/auth/password/set", { password: "Blue-harbour-2026", confirmPassword: "Blue-harbour-2026" });
   assert.strictEqual(set.status, 200, JSON.stringify(set.data));
   assert.strictEqual(set.data.user.hasPassword, true);
-  assert.strictEqual(set.data.redirect, "/portal.html");
+  assert.strictEqual(set.data.redirect, "/portal");
   assert.strictEqual((await c.get("/api/auth/me")).status, 200, "still signed in on this device");
 
   // A new browser: the password works, a wrong one doesn't.
@@ -358,7 +358,7 @@ test("a client adds a password in the portal, and the next sign-in can use it", 
   assert.strictEqual((await other.post("/api/auth/login", { email: "owner@acme.com", password: "wrong-password-99" })).status, 401);
   const login = await other.post("/api/auth/login", { email: "owner@acme.com", password: "Blue-harbour-2026" });
   assert.strictEqual(login.status, 200);
-  assert.strictEqual(login.data.redirect, "/portal.html");
+  assert.strictEqual(login.data.redirect, "/portal");
   assert.strictEqual(login.data.user.hasPassword, true);
 
   // Changing it now needs the current one; email codes keep working.

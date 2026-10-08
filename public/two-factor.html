@@ -41,7 +41,7 @@
       <button type="submit" class="primary" id="verifyBtn">Continue</button>
     </div>
     <p class="hint" id="verifyHint" role="alert" style="margin-top:12px;"></p>
-    <p style="margin-top:18px;font-size:13px;"><a href="/login.html">Back to login</a></p>
+    <p style="margin-top:18px;font-size:13px;"><a href="/login">Back to login</a></p>
   </form>
 
   <!-- 2. Set up -->
@@ -87,7 +87,7 @@
     <form id="regenForm">
       <label for="regenCode" class="sr-only">Code</label>
       <input id="regenCode" class="tf-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" placeholder="000000" required>
-      <div class="tf-actions"><a href="/dashboard.html">Back to dashboard</a><button type="submit" class="primary">Make new recovery codes</button></div>
+      <div class="tf-actions"><a href="/dashboard">Back to dashboard</a><button type="submit" class="primary">Make new recovery codes</button></div>
       <p class="hint" id="regenHint" role="alert"></p>
     </form>
   </div>
@@ -97,7 +97,7 @@
 <script>
   const $ = (id) => document.getElementById(id);
   const params = new URLSearchParams(location.search);
-  let afterCodes = '/dashboard.html';
+  let afterCodes = '/dashboard';
   let recoveryMode = false;
 
   function show(id) {
@@ -112,7 +112,7 @@
     return data;
   }
   function showCodes(codes, next) {
-    afterCodes = next || '/dashboard.html';
+    afterCodes = next || '/dashboard';
     $('codes').innerHTML = codes.map(c => `<span>${c}</span>`).join('');
     $('codes').dataset.text = codes.join('\n');
     show('codesView');
@@ -145,10 +145,10 @@
       if (data.usedRecovery) {
         alert(`Signed in with a recovery code. You have ${data.recoveryCodesLeft} left.` + (data.recoveryCodesLeft <= 3 ? ' Make new ones from the two-factor page soon.' : ''));
       }
-      location.href = data.redirect || '/dashboard.html';
+      location.href = data.redirect || '/dashboard';
     } catch (err) {
       hint.textContent = err.message; hint.classList.add('err');
-      if (err.data && err.data.code === 'MFA_EXPIRED') setTimeout(() => { location.href = '/login.html?reason=session_expired'; }, 1500);
+      if (err.data && err.data.code === 'MFA_EXPIRED') setTimeout(() => { location.href = '/login?reason=session_expired'; }, 1500);
       $('verifyBtn').disabled = false; $('verifyCode').select();
     }
   });
@@ -189,7 +189,7 @@
     const hint = $('regenHint'); hint.textContent = ''; hint.classList.remove('err');
     try {
       const data = await post('/api/auth/2fa/recovery-codes', { code: $('regenCode').value });
-      showCodes(data.recoveryCodes, '/two-factor.html');
+      showCodes(data.recoveryCodes, '/two-factor');
     } catch (err) { hint.textContent = err.message; hint.classList.add('err'); }
   });
 
@@ -199,9 +199,9 @@
     const data = await res.json().catch(() => ({}));
     if (res.status === 401) {
       if (data.code === 'MFA_REQUIRED') return show('verifyView');
-      location.href = '/login.html'; return;
+      location.href = '/login'; return;
     }
-    if (!res.ok) { location.href = '/login.html'; return; }
+    if (!res.ok) { location.href = '/login'; return; }
     if (!data.enabled) {
       if (!data.required && !params.get('setup')) { /* optional: still allow setup */ }
       return startSetup().catch(err => { $('loading').innerHTML = `<p>${err.message}</p>`; });

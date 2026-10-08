@@ -37,7 +37,7 @@ router.use(requireAuth, requireClientRole);
 const clientView = async (calendar) => toView(calendar, { staff: false, missingKeys: await missingKeysFor(calendar) });
 
 function staffLink(calendarId) {
-  return `/calendar.html?id=${calendarId}`;
+  return `/calendar?id=${calendarId}`;
 }
 
 // Every route below finds the calendar via this helper, which builds the
@@ -183,7 +183,7 @@ router.patch("/profile", async (req, res) => {
       type: "profile_updated",
       title: `${org.name} updated their contact details`,
       body: `Changed: ${changed.join(", ")}.`,
-      link: "/admin.html",
+      link: "/admin",
       actorName: req.user.name || req.user.email,
       email: false,
     });
@@ -396,7 +396,7 @@ router.get("/calendars/:id/items/:index/documents/:docIndex/download", async (re
   const doc = idx !== null ? calendar.items[idx].documents[docIdx] : null;
   if (!doc) return res.status(404).json({ error: "Document not found." });
 
-  await sendStoredFile(req, res, doc, { audience: "client", backHref: `/portal.html?calendar=${calendar._id}` });
+  await sendStoredFile(req, res, doc, { audience: "client", backHref: `/portal?calendar=${calendar._id}` });
 });
 
 // ---------------------------------------------------------------------
@@ -541,7 +541,7 @@ router.post("/calendars/regenerate", requireCompleteContact, async (req, res) =>
       type: "calendar_regenerated",
       title: "Your compliance calendar was regenerated",
       body: `Your new calendar has ${items.length} items. We kept your selections, documents and payments for the ${carried} filings that are still on it. Your previous calendar is still available: choose it from the version list above the calendar.`,
-      link: `/portal.html?calendar=${calendar._id}`,
+      link: `/portal?calendar=${calendar._id}`,
       actorName: who,
     });
   } catch (err) {

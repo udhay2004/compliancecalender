@@ -25,7 +25,7 @@ deployed on Railway.
 - Company and policy pages: `/about`, `/pricing`, `/terms`, `/privacy`,
   `/refund-policy`, `/shipping-policy`, `/contact`.
 
-**Client portal** (`/portal.html`)
+**Client portal** (`/portal`)
 - The calendar with real due dates. Clients choose the services they want
   handled, see prices, upload documents (checked by content, stored in R2)
   and pay by card through Razorpay.
@@ -35,16 +35,16 @@ deployed on Railway.
 - Optional WhatsApp reminders (the client opts in).
 
 **Staff workspace**
-- `/dashboard.html`: deadlines, documents waiting to be checked, clients
+- `/dashboard`: deadlines, documents waiting to be checked, clients
   waiting on documents, finance to-do lists, the team and the security log.
-- `/pipeline.html`: every service a client chose, in the step it's at now,
+- `/pipeline`: every service a client chose, in the step it's at now,
   with an owner for each.
-- `/reports.html`: on-time rate, turnaround, workload, services, money
+- `/reports`: on-time rate, turnaround, workload, services, money
   collected, and CSV exports.
-- `/review.html` and `/calendar.html`: review and approve AI calendars;
+- `/review` and `/calendar`: review and approve AI calendars;
   per client, check documents, send prices, upload proof of completion,
   refund, and chase documents.
-- `/admin.html`: accounts, client companies, and health checks for
+- `/admin`: accounts, client companies, and health checks for
   storage, payments, WhatsApp, legal pages and backups.
 - Staff sign in with a password or an email code, plus required two-factor login.
 

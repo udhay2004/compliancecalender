@@ -10,13 +10,13 @@
 </head>
 <body>
 <div class="topbar">
-  <div class="brand"><a href="/app.html">Compliance Calendar <strong>Generator</strong></a></div>
+  <div class="brand"><a href="/app">Compliance Calendar <strong>Generator</strong></a></div>
   <div class="nav-links">
-    <a href="/dashboard.html">Dashboard</a>
-    <a href="/pipeline.html">Pipeline</a>
-    <a href="/reports.html">Reports</a>
-    <a href="/app.html" class="active">Generate</a>
-    <a href="/review.html">Review Queue</a>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/pipeline">Pipeline</a>
+    <a href="/reports">Reports</a>
+    <a href="/app" class="active">Generate</a>
+    <a href="/review">Review Queue</a>
   </div>
   <div class="nav-user" id="navUser"></div>
 </div>
@@ -113,15 +113,15 @@
   async function loadUser() {
     try {
       const res = await fetch('/api/auth/me');
-      if (!res.ok) { location.href = '/login.html?next=/app.html'; return; }
+      if (!res.ok) { location.href = '/login?next=/app'; return; }
       const { user } = await res.json();
       const el = document.getElementById('navUser');
       el.innerHTML = `<span>${escapeHtml(user.name || user.email)}</span><button id="logoutBtn">Log out</button>`;
       document.getElementById('logoutBtn').addEventListener('click', async () => {
         await fetch('/api/auth/logout', { method: 'POST' });
-        location.href = '/login.html';
+        location.href = '/login';
       });
-    } catch (e) { location.href = '/login.html?next=/app.html'; }
+    } catch (e) { location.href = '/login?next=/app'; }
   }
   loadUser();
 
@@ -199,7 +199,7 @@
       slot.innerHTML = `
         <div class="error-banner" style="background:var(--seal-gold-bg); border-color:var(--seal-gold); color:var(--seal-gold);">
           Saved as <strong>pending review</strong> (${escapeHtml(SOURCE_LABEL[cal.sourceMode] || cal.sourceMode)}, ${cal.items.length} items).
-          <a href="/calendar.html?id=${cal._id}">Open it to review, edit, or approve →</a>
+          <a href="/calendar?id=${cal._id}">Open it to review, edit, or approve →</a>
         </div>`;
       loadMine();
     } catch (err) {
@@ -236,7 +236,7 @@
               <td class="meta">${escapeHtml(c.profile.state)} · ${escapeHtml(c.profile.entityType)}</td>
               <td><span class="badge ${c.status}">${c.status.replace('_',' ')}</span></td>
               <td class="meta">${fmtDate(c.createdAt)}</td>
-              <td><a class="open-link" href="/calendar.html?id=${c._id}">Open →</a></td>
+              <td><a class="open-link" href="/calendar?id=${c._id}">Open →</a></td>
             </tr>`).join('')}
         </tbody>
       </table>`;

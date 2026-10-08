@@ -235,7 +235,7 @@ test("first-time staff login: code → verify → set password → dashboard", a
     confirmPassword: "Harbour-Lantern-42",
   });
   assert.strictEqual(set.status, 200);
-  assert.strictEqual(set.data.redirect, "/dashboard.html");
+  assert.strictEqual(set.data.redirect, "/dashboard");
 
   const now = await client.get("/protected");
   assert.strictEqual(now.status, 200);

@@ -79,7 +79,7 @@ function cookieOptions(maxAge) {
 // EVERY way of signing in (password, emailed code, Google, first password)
 // ends here, so this is where two-factor is enforced: a staff member with
 // two-factor switched on gets only a 10-minute "code needed" cookie, and
-// every staff page sends them to /two-factor.html until they enter a code.
+// every staff page sends them to /two-factor until they enter a code.
 // Returns "mfa" in that case, "session" otherwise.
 function setSessionCookie(res, user, { mfaPassed = false } = {}) {
   res.clearCookie(SETUP_COOKIE_NAME, { path: "/" });
@@ -214,19 +214,19 @@ function requirePageAuth(req, res, next) {
   loadUserFromRequest(req)
     .then((user) => {
       req.user = user;
-      if (needsMfaSetup(user)) return res.redirect("/two-factor.html?setup=1");
+      if (needsMfaSetup(user)) return res.redirect("/two-factor?setup=1");
       next();
     })
     .catch(() => {
-      if (req.cookies?.[MFA_COOKIE_NAME]) return res.redirect(`/two-factor.html?next=${encodeURIComponent(req.originalUrl)}`);
-      res.redirect("/login.html?reason=session_expired");
+      if (req.cookies?.[MFA_COOKIE_NAME]) return res.redirect(`/two-factor?next=${encodeURIComponent(req.originalUrl)}`);
+      res.redirect("/login?reason=session_expired");
     });
 }
 
 function requirePageRole(minRole) {
   return (req, res, next) => {
     if (!req.user || !User.hasAtLeast(req.user.role, minRole)) {
-      return res.redirect("/login.html?reason=not_authorized");
+      return res.redirect("/login?reason=not_authorized");
     }
     next();
   };
@@ -251,7 +251,7 @@ function tryPageAuth(req, res, next) {
 // client), which is wrong for a client-only UI. Mirrors requireClientRole.
 function requirePageClientRole(req, res, next) {
   if (!req.user || req.user.role !== "client") {
-    return res.redirect("/login.html?reason=not_authorized");
+    return res.redirect("/login?reason=not_authorized");
   }
   next();
 }
