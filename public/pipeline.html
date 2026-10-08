@@ -60,12 +60,12 @@
 </head>
 <body>
 <div class="topbar">
-  <div class="brand"><a href="/dashboard.html" style="color:inherit;text-decoration:none;">Compliance Calendar <strong>Generator</strong></a></div>
+  <div class="brand"><a href="/dashboard" style="color:inherit;text-decoration:none;">Compliance Calendar <strong>Generator</strong></a></div>
   <div class="nav-links" id="navLinks">
-    <a href="/dashboard.html">Dashboard</a>
-    <a href="/pipeline.html" class="active">Pipeline</a>
-    <a href="/reports.html">Reports</a>
-    <a href="/review.html">Review Queue</a>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/pipeline" class="active">Pipeline</a>
+    <a href="/reports">Reports</a>
+    <a href="/review">Review Queue</a>
   </div>
   <div class="nav-user">
     <span id="navUser"></span>
@@ -126,14 +126,14 @@
     if (state.due) p.set('due', state.due);
     if (state.q) p.set('q', state.q);
     if (state.stage !== 'open') p.set('stage', state.stage);
-    history.replaceState(null, '', '/pipeline.html' + (p.toString() ? '?' + p : ''));
+    history.replaceState(null, '', '/pipeline' + (p.toString() ? '?' + p : ''));
   }
 
   function load() {
     var p = new URLSearchParams({ owner: state.owner, due: state.due, q: state.q });
     return fetch('/api/pipeline?' + p, { credentials: 'same-origin' })
       .then(function (r) {
-        if (r.status === 401) { location.href = '/login.html'; throw new Error('Signed out'); }
+        if (r.status === 401) { location.href = '/login'; throw new Error('Signed out'); }
         return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || 'Could not load the pipeline.'); return d; });
       })
       .then(function (d) { data = d; render(); })
@@ -188,7 +188,7 @@
     if (c.paymentStatus === 'Overdue') bits.push('payment overdue');
     var wait = c.stage !== 'done' && c.daysInStage !== null ? '<div class="wait">' + (c.daysInStage === 0 ? 'since today' : 'waiting ' + c.daysInStage + ' day' + (c.daysInStage === 1 ? '' : 's')) + '</div>' : '';
     return '<div class="card-row">' +
-      '<div class="card-main"><a href="/calendar.html?id=' + encodeURIComponent(c.calendarId) + '#item-' + c.itemIndex + '">' + esc(c.company) + '</a>' +
+      '<div class="card-main"><a href="/calendar?id=' + encodeURIComponent(c.calendarId) + '#item-' + c.itemIndex + '">' + esc(c.company) + '</a>' +
         '<div class="card-sub">' + esc(c.task) + (bits.length ? ' · ' + esc(bits.join(' · ')) : '') + '</div></div>' +
       '<div class="card-meta">' + due + wait + '</div>' +
       ownerCell(c) +
@@ -233,10 +233,10 @@
   fetch('/api/auth/me', { credentials: 'same-origin' }).then(function (r) { return r.json(); }).then(function (d) {
     var u = d.user || {};
     $('navUser').textContent = u.email || '';
-    if (u.role === 'admin' || u.role === 'super_admin') $('navLinks').insertAdjacentHTML('beforeend', '<a href="/admin.html">Admin</a>');
+    if (u.role === 'admin' || u.role === 'super_admin') $('navLinks').insertAdjacentHTML('beforeend', '<a href="/admin">Admin</a>');
   }).catch(function () {});
   $('logoutBtn').addEventListener('click', function () {
-    fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' }).then(function () { location.href = '/login.html'; });
+    fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' }).then(function () { location.href = '/login'; });
   });
   document.addEventListener('cc:notifications', function () { load(); });
   load();

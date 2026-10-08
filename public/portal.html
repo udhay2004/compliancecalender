@@ -175,16 +175,16 @@
 
   async function loadUser() {
     const res = await fetch('/api/auth/me');
-    if (!res.ok) { location.href = '/login.html?next=/portal.html'; return false; }
+    if (!res.ok) { location.href = '/login?next=/portal'; return false; }
     const { user } = await res.json();
-    if (user.role !== 'client') { location.href = '/dashboard.html'; return false; }
+    if (user.role !== 'client') { location.href = '/dashboard'; return false; }
     me = user;
     // The login page opens on the right form next time (see login.html).
     try { localStorage.setItem("cc_last_sign_in", JSON.stringify({ email: user.email, client: true, hasPassword: Boolean(user.hasPassword) })); } catch (_) {}
     document.getElementById('navUser').innerHTML = `<span>${escapeHtml(user.name || user.email)}</span><button id="logoutBtn">Log out</button>`;
     document.getElementById('logoutBtn').addEventListener('click', async () => {
       await fetch('/api/auth/logout', { method: 'POST' });
-      location.href = '/login.html';
+      location.href = '/login';
     });
     return true;
   }
@@ -516,7 +516,7 @@
     const next = calendars.find(c => c._id === id);
     if (!next) return;
     calendar = next;
-    window.history.replaceState(null, '', `/portal.html?calendar=${calendar._id}`);
+    window.history.replaceState(null, '', `/portal?calendar=${calendar._id}`);
     expandedItems.clear(); renderHeader(); renderItems();
   }
   function renderCompanies() {
@@ -935,7 +935,7 @@
       regenDialog.close();
       expandedItems.clear();
       await loadCalendars(data.calendar._id);
-      window.history.replaceState(null, '', `/portal.html?calendar=${data.calendar._id}`);
+      window.history.replaceState(null, '', `/portal?calendar=${data.calendar._id}`);
     } catch (err) {
       if (needContact(err)) regenDialog.close();
       hint.textContent = err.message; hint.classList.add('err');

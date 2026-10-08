@@ -20,7 +20,7 @@ const { fmt: fmtDay } = require("../lib/deadlines");
 // Async because it checks storage for each uploaded file, so staff see
 // "File missing" instead of discovering it by clicking Download.
 const staffView = async (calendar) => toView(calendar, { staff: true, missingKeys: await missingKeysFor(calendar) });
-const portalLink = (calendar) => `/portal.html?calendar=${calendar._id}`;
+const portalLink = (calendar) => `/portal?calendar=${calendar._id}`;
 
 const router = express.Router();
 // Everything in this file is internal tooling (generate/review/approve/
@@ -698,7 +698,7 @@ router.get("/:id/items/:index/documents/:docIndex/download", async (req, res) =>
   const doc = item && item.documents[docIdx];
   if (!doc) return res.status(404).json({ error: "Document not found." });
 
-  await sendStoredFile(req, res, doc, { audience: "staff", backHref: `/calendar.html?id=${calendar._id}` });
+  await sendStoredFile(req, res, doc, { audience: "staff", backHref: `/calendar?id=${calendar._id}` });
 });
 
 // GET /api/calendars/:id/client-contact — the client org's contact

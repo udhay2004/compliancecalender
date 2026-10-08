@@ -10,13 +10,13 @@
 </head>
 <body>
 <div class="topbar">
-  <div class="brand"><a href="/app.html">Compliance Calendar <strong>Generator</strong></a></div>
+  <div class="brand"><a href="/app">Compliance Calendar <strong>Generator</strong></a></div>
   <div class="nav-links" id="navLinks">
-    <a href="/dashboard.html">Dashboard</a>
-    <a href="/pipeline.html">Pipeline</a>
-    <a href="/reports.html">Reports</a>
-    <a href="/app.html">Generate</a>
-    <a href="/review.html" class="active">Review Queue</a>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/pipeline">Pipeline</a>
+    <a href="/reports">Reports</a>
+    <a href="/app">Generate</a>
+    <a href="/review" class="active">Review Queue</a>
   </div>
   <div class="nav-user" id="navUser"></div>
 </div>
@@ -46,21 +46,21 @@
   async function loadUser() {
     try {
       const res = await fetch('/api/auth/me');
-      if (!res.ok) { location.href = '/login.html?next=/review.html'; return; }
+      if (!res.ok) { location.href = '/login?next=/review'; return; }
       const { user } = await res.json();
       const el = document.getElementById('navUser');
       el.innerHTML = `<span>${escapeHtml(user.name || user.email)}</span><button id="logoutBtn">Log out</button>`;
       if (user.role === 'admin' || user.role === 'super_admin') {
         const navLinks = document.getElementById('navLinks');
-        if (navLinks && !navLinks.querySelector('a[href="/admin.html"]')) {
-          navLinks.insertAdjacentHTML('beforeend', '<a href="/admin.html">Admin</a>');
+        if (navLinks && !navLinks.querySelector('a[href="/admin"]')) {
+          navLinks.insertAdjacentHTML('beforeend', '<a href="/admin">Admin</a>');
         }
       }
       document.getElementById('logoutBtn').addEventListener('click', async () => {
         await fetch('/api/auth/logout', { method: 'POST' });
-        location.href = '/login.html';
+        location.href = '/login';
       });
-    } catch (e) { location.href = '/login.html?next=/review.html'; }
+    } catch (e) { location.href = '/login?next=/review'; }
   }
   loadUser();
 
@@ -94,7 +94,7 @@
               <td class="meta">${escapeHtml(c.profile.state)} · ${escapeHtml(c.profile.entityType)}</td>
               <td class="meta">${escapeHtml(byCol.get(c))}</td>
               <td class="meta">${dateCol.get(c)}</td>
-              <td><a class="open-link" href="/calendar.html?id=${c._id}">Open →</a></td>
+              <td><a class="open-link" href="/calendar?id=${c._id}">Open →</a></td>
             </tr>`).join('')}
         </tbody>
       </table>`;

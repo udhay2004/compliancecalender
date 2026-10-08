@@ -99,7 +99,7 @@ async function main() {
   }
 
   console.log(
-    "\nDone. Each person should now go to /login.html, pick their door " +
+    "\nDone. Each person should now go to /login, pick their door " +
     "(Staff or Super admin), enter their address, and follow the emailed code."
   );
   process.exit(0);

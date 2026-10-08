@@ -518,8 +518,8 @@
   <div class="topbar-actions">
     <button class="btn btn-ghost js-results" type="button" aria-label="View your calendar" style="height:40px;padding:0 14px;font-size:13.5px"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg><span class="lbl-new">View calendar</span></button>
     <button class="btn btn-ghost js-new" type="button" aria-label="New calendar" style="height:40px;padding:0 14px;font-size:13.5px"><svg class="ic" aria-hidden="true"><use href="#i-calendar"/></svg><span class="lbl-new">New calendar</span></button>
-    <a class="client-link" href="/login.html?as=client">Client login <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-    <a class="staff-link" href="/login.html">Staff login</a>
+    <a class="client-link" href="/login?as=client">Client login <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+    <a class="staff-link" href="/login">Staff login</a>
   </div>
 </div></div>
 
@@ -763,7 +763,7 @@
   // (routes/public.routes.js returns portalUrl); everyone else signs in first.
   const portalUrls = {};
   function startFilingHref(calendarId) {
-    return portalUrls[calendarId] || `/login.html?as=client&mode=signup&calendarId=${encodeURIComponent(calendarId)}`;
+    return portalUrls[calendarId] || `/login?as=client&mode=signup&calendarId=${encodeURIComponent(calendarId)}`;
   }
 
   function icon(name, extra) {
@@ -1358,7 +1358,7 @@
     if (p.email || p.loginEmail) document.getElementById('contactEmail').value = p.email || p.loginEmail;
     if (p.phone) document.getElementById('contactPhone').value = p.phone;
     const clientLink = document.querySelector('.client-link');
-    if (clientLink) { clientLink.href = '/portal.html'; clientLink.firstChild.textContent = 'Back to your portal '; }
+    if (clientLink) { clientLink.href = '/portal'; clientLink.firstChild.textContent = 'Back to your portal '; }
     const staff = document.querySelector('.staff-link');
     if (staff) staff.remove();
   }).catch(() => {});

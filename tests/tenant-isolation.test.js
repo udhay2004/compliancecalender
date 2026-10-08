@@ -180,10 +180,10 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 // Page guards, the same middleware and order server.js uses.
-["/app.html", "/review.html", "/calendar.html", "/pipeline.html", "/reports.html", "/dashboard.html"].forEach((p) =>
+["/app", "/review", "/calendar", "/pipeline", "/reports", "/dashboard"].forEach((p) =>
   app.get(p, requirePageAuth, requirePageRole("staff"), (req, res) => res.send("staff page")));
-app.get("/admin.html", requirePageAuth, requirePageRole("admin"), (req, res) => res.send("admin page"));
-app.get("/portal.html", requirePageAuth, requirePageClientRole, (req, res) => res.send("portal page"));
+app.get("/admin", requirePageAuth, requirePageRole("admin"), (req, res) => res.send("admin page"));
+app.get("/portal", requirePageAuth, requirePageClientRole, (req, res) => res.send("portal page"));
 Object.entries(ROUTERS).forEach(([prefix, router]) => app.use(prefix, router));
 app.use(errorHandler);
 
@@ -476,28 +476,28 @@ test("staff are refused on every admin route; team accounts are refused on clien
 });
 
 test("pages are refused on the server, not just hidden: each role only gets its own pages", async () => {
-  const staffPages = ["/app.html", "/review.html", "/calendar.html", "/pipeline.html", "/reports.html", "/dashboard.html"];
-  for (const p of [...staffPages, "/admin.html", "/portal.html"]) {
+  const staffPages = ["/app", "/review", "/calendar", "/pipeline", "/reports", "/dashboard"];
+  for (const p of [...staffPages, "/admin", "/portal"]) {
     const r = await call("GET", p);
     assert.strictEqual(r.status, 302, p);
-    assert.strictEqual(r.location, "/login.html?reason=session_expired");
+    assert.strictEqual(r.location, "/login?reason=session_expired");
   }
-  for (const p of [...staffPages, "/admin.html"]) {
+  for (const p of [...staffPages, "/admin"]) {
     const r = await call("GET", p, { as: alice });
-    assert.strictEqual(r.location, "/login.html?reason=not_authorized", `client → ${p}`);
+    assert.strictEqual(r.location, "/login?reason=not_authorized", `client → ${p}`);
     assert.ok(!r.text.includes("page"));
   }
-  assert.strictEqual((await call("GET", "/admin.html", { as: staff })).location, "/login.html?reason=not_authorized");
-  assert.strictEqual((await call("GET", "/portal.html", { as: staff })).location, "/login.html?reason=not_authorized");
+  assert.strictEqual((await call("GET", "/admin", { as: staff })).location, "/login?reason=not_authorized");
+  assert.strictEqual((await call("GET", "/portal", { as: staff })).location, "/login?reason=not_authorized");
   for (const p of staffPages) assert.strictEqual((await call("GET", p, { as: staff })).status, 200, p);
-  assert.strictEqual((await call("GET", "/admin.html", { as: admin })).status, 200);
-  assert.strictEqual((await call("GET", "/portal.html", { as: alice })).status, 200);
+  assert.strictEqual((await call("GET", "/admin", { as: admin })).status, 200);
+  assert.strictEqual((await call("GET", "/portal", { as: alice })).status, 200);
 
   // server.js guards every page in public/ that isn't meant for the public.
   const serverJs = fs.readFileSync(path.join(root, "server.js"), "utf8");
   const publicPages = new Set(["index.html", "login.html", "two-factor.html"]);
   for (const file of fs.readdirSync(path.join(root, "public")).filter((f) => f.endsWith(".html") && !publicPages.has(f))) {
-    assert.ok(serverJs.includes(`"/${file}"`), `${file} has a guarded route in server.js`);
+    assert.ok(serverJs.includes(`"/${file.slice(0, -5)}"`), `${file} has a guarded route in server.js`);
   }
   assert.ok(serverJs.indexOf("STAFF_PAGES.forEach") < serverJs.indexOf("express.static("), "guards are registered before the static folder");
 });
@@ -506,7 +506,7 @@ test("a deactivated account, or one signed out everywhere, loses access at once"
   assert.strictEqual((await call("GET", "/api/portal/calendars", { as: alice })).status, 200);
   alice.active = false;
   assert.strictEqual((await call("GET", "/api/portal/calendars", { as: alice })).status, 401);
-  assert.strictEqual((await call("GET", "/portal.html", { as: alice })).location, "/login.html?reason=session_expired");
+  assert.strictEqual((await call("GET", "/portal", { as: alice })).location, "/login?reason=session_expired");
   alice.active = true;
   const oldCookie = { Cookie: cookieFor(staff) };
   staff.tokenVersion += 1; // password change / "log out everywhere"
@@ -526,7 +526,7 @@ test("two-factor is enforced by the server for staff, admins and the owner, on e
           assert.strictEqual(r.body.code, "MFA_SETUP_REQUIRED");
         }
       }
-      assert.strictEqual((await call("GET", "/dashboard.html", { as: who })).location, "/two-factor.html?setup=1");
+      assert.strictEqual((await call("GET", "/dashboard", { as: who })).location, "/two-factor?setup=1");
     }
     // Two-factor is on, but this session never passed the code step.
     staff.totpEnabled = true;
@@ -630,4 +630,33 @@ test("refunds: only finance and admins; the amount can't exceed what was paid", 
     assert.strictEqual(r.status, 400, `amount ${amount} → ${r.status}`);
   }
   assert.strictEqual((A.cal.items[0].refunds || []).length, 0);
+});
+
+// =====================================================================
+// Page addresses without ".html"
+// =====================================================================
+test("server.js serves each page at an address without .html, and sends the old address there", async () => {
+  // The same page wiring as server.js, read from it so the two can't drift.
+  const serverJs = fs.readFileSync(path.join(root, "server.js"), "utf8");
+  const names = JSON.parse(serverJs.match(/const PAGE_NAMES = (\[[^\]]+\]);/)[1]);
+  const pages = fs.readdirSync(path.join(root, "public")).filter((f) => f.endsWith(".html")).map((f) => f.slice(0, -5));
+  assert.deepStrictEqual([...names].sort(), pages.sort(), "every page in public/ is covered by the redirect");
+  for (const name of names.filter((n) => n !== "index")) {
+    assert.ok(serverJs.includes(`"/${name}"`), `/${name} has its own route`);
+    assert.ok(!serverJs.includes(`app.get("/${name}.html"`), `/${name}.html is not served directly`);
+  }
+  assert.ok(serverJs.indexOf("PAGE_NAMES.map") < serverJs.indexOf("express.static("), "old addresses are redirected before files are served");
+
+  // No page, email or notification still points at an .html address.
+  const stale = [];
+  const scan = (dir) => fs.readdirSync(path.join(root, dir), { withFileTypes: true }).forEach((e) => {
+    if (e.isDirectory()) { if (e.name !== "vendor") scan(path.join(dir, e.name)); return; }
+    if (!/\.(js|html)$/.test(e.name)) return;
+    const src = fs.readFileSync(path.join(root, dir, e.name), "utf8");
+    for (const m of src.matchAll(/(["'`=(]|\$\{[^}]*\})\/(app|review|calendar|pipeline|reports|admin|dashboard|portal|login|two-factor|index)\.html/g)) {
+      stale.push(`${dir}/${e.name}: ${m[0]}`);
+    }
+  });
+  ["routes", "lib", "middleware", "public"].forEach(scan);
+  assert.deepStrictEqual(stale, []);
 });

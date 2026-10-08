@@ -82,7 +82,7 @@ const authRoutes = require("../routes/auth.routes");
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", requireAuth, requireRole("admin"), require("../routes/admin.routes"));
 app.get("/api/staff-thing", requireAuth, requireRole("staff"), (req, res) => res.json({ ok: true }));
-app.get("/dashboard.html", requirePageAuth, requirePageRole("staff"), (req, res) => res.send("dashboard"));
+app.get("/dashboard", requirePageAuth, requirePageRole("staff"), (req, res) => res.send("dashboard"));
 app.get("/public", (req, res) => res.send("hello"));
 
 let server, base;
@@ -135,8 +135,8 @@ test("staff without two-factor must set it up before reaching anything", async (
   const api = await c.req("GET", "/api/staff-thing");
   assert.strictEqual(api.status, 403);
   assert.strictEqual(api.body.code, "MFA_SETUP_REQUIRED");
-  const page = await c.req("GET", "/dashboard.html", null, { redirect: "manual" });
-  assert.strictEqual(page.location, "/two-factor.html?setup=1");
+  const page = await c.req("GET", "/dashboard", null, { redirect: "manual" });
+  assert.strictEqual(page.location, "/two-factor?setup=1");
   const { recovery } = await enroll(c);
   assert.strictEqual(recovery.length, 10);
   assert.strictEqual((await c.req("GET", "/api/staff-thing")).status, 200, "full access after setup");
@@ -151,20 +151,20 @@ test("with two-factor on, a password alone never gives a session", async () => {
 
   const c = client();
   const login = await c.req("POST", "/api/auth/login", { email: "pat@firm.com", password: "correct horse 1" });
-  assert.strictEqual(login.body.redirect, "/two-factor.html");
+  assert.strictEqual(login.body.redirect, "/two-factor");
   assert.strictEqual(login.body.mfaRequired, true);
   assert.ok(c.jar.has("cc_mfa") && !c.jar.has("cc_session"));
   const blocked = await c.req("GET", "/api/staff-thing");
   assert.strictEqual(blocked.status, 401);
   assert.strictEqual(blocked.body.code, "MFA_REQUIRED");
-  const page = await c.req("GET", "/dashboard.html", null, { redirect: "manual" });
-  assert.match(page.location, /^\/two-factor\.html\?next=/);
+  const page = await c.req("GET", "/dashboard", null, { redirect: "manual" });
+  assert.ok(page.location.startsWith("/two-factor?next="), page.location);
 
   const wrong = await c.req("POST", "/api/auth/2fa/verify", { code: "000000" });
   assert.strictEqual(wrong.status, 400);
-  const ok = await c.req("POST", "/api/auth/2fa/verify", { code: totp.totp(secret, Date.now() + 30000), next: "/calendar.html?id=1" });
+  const ok = await c.req("POST", "/api/auth/2fa/verify", { code: totp.totp(secret, Date.now() + 30000), next: "/calendar?id=1" });
   assert.strictEqual(ok.status, 200, JSON.stringify(ok.body));
-  assert.strictEqual(ok.body.redirect, "/calendar.html?id=1");
+  assert.strictEqual(ok.body.redirect, "/calendar?id=1");
   assert.strictEqual((await c.req("GET", "/api/staff-thing")).status, 200);
 
   // A recovery code works once.
@@ -186,11 +186,11 @@ test("after the code step, 'next' can only send you to a page on this site", asy
   const { secret } = await enroll(c1);
   const bs = String.fromCharCode(92);
   const cases = [
-    ["//evil.example/x", "/dashboard.html"],
-    ["/" + bs + "evil.example/x", "/dashboard.html"],
-    ["/" + bs + bs + "evil.example", "/dashboard.html"],
-    ["https://evil.example", "/dashboard.html"],
-    ["/pipeline.html?owner=me", "/pipeline.html?owner=me"],
+    ["//evil.example/x", "/dashboard"],
+    ["/" + bs + "evil.example/x", "/dashboard"],
+    ["/" + bs + bs + "evil.example", "/dashboard"],
+    ["https://evil.example", "/dashboard"],
+    ["/pipeline?owner=me", "/pipeline?owner=me"],
   ];
   for (const [next, want] of cases) {
     users[0].totpLastUsedStep = -1; // let the same 30-second code be used again in this test
@@ -250,7 +250,7 @@ test("clients are never asked for two-factor", async () => {
   users.push(new FakeUser({ email: "c@client.com", role: "client", clientOrgId: "org", passwordHash: await bcrypt.hash("correct horse 1", 4) }));
   const c = client();
   const login = await c.req("POST", "/api/auth/login", { email: "c@client.com", password: "correct horse 1" });
-  assert.notStrictEqual(login.body.redirect, "/two-factor.html");
+  assert.notStrictEqual(login.body.redirect, "/two-factor");
   assert.ok(c.jar.has("cc_session"));
 });
 

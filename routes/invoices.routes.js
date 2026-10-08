@@ -111,7 +111,7 @@ router.post("/calendar/:calendarId/items/:index/refund", async (req, res) => {
       body: `We've refunded ${pretty} for ${item.compliance_name} to your original payment method.\n\nReason: ${refund.reason}\n\n` +
         `Refunds usually reach your account within 5 to 7 business days, depending on your bank.` +
         (creditNote ? `\n\nCredit note ${creditNote.number}: ${process.env.APP_URL || ""}/api/portal/invoices/${creditNote._id}/pdf` : ""),
-      link: `/portal.html?calendar=${calendar._id}`,
+      link: `/portal?calendar=${calendar._id}`,
     });
     res.status(201).json({ ok: true, refund, creditNote: creditNote ? summary(creditNote) : null, paymentStatus: item.paymentStatus });
   } catch (err) {

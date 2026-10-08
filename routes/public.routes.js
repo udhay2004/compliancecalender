@@ -182,7 +182,7 @@ function notifyAdminOfLead(calendar, contact, { isReviewRequest = false } = {}) 
       `Company: ${calendar.profile.companyName || "(not given)"}\n` +
       `Country: ${calendar.profile.country || "United States"}\n` +
       `State/Region: ${calendar.profile.state}, Entity: ${calendar.profile.entityType}\n\n` +
-      `View in admin: ${process.env.APP_URL || ""}/admin.html`,
+      `View in admin: ${process.env.APP_URL || ""}/admin`,
     logPrefix: "[public-lead]",
   }).catch((err) => console.error("[public-lead] Notify email failed (non-fatal):", err.message));
 }
@@ -248,7 +248,7 @@ router.post("/generate", generateLimiter, async (req, res) => {
         type: "calendar_generated",
         title: `New calendar generated: ${profile.companyName || profile.state}`,
         body: `${signedInClient.name || signedInClient.email} generated a ${items.length}-item calendar for ${profile.companyName || "another entity"} (${profile.state}, ${profile.entityType}).`,
-        link: `/calendar.html?id=${calendar._id}`,
+        link: `/calendar?id=${calendar._id}`,
         actorName: signedInClient.name || signedInClient.email,
       });
       notifyClient({
@@ -257,14 +257,14 @@ router.post("/generate", generateLimiter, async (req, res) => {
         type: "calendar_generated",
         title: "Your new compliance calendar is saved",
         body: `We saved your ${items.length}-item calendar for ${profile.companyName || "your company"} to your portal.`,
-        link: `/portal.html?calendar=${calendar._id}`,
+        link: `/portal?calendar=${calendar._id}`,
         email: false,
       });
       return res.status(201).json({
         calendarId: calendar._id,
         itemCount: items.length,
         savedToPortal: true,
-        portalUrl: `/portal.html?calendar=${calendar._id}`,
+        portalUrl: `/portal?calendar=${calendar._id}`,
         items: items.map((it) => ({ ...it, locked: false, daysUntil: daysUntilFor(it, profile), price: getPriceInfo(it) })),
       });
     }

@@ -10,14 +10,14 @@
 </head>
 <body>
 <div class="topbar">
-  <div class="brand"><a href="/app.html">Compliance Calendar <strong>Generator</strong></a></div>
+  <div class="brand"><a href="/app">Compliance Calendar <strong>Generator</strong></a></div>
   <div class="nav-links">
-    <a href="/dashboard.html">Dashboard</a>
-    <a href="/pipeline.html">Pipeline</a>
-    <a href="/reports.html">Reports</a>
-    <a href="/app.html">Generate</a>
-    <a href="/review.html">Review Queue</a>
-    <a href="/admin.html" class="active">Admin</a>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/pipeline">Pipeline</a>
+    <a href="/reports">Reports</a>
+    <a href="/app">Generate</a>
+    <a href="/review">Review Queue</a>
+    <a href="/admin" class="active">Admin</a>
   </div>
   <div class="nav-user" id="navUser"></div>
 </div>
@@ -308,7 +308,7 @@
         html += r.missingDocuments.length
           ? `<div style="margin-top:14px;font-size:13.5px;"><b>${r.missingDocuments.length} uploaded file${r.missingDocuments.length === 1 ? ' is' : 's are'} missing</b> (checked ${r.documentsChecked}). These were most likely uploaded before R2 was connected. Open each calendar and click <b>Ask client to re-upload</b>.</div>
              <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px;">${r.missingDocuments.map(d => `
-               <a href="/calendar.html?id=${encodeURIComponent(d.calendarId)}" style="display:block;padding:10px 12px;border:1px solid var(--rule);border-radius:6px;text-decoration:none;color:var(--ink);font-size:13px;">
+               <a href="/calendar?id=${encodeURIComponent(d.calendarId)}" style="display:block;padding:10px 12px;border:1px solid var(--rule);border-radius:6px;text-decoration:none;color:var(--ink);font-size:13px;">
                  <b>${escapeHtml(d.company)}</b> · ${escapeHtml(d.filing)}<br><span style="color:var(--ink-soft);">${escapeHtml(d.fileName)}${d.type === 'certificate' ? ' (your filed certificate, upload it again)' : ''}</span></a>`).join('')}</div>`
           : `<div style="margin-top:12px;font-size:13.5px;color:var(--ink-soft);">All ${r.documentsChecked} uploaded documents were found in storage.</div>`;
       }
@@ -324,14 +324,14 @@
   async function loadUser() {
     try {
       const res = await fetch('/api/auth/me');
-      if (!res.ok) { location.href = '/login.html?next=/admin.html'; return; }
+      if (!res.ok) { location.href = '/login?next=/admin'; return; }
       const { user } = await res.json();
       me = user;
       const el = document.getElementById('navUser');
       el.innerHTML = `<span>${escapeHtml(user.name || user.email)} (${escapeHtml(user.role)})</span><button id="logoutBtn">Log out</button>`;
       document.getElementById('logoutBtn').addEventListener('click', async () => {
         await fetch('/api/auth/logout', { method: 'POST' });
-        location.href = '/login.html';
+        location.href = '/login';
       });
 
       // Populate role dropdown based on what THIS admin is allowed to
@@ -353,7 +353,7 @@
           "You can create staff and client accounts, and client companies. Only a super admin can create or edit other admin accounts.";
       }
     } catch (err) {
-      location.href = '/login.html';
+      location.href = '/login';
     }
   }
 

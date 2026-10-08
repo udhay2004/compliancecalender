@@ -21,8 +21,8 @@ function run({ host, method = "GET", url = "/", appUrl = "https://compliance.com
 }
 
 test("a page on the old Railway address goes to the same page on APP_URL", () => {
-  const out = run({ host: "compliancecalender-production.up.railway.app", url: "/calendar.html?id=abc" });
-  assert.deepStrictEqual(out.redirect, { status: 301, to: "https://compliance.complyglobally.com/calendar.html?id=abc" });
+  const out = run({ host: "compliancecalender-production.up.railway.app", url: "/calendar?id=abc" });
+  assert.deepStrictEqual(out.redirect, { status: 301, to: "https://compliance.complyglobally.com/calendar?id=abc" });
   assert.strictEqual(out.next, false);
 });
 
@@ -35,7 +35,7 @@ test("webhooks, feeds and form posts on the old address are left alone", () => {
   const host = "compliancecalender-production.up.railway.app";
   assert.strictEqual(run({ host, method: "POST", url: "/api/webhooks/razorpay" }).next, true);
   assert.strictEqual(run({ host, url: "/api/webhooks/whatsapp?hub.mode=subscribe" }).next, true);
-  assert.strictEqual(run({ host, method: "POST", url: "/login.html" }).next, true);
+  assert.strictEqual(run({ host, method: "POST", url: "/login" }).next, true);
 });
 
 test("no redirect outside production or without a usable APP_URL", () => {
