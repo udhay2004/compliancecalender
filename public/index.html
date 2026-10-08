@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0E2B2E">
-<title>Free Compliance Calendar — ComplyGlobally</title>
+<title>Free Compliance Calendar by ComplyGlobally</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -33,6 +35,7 @@
     --display: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
 
     --topbar-h: 64px;
+    --page-max: 1560px; --page-gutter: clamp(14px, 3vw, 40px);
     --shadow-sm: 0 1px 2px rgba(27,42,46,.05), 0 2px 8px rgba(27,42,46,.04);
     --shadow-md: 0 1px 2px rgba(27,42,46,.05), 0 12px 28px -14px rgba(27,42,46,.18);
     --shadow-lg: 0 1px 2px rgba(27,42,46,.05), 0 12px 24px -12px rgba(27,42,46,.12), 0 40px 80px -40px rgba(27,42,46,.22);
@@ -62,9 +65,28 @@
     background: rgba(255,255,255,.86); -webkit-backdrop-filter: saturate(1.4) blur(12px); backdrop-filter: saturate(1.4) blur(12px);
     border-bottom: 1px solid var(--rule);
   }
-  .topbar-inner { max-width: 1240px; height: 100%; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .topbar-inner { max-width: var(--page-max); height: 100%; margin: 0 auto; padding: 0 var(--page-gutter); display: flex; align-items: center; justify-content: space-between; gap: 16px; }
   .brand { display: flex; align-items: center; gap: 12px; min-width: 0; font-family: var(--display); font-weight: 800; font-size: 19px; letter-spacing: -.02em; color: var(--ink); }
+  a.brand { text-decoration: none; }
   .brand b { color: var(--brand-dark); font-weight: 800; }
+  .brand-logo { width: 40px; height: 40px; flex-shrink: 0; display: block; }
+  .brand-text { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+  .brand-name { font-size: 16px; font-weight: 800; letter-spacing: -.02em; color: var(--ink); white-space: nowrap; }
+  .brand-by { font: 500 11.5px/1.2 var(--sans); letter-spacing: 0; color: var(--ink-soft); white-space: nowrap; }
+  .brand-by b { font-weight: 700; }
+  /* Phones: the name must never be cut off by the login buttons. */
+  @media (max-width: 560px) {
+    .brand { gap: 8px; flex-shrink: 0; }
+    .brand-logo { width: 32px; height: 32px; }
+    .brand-name { font-size: 13px; }
+    .brand-by { font-size: 10.5px; }
+    .brand .brand-pill { display: none; }
+    .topbar-inner { gap: 8px; }
+    .topbar-actions { gap: 2px; }
+    .topbar-actions .client-link { padding: 7px 10px; font-size: 12.5px; }
+    .topbar-actions .staff-link { padding: 7px 6px; font-size: 12.5px; }
+  }
+  @media (max-width: 400px) { .topbar-actions .staff-link { display: none; } }
   .brand-pill { font: 600 12px/1 var(--sans); letter-spacing: 0; color: var(--brand-text); background: var(--brand-tint); padding: 7px 11px; border-radius: 999px; white-space: nowrap; }
   .topbar-actions { display: flex; align-items: center; gap: 6px; }
   .staff-link { white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 600; color: var(--ink-soft); text-decoration: none; padding: 9px 12px; border-radius: 10px; transition: color .15s, background .15s; }
@@ -80,7 +102,7 @@
   /* ============================================================
      Layout shell
      ============================================================ */
-  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 24px 96px; }
+  .wrap { max-width: var(--page-max); margin: 0 auto; padding: 0 var(--page-gutter) 96px; }
   [data-view="results"] .landing { display: none; }
 
   /* ============================================================
@@ -514,7 +536,7 @@
 </svg>
 
 <div class="topbar"><div class="topbar-inner">
-  <div class="brand"><span>Comply<b>Globally</b></span><span class="brand-pill">Free Compliance Calendar</span></div>
+  <a class="brand" href="/"><img class="brand-logo" src="/logo.png" alt="ComplyGlobally" width="38" height="38"><span class="brand-text"><span class="brand-name">Compliance Calendar</span><span class="brand-by">by <b>ComplyGlobally</b></span></span><span class="brand-pill">Free tool</span></a>
   <div class="topbar-actions">
     <button class="btn btn-ghost js-results" type="button" aria-label="View your calendar" style="height:40px;padding:0 14px;font-size:13.5px"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg><span class="lbl-new">View calendar</span></button>
     <button class="btn btn-ghost js-new" type="button" aria-label="New calendar" style="height:40px;padding:0 14px;font-size:13.5px"><svg class="ic" aria-hidden="true"><use href="#i-calendar"/></svg><span class="lbl-new">New calendar</span></button>
