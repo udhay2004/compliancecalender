@@ -141,10 +141,17 @@ test("the same payment arriving twice at once is processed one after the other",
   const results = await Promise.all([record("browser"), record("webhook")]);
   assert.deepStrictEqual(results, ["paid", "duplicate"]);
   assert.deepStrictEqual(order, ["browser:start", "browser:paid", "webhook:start", "webhook:duplicate"]);
-  // Different payments don't wait for each other.
-  const t0 = Date.now();
-  await Promise.all([withKeyLock("payment:a", () => new Promise((r) => setTimeout(r, 30))), withKeyLock("payment:b", () => new Promise((r) => setTimeout(r, 30)))]);
-  assert.ok(Date.now() - t0 < 55);
+  // Different payments don't wait for each other: both have started before
+  // either finishes. (Checked by order, not by the clock: a time limit here
+  // failed now and then when the machine running the tests was busy.)
+  const seen = [];
+  const slow = (name) => withKeyLock(`payment:${name}`, async () => {
+    seen.push(`${name}:start`);
+    await new Promise((r) => setTimeout(r, 30));
+    seen.push(`${name}:end`);
+  });
+  await Promise.all([slow("a"), slow("b")]);
+  assert.deepStrictEqual(seen.slice(0, 2).sort(), ["a:start", "b:start"]);
 });
 
 test("a conflicting save is retried", async () => {
