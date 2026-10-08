@@ -264,6 +264,8 @@ test("security headers are on every response", async () => {
   assert.match(csp, /default-src 'self'/);
   assert.match(csp, /script-src [^;]*https:\/\/checkout\.razorpay\.com/);
   assert.match(csp, /frame-src https:\/\/\*\.razorpay\.com/);
+  // checkout.js pulls more scripts from Razorpay's CDN; blocked, its fraud check can't load.
+  assert.match(csp, /script-src [^;]*https:\/\/cdn\.razorpay\.com/);
   assert.match(csp, /frame-ancestors 'none'/);
   assert.match(csp, /object-src 'none'/);
   assert.strictEqual(h.get("x-frame-options"), "DENY");
