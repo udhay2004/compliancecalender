@@ -155,7 +155,8 @@
 </dialog>
 
 <script>
-  function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
+  // Escapes quotes too: values are also placed inside attributes (value="…", href="…").
+  function escapeHtml(s) { return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
   function statusClass(s) { return 'status-' + (s || '').replace(/\s+/g, '-'); }
   function money(cents) { const d = cents / 100; return '$' + d.toLocaleString('en-US', { minimumFractionDigits: d % 1 ? 2 : 0, maximumFractionDigits: 2 }); }
 

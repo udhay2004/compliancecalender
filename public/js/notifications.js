@@ -13,7 +13,8 @@
   let open = false;
   let lastUnread = null;
 
-  function esc(s) { const d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+  // Escapes quotes too: values are also placed inside attributes (value="…", href="…").
+  function esc(s) { return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
   function ago(iso) {
     const s = Math.max(1, Math.round((Date.now() - new Date(iso).getTime()) / 1000));
     if (s < 60) return 'just now';
