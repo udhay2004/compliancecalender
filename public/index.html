@@ -756,7 +756,8 @@
     return data;
   }
 
-  function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
+  // Escapes quotes too: values are also placed inside attributes (value="…", href="…").
+  function escapeHtml(s) { return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
   // Signed-in clients get their calendar saved straight to the portal
   // (routes/public.routes.js returns portalUrl); everyone else signs in first.
@@ -976,8 +977,12 @@
       fyStart: document.getElementById('fyStart').value,
       fyEnd: document.getElementById('fyEnd').value,
       hasForeignParent: document.getElementById('hasForeignParent').checked,
-      odiDone: document.getElementById('odiDone').value,
-      odiInvestorType: document.getElementById('odiInvestorType').value,
+      // The two ODI questions are only asked (and only sent) when the
+      // switch above them is on; hidden, they'd still report "Yes".
+      ...(document.getElementById('hasForeignParent').checked ? {
+        odiDone: document.getElementById('odiDone').value,
+        odiInvestorType: document.getElementById('odiInvestorType').value,
+      } : {}),
     };
   }
 

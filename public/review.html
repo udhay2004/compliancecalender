@@ -39,7 +39,8 @@
 </div>
 
 <script>
-  function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
+  // Escapes quotes too: values are also placed inside attributes (value="…", href="…").
+  function escapeHtml(s) { return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
   function fmtDate(s) { return s ? new Date(s).toLocaleDateString() : '—'; }
 
   async function loadUser() {

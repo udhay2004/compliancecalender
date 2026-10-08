@@ -107,7 +107,8 @@
 
 <script src="/js/company-form.js"></script>
 <script>
-  function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
+  // Escapes quotes too: values are also placed inside attributes (value="…", href="…").
+  function escapeHtml(s) { return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
   async function loadUser() {
     try {

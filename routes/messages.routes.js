@@ -103,11 +103,24 @@ router.post("/:clientOrgId", async (req, res) => {
   const org = await authorizeOrgAccess(req, res, req.params.clientOrgId);
   if (!org) return;
 
-  const text = (req.body?.body || "").trim();
+  const text = typeof req.body?.body === "string" ? req.body.body.trim() : "";
   if (!text) return res.status(400).json({ error: "Message text is required." });
   if (text.length > 4000) return res.status(400).json({ error: "Message is too long (4000 characters max)." });
 
   const isClient = req.user.role === "client";
+  // The filing a message is "about" is a link staff click. It must be one
+  // of this company's own calendars, so a client can't point a message at
+  // another company's calendar; anything else is simply left off.
+  let calendarId = null;
+  let itemIndex = null;
+  if (mongoose.isValidObjectId(req.body?.calendarId)) {
+    const own = await Calendar.findOne({ _id: req.body.calendarId, clientOrgId: org._id }).select("_id");
+    if (own) {
+      calendarId = own._id;
+      const n = Number(req.body?.itemIndex);
+      if (req.body?.itemIndex !== undefined && req.body?.itemIndex !== null && Number.isInteger(n) && n >= 0 && n < 10000) itemIndex = n;
+    }
+  }
   try {
     const message = await Message.create({
       clientOrgId: org._id,
@@ -115,9 +128,9 @@ router.post("/:clientOrgId", async (req, res) => {
       senderName: req.user.name || req.user.email,
       senderRole: req.user.role,
       body: text,
-      calendarId: req.body?.calendarId || null,
-      itemIndex: req.body?.itemIndex !== undefined && req.body?.itemIndex !== null ? Number(req.body.itemIndex) : null,
-      itemLabel: typeof req.body?.itemLabel === "string" ? req.body.itemLabel.slice(0, 200) : "",
+      calendarId,
+      itemIndex,
+      itemLabel: calendarId && typeof req.body?.itemLabel === "string" ? req.body.itemLabel.slice(0, 200) : "",
       // The sender has, by definition, already "read" their own message.
       readByClient: isClient,
       readByStaff: !isClient,

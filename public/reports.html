@@ -114,7 +114,8 @@
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
-  function esc(v) { var d = document.createElement('div'); d.textContent = v == null ? '' : String(v); return d.innerHTML; }
+  // Escapes quotes too: values are also placed inside attributes (value="…", href="…").
+  function esc(v) { return String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
   function money(minor, cur) { var v = (minor || 0) / 100; return (v < 0 ? '\u2212' : '') + (cur === 'INR' ? '₹' : '$') + Math.abs(v).toLocaleString(cur === 'INR' ? 'en-IN' : 'en-US', { minimumFractionDigits: 0, maximumFractionDigits: v % 1 ? 2 : 0 }); }
   function fmtDay(d) { return new Date(d).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }); }
   function days(n) { return n === null || n === undefined ? '—' : n + ' day' + (n === 1 ? '' : 's'); }

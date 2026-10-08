@@ -178,6 +178,30 @@ test("with two-factor on, a password alone never gives a session", async () => {
   assert.strictEqual((await c3.req("POST", "/api/auth/2fa/verify", { code: recovery[0] })).status, 400, "used recovery code rejected");
 });
 
+test("after the code step, 'next' can only send you to a page on this site", async () => {
+  users = [];
+  await staff("nx@firm.com");
+  const c1 = client();
+  await c1.req("POST", "/api/auth/login", { email: "nx@firm.com", password: "correct horse 1" });
+  const { secret } = await enroll(c1);
+  const bs = String.fromCharCode(92);
+  const cases = [
+    ["//evil.example/x", "/dashboard.html"],
+    ["/" + bs + "evil.example/x", "/dashboard.html"],
+    ["/" + bs + bs + "evil.example", "/dashboard.html"],
+    ["https://evil.example", "/dashboard.html"],
+    ["/pipeline.html?owner=me", "/pipeline.html?owner=me"],
+  ];
+  for (const [next, want] of cases) {
+    users[0].totpLastUsedStep = -1; // let the same 30-second code be used again in this test
+    const c = client();
+    await c.req("POST", "/api/auth/login", { email: "nx@firm.com", password: "correct horse 1" });
+    const r = await c.req("POST", "/api/auth/2fa/verify", { code: totp.totp(secret), next });
+    assert.strictEqual(r.status, 200, JSON.stringify(r.body));
+    assert.strictEqual(r.body.redirect, want, `next=${next}`);
+  }
+});
+
 test("five wrong codes lock the code step for 15 minutes", async () => {
   users = [];
   await staff("lock@firm.com");
@@ -240,6 +264,8 @@ test("security headers are on every response", async () => {
   assert.match(csp, /default-src 'self'/);
   assert.match(csp, /script-src [^;]*https:\/\/checkout\.razorpay\.com/);
   assert.match(csp, /frame-src https:\/\/\*\.razorpay\.com/);
+  // checkout.js pulls more scripts from Razorpay's CDN; blocked, its fraud check can't load.
+  assert.match(csp, /script-src [^;]*https:\/\/cdn\.razorpay\.com/);
   assert.match(csp, /frame-ancestors 'none'/);
   assert.match(csp, /object-src 'none'/);
   assert.strictEqual(h.get("x-frame-options"), "DENY");
