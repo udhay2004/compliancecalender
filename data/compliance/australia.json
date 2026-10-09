@@ -1,0 +1,847 @@
+{
+  "country": "Australia",
+  "updated": "2026-10-09",
+  "notes": "Federal filings (ASIC, ATO) plus each state's and territory's payroll tax and workers' compensation. The standard income year ends 30 June.",
+  "items": [
+    {
+      "id": "au-asic-review",
+      "category": "Mandatory Annual",
+      "name": "ASIC Annual Review — Fee and Solvency Resolution",
+      "schedule": {
+        "type": "anniversary",
+        "monthsAfter": 2
+      },
+      "rule": "Within 2 months after the annual review date (the anniversary of registration)",
+      "applies": "Australian companies",
+      "description": "ASIC issues an annual statement on the review date; the company checks its details, pays the review fee and the directors pass a solvency resolution. Changes are notified within 28 days.",
+      "authority": "Australian Securities and Investments Commission (ASIC), Corporations Act 2001",
+      "source": "https://asic.gov.au/for-business/running-a-company/annual-statements/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Proprietary Company (Pty Ltd)",
+          "Public Company (Ltd)"
+        ]
+      }
+    },
+    {
+      "id": "au-financial-report",
+      "category": "Conditional",
+      "name": "Financial Report Lodged with ASIC",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 4,
+        "day": "last"
+      },
+      "rule": "Within 4 months after financial year end (3 months for disclosing entities)",
+      "applies": "Public companies, large proprietary companies and foreign-controlled small proprietary companies that are not exempt",
+      "description": "The financial report, directors' report and auditor's report are lodged on Form 388.",
+      "authority": "Australian Securities and Investments Commission (ASIC)",
+      "source": "https://asic.gov.au/regulatory-resources/financial-reporting-and-audit/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Proprietary Company (Pty Ltd)",
+          "Public Company (Ltd)"
+        ]
+      }
+    },
+    {
+      "id": "au-agm",
+      "category": "Mandatory Annual",
+      "name": "Annual General Meeting",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 5,
+        "day": "last"
+      },
+      "rule": "Within 5 months after financial year end",
+      "applies": "Public companies",
+      "description": "Public companies hold an AGM at least once each calendar year.",
+      "authority": "Australian Securities and Investments Commission (ASIC), Corporations Act 2001 s.250N",
+      "source": "https://asic.gov.au/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Public Company (Ltd)"
+        ]
+      }
+    },
+    {
+      "id": "au-branch-accounts",
+      "category": "Mandatory Annual",
+      "name": "Foreign Company Annual Financial Statements (Form 405)",
+      "schedule": {
+        "type": "annual",
+        "month": 12,
+        "day": 31
+      },
+      "rule": "At least once every calendar year, at intervals of no more than 15 months",
+      "applies": "Registered foreign companies",
+      "description": "The foreign company lodges its balance sheet, profit and loss statement and cash flow statement with ASIC.",
+      "authority": "Australian Securities and Investments Commission (ASIC)",
+      "source": "https://asic.gov.au/for-business/registering-a-company/foreign-companies/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Branch of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "au-company-tax-june",
+      "category": "Mandatory Annual",
+      "name": "Company Tax Return",
+      "schedule": {
+        "type": "annual",
+        "month": 2,
+        "day": 28
+      },
+      "rule": "28 February after the income year (15 January for large and medium taxpayers; up to 15 May through a registered tax agent)",
+      "applies": "Companies with a 30 June year end",
+      "description": "The company tax return with any balance of tax payable.",
+      "authority": "Australian Taxation Office (ATO)",
+      "source": "https://www.ato.gov.au/businesses-and-organisations/corporate-tax-measures-and-assurance/lodging-and-paying",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Proprietary Company (Pty Ltd)",
+          "Public Company (Ltd)",
+          "Branch of Foreign Company"
+        ],
+        "fyEndMonth": [
+          6
+        ]
+      }
+    },
+    {
+      "id": "au-company-tax-sap",
+      "category": "Mandatory Annual",
+      "name": "Company Tax Return (substituted accounting period)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 7,
+        "day": 15
+      },
+      "rule": "15th day of the 7th month after the end of the income year",
+      "applies": "Companies whose income year does not end on 30 June",
+      "description": "Companies with ATO approval to use another year end lodge on the equivalent date.",
+      "authority": "Australian Taxation Office (ATO)",
+      "source": "https://www.ato.gov.au/businesses-and-organisations/corporate-tax-measures-and-assurance/lodging-and-paying",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Proprietary Company (Pty Ltd)",
+          "Public Company (Ltd)",
+          "Branch of Foreign Company"
+        ],
+        "not": {
+          "fyEndMonth": [
+            6
+          ]
+        }
+      }
+    },
+    {
+      "id": "au-other-tax",
+      "category": "Mandatory Annual",
+      "name": "Income Tax Return (individual, partnership or trust)",
+      "schedule": {
+        "type": "annual",
+        "month": 10,
+        "day": 31
+      },
+      "rule": "31 October (later through a registered tax agent)",
+      "applies": "Sole traders, partnerships and trusts",
+      "description": "Sole traders report business income in their individual return; partnerships and trusts lodge their own returns and the partners or beneficiaries report their shares.",
+      "authority": "Australian Taxation Office (ATO)",
+      "source": "https://www.ato.gov.au/individuals-and-families/your-tax-return",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sole Trader",
+          "Partnership",
+          "Trust"
+        ]
+      }
+    },
+    {
+      "id": "au-business-name",
+      "category": "Mandatory Annual",
+      "name": "Business Name Renewal",
+      "schedule": {
+        "type": "anniversary",
+        "daysAfter": -1
+      },
+      "rule": "Before the registration expires (every 1 or 3 years)",
+      "applies": "Businesses trading under a registered business name",
+      "description": "Renewed through ASIC; an unrenewed name is cancelled.",
+      "authority": "Australian Securities and Investments Commission (ASIC)",
+      "source": "https://asic.gov.au/for-business/registering-a-business-name/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sole Trader",
+          "Partnership",
+          "Trust"
+        ]
+      }
+    },
+    {
+      "id": "au-payg-instalments",
+      "category": "Conditional",
+      "name": "PAYG Income Tax Instalments",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 10,
+            "day": 28
+          },
+          {
+            "month": 2,
+            "day": 28
+          },
+          {
+            "month": 4,
+            "day": 28
+          },
+          {
+            "month": 7,
+            "day": 28
+          }
+        ]
+      },
+      "rule": "28 October, 28 February, 28 April and 28 July",
+      "applies": "Businesses the ATO has entered into the PAYG instalments system",
+      "description": "Instalments towards the year's income tax, reported on the activity statement.",
+      "authority": "Australian Taxation Office (ATO)",
+      "source": "https://www.ato.gov.au/businesses-and-organisations/income-deductions-and-concessions/payg-instalments",
+      "confidence": "medium"
+    },
+    {
+      "id": "au-gst-register",
+      "category": "Event-Based",
+      "name": "GST Registration",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Within 21 days of GST turnover reaching A$75,000",
+      "applies": "Businesses not yet registered for GST",
+      "description": "Registration is voluntary below the threshold.",
+      "authority": "Australian Taxation Office (ATO)",
+      "source": "https://www.ato.gov.au/businesses-and-organisations/gst-excise-and-indirect-taxes/gst/registering-for-gst",
+      "confidence": "medium",
+      "when": {
+        "gst": [
+          "Not registered"
+        ]
+      }
+    },
+    {
+      "id": "au-bas-quarterly",
+      "category": "Conditional",
+      "name": "Business Activity Statement (quarterly GST)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 10,
+            "day": 28
+          },
+          {
+            "month": 2,
+            "day": 28
+          },
+          {
+            "month": 4,
+            "day": 28
+          },
+          {
+            "month": 7,
+            "day": 28
+          }
+        ]
+      },
+      "rule": "28 October, 28 February, 28 April and 28 July",
+      "applies": "GST-registered businesses reporting quarterly",
+      "description": "GST collected and credits claimed for the quarter, with payment.",
+      "authority": "Australian Taxation Office (ATO)",
+      "source": "https://www.ato.gov.au/businesses-and-organisations/preparing-lodging-and-paying/business-activity-statements-bas",
+      "confidence": "medium",
+      "when": {
+        "gst": [
+          "Quarterly"
+        ]
+      }
+    },
+    {
+      "id": "au-bas-monthly",
+      "category": "Conditional",
+      "name": "Business Activity Statement (monthly GST)",
+      "schedule": {
+        "type": "monthly",
+        "day": 21
+      },
+      "rule": "21st of the following month",
+      "applies": "GST-registered businesses with turnover of A$20 million or more, or that chose monthly reporting",
+      "description": "GST collected and credits claimed for the month, with payment.",
+      "authority": "Australian Taxation Office (ATO)",
+      "source": "https://www.ato.gov.au/businesses-and-organisations/preparing-lodging-and-paying/business-activity-statements-bas",
+      "confidence": "medium",
+      "when": {
+        "gst": [
+          "Monthly"
+        ]
+      }
+    },
+    {
+      "id": "au-gst-annual",
+      "category": "Conditional",
+      "name": "Annual GST Return",
+      "schedule": {
+        "type": "annual",
+        "month": 10,
+        "day": 31
+      },
+      "rule": "31 October (or the income tax return due date when a tax return is required)",
+      "applies": "Businesses voluntarily registered for GST that report annually",
+      "description": "One GST return for the year ended 30 June.",
+      "authority": "Australian Taxation Office (ATO)",
+      "source": "https://www.ato.gov.au/businesses-and-organisations/preparing-lodging-and-paying/business-activity-statements-bas",
+      "confidence": "medium",
+      "when": {
+        "gst": [
+          "Annual"
+        ]
+      }
+    },
+    {
+      "id": "au-payg-withholding",
+      "category": "Conditional",
+      "name": "PAYG Withholding from Wages",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 10,
+            "day": 28
+          },
+          {
+            "month": 2,
+            "day": 28
+          },
+          {
+            "month": 4,
+            "day": 28
+          },
+          {
+            "month": 7,
+            "day": 28
+          }
+        ]
+      },
+      "rule": "Small withholders: 28 October, 28 February, 28 April and 28 July (medium withholders: 21st of each following month)",
+      "applies": "Employers",
+      "description": "Tax withheld from wages is reported on the activity statement and paid to the ATO; each pay run is reported through Single Touch Payroll.",
+      "authority": "Australian Taxation Office (ATO)",
+      "source": "https://www.ato.gov.au/businesses-and-organisations/hiring-and-paying-your-workers/payg-withholding",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "au-stp-finalisation",
+      "category": "Conditional",
+      "name": "Single Touch Payroll Finalisation Declaration",
+      "schedule": {
+        "type": "annual",
+        "month": 7,
+        "day": 14
+      },
+      "rule": "14 July (for the year ended 30 June)",
+      "applies": "Employers",
+      "description": "Confirms each employee's year-end payroll figures so their income statements are tax ready.",
+      "authority": "Australian Taxation Office (ATO)",
+      "source": "https://www.ato.gov.au/businesses-and-organisations/hiring-and-paying-your-workers/single-touch-payroll",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "au-super",
+      "category": "Conditional",
+      "name": "Superannuation Guarantee Contributions (Payday Super)",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Within 7 business days of each payday (from 1 July 2026; earlier quarters were due 28 days after the quarter)",
+      "applies": "Employers",
+      "description": "Super contributions must reach the employee's fund within 7 business days of paying wages; late contributions attract the superannuation guarantee charge.",
+      "authority": "Australian Taxation Office (ATO)",
+      "source": "https://www.ato.gov.au/businesses-and-organisations/super-for-employers",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "au-fbt",
+      "category": "Conditional",
+      "name": "Fringe Benefits Tax Return",
+      "schedule": {
+        "type": "annual",
+        "month": 5,
+        "day": 21
+      },
+      "rule": "21 May (25 June when lodged electronically through a tax agent), for the FBT year ended 31 March",
+      "applies": "Employers that provided fringe benefits",
+      "description": "Reports benefits such as cars, loans and entertainment provided to employees.",
+      "authority": "Australian Taxation Office (ATO)",
+      "source": "https://www.ato.gov.au/businesses-and-organisations/hiring-and-paying-your-workers/fringe-benefits-tax",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "au-tp",
+      "category": "Transfer Pricing",
+      "name": "International Dealings Schedule and Transfer Pricing Documentation",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 7,
+        "day": 15
+      },
+      "rule": "With the company tax return (15th day of the 7th month after year end for most foreign-owned companies)",
+      "applies": "Companies with international related-party dealings over A$2 million",
+      "description": "The schedule is lodged with the tax return; transfer pricing documentation must exist by the lodgment date to support a reasonably arguable position.",
+      "authority": "Australian Taxation Office (ATO)",
+      "source": "https://www.ato.gov.au/businesses-and-organisations/international-tax-for-business/in-detail/transfer-pricing",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Proprietary Company (Pty Ltd)",
+          "Public Company (Ltd)",
+          "Branch of Foreign Company"
+        ],
+        "foreignOwned": true
+      }
+    },
+    {
+      "id": "au-foreign-register",
+      "category": "Event-Based",
+      "name": "Register of Foreign Ownership of Australian Assets",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Within 30 days of acquiring or disposing of a registrable interest",
+      "applies": "Foreign persons holding interests in Australian land, entities or businesses",
+      "description": "Foreign investors register acquisitions and changes through Online services for foreign investors.",
+      "authority": "Australian Taxation Office (ATO)",
+      "source": "https://www.ato.gov.au/individuals-and-families/investments-and-assets/foreign-investment-in-australia",
+      "confidence": "medium",
+      "when": {
+        "foreignOwned": true
+      }
+    }
+  ],
+  "regions": {
+    "New South Wales": {
+      "employerItems": [
+        {
+          "id": "au-new-south-wales-payroll-tax",
+          "category": "Conditional",
+          "name": "New South Wales Payroll Tax Return and Payment (monthly)",
+          "schedule": {
+            "type": "monthly",
+            "day": 7
+          },
+          "rule": "7th of the following month",
+          "applies": "Employers whose Australian wages are above the New South Wales payroll tax threshold",
+          "description": "Payroll tax is charged by the state or territory where the wages are paid; an employer registers once its total Australian wages pass the threshold.",
+          "authority": "Revenue NSW",
+          "source": "https://www.revenue.nsw.gov.au/taxes-duties-levies-royalties/payroll-tax",
+          "confidence": "medium"
+        },
+        {
+          "id": "au-new-south-wales-payroll-tax-annual",
+          "category": "Conditional",
+          "name": "New South Wales Payroll Tax Annual Reconciliation",
+          "schedule": {
+            "type": "annual",
+            "month": 7,
+            "day": 28
+          },
+          "rule": "28 July (for the year ended 30 June)",
+          "applies": "Employers registered for New South Wales payroll tax",
+          "description": "Reconciles the year's wages and payroll tax; takes the place of the June monthly return.",
+          "authority": "Revenue NSW",
+          "source": "https://www.revenue.nsw.gov.au/taxes-duties-levies-royalties/payroll-tax",
+          "confidence": "medium"
+        },
+        {
+          "id": "au-new-south-wales-workers-comp",
+          "category": "Conditional",
+          "name": "New South Wales Workers' Compensation Insurance — Renewal and Wage Declaration",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "At each policy renewal: declare actual wages for the past year and estimated wages for the next",
+          "applies": "Employers with workers in New South Wales",
+          "description": "Cover is compulsory for employers; premiums are set from the declared wages.",
+          "authority": "icare / State Insurance Regulatory Authority (NSW)",
+          "source": "https://www.icare.nsw.gov.au/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Victoria": {
+      "employerItems": [
+        {
+          "id": "au-victoria-payroll-tax",
+          "category": "Conditional",
+          "name": "Victoria Payroll Tax Return and Payment (monthly)",
+          "schedule": {
+            "type": "monthly",
+            "day": 7
+          },
+          "rule": "7th of the following month",
+          "applies": "Employers whose Australian wages are above the Victoria payroll tax threshold",
+          "description": "Payroll tax is charged by the state or territory where the wages are paid; an employer registers once its total Australian wages pass the threshold.",
+          "authority": "State Revenue Office Victoria",
+          "source": "https://www.sro.vic.gov.au/payroll-tax",
+          "confidence": "medium"
+        },
+        {
+          "id": "au-victoria-payroll-tax-annual",
+          "category": "Conditional",
+          "name": "Victoria Payroll Tax Annual Reconciliation",
+          "schedule": {
+            "type": "annual",
+            "month": 7,
+            "day": 21
+          },
+          "rule": "21 July (for the year ended 30 June)",
+          "applies": "Employers registered for Victoria payroll tax",
+          "description": "Reconciles the year's wages and payroll tax; takes the place of the June monthly return.",
+          "authority": "State Revenue Office Victoria",
+          "source": "https://www.sro.vic.gov.au/payroll-tax",
+          "confidence": "medium"
+        },
+        {
+          "id": "au-victoria-workers-comp",
+          "category": "Conditional",
+          "name": "Victoria Workers' Compensation Insurance — Renewal and Wage Declaration",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "At each policy renewal: declare actual wages for the past year and estimated wages for the next",
+          "applies": "Employers with workers in Victoria",
+          "description": "Cover is compulsory for employers; premiums are set from the declared wages.",
+          "authority": "WorkSafe Victoria",
+          "source": "https://www.worksafe.vic.gov.au/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Queensland": {
+      "employerItems": [
+        {
+          "id": "au-queensland-payroll-tax",
+          "category": "Conditional",
+          "name": "Queensland Payroll Tax Return and Payment (monthly)",
+          "schedule": {
+            "type": "monthly",
+            "day": 7
+          },
+          "rule": "7th of the following month",
+          "applies": "Employers whose Australian wages are above the Queensland payroll tax threshold",
+          "description": "Payroll tax is charged by the state or territory where the wages are paid; an employer registers once its total Australian wages pass the threshold.",
+          "authority": "Queensland Revenue Office",
+          "source": "https://qro.qld.gov.au/payroll-tax/",
+          "confidence": "medium"
+        },
+        {
+          "id": "au-queensland-payroll-tax-annual",
+          "category": "Conditional",
+          "name": "Queensland Payroll Tax Annual Reconciliation",
+          "schedule": {
+            "type": "annual",
+            "month": 7,
+            "day": 21
+          },
+          "rule": "21 July (for the year ended 30 June)",
+          "applies": "Employers registered for Queensland payroll tax",
+          "description": "Reconciles the year's wages and payroll tax; takes the place of the June monthly return.",
+          "authority": "Queensland Revenue Office",
+          "source": "https://qro.qld.gov.au/payroll-tax/",
+          "confidence": "medium"
+        },
+        {
+          "id": "au-queensland-workers-comp",
+          "category": "Conditional",
+          "name": "Queensland Workers' Compensation Insurance — Renewal and Wage Declaration",
+          "schedule": {
+            "type": "annual",
+            "month": 8,
+            "day": 31
+          },
+          "rule": "Declare wages between 1 July and 31 August each year",
+          "applies": "Employers with workers in Queensland",
+          "description": "Cover is compulsory for employers; premiums are set from the declared wages.",
+          "authority": "WorkCover Queensland",
+          "source": "https://www.worksafe.qld.gov.au/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "South Australia": {
+      "employerItems": [
+        {
+          "id": "au-south-australia-payroll-tax",
+          "category": "Conditional",
+          "name": "South Australia Payroll Tax Return and Payment (monthly)",
+          "schedule": {
+            "type": "monthly",
+            "day": 7
+          },
+          "rule": "7th of the following month",
+          "applies": "Employers whose Australian wages are above the South Australia payroll tax threshold",
+          "description": "Payroll tax is charged by the state or territory where the wages are paid; an employer registers once its total Australian wages pass the threshold.",
+          "authority": "RevenueSA",
+          "source": "https://www.revenuesa.sa.gov.au/payrolltax",
+          "confidence": "medium"
+        },
+        {
+          "id": "au-south-australia-payroll-tax-annual",
+          "category": "Conditional",
+          "name": "South Australia Payroll Tax Annual Reconciliation",
+          "schedule": {
+            "type": "annual",
+            "month": 7,
+            "day": 28
+          },
+          "rule": "28 July (for the year ended 30 June)",
+          "applies": "Employers registered for South Australia payroll tax",
+          "description": "Reconciles the year's wages and payroll tax; takes the place of the June monthly return.",
+          "authority": "RevenueSA",
+          "source": "https://www.revenuesa.sa.gov.au/payrolltax",
+          "confidence": "medium"
+        },
+        {
+          "id": "au-south-australia-workers-comp",
+          "category": "Conditional",
+          "name": "South Australia Workers' Compensation Insurance — Renewal and Wage Declaration",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "At each policy renewal: declare actual wages for the past year and estimated wages for the next",
+          "applies": "Employers with workers in South Australia",
+          "description": "Cover is compulsory for employers; premiums are set from the declared wages.",
+          "authority": "ReturnToWorkSA",
+          "source": "https://www.rtwsa.com/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Western Australia": {
+      "employerItems": [
+        {
+          "id": "au-western-australia-payroll-tax",
+          "category": "Conditional",
+          "name": "Western Australia Payroll Tax Return and Payment (monthly)",
+          "schedule": {
+            "type": "monthly",
+            "day": 7
+          },
+          "rule": "7th of the following month",
+          "applies": "Employers whose Australian wages are above the Western Australia payroll tax threshold",
+          "description": "Payroll tax is charged by the state or territory where the wages are paid; an employer registers once its total Australian wages pass the threshold.",
+          "authority": "RevenueWA",
+          "source": "https://www.wa.gov.au/organisation/department-of-finance/payroll-tax",
+          "confidence": "medium"
+        },
+        {
+          "id": "au-western-australia-payroll-tax-annual",
+          "category": "Conditional",
+          "name": "Western Australia Payroll Tax Annual Reconciliation",
+          "schedule": {
+            "type": "annual",
+            "month": 7,
+            "day": 21
+          },
+          "rule": "21 July (for the year ended 30 June)",
+          "applies": "Employers registered for Western Australia payroll tax",
+          "description": "Reconciles the year's wages and payroll tax; takes the place of the June monthly return.",
+          "authority": "RevenueWA",
+          "source": "https://www.wa.gov.au/organisation/department-of-finance/payroll-tax",
+          "confidence": "medium"
+        },
+        {
+          "id": "au-western-australia-workers-comp",
+          "category": "Conditional",
+          "name": "Western Australia Workers' Compensation Insurance — Renewal and Wage Declaration",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "At each policy renewal: declare actual wages for the past year and estimated wages for the next",
+          "applies": "Employers with workers in Western Australia",
+          "description": "Cover is compulsory for employers; premiums are set from the declared wages.",
+          "authority": "WorkCover WA (approved insurers)",
+          "source": "https://www.workcover.wa.gov.au/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Tasmania": {
+      "employerItems": [
+        {
+          "id": "au-tasmania-payroll-tax",
+          "category": "Conditional",
+          "name": "Tasmania Payroll Tax Return and Payment (monthly)",
+          "schedule": {
+            "type": "monthly",
+            "day": 7
+          },
+          "rule": "7th of the following month",
+          "applies": "Employers whose Australian wages are above the Tasmania payroll tax threshold",
+          "description": "Payroll tax is charged by the state or territory where the wages are paid; an employer registers once its total Australian wages pass the threshold.",
+          "authority": "State Revenue Office of Tasmania",
+          "source": "https://www.sro.tas.gov.au/payroll-tax",
+          "confidence": "medium"
+        },
+        {
+          "id": "au-tasmania-payroll-tax-annual",
+          "category": "Conditional",
+          "name": "Tasmania Payroll Tax Annual Reconciliation",
+          "schedule": {
+            "type": "annual",
+            "month": 7,
+            "day": 21
+          },
+          "rule": "21 July (for the year ended 30 June)",
+          "applies": "Employers registered for Tasmania payroll tax",
+          "description": "Reconciles the year's wages and payroll tax; takes the place of the June monthly return.",
+          "authority": "State Revenue Office of Tasmania",
+          "source": "https://www.sro.tas.gov.au/payroll-tax",
+          "confidence": "medium"
+        },
+        {
+          "id": "au-tasmania-workers-comp",
+          "category": "Conditional",
+          "name": "Tasmania Workers' Compensation Insurance — Renewal and Wage Declaration",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "At each policy renewal: declare actual wages for the past year and estimated wages for the next",
+          "applies": "Employers with workers in Tasmania",
+          "description": "Cover is compulsory for employers; premiums are set from the declared wages.",
+          "authority": "WorkSafe Tasmania (licensed insurers)",
+          "source": "https://worksafe.tas.gov.au/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Australian Capital Territory": {
+      "employerItems": [
+        {
+          "id": "au-australian-capital-territory-payroll-tax",
+          "category": "Conditional",
+          "name": "Australian Capital Territory Payroll Tax Return and Payment (monthly)",
+          "schedule": {
+            "type": "monthly",
+            "day": 7
+          },
+          "rule": "7th of the following month",
+          "applies": "Employers whose Australian wages are above the Australian Capital Territory payroll tax threshold",
+          "description": "Payroll tax is charged by the state or territory where the wages are paid; an employer registers once its total Australian wages pass the threshold.",
+          "authority": "ACT Revenue Office",
+          "source": "https://www.revenue.act.gov.au/payroll-tax",
+          "confidence": "medium"
+        },
+        {
+          "id": "au-australian-capital-territory-payroll-tax-annual",
+          "category": "Conditional",
+          "name": "Australian Capital Territory Payroll Tax Annual Reconciliation",
+          "schedule": {
+            "type": "annual",
+            "month": 7,
+            "day": 28
+          },
+          "rule": "28 July (for the year ended 30 June)",
+          "applies": "Employers registered for Australian Capital Territory payroll tax",
+          "description": "Reconciles the year's wages and payroll tax; takes the place of the June monthly return.",
+          "authority": "ACT Revenue Office",
+          "source": "https://www.revenue.act.gov.au/payroll-tax",
+          "confidence": "medium"
+        },
+        {
+          "id": "au-australian-capital-territory-workers-comp",
+          "category": "Conditional",
+          "name": "Australian Capital Territory Workers' Compensation Insurance — Renewal and Wage Declaration",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "At each policy renewal: declare actual wages for the past year and estimated wages for the next",
+          "applies": "Employers with workers in Australian Capital Territory",
+          "description": "Cover is compulsory for employers; premiums are set from the declared wages.",
+          "authority": "WorkSafe ACT (approved insurers)",
+          "source": "https://www.worksafe.act.gov.au/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Northern Territory": {
+      "employerItems": [
+        {
+          "id": "au-northern-territory-payroll-tax",
+          "category": "Conditional",
+          "name": "Northern Territory Payroll Tax Return and Payment (monthly)",
+          "schedule": {
+            "type": "monthly",
+            "day": 21
+          },
+          "rule": "21st of the following month",
+          "applies": "Employers whose Australian wages are above the Northern Territory payroll tax threshold",
+          "description": "Payroll tax is charged by the state or territory where the wages are paid; an employer registers once its total Australian wages pass the threshold.",
+          "authority": "Territory Revenue Office",
+          "source": "https://treasury.nt.gov.au/dtf/territory-revenue-office/payroll-tax",
+          "confidence": "medium"
+        },
+        {
+          "id": "au-northern-territory-payroll-tax-annual",
+          "category": "Conditional",
+          "name": "Northern Territory Payroll Tax Annual Reconciliation",
+          "schedule": {
+            "type": "annual",
+            "month": 7,
+            "day": 21
+          },
+          "rule": "21 July (for the year ended 30 June)",
+          "applies": "Employers registered for Northern Territory payroll tax",
+          "description": "Reconciles the year's wages and payroll tax; takes the place of the June monthly return.",
+          "authority": "Territory Revenue Office",
+          "source": "https://treasury.nt.gov.au/dtf/territory-revenue-office/payroll-tax",
+          "confidence": "medium"
+        },
+        {
+          "id": "au-northern-territory-workers-comp",
+          "category": "Conditional",
+          "name": "Northern Territory Workers' Compensation Insurance — Renewal and Wage Declaration",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "At each policy renewal: declare actual wages for the past year and estimated wages for the next",
+          "applies": "Employers with workers in Northern Territory",
+          "description": "Cover is compulsory for employers; premiums are set from the declared wages.",
+          "authority": "NT WorkSafe (approved insurers)",
+          "source": "https://worksafe.nt.gov.au/",
+          "confidence": "medium"
+        }
+      ]
+    }
+  }
+}

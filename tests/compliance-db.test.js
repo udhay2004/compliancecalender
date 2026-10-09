@@ -42,7 +42,7 @@ function due(items, re, profile) {
 test("every item in the database is well-formed, with a schedule the date engine understands", () => {
   const ids = new Set();
   const items = allItems();
-  assert.ok(items.length > 500, `only ${items.length} items`);
+  assert.ok(items.length > 1000, `only ${items.length} items`);
   for (const { file, where, it } of items) {
     const at = `${file} ${where} ${it.id}`;
     assert.ok(it.id && !ids.has(it.id), `${at}: missing or duplicate id`);
@@ -77,7 +77,7 @@ test("every answer the forms offer is covered by the database", () => {
     for (const v of list) walk(country, fields, i + 1, { ...profile, [f.key]: v });
   }
   for (const [country, fields] of Object.entries(FORMS)) walk(country, fields, 0, { country });
-  assert.ok(checked > 400, `only ${checked} combinations checked`);
+  assert.ok(checked > 1500, `only ${checked} combinations checked`);
 });
 
 test("US: Delaware C corporation — federal, state and payroll filings with the right dates", () => {
@@ -187,7 +187,7 @@ test("calendars come only from the database; anything outside it is refused with
   const r = await generateCompanyCalendar({ country: "United Kingdom", entityType: "Private Limited Company (Ltd)", vat: "Quarterly", hasEmployees: "No", fyEnd: "Dec" });
   assert.strictEqual(r.sourceMode, "database");
   assert.ok(r.items.length > 5);
-  await assert.rejects(generateCompanyCalendar({ country: "France", entityType: "SAS" }), (e) => e instanceof NotCoveredError && e.status === 400 && /France/.test(e.message));
+  await assert.rejects(generateCompanyCalendar({ country: "Brazil", entityType: "Ltda" }), (e) => e instanceof NotCoveredError && e.status === 400 && /Brazil/.test(e.message));
   await assert.rejects(generateCompanyCalendar({ country: "United States", state: "Texas", entityType: "Corporation", taxStatus: "Not sure" }), /tax status/);
   assert.ok(!fs.existsSync(path.join(__dirname, "..", "lib", "claude.js")), "no AI research module");
 });
@@ -208,4 +208,130 @@ test("older calendars without the new answers still build (with sensible default
   const items = build({ country: "Canada", state: "Ontario", entityType: "Federal Corporation (CBCA)" });
   assert.ok(has(items, /CBCA Annual Return/), "old Canadian entity type maps to a federal corporation");
   assert.ok(has(items, /T4 Slips/), "payroll kept when the old profile never answered the question");
+});
+
+// ---------------------------------------------------------------------
+// The countries added in October 2026
+// ---------------------------------------------------------------------
+function staffSetsDate(items, re, profile) {
+  const it = items.find((i) => re.test(i.compliance_name));
+  assert.ok(it, `no item matching ${re}`);
+  return D.nextOccurrence(D.scheduleFor(it), profile, FROM, { businessDays: false }) === null;
+}
+
+test("Australia: the state decides payroll tax, and a 30 June year end the tax return date", () => {
+  const p = { country: "Australia", state: "New South Wales", entityType: "Proprietary Company (Pty Ltd)", gst: "Quarterly", hasEmployees: "Yes", employeeStates: ["Northern Territory"], fyEnd: "Jun", incorpDate: "2021-07-15" };
+  const items = build(p);
+  assert.strictEqual(due(items, /^Company Tax Return$/, p), "2027-02-28");
+  assert.strictEqual(due(items, /Business Activity Statement \(quarterly/, p), "2026-10-28");
+  assert.strictEqual(due(items, /ASIC Annual Review/, p), "2027-09-15");
+  assert.strictEqual(due(items, /New South Wales Payroll Tax Return/, p), "2026-10-07");
+  assert.strictEqual(due(items, /Northern Territory Payroll Tax Return/, p), "2026-10-21");
+  assert.ok(!has(items, /Victoria|substituted accounting period/));
+  const dec = { ...p, fyEnd: "Dec", hasEmployees: "No", employeeStates: [] };
+  assert.strictEqual(due(build(dec), /substituted accounting period/, dec), "2027-07-15");
+  assert.ok(!has(build(dec), /Payroll Tax|Superannuation/));
+  const trader = build({ country: "Australia", state: "Victoria", entityType: "Sole Trader", gst: "Not registered", hasEmployees: "No" });
+  assert.ok(has(trader, /GST Registration/) && has(trader, /Income Tax Return \(individual/) && !has(trader, /ASIC Annual Review/));
+});
+
+test("Spain: the Basque Country and Navarre file with their own tax offices; the Canary Islands use IGIC", () => {
+  const base = { country: "Spain", entityType: "Sociedad Limitada (S.L.)", vat: "Quarterly", hasEmployees: "Yes", fyEnd: "Dec" };
+  const madrid = build({ ...base, state: "Madrid" });
+  assert.strictEqual(due(madrid, /Modelo 200/, { ...base, state: "Madrid" }), "2027-07-25");
+  assert.strictEqual(due(madrid, /Modelo 303, quarterly/, base), "2026-10-20");
+  assert.ok(has(madrid, /Modelo 111/) && !has(madrid, /IGIC|Basque|Navarre/));
+  const basque = build({ ...base, state: "Basque Country" });
+  assert.ok(has(basque, /Corporate Income Tax Return — Basque Country/) && has(basque, /TicketBAI/) && has(basque, /Payroll Withholding Tax Returns — Basque/));
+  assert.ok(!has(basque, /Modelo (200|202|303|390|347|111|190)/), "no state tax agency returns");
+  assert.ok(has(basque, /Annual Accounts Deposited/) && has(basque, /Social Security Contributions/), "company law and social security are national");
+  const canary = build({ ...base, state: "Canary Islands" });
+  assert.ok(has(canary, /IGIC Return \(Modelo 420/) && has(canary, /Modelo 200/) && !has(canary, /Modelo 303|Modelo 390/));
+  assert.ok(has(build({ ...base, state: "Ceuta" }), /IPSI/));
+});
+
+test("Switzerland: each canton has its own tax return, with the date left for staff", () => {
+  const p = { country: "Switzerland", state: "Zurich", entityType: "AG / SA (company limited by shares)", vat: "Quarterly", hasEmployees: "Yes", employeeStates: ["Geneva"], fyEnd: "Dec" };
+  const items = build(p);
+  assert.ok(staffSetsDate(items, /Corporate Tax Return — Canton of Zurich/, p), "no automatic date for a cantonal return");
+  assert.ok(has(items, /Quellensteuer\) — Zurich/) && has(items, /Quellensteuer\) — Geneva/) && !has(items, /Canton of Geneva|Bern/));
+  assert.strictEqual(due(items, /VAT Return \(quarterly\)/, p), "2026-11-30");
+  assert.strictEqual(due(items, /Annual Salary Declaration/, p), "2027-01-30");
+  const sole = { country: "Switzerland", state: "Vaud", entityType: "Sole Proprietorship (Einzelunternehmen)", vat: "Not registered", hasEmployees: "No" };
+  assert.ok(staffSetsDate(build(sole), /Personal Tax Return — Canton of Vaud/, sole));
+  assert.strictEqual(checkProfile({ ...p, state: "Bavaria" }).field, "state");
+});
+
+test("Japan, Italy, Portugal and Austria: regional filings follow the region chosen", () => {
+  const jp = { country: "Japan", state: "Tokyo", entityType: "Kabushiki Kaisha (KK)", vat: "Annual", hasEmployees: "Yes", fyEnd: "Mar" };
+  const tokyo = build(jp);
+  assert.strictEqual(due(tokyo, /^Corporation Tax and Local Corporation Tax Return/, jp), "2027-05-31");
+  assert.strictEqual(due(tokyo, /Tokyo Corporate Inhabitant Tax/, jp), "2027-05-31");
+  assert.ok(has(tokyo, /Depreciable Assets Tax Return \(Tokyo\)/) && !has(tokyo, /Osaka|Individual Enterprise Tax/));
+  assert.ok(has(build({ ...jp, state: "Osaka", entityType: "Sole Proprietorship (kojin jigyo)" }), /Osaka Individual Enterprise Tax/));
+
+  const it = { country: "Italy", state: "Lombardy", entityType: "S.r.l.", vat: "Monthly", hasEmployees: "No", fyEnd: "Dec" };
+  assert.ok(has(build(it), /IRAP — Regional Tax on Productive Activities \(Lombardy\)/));
+  assert.strictEqual(due(build(it), /Redditi SC/, it), "2026-10-31");
+  assert.ok(!has(build({ ...it, entityType: "Sole Proprietorship (ditta individuale)" }), /IRAP —|IRES/), "sole proprietors pay neither IRAP nor IRES");
+
+  const pt = { country: "Portugal", entityType: "Lda (sociedade por quotas)", vat: "Quarterly", hasEmployees: "No", fyEnd: "Dec" };
+  assert.ok(has(build({ ...pt, state: "Madeira" }), /Madeira Regional Rate/));
+  assert.ok(!has(build({ ...pt, state: "Mainland Portugal" }), /Regional Rate/));
+  assert.strictEqual(due(build({ ...pt, state: "Azores" }), /Modelo 22\) and Payment/, pt), "2027-05-31");
+
+  const at = { country: "Austria", entityType: "GmbH", vat: "Monthly", hasEmployees: "Yes" };
+  assert.ok(has(build({ ...at, state: "Vienna" }), /U-Bahn-Steuer/));
+  const tyrol = build({ ...at, state: "Tyrol" });
+  assert.ok(has(tyrol, /Tyrol Tourism Contribution/) && !has(tyrol, /U-Bahn-Steuer/) && has(tyrol, /Kommunalsteuer/));
+});
+
+test("Hong Kong, Sweden and Belgium: the financial year end decides the tax return date", () => {
+  const hk = { country: "Hong Kong", entityType: "Private Company Limited by Shares", hasEmployees: "Yes", fyEnd: "Dec", incorpDate: "2021-07-15" };
+  assert.strictEqual(due(build(hk), /Profits Tax Return/, hk), "2027-08-15");
+  assert.strictEqual(due(build({ ...hk, fyEnd: "Mar" }), /Profits Tax Return/, { ...hk, fyEnd: "Mar" }), "2026-11-15");
+  assert.strictEqual(names(build(hk)).filter((n) => /Profits Tax Return/.test(n)).length, 1);
+  assert.strictEqual(due(build(hk), /Form NAR1/, hk), "2027-08-26", "42 days after the 15 July anniversary");
+  assert.ok(has(build(hk), /MPF Contributions/));
+
+  const se = { country: "Sweden", entityType: "Aktiebolag (AB)", vat: "Quarterly", hasEmployees: "No", fyEnd: "Jun" };
+  assert.strictEqual(due(build(se), /Inkomstdeklaration 2/, se), "2026-12-15");
+  assert.strictEqual(due(build({ ...se, fyEnd: "Dec" }), /Inkomstdeklaration 2/, { ...se, fyEnd: "Dec" }), "2027-07-01");
+
+  const be = { country: "Belgium", entityType: "BV / SRL (private limited company)", vat: "Quarterly", hasEmployees: "No", fyEnd: "Dec" };
+  assert.strictEqual(due(build(be), /Biztax/, be), "2026-09-30");
+  assert.strictEqual(due(build({ ...be, fyEnd: "Mar" }), /Biztax/, { ...be, fyEnd: "Mar" }), "2026-10-31");
+});
+
+test("France, Ireland and the other national countries: answers decide the filings", () => {
+  const fr = { country: "France", entityType: "SAS", vat: "Monthly", hasEmployees: "Yes", employeeBand: "50 or more", fyEnd: "Dec" };
+  const big = build(fr);
+  assert.strictEqual(due(big, /Monthly Payroll Declaration \(DSN\)/, fr), "2026-10-05");
+  assert.ok(has(big, /Gender Equality Index/) && has(big, /CSE/));
+  const small = build({ ...fr, employeeBand: "Fewer than 11" });
+  assert.strictEqual(due(small, /Monthly Payroll Declaration \(DSN\)/, fr), "2026-10-15");
+  assert.ok(!has(small, /Gender Equality Index|CSE/));
+  assert.strictEqual(checkProfile({ ...fr, employeeBand: undefined }).field, "employeeBand");
+
+  const ie = { country: "Ireland", entityType: "Private Company Limited by Shares (LTD)", vat: "Bi-monthly", hasEmployees: "No", fyEnd: "Dec", incorpDate: "2021-07-15" };
+  assert.strictEqual(due(build(ie), /CT1/, ie), "2027-09-23");
+  assert.strictEqual(due(build(ie), /Form B1/, ie), "2027-03-12", "56 days after the 15 January return date");
+  assert.strictEqual(due(build(ie), /Preliminary Corporation Tax/, ie), "2026-11-23");
+
+  const checks = [
+    [{ country: "Netherlands", entityType: "BV (private limited company)", vat: "Quarterly", hasEmployees: "No", fyEnd: "Dec" }, /vennootschapsbelasting/, "2027-05-31"],
+    [{ country: "Norway", entityType: "AS (private limited company)", vat: "Bi-monthly", hasEmployees: "No", fyEnd: "Dec" }, /Shareholder Register Statement/, "2027-01-31"],
+    [{ country: "Denmark", entityType: "ApS (private limited company)", vat: "Half-yearly", hasEmployees: "No", fyEnd: "Dec" }, /Annual Report Filed/, "2027-06-30"],
+    [{ country: "South Korea", entityType: "Yuhan Hoesa (limited company)", hasEmployees: "No", fyEnd: "Dec" }, /^Corporate Income Tax Return/, "2027-03-31"],
+  ];
+  for (const [p, re, date] of checks) assert.strictEqual(due(build(p), re, p), date, p.country);
+  assert.ok(has(build({ country: "South Korea", entityType: "Sole Proprietorship", hasEmployees: "No" }), /VAT Returns \(half-yearly\)/));
+});
+
+test("a region is required where the country has regional filings", () => {
+  for (const country of ["Australia", "Austria", "Italy", "Japan", "Portugal", "Spain", "Switzerland"]) {
+    const entityType = FORMS[country].find((f) => f.key === "entityType").options[0];
+    assert.strictEqual(checkProfile({ country, entityType }).field, "state", country);
+    assert.strictEqual(db.buildFromDatabase({ country, entityType }).covered, false, country);
+  }
 });

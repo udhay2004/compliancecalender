@@ -1,0 +1,364 @@
+{
+  "country": "Norway",
+  "updated": "2026-10-09",
+  "notes": "National rules; no region is needed.",
+  "items": [
+    {
+      "id": "no-agm",
+      "category": "Mandatory Annual",
+      "name": "Annual General Meeting",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 6,
+        "day": "last"
+      },
+      "rule": "Within 6 months after financial year end",
+      "applies": "AS and ASA",
+      "description": "The meeting approves the annual accounts and any dividend.",
+      "authority": "Companies Acts (aksjeloven / allmennaksjeloven)",
+      "source": "https://www.brreg.no/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "AS (private limited company)",
+          "ASA (public limited company)"
+        ]
+      }
+    },
+    {
+      "id": "no-accounts",
+      "category": "Mandatory Annual",
+      "name": "Annual Accounts Filed with the Register of Company Accounts",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 7,
+        "day": "last"
+      },
+      "rule": "Within 1 month of approval and no later than 31 July (calendar financial year)",
+      "applies": "AS, ASA, branches and partnerships with an accounting obligation",
+      "description": "Filed through Altinn; late-filing fees accrue weekly.",
+      "authority": "Brønnøysund Register Centre (Regnskapsregisteret)",
+      "source": "https://www.brreg.no/en/annual-accounts/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "AS (private limited company)",
+          "ASA (public limited company)",
+          "NUF (Norwegian branch of a foreign company)",
+          "ANS / DA (partnership)"
+        ]
+      }
+    },
+    {
+      "id": "no-shareholders",
+      "category": "Mandatory Annual",
+      "name": "Shareholder Register Statement (aksjonærregisteroppgaven)",
+      "schedule": {
+        "type": "annual",
+        "month": 1,
+        "day": 31
+      },
+      "rule": "31 January",
+      "applies": "AS and ASA",
+      "description": "Reports shareholders, dividends and share transactions for the previous year.",
+      "authority": "Norwegian Tax Administration (Skatteetaten)",
+      "source": "https://www.skatteetaten.no/en/business-and-organisation/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "AS (private limited company)",
+          "ASA (public limited company)"
+        ]
+      }
+    },
+    {
+      "id": "no-owners",
+      "category": "Event-Based",
+      "name": "Register of Beneficial Owners",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Register beneficial owners, and update within 14 days of a change",
+      "applies": "Companies, branches and partnerships",
+      "description": "Filed through Altinn.",
+      "authority": "Brønnøysund Register Centre (Register over reelle rettighetshavere)",
+      "source": "https://www.brreg.no/en/beneficial-owners/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "AS (private limited company)",
+          "ASA (public limited company)",
+          "NUF (Norwegian branch of a foreign company)",
+          "ANS / DA (partnership)"
+        ]
+      }
+    },
+    {
+      "id": "no-tax-return",
+      "category": "Mandatory Annual",
+      "name": "Tax Return (skattemelding) for Businesses",
+      "schedule": {
+        "type": "annual",
+        "month": 5,
+        "day": 31
+      },
+      "rule": "31 May",
+      "applies": "Companies, branches, partnerships (partnership statement) and sole proprietors",
+      "description": "Filed digitally from the accounting system or Altinn.",
+      "authority": "Norwegian Tax Administration (Skatteetaten)",
+      "source": "https://www.skatteetaten.no/en/business-and-organisation/",
+      "confidence": "medium"
+    },
+    {
+      "id": "no-advance-tax-co",
+      "category": "Conditional",
+      "name": "Advance Tax for Companies",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 2,
+            "day": 15
+          },
+          {
+            "month": 4,
+            "day": 15
+          }
+        ]
+      },
+      "rule": "15 February and 15 April",
+      "applies": "AS, ASA and branches",
+      "description": "Two instalments in the year after the income year.",
+      "authority": "Norwegian Tax Administration (Skatteetaten)",
+      "source": "https://www.skatteetaten.no/en/business-and-organisation/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "AS (private limited company)",
+          "ASA (public limited company)",
+          "NUF (Norwegian branch of a foreign company)"
+        ]
+      }
+    },
+    {
+      "id": "no-advance-tax-sole",
+      "category": "Conditional",
+      "name": "Advance Tax for the Self-Employed (forskuddsskatt)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 3,
+            "day": 15
+          },
+          {
+            "month": 6,
+            "day": 15
+          },
+          {
+            "month": 9,
+            "day": 15
+          },
+          {
+            "month": 12,
+            "day": 15
+          }
+        ]
+      },
+      "rule": "15 March, 15 June, 15 September and 15 December",
+      "applies": "Sole proprietors and partners",
+      "description": "Four instalments during the income year.",
+      "authority": "Norwegian Tax Administration (Skatteetaten)",
+      "source": "https://www.skatteetaten.no/en/business-and-organisation/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Enkeltpersonforetak (sole proprietorship)",
+          "ANS / DA (partnership)"
+        ]
+      }
+    },
+    {
+      "id": "no-vat-bimonthly",
+      "category": "Conditional",
+      "name": "VAT Return (every two months)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 4,
+            "day": 10
+          },
+          {
+            "month": 6,
+            "day": 10
+          },
+          {
+            "month": 8,
+            "day": 31
+          },
+          {
+            "month": 10,
+            "day": 10
+          },
+          {
+            "month": 12,
+            "day": 10
+          },
+          {
+            "month": 2,
+            "day": 10
+          }
+        ]
+      },
+      "rule": "10 April, 10 June, 31 August, 10 October, 10 December and 10 February",
+      "applies": "VAT-registered businesses",
+      "description": "Filed and paid by the same date.",
+      "authority": "Norwegian Tax Administration (Skatteetaten)",
+      "source": "https://www.skatteetaten.no/en/business-and-organisation/vat-and-duties/vat/",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Bi-monthly"
+        ]
+      }
+    },
+    {
+      "id": "no-vat-annual",
+      "category": "Conditional",
+      "name": "VAT Return (annual)",
+      "schedule": {
+        "type": "annual",
+        "month": 3,
+        "day": 10
+      },
+      "rule": "10 March",
+      "applies": "VAT-registered businesses with turnover under NOK 1 million that were granted annual returns",
+      "description": "Filed and paid by the same date.",
+      "authority": "Norwegian Tax Administration (Skatteetaten)",
+      "source": "https://www.skatteetaten.no/en/business-and-organisation/vat-and-duties/vat/",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Annual"
+        ]
+      }
+    },
+    {
+      "id": "no-vat-register",
+      "category": "Event-Based",
+      "name": "VAT Registration",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "When taxable turnover passes NOK 50,000 in a 12-month period",
+      "applies": "Businesses not yet VAT-registered",
+      "description": "Registered through the Coordinated Register Notification.",
+      "authority": "Norwegian Tax Administration (Skatteetaten)",
+      "source": "https://www.skatteetaten.no/en/business-and-organisation/vat-and-duties/vat/",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Not registered"
+        ]
+      }
+    },
+    {
+      "id": "no-a-melding",
+      "category": "Conditional",
+      "name": "A-melding (monthly payroll report)",
+      "schedule": {
+        "type": "monthly",
+        "day": 5
+      },
+      "rule": "5th of the following month",
+      "applies": "Employers",
+      "description": "Reports pay, tax withheld and employer's national insurance contributions per employee.",
+      "authority": "Norwegian Tax Administration (Skatteetaten) / NAV / Statistics Norway",
+      "source": "https://www.skatteetaten.no/en/business-and-organisation/employer/the-a-melding/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "no-payroll-pay",
+      "category": "Conditional",
+      "name": "Withholding Tax and Employer's National Insurance Contributions",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 1,
+            "day": 15
+          },
+          {
+            "month": 3,
+            "day": 15
+          },
+          {
+            "month": 5,
+            "day": 15
+          },
+          {
+            "month": 7,
+            "day": 15
+          },
+          {
+            "month": 9,
+            "day": 15
+          },
+          {
+            "month": 11,
+            "day": 15
+          }
+        ]
+      },
+      "rule": "15 January, 15 March, 15 May, 15 July, 15 September and 15 November",
+      "applies": "Employers",
+      "description": "Paid every two months.",
+      "authority": "Norwegian Tax Administration (Skatteetaten)",
+      "source": "https://www.skatteetaten.no/en/business-and-organisation/employer/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "no-pension-insurance",
+      "category": "Event-Based",
+      "name": "Occupational Pension (OTP) and Occupational Injury Insurance",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "From the first employee; renewed each year",
+      "applies": "Employers",
+      "description": "Both are compulsory.",
+      "authority": "Finanstilsynet / Arbeidstilsynet",
+      "source": "https://www.arbeidstilsynet.no/en/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "no-tp",
+      "category": "Transfer Pricing",
+      "name": "Controlled Transactions Statement and Transfer Pricing Documentation",
+      "schedule": {
+        "type": "annual",
+        "month": 5,
+        "day": 31
+      },
+      "rule": "Statement with the tax return; documentation within 45 days of a request",
+      "applies": "Companies with controlled transactions of NOK 10 million or more",
+      "description": "Full documentation is required from larger groups.",
+      "authority": "Norwegian Tax Administration (Skatteetaten)",
+      "source": "https://www.skatteetaten.no/en/business-and-organisation/",
+      "confidence": "medium",
+      "when": {
+        "foreignOwned": true
+      }
+    }
+  ]
+}

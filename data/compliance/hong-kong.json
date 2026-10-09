@@ -1,0 +1,315 @@
+{
+  "country": "Hong Kong",
+  "updated": "2026-10-09",
+  "notes": "No regions. The profits tax return date depends on the financial year end (the IRD's accounting-date codes).",
+  "items": [
+    {
+      "id": "hk-br",
+      "category": "Mandatory Annual",
+      "name": "Business Registration Certificate Renewal",
+      "schedule": {
+        "type": "anniversary",
+        "daysAfter": -1
+      },
+      "rule": "Before the certificate expires (every 1 or 3 years, on the anniversary of commencement)",
+      "applies": "Every business carried on in Hong Kong",
+      "description": "The renewal demand is issued about a month before expiry; the fee includes the levy.",
+      "authority": "Business Registration Office, Inland Revenue Department",
+      "source": "https://www.ird.gov.hk/eng/tax/bre.htm",
+      "confidence": "medium"
+    },
+    {
+      "id": "hk-nar1",
+      "category": "Mandatory Annual",
+      "name": "Annual Return (Form NAR1)",
+      "schedule": {
+        "type": "anniversary",
+        "daysAfter": 42
+      },
+      "rule": "Within 42 days after the anniversary of incorporation",
+      "applies": "Private companies",
+      "description": "Late delivery attracts escalating registration fees and possible prosecution.",
+      "authority": "Companies Registry",
+      "source": "https://www.cr.gov.hk/en/compliance/obligations/local.htm",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Private Company Limited by Shares"
+        ]
+      }
+    },
+    {
+      "id": "hk-nn3",
+      "category": "Mandatory Annual",
+      "name": "Annual Return of a Registered Non-Hong Kong Company (Form NN3) with Accounts",
+      "schedule": {
+        "type": "anniversary",
+        "daysAfter": 42
+      },
+      "rule": "Within 42 days after the anniversary of registration in Hong Kong",
+      "applies": "Registered non-Hong Kong companies",
+      "description": "Delivered with the company's latest published accounts where its home law requires them.",
+      "authority": "Companies Registry",
+      "source": "https://www.cr.gov.hk/en/compliance/obligations/non-hk.htm",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Branch of Non-Hong Kong Company"
+        ]
+      }
+    },
+    {
+      "id": "hk-agm",
+      "category": "Mandatory Annual",
+      "name": "Annual General Meeting and Audited Financial Statements",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 9,
+        "day": "last"
+      },
+      "rule": "Within 9 months after financial year end",
+      "applies": "Private companies (unless the AGM is dispensed with by unanimous resolution)",
+      "description": "Audited financial statements are laid before the members.",
+      "authority": "Companies Registry, Companies Ordinance (Cap. 622) s.610",
+      "source": "https://www.cr.gov.hk/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Private Company Limited by Shares"
+        ]
+      }
+    },
+    {
+      "id": "hk-scr",
+      "category": "Event-Based",
+      "name": "Significant Controllers Register",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Keep current; enter changes within 7 days of confirming them",
+      "applies": "Companies incorporated in Hong Kong",
+      "description": "Kept at the registered office and open to law enforcement officers.",
+      "authority": "Companies Registry",
+      "source": "https://www.cr.gov.hk/en/legislation/scr/overview.htm",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Private Company Limited by Shares"
+        ]
+      }
+    },
+    {
+      "id": "hk-ptr-d",
+      "category": "Mandatory Annual",
+      "name": "Profits Tax Return (BIR51 / BIR52)",
+      "schedule": {
+        "type": "annual",
+        "month": 8,
+        "day": 15
+      },
+      "rule": "Mid-August under the block extension scheme for tax representatives (otherwise 1 month from issue)",
+      "applies": "Businesses with a December year end (\"D\" code)",
+      "description": "Issued on the first working day of April; filed with audited financial statements and a tax computation (partnerships file BIR52).",
+      "authority": "Inland Revenue Department (IRD)",
+      "source": "https://www.ird.gov.hk/eng/tax/bus_pft.htm",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Private Company Limited by Shares",
+          "Branch of Non-Hong Kong Company",
+          "Partnership"
+        ],
+        "fyEndMonth": [
+          12
+        ]
+      }
+    },
+    {
+      "id": "hk-ptr-m",
+      "category": "Mandatory Annual",
+      "name": "Profits Tax Return (BIR51 / BIR52)",
+      "schedule": {
+        "type": "annual",
+        "month": 11,
+        "day": 15
+      },
+      "rule": "Mid-November under the block extension scheme for tax representatives (otherwise 1 month from issue)",
+      "applies": "Businesses with a year end between 1 January and 31 March (\"M\" code)",
+      "description": "Issued on the first working day of April; filed with audited financial statements and a tax computation (partnerships file BIR52).",
+      "authority": "Inland Revenue Department (IRD)",
+      "source": "https://www.ird.gov.hk/eng/tax/bus_pft.htm",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Private Company Limited by Shares",
+          "Branch of Non-Hong Kong Company",
+          "Partnership"
+        ],
+        "fyEndMonth": [
+          1,
+          2,
+          3
+        ]
+      }
+    },
+    {
+      "id": "hk-ptr-n",
+      "category": "Mandatory Annual",
+      "name": "Profits Tax Return (BIR51 / BIR52)",
+      "schedule": {
+        "type": "annual",
+        "month": 5,
+        "day": 31
+      },
+      "rule": "Around the end of May under the block extension scheme (otherwise 1 month from issue)",
+      "applies": "Businesses with a year end between 1 April and 30 November (\"N\" code)",
+      "description": "Issued on the first working day of April; filed with audited financial statements and a tax computation (partnerships file BIR52).",
+      "authority": "Inland Revenue Department (IRD)",
+      "source": "https://www.ird.gov.hk/eng/tax/bus_pft.htm",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Private Company Limited by Shares",
+          "Branch of Non-Hong Kong Company",
+          "Partnership"
+        ],
+        "fyEndMonth": [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ]
+      }
+    },
+    {
+      "id": "hk-profits-tax-pay",
+      "category": "Conditional",
+      "name": "Profits Tax — Final and Provisional Tax Payments",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "On the two dates in the notice of assessment (usually between November and April)",
+      "applies": "Businesses with assessable profits",
+      "description": "Provisional tax for the next year is charged with the final tax for the year assessed.",
+      "authority": "Inland Revenue Department (IRD)",
+      "source": "https://www.ird.gov.hk/eng/tax/bus_pft.htm",
+      "confidence": "medium"
+    },
+    {
+      "id": "hk-bir60",
+      "category": "Mandatory Annual",
+      "name": "Individual Tax Return (BIR60)",
+      "schedule": {
+        "type": "annual",
+        "month": 8,
+        "day": 1
+      },
+      "rule": "Within 3 months of issue for sole proprietors (issued in early May)",
+      "applies": "Sole proprietors and partners",
+      "description": "A sole proprietor reports the business's profits in the individual return.",
+      "authority": "Inland Revenue Department (IRD)",
+      "source": "https://www.ird.gov.hk/eng/tax/ind_ctr.htm",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sole Proprietorship",
+          "Partnership"
+        ]
+      }
+    },
+    {
+      "id": "hk-employers-return",
+      "category": "Conditional",
+      "name": "Employer's Return (BIR56A and IR56B)",
+      "schedule": {
+        "type": "annual",
+        "month": 4,
+        "day": 30
+      },
+      "rule": "Within 1 month of issue (issued on the first working day of April)",
+      "applies": "Employers",
+      "description": "Reports each employee's income for the year ended 31 March.",
+      "authority": "Inland Revenue Department (IRD)",
+      "source": "https://www.ird.gov.hk/eng/tax/ere.htm",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "hk-ir56",
+      "category": "Event-Based",
+      "name": "Employee Start and Leaving Notifications (IR56E, IR56F, IR56G)",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "IR56E within 3 months of hiring; IR56F 1 month before employment ends; IR56G 1 month before an employee leaves Hong Kong",
+      "applies": "Employers",
+      "description": "Money due to an employee leaving Hong Kong is withheld until the IRD issues a letter of release.",
+      "authority": "Inland Revenue Department (IRD)",
+      "source": "https://www.ird.gov.hk/eng/tax/ere.htm",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "hk-mpf",
+      "category": "Conditional",
+      "name": "MPF Contributions",
+      "schedule": {
+        "type": "monthly",
+        "day": 10
+      },
+      "rule": "10th of the following month",
+      "applies": "Employers",
+      "description": "Employer and employee mandatory contributions are paid to the MPF trustee with a remittance statement; new employees are enrolled within 60 days.",
+      "authority": "Mandatory Provident Fund Schemes Authority (MPFA)",
+      "source": "https://www.mpfa.org.hk/en/mpf-system/employers",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "hk-eci",
+      "category": "Conditional",
+      "name": "Employees' Compensation Insurance Renewal",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Before the policy expires each year",
+      "applies": "Employers",
+      "description": "Cover is compulsory for all employees; the notice of insurance is displayed at the workplace.",
+      "authority": "Labour Department",
+      "source": "https://www.labour.gov.hk/eng/public/content2_7.htm",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "hk-tp",
+      "category": "Transfer Pricing",
+      "name": "Transfer Pricing Master File and Local File",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 9,
+        "day": "last"
+      },
+      "rule": "Within 9 months after financial year end",
+      "applies": "Businesses with related-party transactions that exceed the size and transaction thresholds",
+      "description": "Country-by-country notifications are due within 3 months after the group's year end.",
+      "authority": "Inland Revenue Department (IRD)",
+      "source": "https://www.ird.gov.hk/eng/tax/tp.htm",
+      "confidence": "medium",
+      "when": {
+        "foreignOwned": true
+      }
+    }
+  ]
+}

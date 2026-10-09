@@ -1,0 +1,305 @@
+{
+  "country": "Netherlands",
+  "updated": "2026-10-09",
+  "notes": "National rules; no region is needed.",
+  "items": [
+    {
+      "id": "nl-prepare-accounts",
+      "category": "Mandatory Annual",
+      "name": "Annual Accounts Prepared by the Board",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 5,
+        "day": "last"
+      },
+      "rule": "Within 5 months after financial year end (the shareholders may extend this by up to 5 months)",
+      "applies": "BV and NV",
+      "description": "The shareholders adopt the accounts within 2 months after they are prepared.",
+      "authority": "Dutch Civil Code, Book 2",
+      "source": "https://www.kvk.nl/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "BV (private limited company)",
+          "NV (public limited company)"
+        ]
+      }
+    },
+    {
+      "id": "nl-file-accounts",
+      "category": "Mandatory Annual",
+      "name": "Annual Accounts Filed with the Chamber of Commerce",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 12,
+        "day": "last"
+      },
+      "rule": "Within 8 days of adoption and no later than 12 months after financial year end",
+      "applies": "BV and NV; branches file the foreign company's accounts",
+      "description": "Micro and small companies file digitally through SBR; late filing can make directors personally liable in a bankruptcy.",
+      "authority": "Netherlands Chamber of Commerce (KVK)",
+      "source": "https://www.kvk.nl/en/filing/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "BV (private limited company)",
+          "NV (public limited company)",
+          "Branch of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "nl-kvk-changes",
+      "category": "Event-Based",
+      "name": "Business Register Changes",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Within 1 week of the change (new address, officers, activities or trade names)",
+      "applies": "Every business registered with the Chamber of Commerce",
+      "description": "Changes are reported online to the KVK.",
+      "authority": "Netherlands Chamber of Commerce (KVK)",
+      "source": "https://www.kvk.nl/en/changes/",
+      "confidence": "medium"
+    },
+    {
+      "id": "nl-ubo",
+      "category": "Event-Based",
+      "name": "UBO Register",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "On registration; changes within 7 days",
+      "applies": "BV, NV and partnerships",
+      "description": "Ultimate beneficial owners are registered with the Chamber of Commerce.",
+      "authority": "Netherlands Chamber of Commerce (KVK)",
+      "source": "https://www.kvk.nl/en/ubo/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "BV (private limited company)",
+          "NV (public limited company)",
+          "VOF (general partnership)"
+        ]
+      }
+    },
+    {
+      "id": "nl-vpb",
+      "category": "Mandatory Annual",
+      "name": "Corporate Income Tax Return (vennootschapsbelasting)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 5,
+        "day": "last"
+      },
+      "rule": "Within 5 months after financial year end (before 1 June for a calendar year); later under a tax adviser's extension scheme",
+      "applies": "BV, NV and branches",
+      "description": "Filed digitally; a provisional assessment is paid during the year.",
+      "authority": "Belastingdienst (Dutch Tax and Customs Administration)",
+      "source": "https://www.belastingdienst.nl/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "BV (private limited company)",
+          "NV (public limited company)",
+          "Branch of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "nl-dividend-tax",
+      "category": "Event-Based",
+      "name": "Dividend Withholding Tax Return",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Within 1 month after the dividend is made payable",
+      "applies": "BV and NV paying dividends",
+      "description": "The return and the tax withheld are due together.",
+      "authority": "Belastingdienst (Dutch Tax and Customs Administration)",
+      "source": "https://www.belastingdienst.nl/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "BV (private limited company)",
+          "NV (public limited company)"
+        ]
+      }
+    },
+    {
+      "id": "nl-income-tax",
+      "category": "Mandatory Annual",
+      "name": "Income Tax Return",
+      "schedule": {
+        "type": "annual",
+        "month": 5,
+        "day": 1
+      },
+      "rule": "1 May",
+      "applies": "Sole proprietors and partners",
+      "description": "Business profit is reported in the owner's income tax return.",
+      "authority": "Belastingdienst (Dutch Tax and Customs Administration)",
+      "source": "https://www.belastingdienst.nl/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Eenmanszaak (sole proprietorship)",
+          "VOF (general partnership)"
+        ]
+      }
+    },
+    {
+      "id": "nl-vat-quarterly",
+      "category": "Conditional",
+      "name": "VAT Return (quarterly)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 4,
+            "day": 30
+          },
+          {
+            "month": 7,
+            "day": 31
+          },
+          {
+            "month": 10,
+            "day": 31
+          },
+          {
+            "month": 1,
+            "day": 31
+          }
+        ]
+      },
+      "rule": "Last day of the month after each quarter",
+      "applies": "VAT-registered businesses",
+      "description": "Filed and paid by the same date.",
+      "authority": "Belastingdienst (Dutch Tax and Customs Administration)",
+      "source": "https://www.belastingdienst.nl/",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Quarterly"
+        ]
+      }
+    },
+    {
+      "id": "nl-vat-monthly",
+      "category": "Conditional",
+      "name": "VAT Return (monthly)",
+      "schedule": {
+        "type": "monthly",
+        "day": "last"
+      },
+      "rule": "Last day of the following month",
+      "applies": "VAT-registered businesses on monthly returns",
+      "description": "Filed and paid by the same date.",
+      "authority": "Belastingdienst (Dutch Tax and Customs Administration)",
+      "source": "https://www.belastingdienst.nl/",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Monthly"
+        ]
+      }
+    },
+    {
+      "id": "nl-vat-annual",
+      "category": "Conditional",
+      "name": "VAT Return (annual)",
+      "schedule": {
+        "type": "annual",
+        "month": 3,
+        "day": 31
+      },
+      "rule": "31 March",
+      "applies": "Small VAT-registered businesses allowed to file once a year",
+      "description": "Filed and paid by the same date.",
+      "authority": "Belastingdienst (Dutch Tax and Customs Administration)",
+      "source": "https://www.belastingdienst.nl/",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Annual"
+        ]
+      }
+    },
+    {
+      "id": "nl-vat-register",
+      "category": "Event-Based",
+      "name": "Leaving the Small Businesses Scheme (KOR)",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "As soon as turnover passes €20,000 in a calendar year",
+      "applies": "Businesses using the VAT exemption for small businesses",
+      "description": "VAT is charged from the supply that passes the limit and returns begin.",
+      "authority": "Belastingdienst (Dutch Tax and Customs Administration)",
+      "source": "https://www.belastingdienst.nl/",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Not registered"
+        ]
+      }
+    },
+    {
+      "id": "nl-payroll",
+      "category": "Conditional",
+      "name": "Payroll Tax Return (loonheffingen)",
+      "schedule": {
+        "type": "monthly",
+        "day": "last"
+      },
+      "rule": "Within 1 month after each monthly period",
+      "applies": "Employers",
+      "description": "Wage tax, national insurance and employee insurance contributions are filed and paid together.",
+      "authority": "Belastingdienst (Dutch Tax and Customs Administration)",
+      "source": "https://www.belastingdienst.nl/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "nl-wkr",
+      "category": "Conditional",
+      "name": "Work-Related Costs Scheme — Final Levy",
+      "schedule": {
+        "type": "annual",
+        "month": 3,
+        "day": 31
+      },
+      "rule": "With the return for the second payroll period of the next year (by 31 March)",
+      "applies": "Employers that exceeded the tax-free allowance",
+      "description": "An 80% final levy on the excess.",
+      "authority": "Belastingdienst (Dutch Tax and Customs Administration)",
+      "source": "https://www.belastingdienst.nl/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "nl-tp",
+      "category": "Transfer Pricing",
+      "name": "Transfer Pricing Documentation",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 5,
+        "day": "last"
+      },
+      "rule": "Available when the corporate income tax return is filed",
+      "applies": "Companies with related-party transactions (master file and local file for groups with €50 million turnover or more)",
+      "description": "Country-by-country notifications are due by the end of the group's financial year.",
+      "authority": "Belastingdienst (Dutch Tax and Customs Administration)",
+      "source": "https://www.belastingdienst.nl/",
+      "confidence": "medium",
+      "when": {
+        "foreignOwned": true
+      }
+    }
+  ]
+}

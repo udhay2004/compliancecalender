@@ -1,0 +1,1801 @@
+{
+  "country": "Switzerland",
+  "updated": "2026-10-09",
+  "notes": "Federal filings plus the tax return and tax at source of the company's canton. Cantons set their own tax return dates, so those are left for staff to confirm.",
+  "items": [
+    {
+      "id": "ch-agm",
+      "category": "Mandatory Annual",
+      "name": "Annual General Meeting — Approval of the Annual Accounts",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 6,
+        "day": "last"
+      },
+      "rule": "Within 6 months after financial year end",
+      "applies": "AG and GmbH",
+      "description": "Approves the accounts and the dividend; accounts are not filed publicly.",
+      "authority": "Swiss Code of Obligations art. 699 and 805",
+      "source": "https://www.fedlex.admin.ch/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "AG / SA (company limited by shares)",
+          "GmbH / Sàrl (limited liability company)"
+        ]
+      }
+    },
+    {
+      "id": "ch-registers",
+      "category": "Event-Based",
+      "name": "Share Register and List of Beneficial Owners",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Keep current; shareholders report beneficial owners within 1 month of acquiring 25%",
+      "applies": "AG and GmbH",
+      "description": "The company keeps both registers and must be able to produce them in Switzerland.",
+      "authority": "Swiss Code of Obligations art. 697j and 790a",
+      "source": "https://www.fedlex.admin.ch/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "AG / SA (company limited by shares)",
+          "GmbH / Sàrl (limited liability company)"
+        ]
+      }
+    },
+    {
+      "id": "ch-dividend-wht",
+      "category": "Event-Based",
+      "name": "Withholding Tax on Dividends (Form 103 / 110)",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Within 30 days after the dividend falls due",
+      "applies": "AG and GmbH",
+      "description": "35% withholding tax is declared and paid, or the notification procedure is used within a group.",
+      "authority": "Federal Tax Administration (ESTV / AFC)",
+      "source": "https://www.estv.admin.ch/estv/en/home/withholding-tax.html",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "AG / SA (company limited by shares)",
+          "GmbH / Sàrl (limited liability company)"
+        ]
+      }
+    },
+    {
+      "id": "ch-vat-quarterly",
+      "category": "Conditional",
+      "name": "VAT Return (quarterly)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 5,
+            "day": 31
+          },
+          {
+            "month": 8,
+            "day": 31
+          },
+          {
+            "month": 11,
+            "day": 30
+          },
+          {
+            "month": 2,
+            "day": 28
+          }
+        ]
+      },
+      "rule": "Within 60 days after each quarter: end of May, August, November and February",
+      "applies": "VAT-registered businesses using the effective method",
+      "description": "Filed online through ePortal with payment.",
+      "authority": "Federal Tax Administration (ESTV / AFC)",
+      "source": "https://www.estv.admin.ch/estv/en/home/value-added-tax.html",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Quarterly"
+        ]
+      }
+    },
+    {
+      "id": "ch-vat-semi",
+      "category": "Conditional",
+      "name": "VAT Return (half-yearly)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 8,
+            "day": 31
+          },
+          {
+            "month": 2,
+            "day": 28
+          }
+        ]
+      },
+      "rule": "Within 60 days after each half-year: end of August and end of February",
+      "applies": "VAT-registered businesses using the net tax rate method",
+      "description": "Filed online through ePortal with payment.",
+      "authority": "Federal Tax Administration (ESTV / AFC)",
+      "source": "https://www.estv.admin.ch/estv/en/home/value-added-tax.html",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Semi-annual"
+        ]
+      }
+    },
+    {
+      "id": "ch-vat-monthly",
+      "category": "Conditional",
+      "name": "VAT Return (monthly)",
+      "schedule": {
+        "type": "monthly",
+        "day": "last"
+      },
+      "rule": "Within 60 days after each month",
+      "applies": "VAT-registered businesses with regular input tax surpluses that chose monthly returns",
+      "description": "Filed online through ePortal.",
+      "authority": "Federal Tax Administration (ESTV / AFC)",
+      "source": "https://www.estv.admin.ch/estv/en/home/value-added-tax.html",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Monthly"
+        ]
+      }
+    },
+    {
+      "id": "ch-vat-annual",
+      "category": "Conditional",
+      "name": "VAT Return (annual) with Instalments",
+      "schedule": {
+        "type": "annual",
+        "month": 2,
+        "day": 28
+      },
+      "rule": "Within 60 days after the year end; instalments during the year",
+      "applies": "VAT-registered businesses with turnover up to CHF 5.005 million that chose annual returns",
+      "description": "Filed online through ePortal.",
+      "authority": "Federal Tax Administration (ESTV / AFC)",
+      "source": "https://www.estv.admin.ch/estv/en/home/value-added-tax.html",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Annual"
+        ]
+      }
+    },
+    {
+      "id": "ch-vat-finalisation",
+      "category": "Mandatory Annual",
+      "name": "VAT Annual Reconciliation (corrections to the year's returns)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 6,
+        "day": "last"
+      },
+      "rule": "Within 180 days after financial year end",
+      "applies": "VAT-registered businesses",
+      "description": "Returns are reconciled to the annual accounts and any differences reported in a correction return.",
+      "authority": "Federal Tax Administration (ESTV / AFC)",
+      "source": "https://www.estv.admin.ch/estv/en/home/value-added-tax.html",
+      "confidence": "medium",
+      "when": {
+        "not": {
+          "vat": [
+            "Not registered"
+          ]
+        }
+      }
+    },
+    {
+      "id": "ch-vat-register",
+      "category": "Event-Based",
+      "name": "VAT Registration",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "When worldwide turnover from taxable supplies reaches CHF 100,000 in a year",
+      "applies": "Businesses not yet VAT-registered",
+      "description": "Registered online with the Federal Tax Administration.",
+      "authority": "Federal Tax Administration (ESTV / AFC)",
+      "source": "https://www.estv.admin.ch/estv/en/home/value-added-tax.html",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Not registered"
+        ]
+      }
+    },
+    {
+      "id": "ch-ahv-declaration",
+      "category": "Conditional",
+      "name": "Annual Salary Declaration to the Compensation Office (AHV/IV/EO/ALV)",
+      "schedule": {
+        "type": "annual",
+        "month": 1,
+        "day": 30
+      },
+      "rule": "30 January",
+      "applies": "Employers",
+      "description": "The year's wages per employee, used to settle the contributions paid on account.",
+      "authority": "Cantonal or association compensation office (Ausgleichskasse)",
+      "source": "https://www.ahv-iv.ch/en/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "ch-ahv-contributions",
+      "category": "Conditional",
+      "name": "Social Insurance Contributions on Account (AHV/IV/EO/ALV)",
+      "schedule": {
+        "type": "monthly",
+        "day": 10
+      },
+      "rule": "10th day after each period (monthly, or quarterly for small payrolls)",
+      "applies": "Employers",
+      "description": "Employer and employee contributions are paid on account to the compensation office.",
+      "authority": "Cantonal or association compensation office (Ausgleichskasse)",
+      "source": "https://www.ahv-iv.ch/en/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "ch-lohnausweis",
+      "category": "Conditional",
+      "name": "Salary Certificates, Accident Insurance and Pension Fund Wage Declarations",
+      "schedule": {
+        "type": "annual",
+        "month": 1,
+        "day": 31
+      },
+      "rule": "End of January",
+      "applies": "Employers",
+      "description": "Each employee receives a salary certificate (some cantons also want a copy); the accident insurer and pension fund receive the year's wages.",
+      "authority": "Accident insurer (Suva or private) / pension fund / cantonal tax administration",
+      "source": "https://www.ch.ch/en/work/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "ch-tp",
+      "category": "Transfer Pricing",
+      "name": "Transfer Pricing Support and Country-by-Country Reporting",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "On the tax administration's request; group notifications with the tax return",
+      "applies": "Companies with cross-border related-party transactions",
+      "description": "Switzerland has no fixed documentation deadline, but prices must be shown to be at arm's length.",
+      "authority": "Federal Tax Administration (ESTV / AFC)",
+      "source": "https://www.estv.admin.ch/",
+      "confidence": "medium",
+      "when": {
+        "foreignOwned": true
+      }
+    }
+  ],
+  "regions": {
+    "Aargau": {
+      "items": [
+        {
+          "id": "ch-aargau-corp-tax",
+          "category": "Mandatory Annual",
+          "name": "Corporate Tax Return — Canton of Aargau (cantonal, communal and direct federal tax)",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form; extensions are granted on request",
+          "applies": "Companies and branches taxed in Aargau",
+          "description": "One return to the canton covers its own profit and capital taxes, the commune's and the direct federal tax. Each canton sets its own filing date.",
+          "authority": "Canton of Aargau tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "AG / SA (company limited by shares)",
+              "GmbH / Sàrl (limited liability company)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "ch-aargau-personal-tax",
+          "category": "Mandatory Annual",
+          "name": "Personal Tax Return — Canton of Aargau",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form (the end of March in most cantons); extensions are granted on request",
+          "applies": "Sole proprietors and partners resident in Aargau",
+          "description": "Business income is declared in the owner's personal return, with the annual accounts attached.",
+          "authority": "Canton of Aargau tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (Einzelunternehmen)",
+              "Kollektivgesellschaft (general partnership)"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ch-aargau-source-tax",
+          "category": "Conditional",
+          "name": "Tax at Source on Foreign Employees' Wages (Quellensteuer) — Aargau",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "Within 30 days after each accounting period (monthly in most cantons)",
+          "applies": "Employers of foreign staff without a C permit, and cross-border workers, taxed in Aargau",
+          "description": "Tax is deducted from wages and paid to the canton entitled to it, at that canton's rates.",
+          "authority": "Canton of Aargau tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Appenzell Ausserrhoden": {
+      "items": [
+        {
+          "id": "ch-appenzell-ausserrhoden-corp-tax",
+          "category": "Mandatory Annual",
+          "name": "Corporate Tax Return — Canton of Appenzell Ausserrhoden (cantonal, communal and direct federal tax)",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form; extensions are granted on request",
+          "applies": "Companies and branches taxed in Appenzell Ausserrhoden",
+          "description": "One return to the canton covers its own profit and capital taxes, the commune's and the direct federal tax. Each canton sets its own filing date.",
+          "authority": "Canton of Appenzell Ausserrhoden tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "AG / SA (company limited by shares)",
+              "GmbH / Sàrl (limited liability company)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "ch-appenzell-ausserrhoden-personal-tax",
+          "category": "Mandatory Annual",
+          "name": "Personal Tax Return — Canton of Appenzell Ausserrhoden",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form (the end of March in most cantons); extensions are granted on request",
+          "applies": "Sole proprietors and partners resident in Appenzell Ausserrhoden",
+          "description": "Business income is declared in the owner's personal return, with the annual accounts attached.",
+          "authority": "Canton of Appenzell Ausserrhoden tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (Einzelunternehmen)",
+              "Kollektivgesellschaft (general partnership)"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ch-appenzell-ausserrhoden-source-tax",
+          "category": "Conditional",
+          "name": "Tax at Source on Foreign Employees' Wages (Quellensteuer) — Appenzell Ausserrhoden",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "Within 30 days after each accounting period (monthly in most cantons)",
+          "applies": "Employers of foreign staff without a C permit, and cross-border workers, taxed in Appenzell Ausserrhoden",
+          "description": "Tax is deducted from wages and paid to the canton entitled to it, at that canton's rates.",
+          "authority": "Canton of Appenzell Ausserrhoden tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Appenzell Innerrhoden": {
+      "items": [
+        {
+          "id": "ch-appenzell-innerrhoden-corp-tax",
+          "category": "Mandatory Annual",
+          "name": "Corporate Tax Return — Canton of Appenzell Innerrhoden (cantonal, communal and direct federal tax)",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form; extensions are granted on request",
+          "applies": "Companies and branches taxed in Appenzell Innerrhoden",
+          "description": "One return to the canton covers its own profit and capital taxes, the commune's and the direct federal tax. Each canton sets its own filing date.",
+          "authority": "Canton of Appenzell Innerrhoden tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "AG / SA (company limited by shares)",
+              "GmbH / Sàrl (limited liability company)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "ch-appenzell-innerrhoden-personal-tax",
+          "category": "Mandatory Annual",
+          "name": "Personal Tax Return — Canton of Appenzell Innerrhoden",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form (the end of March in most cantons); extensions are granted on request",
+          "applies": "Sole proprietors and partners resident in Appenzell Innerrhoden",
+          "description": "Business income is declared in the owner's personal return, with the annual accounts attached.",
+          "authority": "Canton of Appenzell Innerrhoden tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (Einzelunternehmen)",
+              "Kollektivgesellschaft (general partnership)"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ch-appenzell-innerrhoden-source-tax",
+          "category": "Conditional",
+          "name": "Tax at Source on Foreign Employees' Wages (Quellensteuer) — Appenzell Innerrhoden",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "Within 30 days after each accounting period (monthly in most cantons)",
+          "applies": "Employers of foreign staff without a C permit, and cross-border workers, taxed in Appenzell Innerrhoden",
+          "description": "Tax is deducted from wages and paid to the canton entitled to it, at that canton's rates.",
+          "authority": "Canton of Appenzell Innerrhoden tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Basel-Landschaft": {
+      "items": [
+        {
+          "id": "ch-basel-landschaft-corp-tax",
+          "category": "Mandatory Annual",
+          "name": "Corporate Tax Return — Canton of Basel-Landschaft (cantonal, communal and direct federal tax)",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form; extensions are granted on request",
+          "applies": "Companies and branches taxed in Basel-Landschaft",
+          "description": "One return to the canton covers its own profit and capital taxes, the commune's and the direct federal tax. Each canton sets its own filing date.",
+          "authority": "Canton of Basel-Landschaft tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "AG / SA (company limited by shares)",
+              "GmbH / Sàrl (limited liability company)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "ch-basel-landschaft-personal-tax",
+          "category": "Mandatory Annual",
+          "name": "Personal Tax Return — Canton of Basel-Landschaft",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form (the end of March in most cantons); extensions are granted on request",
+          "applies": "Sole proprietors and partners resident in Basel-Landschaft",
+          "description": "Business income is declared in the owner's personal return, with the annual accounts attached.",
+          "authority": "Canton of Basel-Landschaft tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (Einzelunternehmen)",
+              "Kollektivgesellschaft (general partnership)"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ch-basel-landschaft-source-tax",
+          "category": "Conditional",
+          "name": "Tax at Source on Foreign Employees' Wages (Quellensteuer) — Basel-Landschaft",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "Within 30 days after each accounting period (monthly in most cantons)",
+          "applies": "Employers of foreign staff without a C permit, and cross-border workers, taxed in Basel-Landschaft",
+          "description": "Tax is deducted from wages and paid to the canton entitled to it, at that canton's rates.",
+          "authority": "Canton of Basel-Landschaft tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Basel-Stadt": {
+      "items": [
+        {
+          "id": "ch-basel-stadt-corp-tax",
+          "category": "Mandatory Annual",
+          "name": "Corporate Tax Return — Canton of Basel-Stadt (cantonal, communal and direct federal tax)",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form; extensions are granted on request",
+          "applies": "Companies and branches taxed in Basel-Stadt",
+          "description": "One return to the canton covers its own profit and capital taxes, the commune's and the direct federal tax. Each canton sets its own filing date.",
+          "authority": "Canton of Basel-Stadt tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "AG / SA (company limited by shares)",
+              "GmbH / Sàrl (limited liability company)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "ch-basel-stadt-personal-tax",
+          "category": "Mandatory Annual",
+          "name": "Personal Tax Return — Canton of Basel-Stadt",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form (the end of March in most cantons); extensions are granted on request",
+          "applies": "Sole proprietors and partners resident in Basel-Stadt",
+          "description": "Business income is declared in the owner's personal return, with the annual accounts attached.",
+          "authority": "Canton of Basel-Stadt tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (Einzelunternehmen)",
+              "Kollektivgesellschaft (general partnership)"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ch-basel-stadt-source-tax",
+          "category": "Conditional",
+          "name": "Tax at Source on Foreign Employees' Wages (Quellensteuer) — Basel-Stadt",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "Within 30 days after each accounting period (monthly in most cantons)",
+          "applies": "Employers of foreign staff without a C permit, and cross-border workers, taxed in Basel-Stadt",
+          "description": "Tax is deducted from wages and paid to the canton entitled to it, at that canton's rates.",
+          "authority": "Canton of Basel-Stadt tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Bern": {
+      "items": [
+        {
+          "id": "ch-bern-corp-tax",
+          "category": "Mandatory Annual",
+          "name": "Corporate Tax Return — Canton of Bern (cantonal, communal and direct federal tax)",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form; extensions are granted on request",
+          "applies": "Companies and branches taxed in Bern",
+          "description": "One return to the canton covers its own profit and capital taxes, the commune's and the direct federal tax. Each canton sets its own filing date.",
+          "authority": "Canton of Bern tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "AG / SA (company limited by shares)",
+              "GmbH / Sàrl (limited liability company)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "ch-bern-personal-tax",
+          "category": "Mandatory Annual",
+          "name": "Personal Tax Return — Canton of Bern",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form (the end of March in most cantons); extensions are granted on request",
+          "applies": "Sole proprietors and partners resident in Bern",
+          "description": "Business income is declared in the owner's personal return, with the annual accounts attached.",
+          "authority": "Canton of Bern tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (Einzelunternehmen)",
+              "Kollektivgesellschaft (general partnership)"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ch-bern-source-tax",
+          "category": "Conditional",
+          "name": "Tax at Source on Foreign Employees' Wages (Quellensteuer) — Bern",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "Within 30 days after each accounting period (monthly in most cantons)",
+          "applies": "Employers of foreign staff without a C permit, and cross-border workers, taxed in Bern",
+          "description": "Tax is deducted from wages and paid to the canton entitled to it, at that canton's rates.",
+          "authority": "Canton of Bern tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Fribourg": {
+      "items": [
+        {
+          "id": "ch-fribourg-corp-tax",
+          "category": "Mandatory Annual",
+          "name": "Corporate Tax Return — Canton of Fribourg (cantonal, communal and direct federal tax)",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form; extensions are granted on request",
+          "applies": "Companies and branches taxed in Fribourg",
+          "description": "One return to the canton covers its own profit and capital taxes, the commune's and the direct federal tax. Each canton sets its own filing date.",
+          "authority": "Canton of Fribourg tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "AG / SA (company limited by shares)",
+              "GmbH / Sàrl (limited liability company)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "ch-fribourg-personal-tax",
+          "category": "Mandatory Annual",
+          "name": "Personal Tax Return — Canton of Fribourg",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form (the end of March in most cantons); extensions are granted on request",
+          "applies": "Sole proprietors and partners resident in Fribourg",
+          "description": "Business income is declared in the owner's personal return, with the annual accounts attached.",
+          "authority": "Canton of Fribourg tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (Einzelunternehmen)",
+              "Kollektivgesellschaft (general partnership)"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ch-fribourg-source-tax",
+          "category": "Conditional",
+          "name": "Tax at Source on Foreign Employees' Wages (Quellensteuer) — Fribourg",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "Within 30 days after each accounting period (monthly in most cantons)",
+          "applies": "Employers of foreign staff without a C permit, and cross-border workers, taxed in Fribourg",
+          "description": "Tax is deducted from wages and paid to the canton entitled to it, at that canton's rates.",
+          "authority": "Canton of Fribourg tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Geneva": {
+      "items": [
+        {
+          "id": "ch-geneva-corp-tax",
+          "category": "Mandatory Annual",
+          "name": "Corporate Tax Return — Canton of Geneva (cantonal, communal and direct federal tax)",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form; extensions are granted on request",
+          "applies": "Companies and branches taxed in Geneva",
+          "description": "One return to the canton covers its own profit and capital taxes, the commune's and the direct federal tax. Each canton sets its own filing date.",
+          "authority": "Canton of Geneva tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "AG / SA (company limited by shares)",
+              "GmbH / Sàrl (limited liability company)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "ch-geneva-personal-tax",
+          "category": "Mandatory Annual",
+          "name": "Personal Tax Return — Canton of Geneva",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form (the end of March in most cantons); extensions are granted on request",
+          "applies": "Sole proprietors and partners resident in Geneva",
+          "description": "Business income is declared in the owner's personal return, with the annual accounts attached.",
+          "authority": "Canton of Geneva tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (Einzelunternehmen)",
+              "Kollektivgesellschaft (general partnership)"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ch-geneva-source-tax",
+          "category": "Conditional",
+          "name": "Tax at Source on Foreign Employees' Wages (Quellensteuer) — Geneva",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "Within 30 days after each accounting period (monthly in most cantons)",
+          "applies": "Employers of foreign staff without a C permit, and cross-border workers, taxed in Geneva",
+          "description": "Tax is deducted from wages and paid to the canton entitled to it, at that canton's rates.",
+          "authority": "Canton of Geneva tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Glarus": {
+      "items": [
+        {
+          "id": "ch-glarus-corp-tax",
+          "category": "Mandatory Annual",
+          "name": "Corporate Tax Return — Canton of Glarus (cantonal, communal and direct federal tax)",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form; extensions are granted on request",
+          "applies": "Companies and branches taxed in Glarus",
+          "description": "One return to the canton covers its own profit and capital taxes, the commune's and the direct federal tax. Each canton sets its own filing date.",
+          "authority": "Canton of Glarus tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "AG / SA (company limited by shares)",
+              "GmbH / Sàrl (limited liability company)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "ch-glarus-personal-tax",
+          "category": "Mandatory Annual",
+          "name": "Personal Tax Return — Canton of Glarus",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form (the end of March in most cantons); extensions are granted on request",
+          "applies": "Sole proprietors and partners resident in Glarus",
+          "description": "Business income is declared in the owner's personal return, with the annual accounts attached.",
+          "authority": "Canton of Glarus tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (Einzelunternehmen)",
+              "Kollektivgesellschaft (general partnership)"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ch-glarus-source-tax",
+          "category": "Conditional",
+          "name": "Tax at Source on Foreign Employees' Wages (Quellensteuer) — Glarus",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "Within 30 days after each accounting period (monthly in most cantons)",
+          "applies": "Employers of foreign staff without a C permit, and cross-border workers, taxed in Glarus",
+          "description": "Tax is deducted from wages and paid to the canton entitled to it, at that canton's rates.",
+          "authority": "Canton of Glarus tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Graubünden": {
+      "items": [
+        {
+          "id": "ch-graubu-nden-corp-tax",
+          "category": "Mandatory Annual",
+          "name": "Corporate Tax Return — Canton of Graubünden (cantonal, communal and direct federal tax)",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form; extensions are granted on request",
+          "applies": "Companies and branches taxed in Graubünden",
+          "description": "One return to the canton covers its own profit and capital taxes, the commune's and the direct federal tax. Each canton sets its own filing date.",
+          "authority": "Canton of Graubünden tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "AG / SA (company limited by shares)",
+              "GmbH / Sàrl (limited liability company)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "ch-graubu-nden-personal-tax",
+          "category": "Mandatory Annual",
+          "name": "Personal Tax Return — Canton of Graubünden",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form (the end of March in most cantons); extensions are granted on request",
+          "applies": "Sole proprietors and partners resident in Graubünden",
+          "description": "Business income is declared in the owner's personal return, with the annual accounts attached.",
+          "authority": "Canton of Graubünden tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (Einzelunternehmen)",
+              "Kollektivgesellschaft (general partnership)"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ch-graubu-nden-source-tax",
+          "category": "Conditional",
+          "name": "Tax at Source on Foreign Employees' Wages (Quellensteuer) — Graubünden",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "Within 30 days after each accounting period (monthly in most cantons)",
+          "applies": "Employers of foreign staff without a C permit, and cross-border workers, taxed in Graubünden",
+          "description": "Tax is deducted from wages and paid to the canton entitled to it, at that canton's rates.",
+          "authority": "Canton of Graubünden tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Jura": {
+      "items": [
+        {
+          "id": "ch-jura-corp-tax",
+          "category": "Mandatory Annual",
+          "name": "Corporate Tax Return — Canton of Jura (cantonal, communal and direct federal tax)",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form; extensions are granted on request",
+          "applies": "Companies and branches taxed in Jura",
+          "description": "One return to the canton covers its own profit and capital taxes, the commune's and the direct federal tax. Each canton sets its own filing date.",
+          "authority": "Canton of Jura tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "AG / SA (company limited by shares)",
+              "GmbH / Sàrl (limited liability company)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "ch-jura-personal-tax",
+          "category": "Mandatory Annual",
+          "name": "Personal Tax Return — Canton of Jura",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form (the end of March in most cantons); extensions are granted on request",
+          "applies": "Sole proprietors and partners resident in Jura",
+          "description": "Business income is declared in the owner's personal return, with the annual accounts attached.",
+          "authority": "Canton of Jura tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (Einzelunternehmen)",
+              "Kollektivgesellschaft (general partnership)"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ch-jura-source-tax",
+          "category": "Conditional",
+          "name": "Tax at Source on Foreign Employees' Wages (Quellensteuer) — Jura",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "Within 30 days after each accounting period (monthly in most cantons)",
+          "applies": "Employers of foreign staff without a C permit, and cross-border workers, taxed in Jura",
+          "description": "Tax is deducted from wages and paid to the canton entitled to it, at that canton's rates.",
+          "authority": "Canton of Jura tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Lucerne": {
+      "items": [
+        {
+          "id": "ch-lucerne-corp-tax",
+          "category": "Mandatory Annual",
+          "name": "Corporate Tax Return — Canton of Lucerne (cantonal, communal and direct federal tax)",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form; extensions are granted on request",
+          "applies": "Companies and branches taxed in Lucerne",
+          "description": "One return to the canton covers its own profit and capital taxes, the commune's and the direct federal tax. Each canton sets its own filing date.",
+          "authority": "Canton of Lucerne tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "AG / SA (company limited by shares)",
+              "GmbH / Sàrl (limited liability company)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "ch-lucerne-personal-tax",
+          "category": "Mandatory Annual",
+          "name": "Personal Tax Return — Canton of Lucerne",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form (the end of March in most cantons); extensions are granted on request",
+          "applies": "Sole proprietors and partners resident in Lucerne",
+          "description": "Business income is declared in the owner's personal return, with the annual accounts attached.",
+          "authority": "Canton of Lucerne tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (Einzelunternehmen)",
+              "Kollektivgesellschaft (general partnership)"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ch-lucerne-source-tax",
+          "category": "Conditional",
+          "name": "Tax at Source on Foreign Employees' Wages (Quellensteuer) — Lucerne",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "Within 30 days after each accounting period (monthly in most cantons)",
+          "applies": "Employers of foreign staff without a C permit, and cross-border workers, taxed in Lucerne",
+          "description": "Tax is deducted from wages and paid to the canton entitled to it, at that canton's rates.",
+          "authority": "Canton of Lucerne tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Neuchâtel": {
+      "items": [
+        {
+          "id": "ch-neucha-tel-corp-tax",
+          "category": "Mandatory Annual",
+          "name": "Corporate Tax Return — Canton of Neuchâtel (cantonal, communal and direct federal tax)",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form; extensions are granted on request",
+          "applies": "Companies and branches taxed in Neuchâtel",
+          "description": "One return to the canton covers its own profit and capital taxes, the commune's and the direct federal tax. Each canton sets its own filing date.",
+          "authority": "Canton of Neuchâtel tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "AG / SA (company limited by shares)",
+              "GmbH / Sàrl (limited liability company)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "ch-neucha-tel-personal-tax",
+          "category": "Mandatory Annual",
+          "name": "Personal Tax Return — Canton of Neuchâtel",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form (the end of March in most cantons); extensions are granted on request",
+          "applies": "Sole proprietors and partners resident in Neuchâtel",
+          "description": "Business income is declared in the owner's personal return, with the annual accounts attached.",
+          "authority": "Canton of Neuchâtel tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (Einzelunternehmen)",
+              "Kollektivgesellschaft (general partnership)"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ch-neucha-tel-source-tax",
+          "category": "Conditional",
+          "name": "Tax at Source on Foreign Employees' Wages (Quellensteuer) — Neuchâtel",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "Within 30 days after each accounting period (monthly in most cantons)",
+          "applies": "Employers of foreign staff without a C permit, and cross-border workers, taxed in Neuchâtel",
+          "description": "Tax is deducted from wages and paid to the canton entitled to it, at that canton's rates.",
+          "authority": "Canton of Neuchâtel tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Nidwalden": {
+      "items": [
+        {
+          "id": "ch-nidwalden-corp-tax",
+          "category": "Mandatory Annual",
+          "name": "Corporate Tax Return — Canton of Nidwalden (cantonal, communal and direct federal tax)",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form; extensions are granted on request",
+          "applies": "Companies and branches taxed in Nidwalden",
+          "description": "One return to the canton covers its own profit and capital taxes, the commune's and the direct federal tax. Each canton sets its own filing date.",
+          "authority": "Canton of Nidwalden tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "AG / SA (company limited by shares)",
+              "GmbH / Sàrl (limited liability company)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "ch-nidwalden-personal-tax",
+          "category": "Mandatory Annual",
+          "name": "Personal Tax Return — Canton of Nidwalden",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form (the end of March in most cantons); extensions are granted on request",
+          "applies": "Sole proprietors and partners resident in Nidwalden",
+          "description": "Business income is declared in the owner's personal return, with the annual accounts attached.",
+          "authority": "Canton of Nidwalden tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (Einzelunternehmen)",
+              "Kollektivgesellschaft (general partnership)"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ch-nidwalden-source-tax",
+          "category": "Conditional",
+          "name": "Tax at Source on Foreign Employees' Wages (Quellensteuer) — Nidwalden",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "Within 30 days after each accounting period (monthly in most cantons)",
+          "applies": "Employers of foreign staff without a C permit, and cross-border workers, taxed in Nidwalden",
+          "description": "Tax is deducted from wages and paid to the canton entitled to it, at that canton's rates.",
+          "authority": "Canton of Nidwalden tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Obwalden": {
+      "items": [
+        {
+          "id": "ch-obwalden-corp-tax",
+          "category": "Mandatory Annual",
+          "name": "Corporate Tax Return — Canton of Obwalden (cantonal, communal and direct federal tax)",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form; extensions are granted on request",
+          "applies": "Companies and branches taxed in Obwalden",
+          "description": "One return to the canton covers its own profit and capital taxes, the commune's and the direct federal tax. Each canton sets its own filing date.",
+          "authority": "Canton of Obwalden tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "AG / SA (company limited by shares)",
+              "GmbH / Sàrl (limited liability company)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "ch-obwalden-personal-tax",
+          "category": "Mandatory Annual",
+          "name": "Personal Tax Return — Canton of Obwalden",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form (the end of March in most cantons); extensions are granted on request",
+          "applies": "Sole proprietors and partners resident in Obwalden",
+          "description": "Business income is declared in the owner's personal return, with the annual accounts attached.",
+          "authority": "Canton of Obwalden tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (Einzelunternehmen)",
+              "Kollektivgesellschaft (general partnership)"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ch-obwalden-source-tax",
+          "category": "Conditional",
+          "name": "Tax at Source on Foreign Employees' Wages (Quellensteuer) — Obwalden",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "Within 30 days after each accounting period (monthly in most cantons)",
+          "applies": "Employers of foreign staff without a C permit, and cross-border workers, taxed in Obwalden",
+          "description": "Tax is deducted from wages and paid to the canton entitled to it, at that canton's rates.",
+          "authority": "Canton of Obwalden tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Schaffhausen": {
+      "items": [
+        {
+          "id": "ch-schaffhausen-corp-tax",
+          "category": "Mandatory Annual",
+          "name": "Corporate Tax Return — Canton of Schaffhausen (cantonal, communal and direct federal tax)",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form; extensions are granted on request",
+          "applies": "Companies and branches taxed in Schaffhausen",
+          "description": "One return to the canton covers its own profit and capital taxes, the commune's and the direct federal tax. Each canton sets its own filing date.",
+          "authority": "Canton of Schaffhausen tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "AG / SA (company limited by shares)",
+              "GmbH / Sàrl (limited liability company)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "ch-schaffhausen-personal-tax",
+          "category": "Mandatory Annual",
+          "name": "Personal Tax Return — Canton of Schaffhausen",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form (the end of March in most cantons); extensions are granted on request",
+          "applies": "Sole proprietors and partners resident in Schaffhausen",
+          "description": "Business income is declared in the owner's personal return, with the annual accounts attached.",
+          "authority": "Canton of Schaffhausen tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (Einzelunternehmen)",
+              "Kollektivgesellschaft (general partnership)"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ch-schaffhausen-source-tax",
+          "category": "Conditional",
+          "name": "Tax at Source on Foreign Employees' Wages (Quellensteuer) — Schaffhausen",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "Within 30 days after each accounting period (monthly in most cantons)",
+          "applies": "Employers of foreign staff without a C permit, and cross-border workers, taxed in Schaffhausen",
+          "description": "Tax is deducted from wages and paid to the canton entitled to it, at that canton's rates.",
+          "authority": "Canton of Schaffhausen tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Schwyz": {
+      "items": [
+        {
+          "id": "ch-schwyz-corp-tax",
+          "category": "Mandatory Annual",
+          "name": "Corporate Tax Return — Canton of Schwyz (cantonal, communal and direct federal tax)",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form; extensions are granted on request",
+          "applies": "Companies and branches taxed in Schwyz",
+          "description": "One return to the canton covers its own profit and capital taxes, the commune's and the direct federal tax. Each canton sets its own filing date.",
+          "authority": "Canton of Schwyz tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "AG / SA (company limited by shares)",
+              "GmbH / Sàrl (limited liability company)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "ch-schwyz-personal-tax",
+          "category": "Mandatory Annual",
+          "name": "Personal Tax Return — Canton of Schwyz",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form (the end of March in most cantons); extensions are granted on request",
+          "applies": "Sole proprietors and partners resident in Schwyz",
+          "description": "Business income is declared in the owner's personal return, with the annual accounts attached.",
+          "authority": "Canton of Schwyz tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (Einzelunternehmen)",
+              "Kollektivgesellschaft (general partnership)"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ch-schwyz-source-tax",
+          "category": "Conditional",
+          "name": "Tax at Source on Foreign Employees' Wages (Quellensteuer) — Schwyz",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "Within 30 days after each accounting period (monthly in most cantons)",
+          "applies": "Employers of foreign staff without a C permit, and cross-border workers, taxed in Schwyz",
+          "description": "Tax is deducted from wages and paid to the canton entitled to it, at that canton's rates.",
+          "authority": "Canton of Schwyz tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Solothurn": {
+      "items": [
+        {
+          "id": "ch-solothurn-corp-tax",
+          "category": "Mandatory Annual",
+          "name": "Corporate Tax Return — Canton of Solothurn (cantonal, communal and direct federal tax)",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form; extensions are granted on request",
+          "applies": "Companies and branches taxed in Solothurn",
+          "description": "One return to the canton covers its own profit and capital taxes, the commune's and the direct federal tax. Each canton sets its own filing date.",
+          "authority": "Canton of Solothurn tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "AG / SA (company limited by shares)",
+              "GmbH / Sàrl (limited liability company)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "ch-solothurn-personal-tax",
+          "category": "Mandatory Annual",
+          "name": "Personal Tax Return — Canton of Solothurn",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form (the end of March in most cantons); extensions are granted on request",
+          "applies": "Sole proprietors and partners resident in Solothurn",
+          "description": "Business income is declared in the owner's personal return, with the annual accounts attached.",
+          "authority": "Canton of Solothurn tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (Einzelunternehmen)",
+              "Kollektivgesellschaft (general partnership)"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ch-solothurn-source-tax",
+          "category": "Conditional",
+          "name": "Tax at Source on Foreign Employees' Wages (Quellensteuer) — Solothurn",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "Within 30 days after each accounting period (monthly in most cantons)",
+          "applies": "Employers of foreign staff without a C permit, and cross-border workers, taxed in Solothurn",
+          "description": "Tax is deducted from wages and paid to the canton entitled to it, at that canton's rates.",
+          "authority": "Canton of Solothurn tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "St. Gallen": {
+      "items": [
+        {
+          "id": "ch-st-gallen-corp-tax",
+          "category": "Mandatory Annual",
+          "name": "Corporate Tax Return — Canton of St. Gallen (cantonal, communal and direct federal tax)",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form; extensions are granted on request",
+          "applies": "Companies and branches taxed in St. Gallen",
+          "description": "One return to the canton covers its own profit and capital taxes, the commune's and the direct federal tax. Each canton sets its own filing date.",
+          "authority": "Canton of St. Gallen tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "AG / SA (company limited by shares)",
+              "GmbH / Sàrl (limited liability company)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "ch-st-gallen-personal-tax",
+          "category": "Mandatory Annual",
+          "name": "Personal Tax Return — Canton of St. Gallen",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form (the end of March in most cantons); extensions are granted on request",
+          "applies": "Sole proprietors and partners resident in St. Gallen",
+          "description": "Business income is declared in the owner's personal return, with the annual accounts attached.",
+          "authority": "Canton of St. Gallen tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (Einzelunternehmen)",
+              "Kollektivgesellschaft (general partnership)"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ch-st-gallen-source-tax",
+          "category": "Conditional",
+          "name": "Tax at Source on Foreign Employees' Wages (Quellensteuer) — St. Gallen",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "Within 30 days after each accounting period (monthly in most cantons)",
+          "applies": "Employers of foreign staff without a C permit, and cross-border workers, taxed in St. Gallen",
+          "description": "Tax is deducted from wages and paid to the canton entitled to it, at that canton's rates.",
+          "authority": "Canton of St. Gallen tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Thurgau": {
+      "items": [
+        {
+          "id": "ch-thurgau-corp-tax",
+          "category": "Mandatory Annual",
+          "name": "Corporate Tax Return — Canton of Thurgau (cantonal, communal and direct federal tax)",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form; extensions are granted on request",
+          "applies": "Companies and branches taxed in Thurgau",
+          "description": "One return to the canton covers its own profit and capital taxes, the commune's and the direct federal tax. Each canton sets its own filing date.",
+          "authority": "Canton of Thurgau tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "AG / SA (company limited by shares)",
+              "GmbH / Sàrl (limited liability company)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "ch-thurgau-personal-tax",
+          "category": "Mandatory Annual",
+          "name": "Personal Tax Return — Canton of Thurgau",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form (the end of March in most cantons); extensions are granted on request",
+          "applies": "Sole proprietors and partners resident in Thurgau",
+          "description": "Business income is declared in the owner's personal return, with the annual accounts attached.",
+          "authority": "Canton of Thurgau tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (Einzelunternehmen)",
+              "Kollektivgesellschaft (general partnership)"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ch-thurgau-source-tax",
+          "category": "Conditional",
+          "name": "Tax at Source on Foreign Employees' Wages (Quellensteuer) — Thurgau",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "Within 30 days after each accounting period (monthly in most cantons)",
+          "applies": "Employers of foreign staff without a C permit, and cross-border workers, taxed in Thurgau",
+          "description": "Tax is deducted from wages and paid to the canton entitled to it, at that canton's rates.",
+          "authority": "Canton of Thurgau tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Ticino": {
+      "items": [
+        {
+          "id": "ch-ticino-corp-tax",
+          "category": "Mandatory Annual",
+          "name": "Corporate Tax Return — Canton of Ticino (cantonal, communal and direct federal tax)",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form; extensions are granted on request",
+          "applies": "Companies and branches taxed in Ticino",
+          "description": "One return to the canton covers its own profit and capital taxes, the commune's and the direct federal tax. Each canton sets its own filing date.",
+          "authority": "Canton of Ticino tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "AG / SA (company limited by shares)",
+              "GmbH / Sàrl (limited liability company)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "ch-ticino-personal-tax",
+          "category": "Mandatory Annual",
+          "name": "Personal Tax Return — Canton of Ticino",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form (the end of March in most cantons); extensions are granted on request",
+          "applies": "Sole proprietors and partners resident in Ticino",
+          "description": "Business income is declared in the owner's personal return, with the annual accounts attached.",
+          "authority": "Canton of Ticino tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (Einzelunternehmen)",
+              "Kollektivgesellschaft (general partnership)"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ch-ticino-source-tax",
+          "category": "Conditional",
+          "name": "Tax at Source on Foreign Employees' Wages (Quellensteuer) — Ticino",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "Within 30 days after each accounting period (monthly in most cantons)",
+          "applies": "Employers of foreign staff without a C permit, and cross-border workers, taxed in Ticino",
+          "description": "Tax is deducted from wages and paid to the canton entitled to it, at that canton's rates.",
+          "authority": "Canton of Ticino tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Uri": {
+      "items": [
+        {
+          "id": "ch-uri-corp-tax",
+          "category": "Mandatory Annual",
+          "name": "Corporate Tax Return — Canton of Uri (cantonal, communal and direct federal tax)",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form; extensions are granted on request",
+          "applies": "Companies and branches taxed in Uri",
+          "description": "One return to the canton covers its own profit and capital taxes, the commune's and the direct federal tax. Each canton sets its own filing date.",
+          "authority": "Canton of Uri tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "AG / SA (company limited by shares)",
+              "GmbH / Sàrl (limited liability company)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "ch-uri-personal-tax",
+          "category": "Mandatory Annual",
+          "name": "Personal Tax Return — Canton of Uri",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form (the end of March in most cantons); extensions are granted on request",
+          "applies": "Sole proprietors and partners resident in Uri",
+          "description": "Business income is declared in the owner's personal return, with the annual accounts attached.",
+          "authority": "Canton of Uri tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (Einzelunternehmen)",
+              "Kollektivgesellschaft (general partnership)"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ch-uri-source-tax",
+          "category": "Conditional",
+          "name": "Tax at Source on Foreign Employees' Wages (Quellensteuer) — Uri",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "Within 30 days after each accounting period (monthly in most cantons)",
+          "applies": "Employers of foreign staff without a C permit, and cross-border workers, taxed in Uri",
+          "description": "Tax is deducted from wages and paid to the canton entitled to it, at that canton's rates.",
+          "authority": "Canton of Uri tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Valais": {
+      "items": [
+        {
+          "id": "ch-valais-corp-tax",
+          "category": "Mandatory Annual",
+          "name": "Corporate Tax Return — Canton of Valais (cantonal, communal and direct federal tax)",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form; extensions are granted on request",
+          "applies": "Companies and branches taxed in Valais",
+          "description": "One return to the canton covers its own profit and capital taxes, the commune's and the direct federal tax. Each canton sets its own filing date.",
+          "authority": "Canton of Valais tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "AG / SA (company limited by shares)",
+              "GmbH / Sàrl (limited liability company)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "ch-valais-personal-tax",
+          "category": "Mandatory Annual",
+          "name": "Personal Tax Return — Canton of Valais",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form (the end of March in most cantons); extensions are granted on request",
+          "applies": "Sole proprietors and partners resident in Valais",
+          "description": "Business income is declared in the owner's personal return, with the annual accounts attached.",
+          "authority": "Canton of Valais tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (Einzelunternehmen)",
+              "Kollektivgesellschaft (general partnership)"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ch-valais-source-tax",
+          "category": "Conditional",
+          "name": "Tax at Source on Foreign Employees' Wages (Quellensteuer) — Valais",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "Within 30 days after each accounting period (monthly in most cantons)",
+          "applies": "Employers of foreign staff without a C permit, and cross-border workers, taxed in Valais",
+          "description": "Tax is deducted from wages and paid to the canton entitled to it, at that canton's rates.",
+          "authority": "Canton of Valais tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Vaud": {
+      "items": [
+        {
+          "id": "ch-vaud-corp-tax",
+          "category": "Mandatory Annual",
+          "name": "Corporate Tax Return — Canton of Vaud (cantonal, communal and direct federal tax)",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form; extensions are granted on request",
+          "applies": "Companies and branches taxed in Vaud",
+          "description": "One return to the canton covers its own profit and capital taxes, the commune's and the direct federal tax. Each canton sets its own filing date.",
+          "authority": "Canton of Vaud tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "AG / SA (company limited by shares)",
+              "GmbH / Sàrl (limited liability company)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "ch-vaud-personal-tax",
+          "category": "Mandatory Annual",
+          "name": "Personal Tax Return — Canton of Vaud",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form (the end of March in most cantons); extensions are granted on request",
+          "applies": "Sole proprietors and partners resident in Vaud",
+          "description": "Business income is declared in the owner's personal return, with the annual accounts attached.",
+          "authority": "Canton of Vaud tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (Einzelunternehmen)",
+              "Kollektivgesellschaft (general partnership)"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ch-vaud-source-tax",
+          "category": "Conditional",
+          "name": "Tax at Source on Foreign Employees' Wages (Quellensteuer) — Vaud",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "Within 30 days after each accounting period (monthly in most cantons)",
+          "applies": "Employers of foreign staff without a C permit, and cross-border workers, taxed in Vaud",
+          "description": "Tax is deducted from wages and paid to the canton entitled to it, at that canton's rates.",
+          "authority": "Canton of Vaud tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Zug": {
+      "items": [
+        {
+          "id": "ch-zug-corp-tax",
+          "category": "Mandatory Annual",
+          "name": "Corporate Tax Return — Canton of Zug (cantonal, communal and direct federal tax)",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form; extensions are granted on request",
+          "applies": "Companies and branches taxed in Zug",
+          "description": "One return to the canton covers its own profit and capital taxes, the commune's and the direct federal tax. Each canton sets its own filing date.",
+          "authority": "Canton of Zug tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "AG / SA (company limited by shares)",
+              "GmbH / Sàrl (limited liability company)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "ch-zug-personal-tax",
+          "category": "Mandatory Annual",
+          "name": "Personal Tax Return — Canton of Zug",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form (the end of March in most cantons); extensions are granted on request",
+          "applies": "Sole proprietors and partners resident in Zug",
+          "description": "Business income is declared in the owner's personal return, with the annual accounts attached.",
+          "authority": "Canton of Zug tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (Einzelunternehmen)",
+              "Kollektivgesellschaft (general partnership)"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ch-zug-source-tax",
+          "category": "Conditional",
+          "name": "Tax at Source on Foreign Employees' Wages (Quellensteuer) — Zug",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "Within 30 days after each accounting period (monthly in most cantons)",
+          "applies": "Employers of foreign staff without a C permit, and cross-border workers, taxed in Zug",
+          "description": "Tax is deducted from wages and paid to the canton entitled to it, at that canton's rates.",
+          "authority": "Canton of Zug tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Zurich": {
+      "items": [
+        {
+          "id": "ch-zurich-corp-tax",
+          "category": "Mandatory Annual",
+          "name": "Corporate Tax Return — Canton of Zurich (cantonal, communal and direct federal tax)",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form; extensions are granted on request",
+          "applies": "Companies and branches taxed in Zurich",
+          "description": "One return to the canton covers its own profit and capital taxes, the commune's and the direct federal tax. Each canton sets its own filing date.",
+          "authority": "Canton of Zurich tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "AG / SA (company limited by shares)",
+              "GmbH / Sàrl (limited liability company)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "ch-zurich-personal-tax",
+          "category": "Mandatory Annual",
+          "name": "Personal Tax Return — Canton of Zurich",
+          "schedule": null,
+          "rule": "On the date printed on the canton's tax return form (the end of March in most cantons); extensions are granted on request",
+          "applies": "Sole proprietors and partners resident in Zurich",
+          "description": "Business income is declared in the owner's personal return, with the annual accounts attached.",
+          "authority": "Canton of Zurich tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (Einzelunternehmen)",
+              "Kollektivgesellschaft (general partnership)"
+            ]
+          }
+        }
+      ],
+      "employerItems": [
+        {
+          "id": "ch-zurich-source-tax",
+          "category": "Conditional",
+          "name": "Tax at Source on Foreign Employees' Wages (Quellensteuer) — Zurich",
+          "schedule": {
+            "type": "monthly",
+            "day": "last"
+          },
+          "rule": "Within 30 days after each accounting period (monthly in most cantons)",
+          "applies": "Employers of foreign staff without a C permit, and cross-border workers, taxed in Zurich",
+          "description": "Tax is deducted from wages and paid to the canton entitled to it, at that canton's rates.",
+          "authority": "Canton of Zurich tax administration",
+          "source": "https://www.ch.ch/en/taxes-and-finances/",
+          "confidence": "medium"
+        }
+      ]
+    }
+  }
+}

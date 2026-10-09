@@ -1,0 +1,456 @@
+{
+  "country": "Portugal",
+  "updated": "2026-10-09",
+  "notes": "National rules, with the regional tax rates of Madeira and the Azores.",
+  "items": [
+    {
+      "id": "pt-approve",
+      "category": "Mandatory Annual",
+      "name": "Approval of the Annual Accounts",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 3,
+        "day": "last"
+      },
+      "rule": "Within 3 months after financial year end",
+      "applies": "Lda, Unipessoal Lda and SA",
+      "description": "The shareholders approve the accounts and the allocation of profit.",
+      "authority": "Código das Sociedades Comerciais art. 65",
+      "source": "https://eportugal.gov.pt/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Lda (sociedade por quotas)",
+          "Unipessoal Lda",
+          "SA (sociedade anónima)"
+        ]
+      }
+    },
+    {
+      "id": "pt-modelo22",
+      "category": "Mandatory Annual",
+      "name": "Corporate Income Tax Return (Modelo 22) and Payment",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 5,
+        "day": "last"
+      },
+      "rule": "Last day of the 5th month after financial year end (31 May for a calendar year)",
+      "applies": "Companies and branches",
+      "description": "Filed on the Portal das Finanças; the municipal surcharge (derrama) is settled with it.",
+      "authority": "Autoridade Tributária e Aduaneira (AT)",
+      "source": "https://info.portaldasfinancas.gov.pt/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Lda (sociedade por quotas)",
+          "Unipessoal Lda",
+          "SA (sociedade anónima)",
+          "Branch of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "pt-ppc",
+      "category": "Conditional",
+      "name": "Corporate Income Tax Payments on Account",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 7,
+            "day": 31
+          },
+          {
+            "month": 9,
+            "day": 30
+          },
+          {
+            "month": 12,
+            "day": 15
+          }
+        ]
+      },
+      "rule": "July, September and 15 December (calendar financial year)",
+      "applies": "Companies and branches with tax assessed the year before",
+      "description": "Three payments based on the previous year's tax.",
+      "authority": "Autoridade Tributária e Aduaneira (AT)",
+      "source": "https://info.portaldasfinancas.gov.pt/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Lda (sociedade por quotas)",
+          "Unipessoal Lda",
+          "SA (sociedade anónima)",
+          "Branch of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "pt-ies",
+      "category": "Mandatory Annual",
+      "name": "Simplified Business Information (IES / Annual Declaration)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 7,
+        "day": 15
+      },
+      "rule": "15th day of the 7th month after financial year end (15 July for a calendar year)",
+      "applies": "Companies, branches and sole proprietors with organised accounts",
+      "description": "One filing that delivers the annual accounts to the tax authority, the Commercial Registry, the statistics office and the Bank of Portugal.",
+      "authority": "Autoridade Tributária e Aduaneira (AT)",
+      "source": "https://info.portaldasfinancas.gov.pt/",
+      "confidence": "medium"
+    },
+    {
+      "id": "pt-rcbe",
+      "category": "Mandatory Annual",
+      "name": "Central Register of Beneficial Owners (RCBE) — Annual Confirmation",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 7,
+        "day": 15
+      },
+      "rule": "Annual confirmation with the IES; changes within 30 days",
+      "applies": "Companies and branches",
+      "description": "Filed online with the Institute of Registries and Notary.",
+      "authority": "Instituto dos Registos e do Notariado (IRN)",
+      "source": "https://rcbe.justica.gov.pt/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Lda (sociedade por quotas)",
+          "Unipessoal Lda",
+          "SA (sociedade anónima)",
+          "Branch of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "pt-irs",
+      "category": "Mandatory Annual",
+      "name": "Personal Income Tax Return (Modelo 3)",
+      "schedule": {
+        "type": "annual",
+        "month": 6,
+        "day": 30
+      },
+      "rule": "Between 1 April and 30 June",
+      "applies": "Sole proprietors",
+      "description": "Business income is reported in Annex B (simplified regime) or Annex C (organised accounts).",
+      "authority": "Autoridade Tributária e Aduaneira (AT)",
+      "source": "https://info.portaldasfinancas.gov.pt/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sole Proprietorship (empresário em nome individual)"
+        ]
+      }
+    },
+    {
+      "id": "pt-ss-quarterly",
+      "category": "Conditional",
+      "name": "Self-Employed Quarterly Social Security Declaration",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 1,
+            "day": 31
+          },
+          {
+            "month": 4,
+            "day": 30
+          },
+          {
+            "month": 7,
+            "day": 31
+          },
+          {
+            "month": 10,
+            "day": 31
+          }
+        ]
+      },
+      "rule": "End of January, April, July and October",
+      "applies": "Sole proprietors",
+      "description": "Declares the previous quarter's income, which sets the monthly contributions.",
+      "authority": "Segurança Social",
+      "source": "https://www.seg-social.pt/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sole Proprietorship (empresário em nome individual)"
+        ]
+      }
+    },
+    {
+      "id": "pt-saft",
+      "category": "Mandatory Annual",
+      "name": "Monthly Communication of Invoices (SAF-T / e-Fatura)",
+      "schedule": {
+        "type": "monthly",
+        "day": 5
+      },
+      "rule": "5th of the following month",
+      "applies": "Businesses issuing invoices",
+      "description": "Invoices issued are reported to the tax authority.",
+      "authority": "Autoridade Tributária e Aduaneira (AT)",
+      "source": "https://info.portaldasfinancas.gov.pt/",
+      "confidence": "medium"
+    },
+    {
+      "id": "pt-vat-monthly",
+      "category": "Conditional",
+      "name": "VAT Return (monthly)",
+      "schedule": {
+        "type": "monthly",
+        "day": 20
+      },
+      "rule": "20th of the second following month, with payment by the 25th",
+      "applies": "VAT-registered businesses with turnover of €650,000 or more",
+      "description": "Filed on the Portal das Finanças.",
+      "authority": "Autoridade Tributária e Aduaneira (AT)",
+      "source": "https://info.portaldasfinancas.gov.pt/",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Monthly"
+        ]
+      }
+    },
+    {
+      "id": "pt-vat-quarterly",
+      "category": "Conditional",
+      "name": "VAT Return (quarterly)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 5,
+            "day": 20
+          },
+          {
+            "month": 8,
+            "day": 20
+          },
+          {
+            "month": 11,
+            "day": 20
+          },
+          {
+            "month": 2,
+            "day": 20
+          }
+        ]
+      },
+      "rule": "20 May, 20 August, 20 November and 20 February, with payment by the 25th",
+      "applies": "VAT-registered businesses with turnover under €650,000",
+      "description": "Filed on the Portal das Finanças.",
+      "authority": "Autoridade Tributária e Aduaneira (AT)",
+      "source": "https://info.portaldasfinancas.gov.pt/",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Quarterly"
+        ]
+      }
+    },
+    {
+      "id": "pt-vat-register",
+      "category": "Event-Based",
+      "name": "Leaving the VAT Exemption (article 53)",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Declaration of changes in January of the year after the turnover limit is passed (at once if it is passed by more than 25%)",
+      "applies": "Small businesses under the VAT exemption",
+      "description": "VAT is then charged and periodic returns begin.",
+      "authority": "Autoridade Tributária e Aduaneira (AT)",
+      "source": "https://info.portaldasfinancas.gov.pt/",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Not registered"
+        ]
+      }
+    },
+    {
+      "id": "pt-dmr",
+      "category": "Conditional",
+      "name": "Monthly Statement of Remuneration (DMR) to the Tax Authority and Social Security",
+      "schedule": {
+        "type": "monthly",
+        "day": 10
+      },
+      "rule": "10th of the following month",
+      "applies": "Employers",
+      "description": "Reports each employee's pay, tax withheld and contributions.",
+      "authority": "Autoridade Tributária e Aduaneira (AT) / Segurança Social",
+      "source": "https://www.seg-social.pt/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "pt-payroll-pay",
+      "category": "Conditional",
+      "name": "Payroll Withholding Tax and Social Security Contributions",
+      "schedule": {
+        "type": "monthly",
+        "day": 20
+      },
+      "rule": "20th of the following month",
+      "applies": "Employers",
+      "description": "Tax withheld is paid to the tax authority and contributions to Social Security.",
+      "authority": "Autoridade Tributária e Aduaneira (AT) / Segurança Social",
+      "source": "https://www.seg-social.pt/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "pt-relatorio-unico",
+      "category": "Conditional",
+      "name": "Annual Employment Report (Relatório Único)",
+      "schedule": {
+        "type": "annual",
+        "month": 4,
+        "day": 15
+      },
+      "rule": "Between 16 March and 15 April",
+      "applies": "Employers",
+      "description": "The annual report on staff, pay, training and working conditions.",
+      "authority": "Gabinete de Estratégia e Planeamento (GEP)",
+      "source": "https://www.relatoriounico.pt/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "pt-tp",
+      "category": "Transfer Pricing",
+      "name": "Transfer Pricing File",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 7,
+        "day": 15
+      },
+      "rule": "Prepared by the 15th day of the 7th month after financial year end",
+      "applies": "Companies with income of €10 million or more and related-party transactions",
+      "description": "Large taxpayers submit the file; others keep it available.",
+      "authority": "Autoridade Tributária e Aduaneira (AT)",
+      "source": "https://info.portaldasfinancas.gov.pt/",
+      "confidence": "medium",
+      "when": {
+        "foreignOwned": true
+      }
+    }
+  ],
+  "regions": {
+    "Mainland Portugal": {
+      "items": []
+    },
+    "Madeira": {
+      "items": [
+        {
+          "id": "pt-madeira-irc",
+          "category": "Mandatory Annual",
+          "name": "IRC at the Madeira Regional Rate (Modelo 22, Annex C)",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 5,
+            "day": "last"
+          },
+          "rule": "With the Modelo 22: last day of the 5th month after financial year end",
+          "applies": "Companies based in Madeira, or with income from more than one region",
+          "description": "Madeira applies its own reduced corporate tax rates; a company with turnover in more than one region splits the tax between them in Annex C.",
+          "authority": "Autoridade Tributária e Assuntos Fiscais da Região Autónoma da Madeira (AT-RAM)",
+          "source": "https://info.portaldasfinancas.gov.pt/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Lda (sociedade por quotas)",
+              "Unipessoal Lda",
+              "SA (sociedade anónima)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "pt-madeira-vat",
+          "category": "Conditional",
+          "name": "VAT at Madeira Rates — Regional Annex to the VAT Return",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "With each periodic VAT return",
+          "applies": "VAT-registered businesses with transactions located in Madeira and in another region",
+          "description": "Madeira has lower VAT rates than the mainland; transactions in each region are shown in the return's regional annex.",
+          "authority": "Autoridade Tributária e Assuntos Fiscais da Região Autónoma da Madeira (AT-RAM)",
+          "source": "https://info.portaldasfinancas.gov.pt/",
+          "confidence": "medium",
+          "when": {
+            "not": {
+              "vat": [
+                "Not registered"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "Azores": {
+      "items": [
+        {
+          "id": "pt-azores-irc",
+          "category": "Mandatory Annual",
+          "name": "IRC at the the Azores Regional Rate (Modelo 22, Annex C)",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 5,
+            "day": "last"
+          },
+          "rule": "With the Modelo 22: last day of the 5th month after financial year end",
+          "applies": "Companies based in the Azores, or with income from more than one region",
+          "description": "the Azores applies its own reduced corporate tax rates; a company with turnover in more than one region splits the tax between them in Annex C.",
+          "authority": "Autoridade Tributária e Aduaneira / Região Autónoma dos Açores",
+          "source": "https://info.portaldasfinancas.gov.pt/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Lda (sociedade por quotas)",
+              "Unipessoal Lda",
+              "SA (sociedade anónima)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "pt-azores-vat",
+          "category": "Conditional",
+          "name": "VAT at the Azores Rates — Regional Annex to the VAT Return",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "With each periodic VAT return",
+          "applies": "VAT-registered businesses with transactions located in the Azores and in another region",
+          "description": "the Azores has lower VAT rates than the mainland; transactions in each region are shown in the return's regional annex.",
+          "authority": "Autoridade Tributária e Aduaneira / Região Autónoma dos Açores",
+          "source": "https://info.portaldasfinancas.gov.pt/",
+          "confidence": "medium",
+          "when": {
+            "not": {
+              "vat": [
+                "Not registered"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

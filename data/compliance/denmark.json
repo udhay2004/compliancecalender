@@ -1,0 +1,306 @@
+{
+  "country": "Denmark",
+  "updated": "2026-10-09",
+  "notes": "National rules; no region is needed.",
+  "items": [
+    {
+      "id": "dk-annual-report",
+      "category": "Mandatory Annual",
+      "name": "Annual Report Filed with the Danish Business Authority",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 6,
+        "day": "last"
+      },
+      "rule": "Within 6 months after financial year end",
+      "applies": "ApS and A/S; branches file the foreign company's accounts",
+      "description": "Approved at the general meeting and filed digitally (XBRL); late filing leads to fines and compulsory dissolution.",
+      "authority": "Danish Business Authority (Erhvervsstyrelsen)",
+      "source": "https://erhvervsstyrelsen.dk/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "ApS (private limited company)",
+          "A/S (public limited company)",
+          "Branch of Foreign Company (filial)"
+        ]
+      }
+    },
+    {
+      "id": "dk-corp-tax",
+      "category": "Mandatory Annual",
+      "name": "Corporate Tax Return (oplysningsskema)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 6,
+        "day": "last"
+      },
+      "rule": "6 months after the end of the income year",
+      "applies": "ApS, A/S and branches",
+      "description": "Filed through TastSelv Erhverv, including the report of controlled transactions.",
+      "authority": "Danish Tax Agency (Skattestyrelsen)",
+      "source": "https://skat.dk/erhverv",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "ApS (private limited company)",
+          "A/S (public limited company)",
+          "Branch of Foreign Company (filial)"
+        ]
+      }
+    },
+    {
+      "id": "dk-acontoskat",
+      "category": "Conditional",
+      "name": "On-Account Corporate Tax",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 3,
+            "day": 20
+          },
+          {
+            "month": 11,
+            "day": 20
+          }
+        ]
+      },
+      "rule": "20 March and 20 November",
+      "applies": "ApS, A/S and branches",
+      "description": "Two ordinary instalments based on earlier years' tax; voluntary payments are possible.",
+      "authority": "Danish Tax Agency (Skattestyrelsen)",
+      "source": "https://skat.dk/erhverv",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "ApS (private limited company)",
+          "A/S (public limited company)",
+          "Branch of Foreign Company (filial)"
+        ]
+      }
+    },
+    {
+      "id": "dk-owners",
+      "category": "Event-Based",
+      "name": "Register of Beneficial and Legal Owners",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Review at least once a year; register changes as soon as possible",
+      "applies": "ApS and A/S",
+      "description": "Owners holding 5% or more and beneficial owners are registered on virk.dk.",
+      "authority": "Danish Business Authority (Erhvervsstyrelsen)",
+      "source": "https://erhvervsstyrelsen.dk/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "ApS (private limited company)",
+          "A/S (public limited company)"
+        ]
+      }
+    },
+    {
+      "id": "dk-personal-tax",
+      "category": "Mandatory Annual",
+      "name": "Extended Tax Return (oplysningsskema)",
+      "schedule": {
+        "type": "annual",
+        "month": 7,
+        "day": 1
+      },
+      "rule": "1 July",
+      "applies": "Sole proprietors and partners",
+      "description": "Business income is reported in the owner's personal tax return.",
+      "authority": "Danish Tax Agency (Skattestyrelsen)",
+      "source": "https://skat.dk/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sole Proprietorship (enkeltmandsvirksomhed)",
+          "Partnership (I/S)"
+        ]
+      }
+    },
+    {
+      "id": "dk-b-skat",
+      "category": "Conditional",
+      "name": "Provisional Tax Instalments (B-skat)",
+      "schedule": {
+        "type": "monthly",
+        "day": 20
+      },
+      "rule": "20th of each month except June and December",
+      "applies": "Sole proprietors and partners",
+      "description": "Ten instalments a year based on the preliminary income assessment.",
+      "authority": "Danish Tax Agency (Skattestyrelsen)",
+      "source": "https://skat.dk/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sole Proprietorship (enkeltmandsvirksomhed)",
+          "Partnership (I/S)"
+        ]
+      }
+    },
+    {
+      "id": "dk-vat-half",
+      "category": "Conditional",
+      "name": "VAT Return (half-yearly)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 9,
+            "day": 1
+          },
+          {
+            "month": 3,
+            "day": 1
+          }
+        ]
+      },
+      "rule": "1 September and 1 March",
+      "applies": "VAT-registered businesses with turnover under DKK 5 million",
+      "description": "Filed and paid through TastSelv Erhverv.",
+      "authority": "Danish Tax Agency (Skattestyrelsen)",
+      "source": "https://skat.dk/erhverv/moms",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Half-yearly"
+        ]
+      }
+    },
+    {
+      "id": "dk-vat-quarterly",
+      "category": "Conditional",
+      "name": "VAT Return (quarterly)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 6,
+            "day": 1
+          },
+          {
+            "month": 9,
+            "day": 1
+          },
+          {
+            "month": 12,
+            "day": 1
+          },
+          {
+            "month": 3,
+            "day": 1
+          }
+        ]
+      },
+      "rule": "1 June, 1 September, 1 December and 1 March",
+      "applies": "VAT-registered businesses with turnover of DKK 5–50 million, and new businesses",
+      "description": "Filed and paid through TastSelv Erhverv.",
+      "authority": "Danish Tax Agency (Skattestyrelsen)",
+      "source": "https://skat.dk/erhverv/moms",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Quarterly"
+        ]
+      }
+    },
+    {
+      "id": "dk-vat-monthly",
+      "category": "Conditional",
+      "name": "VAT Return (monthly)",
+      "schedule": {
+        "type": "monthly",
+        "day": 25
+      },
+      "rule": "25th of the following month (the June return is due in mid-August)",
+      "applies": "VAT-registered businesses with turnover over DKK 50 million",
+      "description": "Filed and paid through TastSelv Erhverv.",
+      "authority": "Danish Tax Agency (Skattestyrelsen)",
+      "source": "https://skat.dk/erhverv/moms",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Monthly"
+        ]
+      }
+    },
+    {
+      "id": "dk-vat-register",
+      "category": "Event-Based",
+      "name": "VAT Registration",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Before turnover passes DKK 50,000 in a 12-month period",
+      "applies": "Businesses not yet VAT-registered",
+      "description": "Registered on virk.dk.",
+      "authority": "Danish Tax Agency (Skattestyrelsen)",
+      "source": "https://skat.dk/erhverv/moms",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Not registered"
+        ]
+      }
+    },
+    {
+      "id": "dk-a-skat",
+      "category": "Conditional",
+      "name": "A-tax and Labour Market Contribution — Reporting to eIndkomst and Payment",
+      "schedule": {
+        "type": "monthly",
+        "day": 10
+      },
+      "rule": "10th of the following month (large employers: the last banking day of the same month)",
+      "applies": "Employers",
+      "description": "Wages are reported to eIndkomst and the tax withheld is paid.",
+      "authority": "Danish Tax Agency (Skattestyrelsen)",
+      "source": "https://skat.dk/erhverv/ansatte-og-loen",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "dk-atp",
+      "category": "Conditional",
+      "name": "ATP and Collective Employer Contributions (Samlet Betaling)",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Quarterly, on the date in the Samlet Betaling collection notice",
+      "applies": "Employers",
+      "description": "ATP pension, occupational injury and other employer contributions are collected together each quarter.",
+      "authority": "ATP / Samlet Betaling",
+      "source": "https://virk.dk/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "dk-tp",
+      "category": "Transfer Pricing",
+      "name": "Transfer Pricing Documentation",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 8,
+        "day": 29
+      },
+      "rule": "Within 60 days after the tax return deadline",
+      "applies": "Companies with controlled transactions above the size limits",
+      "description": "The documentation is submitted to the tax agency every year, not only on request.",
+      "authority": "Danish Tax Agency (Skattestyrelsen)",
+      "source": "https://skat.dk/erhverv",
+      "confidence": "medium",
+      "when": {
+        "foreignOwned": true
+      }
+    }
+  ]
+}

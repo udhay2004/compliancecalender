@@ -41,6 +41,23 @@ const FINISHED = [
   { country: "United Arab Emirates", state: "Dubai", zoneType: "Free Zone", freeZone: "DMCC", entityType: "Free Zone Company (FZE/FZCO)", vat: "Quarterly", hasEmployees: "Yes" },
   { country: "United Arab Emirates", state: "Abu Dhabi", zoneType: "Mainland", entityType: "Mainland LLC", vat: "Monthly", hasEmployees: "Yes", employeeBand: "50 or more" },
   { country: "Germany", entityType: "GmbH", vat: "Monthly", hasEmployees: "Yes" },
+  { country: "Australia", state: "Queensland", entityType: "Proprietary Company (Pty Ltd)", gst: "Quarterly", hasEmployees: "Yes", employeeStates: ["Victoria"] },
+  { country: "Austria", state: "Vienna", entityType: "GmbH", vat: "Quarterly", hasEmployees: "Yes" },
+  { country: "Belgium", entityType: "NV / SA (public limited company)", vat: "Monthly", hasEmployees: "Yes" },
+  { country: "Denmark", entityType: "ApS (private limited company)", vat: "Quarterly", hasEmployees: "Yes" },
+  { country: "France", entityType: "SARL", vat: "Annual", hasEmployees: "Yes", employeeBand: "11–49" },
+  { country: "Hong Kong", entityType: "Private Company Limited by Shares", hasEmployees: "Yes" },
+  { country: "Ireland", entityType: "Designated Activity Company (DAC)", vat: "Monthly", hasEmployees: "Yes" },
+  { country: "Italy", state: "Sicily", entityType: "S.p.A.", vat: "Quarterly", hasEmployees: "Yes" },
+  { country: "Japan", state: "Osaka", entityType: "Godo Kaisha (GK)", vat: "Annual", hasEmployees: "Yes" },
+  { country: "Netherlands", entityType: "BV (private limited company)", vat: "Monthly", hasEmployees: "Yes" },
+  { country: "Norway", entityType: "AS (private limited company)", vat: "Bi-monthly", hasEmployees: "Yes" },
+  { country: "Portugal", state: "Madeira", entityType: "Unipessoal Lda", vat: "Monthly", hasEmployees: "Yes" },
+  { country: "South Korea", entityType: "Jusik Hoesa (stock company)", hasEmployees: "Yes" },
+  { country: "Spain", state: "Navarre", entityType: "Sociedad Anónima (S.A.)", vat: "Monthly", hasEmployees: "Yes" },
+  { country: "Spain", state: "Canary Islands", entityType: "Autónomo (self-employed)", vat: "Quarterly", hasEmployees: "No" },
+  { country: "Sweden", entityType: "Aktiebolag (AB)", vat: "Annual", hasEmployees: "Yes" },
+  { country: "Switzerland", state: "Geneva", entityType: "GmbH / Sàrl (limited liability company)", vat: "Semi-annual", hasEmployees: "Yes", employeeStates: ["Vaud"] },
 ];
 // The order the questions are asked in (lib/countries.js).
 const ORDER = ["state", "zoneType", "freeZone", "entityType", "incorporation", "taxStatus", "operatingRegions", "salesTax", "vat", "gst", "hasEmployees", "employeeStates", "employeeBand"];

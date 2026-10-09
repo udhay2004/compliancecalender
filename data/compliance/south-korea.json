@@ -1,0 +1,369 @@
+{
+  "country": "South Korea",
+  "updated": "2026-10-09",
+  "notes": "National rules; local income tax is filed with the city, county or district of the head office.",
+  "items": [
+    {
+      "id": "kr-cit",
+      "category": "Mandatory Annual",
+      "name": "Corporate Income Tax Return",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 3,
+        "day": "last"
+      },
+      "rule": "Within 3 months after financial year end",
+      "applies": "Companies and branches",
+      "description": "Filed through Hometax with the financial statements and tax adjustment schedules.",
+      "authority": "National Tax Service (NTS)",
+      "source": "https://www.nts.go.kr/english/main.do",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Yuhan Hoesa (limited company)",
+          "Jusik Hoesa (stock company)",
+          "Branch of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "kr-local-cit",
+      "category": "Mandatory Annual",
+      "name": "Local Corporate Income Tax Return",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 4,
+        "day": "last"
+      },
+      "rule": "Within 4 months after financial year end",
+      "applies": "Companies and branches",
+      "description": "Filed separately with the city, county or district through Wetax.",
+      "authority": "City, county or district tax office",
+      "source": "https://www.wetax.go.kr/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Yuhan Hoesa (limited company)",
+          "Jusik Hoesa (stock company)",
+          "Branch of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "kr-cit-interim",
+      "category": "Conditional",
+      "name": "Interim Corporate Income Tax",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 8,
+        "day": "last"
+      },
+      "rule": "Within 2 months after the first 6 months of the financial year",
+      "applies": "Companies and branches (small companies with little prior-year tax are exempt)",
+      "description": "Half of last year's tax, or tax on the first six months' results.",
+      "authority": "National Tax Service (NTS)",
+      "source": "https://www.nts.go.kr/english/main.do",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Yuhan Hoesa (limited company)",
+          "Jusik Hoesa (stock company)",
+          "Branch of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "kr-agm",
+      "category": "Mandatory Annual",
+      "name": "Ordinary General Meeting — Approval of Financial Statements",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 3,
+        "day": "last"
+      },
+      "rule": "Within 3 months after financial year end",
+      "applies": "Yuhan Hoesa and Jusik Hoesa",
+      "description": "The members or shareholders approve the financial statements.",
+      "authority": "Commercial Act",
+      "source": "https://www.moj.go.kr/moj_eng/index.do",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Yuhan Hoesa (limited company)",
+          "Jusik Hoesa (stock company)"
+        ]
+      }
+    },
+    {
+      "id": "kr-registry",
+      "category": "Event-Based",
+      "name": "Court Registry Changes (directors, address, capital)",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Within 2 weeks of the change (directors of a Jusik Hoesa serve up to 3 years)",
+      "applies": "Companies and branches",
+      "description": "Late registration brings a court fine on the representative director.",
+      "authority": "Court Registry Office",
+      "source": "https://www.iros.go.kr/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Yuhan Hoesa (limited company)",
+          "Jusik Hoesa (stock company)",
+          "Branch of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "kr-audit",
+      "category": "Conditional",
+      "name": "External Auditor Appointment",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Within 45 days of the start of the financial year",
+      "applies": "Companies above the External Audit Act size thresholds",
+      "description": "The appointment is reported to the Securities and Futures Commission.",
+      "authority": "Financial Supervisory Service",
+      "source": "https://www.fss.or.kr/eng/main/main.do",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Yuhan Hoesa (limited company)",
+          "Jusik Hoesa (stock company)"
+        ]
+      }
+    },
+    {
+      "id": "kr-vat-corp",
+      "category": "Mandatory Annual",
+      "name": "VAT Returns (quarterly)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 4,
+            "day": 25
+          },
+          {
+            "month": 7,
+            "day": 25
+          },
+          {
+            "month": 10,
+            "day": 25
+          },
+          {
+            "month": 1,
+            "day": 25
+          }
+        ]
+      },
+      "rule": "25 April, 25 July, 25 October and 25 January",
+      "applies": "Companies and branches",
+      "description": "Preliminary returns in April and October and final returns in July and January.",
+      "authority": "National Tax Service (NTS)",
+      "source": "https://www.nts.go.kr/english/main.do",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Yuhan Hoesa (limited company)",
+          "Jusik Hoesa (stock company)",
+          "Branch of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "kr-vat-sole",
+      "category": "Mandatory Annual",
+      "name": "VAT Returns (half-yearly)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 7,
+            "day": 25
+          },
+          {
+            "month": 1,
+            "day": 25
+          }
+        ]
+      },
+      "rule": "25 July and 25 January (with preliminary payments notified in April and October)",
+      "applies": "Sole proprietors who are general taxpayers",
+      "description": "Simplified taxpayers file once a year, by 25 January.",
+      "authority": "National Tax Service (NTS)",
+      "source": "https://www.nts.go.kr/english/main.do",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sole Proprietorship"
+        ]
+      }
+    },
+    {
+      "id": "kr-income-tax",
+      "category": "Mandatory Annual",
+      "name": "Global Income Tax Return and Local Income Tax",
+      "schedule": {
+        "type": "annual",
+        "month": 5,
+        "day": 31
+      },
+      "rule": "Between 1 and 31 May",
+      "applies": "Sole proprietors",
+      "description": "Business income for the previous calendar year; interim tax is notified in November.",
+      "authority": "National Tax Service (NTS)",
+      "source": "https://www.nts.go.kr/english/main.do",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sole Proprietorship"
+        ]
+      }
+    },
+    {
+      "id": "kr-income-tax-interim",
+      "category": "Conditional",
+      "name": "Interim Income Tax Prepayment",
+      "schedule": {
+        "type": "annual",
+        "month": 11,
+        "day": 30
+      },
+      "rule": "30 November",
+      "applies": "Sole proprietors notified of an interim prepayment",
+      "description": "Half of the previous year's income tax, notified by the tax office.",
+      "authority": "National Tax Service (NTS)",
+      "source": "https://www.nts.go.kr/english/main.do",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sole Proprietorship"
+        ]
+      }
+    },
+    {
+      "id": "kr-withholding",
+      "category": "Conditional",
+      "name": "Withholding Tax Return and Payment",
+      "schedule": {
+        "type": "monthly",
+        "day": 10
+      },
+      "rule": "10th of the following month (half-yearly for approved employers with 20 or fewer staff)",
+      "applies": "Employers",
+      "description": "Income tax and local income tax withheld from wages.",
+      "authority": "National Tax Service (NTS)",
+      "source": "https://www.nts.go.kr/english/main.do",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "kr-year-end",
+      "category": "Conditional",
+      "name": "Year-End Tax Settlement and Payment Statements",
+      "schedule": {
+        "type": "annual",
+        "month": 3,
+        "day": 10
+      },
+      "rule": "10 March",
+      "applies": "Employers",
+      "description": "Employees' tax for the previous year is settled in the February payroll and wage payment statements are filed.",
+      "authority": "National Tax Service (NTS)",
+      "source": "https://www.nts.go.kr/english/main.do",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "kr-insurance",
+      "category": "Conditional",
+      "name": "Four Social Insurances (pension, health, employment, industrial accident)",
+      "schedule": {
+        "type": "monthly",
+        "day": 10
+      },
+      "rule": "10th of the following month",
+      "applies": "Employers",
+      "description": "Billed together by the National Health Insurance Service.",
+      "authority": "National Health Insurance Service / National Pension Service",
+      "source": "https://www.nhis.or.kr/english/index.do",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "kr-fdi",
+      "category": "Event-Based",
+      "name": "Foreign Investment Notification and Registration",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Notify before the investment; register as a foreign-invested company within 60 days of paying in the capital",
+      "applies": "Companies with foreign investors",
+      "description": "Filed through a foreign exchange bank or KOTRA under the Foreign Investment Promotion Act.",
+      "authority": "KOTRA / Ministry of Trade, Industry and Energy",
+      "source": "https://www.investkorea.org/",
+      "confidence": "medium",
+      "when": {
+        "foreignOwned": true
+      }
+    },
+    {
+      "id": "kr-tp-statement",
+      "category": "Transfer Pricing",
+      "name": "Statement of International Transactions",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 6,
+        "day": "last"
+      },
+      "rule": "Within 6 months after financial year end",
+      "applies": "Companies and branches with transactions with foreign related parties",
+      "description": "Filed with details of the transfer pricing method used.",
+      "authority": "National Tax Service (NTS)",
+      "source": "https://www.nts.go.kr/english/main.do",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Yuhan Hoesa (limited company)",
+          "Jusik Hoesa (stock company)",
+          "Branch of Foreign Company"
+        ],
+        "foreignOwned": true
+      }
+    },
+    {
+      "id": "kr-tp-files",
+      "category": "Transfer Pricing",
+      "name": "Transfer Pricing Master File and Local File",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 12,
+        "day": "last"
+      },
+      "rule": "Within 12 months after financial year end",
+      "applies": "Companies with revenue over KRW 100 billion and cross-border related-party transactions over KRW 50 billion",
+      "description": "Smaller companies provide documentation within 60 days of a request.",
+      "authority": "National Tax Service (NTS)",
+      "source": "https://www.nts.go.kr/english/main.do",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Yuhan Hoesa (limited company)",
+          "Jusik Hoesa (stock company)",
+          "Branch of Foreign Company"
+        ],
+        "foreignOwned": true
+      }
+    }
+  ]
+}
