@@ -742,7 +742,7 @@
   </div>
 
   <!-- ================= RESULTS ================= -->
-  <div class="cases" id="cases">
+  <div class="cases" id="cases" hidden>
   </div>
 
 </main>
@@ -1085,7 +1085,6 @@
   function renderCase(profile, allItems, calendarId) {
     caseCount++;
     document.body.dataset.hasResults = '1';
-    document.getElementById('emptyState')?.remove();
 
     const caseEl = document.createElement('div');
     caseEl.className = 'case';
@@ -1185,7 +1184,7 @@
     // Hide the results column only when there is genuinely nothing in it.
     // Previously any generated calendar was hidden the moment the user hit
     // "Edit details", with no way back to it short of generating again.
-    casesEl.hidden = (view === 'landing' && caseCount === 0 && !document.getElementById('emptyState'));
+    casesEl.hidden = (view === 'landing' && caseCount === 0);
     window.scrollTo({ top: 0, behavior: REDUCED ? 'auto' : 'smooth' });
   }
   function backToForm() {
@@ -1353,7 +1352,6 @@
     statusHint.textContent = 'Building your calendar…';
 
     const loader = buildLoader(profile);
-    document.getElementById('emptyState')?.remove();
     document.getElementById('cases').prepend(loader.el);
     setView('results');
 
