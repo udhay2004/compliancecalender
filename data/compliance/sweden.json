@@ -1,0 +1,379 @@
+{
+  "country": "Sweden",
+  "updated": "2026-10-09",
+  "notes": "National rules; the income tax return date depends on the financial year end.",
+  "items": [
+    {
+      "id": "se-agm",
+      "category": "Mandatory Annual",
+      "name": "Annual General Meeting",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 6,
+        "day": "last"
+      },
+      "rule": "Within 6 months after financial year end",
+      "applies": "Aktiebolag",
+      "description": "The meeting adopts the income statement and balance sheet.",
+      "authority": "Companies Act (aktiebolagslagen)",
+      "source": "https://bolagsverket.se/en",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Aktiebolag (AB)"
+        ]
+      }
+    },
+    {
+      "id": "se-annual-report",
+      "category": "Mandatory Annual",
+      "name": "Annual Report Filed with Bolagsverket",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 7,
+        "day": "last"
+      },
+      "rule": "Within 7 months after financial year end",
+      "applies": "Aktiebolag; branches file their own and the foreign company's accounts",
+      "description": "A late fee is charged automatically; after 11 months the company can be put into liquidation.",
+      "authority": "Swedish Companies Registration Office (Bolagsverket)",
+      "source": "https://bolagsverket.se/en",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Aktiebolag (AB)",
+          "Branch of Foreign Company (filial)"
+        ]
+      }
+    },
+    {
+      "id": "se-owners",
+      "category": "Event-Based",
+      "name": "Register of Beneficial Owners",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Within 4 weeks of formation, and without delay after a change",
+      "applies": "Aktiebolag and partnerships",
+      "description": "Filed with Bolagsverket's e-service.",
+      "authority": "Swedish Companies Registration Office (Bolagsverket)",
+      "source": "https://bolagsverket.se/en",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Aktiebolag (AB)",
+          "Handelsbolag / Kommanditbolag (partnership)"
+        ]
+      }
+    },
+    {
+      "id": "se-ink-dec",
+      "category": "Mandatory Annual",
+      "name": "Income Tax Return (Inkomstdeklaration 2, 3 or 4)",
+      "schedule": {
+        "type": "annual",
+        "month": 7,
+        "day": 1
+      },
+      "rule": "1 July (1 August when filed digitally)",
+      "applies": "Financial years ending between September and December",
+      "description": "Companies and branches file Inkomstdeklaration 2; partnerships file Inkomstdeklaration 4.",
+      "authority": "Swedish Tax Agency (Skatteverket)",
+      "source": "https://www.skatteverket.se/servicelankar/otherlanguages/inenglishengelska/businessesandemployers.4.12815e4f14a62bc048f52be.html",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Aktiebolag (AB)",
+          "Handelsbolag / Kommanditbolag (partnership)",
+          "Branch of Foreign Company (filial)"
+        ],
+        "fyEndMonth": [
+          9,
+          10,
+          11,
+          12
+        ]
+      }
+    },
+    {
+      "id": "se-ink-jan",
+      "category": "Mandatory Annual",
+      "name": "Income Tax Return (Inkomstdeklaration 2, 3 or 4)",
+      "schedule": {
+        "type": "annual",
+        "month": 11,
+        "day": 1
+      },
+      "rule": "1 November (1 December when filed digitally)",
+      "applies": "Financial years ending between January and April",
+      "description": "Companies and branches file Inkomstdeklaration 2; partnerships file Inkomstdeklaration 4.",
+      "authority": "Swedish Tax Agency (Skatteverket)",
+      "source": "https://www.skatteverket.se/servicelankar/otherlanguages/inenglishengelska/businessesandemployers.4.12815e4f14a62bc048f52be.html",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Aktiebolag (AB)",
+          "Handelsbolag / Kommanditbolag (partnership)",
+          "Branch of Foreign Company (filial)"
+        ],
+        "fyEndMonth": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    },
+    {
+      "id": "se-ink-may",
+      "category": "Mandatory Annual",
+      "name": "Income Tax Return (Inkomstdeklaration 2, 3 or 4)",
+      "schedule": {
+        "type": "annual",
+        "month": 12,
+        "day": 15
+      },
+      "rule": "15 December (15 January when filed digitally)",
+      "applies": "Financial years ending in May or June",
+      "description": "Companies and branches file Inkomstdeklaration 2; partnerships file Inkomstdeklaration 4.",
+      "authority": "Swedish Tax Agency (Skatteverket)",
+      "source": "https://www.skatteverket.se/servicelankar/otherlanguages/inenglishengelska/businessesandemployers.4.12815e4f14a62bc048f52be.html",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Aktiebolag (AB)",
+          "Handelsbolag / Kommanditbolag (partnership)",
+          "Branch of Foreign Company (filial)"
+        ],
+        "fyEndMonth": [
+          5,
+          6
+        ]
+      }
+    },
+    {
+      "id": "se-ink-jul",
+      "category": "Mandatory Annual",
+      "name": "Income Tax Return (Inkomstdeklaration 2, 3 or 4)",
+      "schedule": {
+        "type": "annual",
+        "month": 3,
+        "day": 1
+      },
+      "rule": "1 March (1 April when filed digitally)",
+      "applies": "Financial years ending in July or August",
+      "description": "Companies and branches file Inkomstdeklaration 2; partnerships file Inkomstdeklaration 4.",
+      "authority": "Swedish Tax Agency (Skatteverket)",
+      "source": "https://www.skatteverket.se/servicelankar/otherlanguages/inenglishengelska/businessesandemployers.4.12815e4f14a62bc048f52be.html",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Aktiebolag (AB)",
+          "Handelsbolag / Kommanditbolag (partnership)",
+          "Branch of Foreign Company (filial)"
+        ],
+        "fyEndMonth": [
+          7,
+          8
+        ]
+      }
+    },
+    {
+      "id": "se-ink1",
+      "category": "Mandatory Annual",
+      "name": "Income Tax Return with Business Appendix (Inkomstdeklaration 1, NE)",
+      "schedule": {
+        "type": "annual",
+        "month": 5,
+        "day": 2
+      },
+      "rule": "2 May",
+      "applies": "Sole traders",
+      "description": "Business income is reported in the owner's return.",
+      "authority": "Swedish Tax Agency (Skatteverket)",
+      "source": "https://www.skatteverket.se/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Enskild firma (sole trader)"
+        ]
+      }
+    },
+    {
+      "id": "se-f-skatt",
+      "category": "Mandatory Annual",
+      "name": "Preliminary Tax (F-tax)",
+      "schedule": {
+        "type": "monthly",
+        "day": 12
+      },
+      "rule": "12th of each month (17th in January and August)",
+      "applies": "Businesses approved for F-tax",
+      "description": "Monthly instalments of the year's expected income tax, paid to the tax account.",
+      "authority": "Swedish Tax Agency (Skatteverket)",
+      "source": "https://www.skatteverket.se/",
+      "confidence": "medium"
+    },
+    {
+      "id": "se-vat-monthly",
+      "category": "Conditional",
+      "name": "VAT Return (monthly)",
+      "schedule": {
+        "type": "monthly",
+        "day": 12
+      },
+      "rule": "12th of the second following month (26th of the following month when turnover is over SEK 40 million)",
+      "applies": "VAT-registered businesses on monthly returns",
+      "description": "Filed online; the 12th becomes the 17th in January and August.",
+      "authority": "Swedish Tax Agency (Skatteverket)",
+      "source": "https://www.skatteverket.se/",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Monthly"
+        ]
+      }
+    },
+    {
+      "id": "se-vat-quarterly",
+      "category": "Conditional",
+      "name": "VAT Return (quarterly)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 5,
+            "day": 12
+          },
+          {
+            "month": 8,
+            "day": 17
+          },
+          {
+            "month": 11,
+            "day": 12
+          },
+          {
+            "month": 2,
+            "day": 12
+          }
+        ]
+      },
+      "rule": "12 May, 17 August, 12 November and 12 February",
+      "applies": "VAT-registered businesses with turnover up to SEK 40 million",
+      "description": "Filed online with payment.",
+      "authority": "Swedish Tax Agency (Skatteverket)",
+      "source": "https://www.skatteverket.se/",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Quarterly"
+        ]
+      }
+    },
+    {
+      "id": "se-vat-annual-co",
+      "category": "Conditional",
+      "name": "VAT Return (annual)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 7,
+        "day": 12
+      },
+      "rule": "12th of the 7th month after financial year end (26th of the 2nd month with EU trade)",
+      "applies": "Companies and partnerships with turnover up to SEK 1 million on annual VAT",
+      "description": "Filed online with payment.",
+      "authority": "Swedish Tax Agency (Skatteverket)",
+      "source": "https://www.skatteverket.se/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Aktiebolag (AB)",
+          "Handelsbolag / Kommanditbolag (partnership)",
+          "Branch of Foreign Company (filial)"
+        ],
+        "vat": [
+          "Annual"
+        ]
+      }
+    },
+    {
+      "id": "se-vat-annual-sole",
+      "category": "Conditional",
+      "name": "VAT Return (annual)",
+      "schedule": {
+        "type": "annual",
+        "month": 5,
+        "day": 12
+      },
+      "rule": "12 May (26 February with EU trade)",
+      "applies": "Sole traders with turnover up to SEK 1 million on annual VAT",
+      "description": "Filed online with payment.",
+      "authority": "Swedish Tax Agency (Skatteverket)",
+      "source": "https://www.skatteverket.se/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Enskild firma (sole trader)"
+        ],
+        "vat": [
+          "Annual"
+        ]
+      }
+    },
+    {
+      "id": "se-vat-register",
+      "category": "Event-Based",
+      "name": "VAT Registration",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Before turnover passes SEK 120,000 in a financial year",
+      "applies": "Businesses not yet VAT-registered",
+      "description": "Registered through verksamt.se.",
+      "authority": "Swedish Tax Agency (Skatteverket)",
+      "source": "https://www.skatteverket.se/",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Not registered"
+        ]
+      }
+    },
+    {
+      "id": "se-agi",
+      "category": "Conditional",
+      "name": "Employer's PAYE Return (arbetsgivardeklaration) and Payment",
+      "schedule": {
+        "type": "monthly",
+        "day": 12
+      },
+      "rule": "12th of the following month (17th in January and August; 26th for employers with turnover over SEK 40 million)",
+      "applies": "Employers",
+      "description": "Reports pay, tax deducted and employer contributions per employee.",
+      "authority": "Swedish Tax Agency (Skatteverket)",
+      "source": "https://www.skatteverket.se/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "se-tp",
+      "category": "Transfer Pricing",
+      "name": "Transfer Pricing Documentation",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Provided on the tax agency's request (master file and local file for larger groups)",
+      "applies": "Companies with cross-border related-party transactions",
+      "description": "Country-by-country notifications are due by the end of the group's financial year.",
+      "authority": "Swedish Tax Agency (Skatteverket)",
+      "source": "https://www.skatteverket.se/",
+      "confidence": "medium",
+      "when": {
+        "foreignOwned": true
+      }
+    }
+  ]
+}

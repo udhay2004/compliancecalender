@@ -1,0 +1,4807 @@
+{
+  "country": "Japan",
+  "updated": "2026-10-09",
+  "notes": "National filings plus the prefectural and municipal tax returns for the prefecture of the head office.",
+  "items": [
+    {
+      "id": "jp-corp-tax",
+      "category": "Mandatory Annual",
+      "name": "Corporation Tax and Local Corporation Tax Return (final)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 2,
+        "day": "last"
+      },
+      "rule": "Within 2 months after financial year end (a 1-month extension is available on application)",
+      "applies": "Companies and branches",
+      "description": "Filed with the financial statements; large companies must file by e-Tax.",
+      "authority": "National Tax Agency (local tax office)",
+      "source": "https://www.nta.go.jp/english/taxes/corporation/index.htm",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Kabushiki Kaisha (KK)",
+          "Godo Kaisha (GK)",
+          "Branch of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "jp-corp-interim",
+      "category": "Conditional",
+      "name": "Corporation Tax Interim Return",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 8,
+        "day": "last"
+      },
+      "rule": "Within 2 months after the first 6 months of the financial year",
+      "applies": "Companies whose previous year's corporation tax was over ¥200,000",
+      "description": "Half of last year's tax, or a provisional settlement of the first six months.",
+      "authority": "National Tax Agency (local tax office)",
+      "source": "https://www.nta.go.jp/english/taxes/corporation/index.htm",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Kabushiki Kaisha (KK)",
+          "Godo Kaisha (GK)",
+          "Branch of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "jp-agm",
+      "category": "Mandatory Annual",
+      "name": "Annual Shareholders' Meeting and Public Notice of the Balance Sheet",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 3,
+        "day": "last"
+      },
+      "rule": "Within 3 months after financial year end",
+      "applies": "Kabushiki Kaisha",
+      "description": "The meeting approves the financial statements; the balance sheet is then published.",
+      "authority": "Companies Act",
+      "source": "https://www.moj.go.jp/ENGLISH/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Kabushiki Kaisha (KK)"
+        ]
+      }
+    },
+    {
+      "id": "jp-registry",
+      "category": "Event-Based",
+      "name": "Commercial Registry Changes (directors, address, capital)",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Within 2 weeks of the change (director terms end after 2 years, or up to 10 for a non-public KK)",
+      "applies": "Companies and branches",
+      "description": "Re-appointing directors at the end of their term must be registered even when nothing else changes.",
+      "authority": "Legal Affairs Bureau",
+      "source": "https://www.moj.go.jp/ENGLISH/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Kabushiki Kaisha (KK)",
+          "Godo Kaisha (GK)",
+          "Branch of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "jp-ct-corp",
+      "category": "Mandatory Annual",
+      "name": "Consumption Tax Return (final)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 2,
+        "day": "last"
+      },
+      "rule": "Within 2 months after financial year end",
+      "applies": "Companies and branches that are taxable businesses",
+      "description": "Registered invoice issuers file even when turnover is below ¥10 million.",
+      "authority": "National Tax Agency (local tax office)",
+      "source": "https://www.nta.go.jp/english/taxes/consumption_tax/index.htm",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Kabushiki Kaisha (KK)",
+          "Godo Kaisha (GK)",
+          "Branch of Foreign Company"
+        ],
+        "vat": [
+          "Annual"
+        ]
+      }
+    },
+    {
+      "id": "jp-ct-interim",
+      "category": "Conditional",
+      "name": "Consumption Tax Interim Return",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 8,
+        "day": "last"
+      },
+      "rule": "Within 2 months after the first 6 months (quarterly or monthly for larger amounts)",
+      "applies": "Taxable businesses whose previous year's national consumption tax was over ¥480,000",
+      "description": "Interim payments based on last year's tax.",
+      "authority": "National Tax Agency (local tax office)",
+      "source": "https://www.nta.go.jp/english/taxes/consumption_tax/index.htm",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Annual"
+        ]
+      }
+    },
+    {
+      "id": "jp-ct-sole",
+      "category": "Mandatory Annual",
+      "name": "Consumption Tax Return (final)",
+      "schedule": {
+        "type": "annual",
+        "month": 3,
+        "day": 31
+      },
+      "rule": "31 March",
+      "applies": "Sole proprietors that are taxable businesses",
+      "description": "Filed for the previous calendar year.",
+      "authority": "National Tax Agency (local tax office)",
+      "source": "https://www.nta.go.jp/english/taxes/consumption_tax/index.htm",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sole Proprietorship (kojin jigyo)"
+        ],
+        "vat": [
+          "Annual"
+        ]
+      }
+    },
+    {
+      "id": "jp-ct-register",
+      "category": "Event-Based",
+      "name": "Becoming a Taxable Business for Consumption Tax",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "From the year after the base period's taxable sales pass ¥10 million (or on registering as an invoice issuer)",
+      "applies": "Exempt businesses",
+      "description": "A notification is filed with the tax office.",
+      "authority": "National Tax Agency (local tax office)",
+      "source": "https://www.nta.go.jp/english/taxes/consumption_tax/index.htm",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Not registered"
+        ]
+      }
+    },
+    {
+      "id": "jp-income-tax",
+      "category": "Mandatory Annual",
+      "name": "Final Income Tax Return (kakutei shinkoku)",
+      "schedule": {
+        "type": "annual",
+        "month": 3,
+        "day": 15
+      },
+      "rule": "Between 16 February and 15 March",
+      "applies": "Sole proprietors",
+      "description": "Business income for the previous calendar year; blue-return filers attach the financial statements.",
+      "authority": "National Tax Agency (local tax office)",
+      "source": "https://www.nta.go.jp/english/taxes/individual/index.htm",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sole Proprietorship (kojin jigyo)"
+        ]
+      }
+    },
+    {
+      "id": "jp-withholding",
+      "category": "Conditional",
+      "name": "Withholding Income Tax and Resident Tax on Salaries",
+      "schedule": {
+        "type": "monthly",
+        "day": 10
+      },
+      "rule": "10th of the following month (employers with fewer than 10 staff may pay twice a year, by 10 July and 20 January)",
+      "applies": "Employers",
+      "description": "Income tax withheld goes to the tax office and resident tax to each employee's municipality.",
+      "authority": "National Tax Agency / municipalities",
+      "source": "https://www.nta.go.jp/english/taxes/withholing/index.htm",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "jp-year-end",
+      "category": "Conditional",
+      "name": "Year-End Adjustment, Statutory Payment Records and Salary Payment Reports",
+      "schedule": {
+        "type": "annual",
+        "month": 1,
+        "day": 31
+      },
+      "rule": "31 January",
+      "applies": "Employers",
+      "description": "Withholding records go to the tax office and salary payment reports to each employee's municipality.",
+      "authority": "National Tax Agency / municipalities",
+      "source": "https://www.nta.go.jp/english/taxes/withholing/index.htm",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "jp-social",
+      "category": "Conditional",
+      "name": "Health and Pension Insurance Premiums",
+      "schedule": {
+        "type": "monthly",
+        "day": "last"
+      },
+      "rule": "Last day of the following month",
+      "applies": "Employers",
+      "description": "Employer and employee premiums are paid to the Japan Pension Service.",
+      "authority": "Japan Pension Service",
+      "source": "https://www.nenkin.go.jp/international/index.html",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "jp-santei",
+      "category": "Conditional",
+      "name": "Annual Standard Remuneration Report (santei kiso todoke)",
+      "schedule": {
+        "type": "annual",
+        "month": 7,
+        "day": 10
+      },
+      "rule": "10 July",
+      "applies": "Employers",
+      "description": "Reports April–June pay to reset each employee's insurance grade.",
+      "authority": "Japan Pension Service",
+      "source": "https://www.nenkin.go.jp/international/index.html",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "jp-labour",
+      "category": "Conditional",
+      "name": "Labour Insurance Annual Renewal",
+      "schedule": {
+        "type": "annual",
+        "month": 7,
+        "day": 10
+      },
+      "rule": "Between 1 June and 10 July",
+      "applies": "Employers",
+      "description": "Settles last year's workers' accident and employment insurance premiums and prepays this year's.",
+      "authority": "Labour Bureau / Ministry of Health, Labour and Welfare",
+      "source": "https://www.mhlw.go.jp/english/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "jp-tp",
+      "category": "Transfer Pricing",
+      "name": "Transfer Pricing — Schedule 17(4) and Local File",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 2,
+        "day": "last"
+      },
+      "rule": "With the corporation tax return",
+      "applies": "Companies with foreign related-party transactions (contemporaneous local file from ¥5 billion of transactions, or ¥300 million of intangibles)",
+      "description": "The schedule of foreign related-party transactions is attached to the return.",
+      "authority": "National Tax Agency (local tax office)",
+      "source": "https://www.nta.go.jp/english/taxes/corporation/index.htm",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Kabushiki Kaisha (KK)",
+          "Godo Kaisha (GK)",
+          "Branch of Foreign Company"
+        ],
+        "foreignOwned": true
+      }
+    },
+    {
+      "id": "jp-fefta",
+      "category": "Event-Based",
+      "name": "Foreign Investment Reports under the Foreign Exchange Act",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Prior notification or a report within 45 days of the investment, depending on the business sector",
+      "applies": "Foreign investors acquiring shares in or lending to a Japanese company",
+      "description": "Filed with the Bank of Japan.",
+      "authority": "Bank of Japan / Ministry of Finance",
+      "source": "https://www.boj.or.jp/en/about/services/tame/index.htm",
+      "confidence": "medium",
+      "when": {
+        "foreignOwned": true
+      }
+    }
+  ],
+  "regions": {
+    "Aichi": {
+      "items": [
+        {
+          "id": "jp-aichi-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Aichi Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Aichi",
+          "description": "Filed with the Aichi prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Aichi Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-aichi-local-interim",
+          "category": "Conditional",
+          "name": "Aichi Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Aichi Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-aichi-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Aichi)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Aichi",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Aichi",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-aichi-sole-enterprise",
+          "category": "Conditional",
+          "name": "Aichi Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Aichi Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Akita": {
+      "items": [
+        {
+          "id": "jp-akita-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Akita Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Akita",
+          "description": "Filed with the Akita prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Akita Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-akita-local-interim",
+          "category": "Conditional",
+          "name": "Akita Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Akita Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-akita-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Akita)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Akita",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Akita",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-akita-sole-enterprise",
+          "category": "Conditional",
+          "name": "Akita Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Akita Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Aomori": {
+      "items": [
+        {
+          "id": "jp-aomori-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Aomori Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Aomori",
+          "description": "Filed with the Aomori prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Aomori Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-aomori-local-interim",
+          "category": "Conditional",
+          "name": "Aomori Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Aomori Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-aomori-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Aomori)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Aomori",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Aomori",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-aomori-sole-enterprise",
+          "category": "Conditional",
+          "name": "Aomori Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Aomori Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Chiba": {
+      "items": [
+        {
+          "id": "jp-chiba-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Chiba Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Chiba",
+          "description": "Filed with the Chiba prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Chiba Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-chiba-local-interim",
+          "category": "Conditional",
+          "name": "Chiba Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Chiba Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-chiba-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Chiba)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Chiba",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Chiba",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-chiba-sole-enterprise",
+          "category": "Conditional",
+          "name": "Chiba Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Chiba Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Ehime": {
+      "items": [
+        {
+          "id": "jp-ehime-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Ehime Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Ehime",
+          "description": "Filed with the Ehime prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Ehime Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-ehime-local-interim",
+          "category": "Conditional",
+          "name": "Ehime Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Ehime Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-ehime-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Ehime)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Ehime",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Ehime",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-ehime-sole-enterprise",
+          "category": "Conditional",
+          "name": "Ehime Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Ehime Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Fukui": {
+      "items": [
+        {
+          "id": "jp-fukui-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Fukui Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Fukui",
+          "description": "Filed with the Fukui prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Fukui Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-fukui-local-interim",
+          "category": "Conditional",
+          "name": "Fukui Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Fukui Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-fukui-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Fukui)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Fukui",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Fukui",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-fukui-sole-enterprise",
+          "category": "Conditional",
+          "name": "Fukui Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Fukui Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Fukuoka": {
+      "items": [
+        {
+          "id": "jp-fukuoka-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Fukuoka Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Fukuoka",
+          "description": "Filed with the Fukuoka prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Fukuoka Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-fukuoka-local-interim",
+          "category": "Conditional",
+          "name": "Fukuoka Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Fukuoka Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-fukuoka-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Fukuoka)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Fukuoka",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Fukuoka",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-fukuoka-sole-enterprise",
+          "category": "Conditional",
+          "name": "Fukuoka Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Fukuoka Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Fukushima": {
+      "items": [
+        {
+          "id": "jp-fukushima-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Fukushima Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Fukushima",
+          "description": "Filed with the Fukushima prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Fukushima Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-fukushima-local-interim",
+          "category": "Conditional",
+          "name": "Fukushima Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Fukushima Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-fukushima-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Fukushima)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Fukushima",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Fukushima",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-fukushima-sole-enterprise",
+          "category": "Conditional",
+          "name": "Fukushima Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Fukushima Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Gifu": {
+      "items": [
+        {
+          "id": "jp-gifu-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Gifu Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Gifu",
+          "description": "Filed with the Gifu prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Gifu Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-gifu-local-interim",
+          "category": "Conditional",
+          "name": "Gifu Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Gifu Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-gifu-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Gifu)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Gifu",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Gifu",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-gifu-sole-enterprise",
+          "category": "Conditional",
+          "name": "Gifu Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Gifu Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Gunma": {
+      "items": [
+        {
+          "id": "jp-gunma-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Gunma Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Gunma",
+          "description": "Filed with the Gunma prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Gunma Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-gunma-local-interim",
+          "category": "Conditional",
+          "name": "Gunma Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Gunma Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-gunma-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Gunma)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Gunma",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Gunma",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-gunma-sole-enterprise",
+          "category": "Conditional",
+          "name": "Gunma Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Gunma Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Hiroshima": {
+      "items": [
+        {
+          "id": "jp-hiroshima-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Hiroshima Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Hiroshima",
+          "description": "Filed with the Hiroshima prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Hiroshima Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-hiroshima-local-interim",
+          "category": "Conditional",
+          "name": "Hiroshima Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Hiroshima Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-hiroshima-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Hiroshima)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Hiroshima",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Hiroshima",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-hiroshima-sole-enterprise",
+          "category": "Conditional",
+          "name": "Hiroshima Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Hiroshima Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Hokkaido": {
+      "items": [
+        {
+          "id": "jp-hokkaido-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Hokkaido Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Hokkaido",
+          "description": "Filed with the Hokkaido prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Hokkaido Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-hokkaido-local-interim",
+          "category": "Conditional",
+          "name": "Hokkaido Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Hokkaido Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-hokkaido-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Hokkaido)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Hokkaido",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Hokkaido",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-hokkaido-sole-enterprise",
+          "category": "Conditional",
+          "name": "Hokkaido Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Hokkaido Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Hyogo": {
+      "items": [
+        {
+          "id": "jp-hyogo-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Hyogo Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Hyogo",
+          "description": "Filed with the Hyogo prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Hyogo Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-hyogo-local-interim",
+          "category": "Conditional",
+          "name": "Hyogo Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Hyogo Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-hyogo-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Hyogo)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Hyogo",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Hyogo",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-hyogo-sole-enterprise",
+          "category": "Conditional",
+          "name": "Hyogo Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Hyogo Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Ibaraki": {
+      "items": [
+        {
+          "id": "jp-ibaraki-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Ibaraki Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Ibaraki",
+          "description": "Filed with the Ibaraki prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Ibaraki Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-ibaraki-local-interim",
+          "category": "Conditional",
+          "name": "Ibaraki Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Ibaraki Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-ibaraki-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Ibaraki)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Ibaraki",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Ibaraki",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-ibaraki-sole-enterprise",
+          "category": "Conditional",
+          "name": "Ibaraki Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Ibaraki Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Ishikawa": {
+      "items": [
+        {
+          "id": "jp-ishikawa-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Ishikawa Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Ishikawa",
+          "description": "Filed with the Ishikawa prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Ishikawa Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-ishikawa-local-interim",
+          "category": "Conditional",
+          "name": "Ishikawa Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Ishikawa Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-ishikawa-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Ishikawa)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Ishikawa",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Ishikawa",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-ishikawa-sole-enterprise",
+          "category": "Conditional",
+          "name": "Ishikawa Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Ishikawa Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Iwate": {
+      "items": [
+        {
+          "id": "jp-iwate-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Iwate Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Iwate",
+          "description": "Filed with the Iwate prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Iwate Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-iwate-local-interim",
+          "category": "Conditional",
+          "name": "Iwate Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Iwate Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-iwate-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Iwate)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Iwate",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Iwate",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-iwate-sole-enterprise",
+          "category": "Conditional",
+          "name": "Iwate Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Iwate Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Kagawa": {
+      "items": [
+        {
+          "id": "jp-kagawa-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Kagawa Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Kagawa",
+          "description": "Filed with the Kagawa prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Kagawa Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-kagawa-local-interim",
+          "category": "Conditional",
+          "name": "Kagawa Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Kagawa Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-kagawa-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Kagawa)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Kagawa",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Kagawa",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-kagawa-sole-enterprise",
+          "category": "Conditional",
+          "name": "Kagawa Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Kagawa Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Kagoshima": {
+      "items": [
+        {
+          "id": "jp-kagoshima-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Kagoshima Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Kagoshima",
+          "description": "Filed with the Kagoshima prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Kagoshima Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-kagoshima-local-interim",
+          "category": "Conditional",
+          "name": "Kagoshima Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Kagoshima Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-kagoshima-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Kagoshima)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Kagoshima",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Kagoshima",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-kagoshima-sole-enterprise",
+          "category": "Conditional",
+          "name": "Kagoshima Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Kagoshima Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Kanagawa": {
+      "items": [
+        {
+          "id": "jp-kanagawa-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Kanagawa Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Kanagawa",
+          "description": "Filed with the Kanagawa prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Kanagawa Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-kanagawa-local-interim",
+          "category": "Conditional",
+          "name": "Kanagawa Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Kanagawa Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-kanagawa-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Kanagawa)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Kanagawa",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Kanagawa",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-kanagawa-sole-enterprise",
+          "category": "Conditional",
+          "name": "Kanagawa Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Kanagawa Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Kochi": {
+      "items": [
+        {
+          "id": "jp-kochi-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Kochi Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Kochi",
+          "description": "Filed with the Kochi prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Kochi Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-kochi-local-interim",
+          "category": "Conditional",
+          "name": "Kochi Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Kochi Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-kochi-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Kochi)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Kochi",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Kochi",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-kochi-sole-enterprise",
+          "category": "Conditional",
+          "name": "Kochi Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Kochi Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Kumamoto": {
+      "items": [
+        {
+          "id": "jp-kumamoto-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Kumamoto Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Kumamoto",
+          "description": "Filed with the Kumamoto prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Kumamoto Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-kumamoto-local-interim",
+          "category": "Conditional",
+          "name": "Kumamoto Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Kumamoto Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-kumamoto-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Kumamoto)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Kumamoto",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Kumamoto",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-kumamoto-sole-enterprise",
+          "category": "Conditional",
+          "name": "Kumamoto Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Kumamoto Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Kyoto": {
+      "items": [
+        {
+          "id": "jp-kyoto-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Kyoto Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Kyoto",
+          "description": "Filed with the Kyoto prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Kyoto Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-kyoto-local-interim",
+          "category": "Conditional",
+          "name": "Kyoto Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Kyoto Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-kyoto-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Kyoto)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Kyoto",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Kyoto",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-kyoto-sole-enterprise",
+          "category": "Conditional",
+          "name": "Kyoto Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Kyoto Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Mie": {
+      "items": [
+        {
+          "id": "jp-mie-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Mie Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Mie",
+          "description": "Filed with the Mie prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Mie Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-mie-local-interim",
+          "category": "Conditional",
+          "name": "Mie Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Mie Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-mie-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Mie)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Mie",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Mie",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-mie-sole-enterprise",
+          "category": "Conditional",
+          "name": "Mie Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Mie Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Miyagi": {
+      "items": [
+        {
+          "id": "jp-miyagi-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Miyagi Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Miyagi",
+          "description": "Filed with the Miyagi prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Miyagi Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-miyagi-local-interim",
+          "category": "Conditional",
+          "name": "Miyagi Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Miyagi Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-miyagi-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Miyagi)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Miyagi",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Miyagi",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-miyagi-sole-enterprise",
+          "category": "Conditional",
+          "name": "Miyagi Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Miyagi Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Miyazaki": {
+      "items": [
+        {
+          "id": "jp-miyazaki-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Miyazaki Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Miyazaki",
+          "description": "Filed with the Miyazaki prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Miyazaki Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-miyazaki-local-interim",
+          "category": "Conditional",
+          "name": "Miyazaki Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Miyazaki Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-miyazaki-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Miyazaki)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Miyazaki",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Miyazaki",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-miyazaki-sole-enterprise",
+          "category": "Conditional",
+          "name": "Miyazaki Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Miyazaki Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Nagano": {
+      "items": [
+        {
+          "id": "jp-nagano-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Nagano Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Nagano",
+          "description": "Filed with the Nagano prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Nagano Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-nagano-local-interim",
+          "category": "Conditional",
+          "name": "Nagano Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Nagano Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-nagano-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Nagano)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Nagano",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Nagano",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-nagano-sole-enterprise",
+          "category": "Conditional",
+          "name": "Nagano Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Nagano Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Nagasaki": {
+      "items": [
+        {
+          "id": "jp-nagasaki-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Nagasaki Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Nagasaki",
+          "description": "Filed with the Nagasaki prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Nagasaki Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-nagasaki-local-interim",
+          "category": "Conditional",
+          "name": "Nagasaki Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Nagasaki Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-nagasaki-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Nagasaki)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Nagasaki",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Nagasaki",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-nagasaki-sole-enterprise",
+          "category": "Conditional",
+          "name": "Nagasaki Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Nagasaki Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Nara": {
+      "items": [
+        {
+          "id": "jp-nara-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Nara Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Nara",
+          "description": "Filed with the Nara prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Nara Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-nara-local-interim",
+          "category": "Conditional",
+          "name": "Nara Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Nara Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-nara-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Nara)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Nara",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Nara",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-nara-sole-enterprise",
+          "category": "Conditional",
+          "name": "Nara Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Nara Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Niigata": {
+      "items": [
+        {
+          "id": "jp-niigata-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Niigata Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Niigata",
+          "description": "Filed with the Niigata prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Niigata Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-niigata-local-interim",
+          "category": "Conditional",
+          "name": "Niigata Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Niigata Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-niigata-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Niigata)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Niigata",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Niigata",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-niigata-sole-enterprise",
+          "category": "Conditional",
+          "name": "Niigata Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Niigata Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Oita": {
+      "items": [
+        {
+          "id": "jp-oita-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Oita Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Oita",
+          "description": "Filed with the Oita prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Oita Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-oita-local-interim",
+          "category": "Conditional",
+          "name": "Oita Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Oita Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-oita-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Oita)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Oita",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Oita",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-oita-sole-enterprise",
+          "category": "Conditional",
+          "name": "Oita Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Oita Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Okayama": {
+      "items": [
+        {
+          "id": "jp-okayama-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Okayama Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Okayama",
+          "description": "Filed with the Okayama prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Okayama Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-okayama-local-interim",
+          "category": "Conditional",
+          "name": "Okayama Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Okayama Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-okayama-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Okayama)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Okayama",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Okayama",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-okayama-sole-enterprise",
+          "category": "Conditional",
+          "name": "Okayama Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Okayama Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Okinawa": {
+      "items": [
+        {
+          "id": "jp-okinawa-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Okinawa Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Okinawa",
+          "description": "Filed with the Okinawa prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Okinawa Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-okinawa-local-interim",
+          "category": "Conditional",
+          "name": "Okinawa Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Okinawa Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-okinawa-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Okinawa)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Okinawa",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Okinawa",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-okinawa-sole-enterprise",
+          "category": "Conditional",
+          "name": "Okinawa Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Okinawa Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Osaka": {
+      "items": [
+        {
+          "id": "jp-osaka-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Osaka Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Osaka",
+          "description": "Filed with the Osaka prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Osaka Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-osaka-local-interim",
+          "category": "Conditional",
+          "name": "Osaka Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Osaka Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-osaka-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Osaka)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Osaka",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Osaka",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-osaka-sole-enterprise",
+          "category": "Conditional",
+          "name": "Osaka Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Osaka Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Saga": {
+      "items": [
+        {
+          "id": "jp-saga-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Saga Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Saga",
+          "description": "Filed with the Saga prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Saga Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-saga-local-interim",
+          "category": "Conditional",
+          "name": "Saga Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Saga Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-saga-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Saga)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Saga",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Saga",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-saga-sole-enterprise",
+          "category": "Conditional",
+          "name": "Saga Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Saga Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Saitama": {
+      "items": [
+        {
+          "id": "jp-saitama-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Saitama Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Saitama",
+          "description": "Filed with the Saitama prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Saitama Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-saitama-local-interim",
+          "category": "Conditional",
+          "name": "Saitama Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Saitama Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-saitama-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Saitama)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Saitama",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Saitama",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-saitama-sole-enterprise",
+          "category": "Conditional",
+          "name": "Saitama Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Saitama Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Shiga": {
+      "items": [
+        {
+          "id": "jp-shiga-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Shiga Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Shiga",
+          "description": "Filed with the Shiga prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Shiga Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-shiga-local-interim",
+          "category": "Conditional",
+          "name": "Shiga Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Shiga Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-shiga-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Shiga)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Shiga",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Shiga",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-shiga-sole-enterprise",
+          "category": "Conditional",
+          "name": "Shiga Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Shiga Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Shimane": {
+      "items": [
+        {
+          "id": "jp-shimane-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Shimane Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Shimane",
+          "description": "Filed with the Shimane prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Shimane Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-shimane-local-interim",
+          "category": "Conditional",
+          "name": "Shimane Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Shimane Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-shimane-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Shimane)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Shimane",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Shimane",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-shimane-sole-enterprise",
+          "category": "Conditional",
+          "name": "Shimane Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Shimane Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Shizuoka": {
+      "items": [
+        {
+          "id": "jp-shizuoka-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Shizuoka Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Shizuoka",
+          "description": "Filed with the Shizuoka prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Shizuoka Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-shizuoka-local-interim",
+          "category": "Conditional",
+          "name": "Shizuoka Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Shizuoka Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-shizuoka-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Shizuoka)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Shizuoka",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Shizuoka",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-shizuoka-sole-enterprise",
+          "category": "Conditional",
+          "name": "Shizuoka Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Shizuoka Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Tochigi": {
+      "items": [
+        {
+          "id": "jp-tochigi-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Tochigi Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Tochigi",
+          "description": "Filed with the Tochigi prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Tochigi Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-tochigi-local-interim",
+          "category": "Conditional",
+          "name": "Tochigi Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Tochigi Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-tochigi-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Tochigi)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Tochigi",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Tochigi",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-tochigi-sole-enterprise",
+          "category": "Conditional",
+          "name": "Tochigi Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Tochigi Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Tokushima": {
+      "items": [
+        {
+          "id": "jp-tokushima-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Tokushima Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Tokushima",
+          "description": "Filed with the Tokushima prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Tokushima Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-tokushima-local-interim",
+          "category": "Conditional",
+          "name": "Tokushima Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Tokushima Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-tokushima-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Tokushima)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Tokushima",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Tokushima",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-tokushima-sole-enterprise",
+          "category": "Conditional",
+          "name": "Tokushima Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Tokushima Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Tokyo": {
+      "items": [
+        {
+          "id": "jp-tokyo-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Tokyo Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Tokyo",
+          "description": "Filed with the Tokyo Metropolitan Taxation Office; for offices in the 23 wards this return also covers the municipal tax. Offices in other Tokyo cities file a municipal return too.",
+          "authority": "Tokyo Metropolitan Taxation Office and the municipality",
+          "source": "https://www.tax.metro.tokyo.lg.jp/english/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-tokyo-local-interim",
+          "category": "Conditional",
+          "name": "Tokyo Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Tokyo Metropolitan Taxation Office and the municipality",
+          "source": "https://www.tax.metro.tokyo.lg.jp/english/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-tokyo-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Tokyo)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Tokyo",
+          "description": "Filed with the metropolitan taxation office for assets in the 23 wards, otherwise with the city, town or village.",
+          "authority": "Tokyo Metropolitan Taxation Office / municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-tokyo-sole-enterprise",
+          "category": "Conditional",
+          "name": "Tokyo Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Tokyo Metropolitan Taxation Office",
+          "source": "https://www.tax.metro.tokyo.lg.jp/english/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Tottori": {
+      "items": [
+        {
+          "id": "jp-tottori-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Tottori Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Tottori",
+          "description": "Filed with the Tottori prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Tottori Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-tottori-local-interim",
+          "category": "Conditional",
+          "name": "Tottori Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Tottori Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-tottori-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Tottori)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Tottori",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Tottori",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-tottori-sole-enterprise",
+          "category": "Conditional",
+          "name": "Tottori Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Tottori Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Toyama": {
+      "items": [
+        {
+          "id": "jp-toyama-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Toyama Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Toyama",
+          "description": "Filed with the Toyama prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Toyama Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-toyama-local-interim",
+          "category": "Conditional",
+          "name": "Toyama Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Toyama Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-toyama-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Toyama)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Toyama",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Toyama",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-toyama-sole-enterprise",
+          "category": "Conditional",
+          "name": "Toyama Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Toyama Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Wakayama": {
+      "items": [
+        {
+          "id": "jp-wakayama-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Wakayama Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Wakayama",
+          "description": "Filed with the Wakayama prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Wakayama Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-wakayama-local-interim",
+          "category": "Conditional",
+          "name": "Wakayama Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Wakayama Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-wakayama-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Wakayama)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Wakayama",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Wakayama",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-wakayama-sole-enterprise",
+          "category": "Conditional",
+          "name": "Wakayama Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Wakayama Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Yamagata": {
+      "items": [
+        {
+          "id": "jp-yamagata-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Yamagata Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Yamagata",
+          "description": "Filed with the Yamagata prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Yamagata Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-yamagata-local-interim",
+          "category": "Conditional",
+          "name": "Yamagata Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Yamagata Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-yamagata-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Yamagata)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Yamagata",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Yamagata",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-yamagata-sole-enterprise",
+          "category": "Conditional",
+          "name": "Yamagata Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Yamagata Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Yamaguchi": {
+      "items": [
+        {
+          "id": "jp-yamaguchi-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Yamaguchi Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Yamaguchi",
+          "description": "Filed with the Yamaguchi prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Yamaguchi Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-yamaguchi-local-interim",
+          "category": "Conditional",
+          "name": "Yamaguchi Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Yamaguchi Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-yamaguchi-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Yamaguchi)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Yamaguchi",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Yamaguchi",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-yamaguchi-sole-enterprise",
+          "category": "Conditional",
+          "name": "Yamaguchi Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Yamaguchi Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    },
+    "Yamanashi": {
+      "items": [
+        {
+          "id": "jp-yamanashi-local-corp",
+          "category": "Mandatory Annual",
+          "name": "Yamanashi Corporate Inhabitant Tax and Enterprise Tax Returns",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 2,
+            "day": "last"
+          },
+          "rule": "Within 2 months after financial year end (extended when the national return is extended)",
+          "applies": "Companies and branches with an office in Yamanashi",
+          "description": "Filed with the Yamanashi prefectural tax office and with the city, town or village where the office is.",
+          "authority": "Yamanashi Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-yamanashi-local-interim",
+          "category": "Conditional",
+          "name": "Yamanashi Local Corporate Taxes — Interim Return",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 8,
+            "day": "last"
+          },
+          "rule": "Within 2 months after the first 6 months of the financial year",
+          "applies": "Companies that must file a national interim return",
+          "description": "Interim inhabitant and enterprise tax, filed with the prefecture and municipality.",
+          "authority": "Yamanashi Prefectural Tax Office and the municipality",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Kabushiki Kaisha (KK)",
+              "Godo Kaisha (GK)",
+              "Branch of Foreign Company"
+            ]
+          }
+        },
+        {
+          "id": "jp-yamanashi-depreciable",
+          "category": "Mandatory Annual",
+          "name": "Depreciable Assets Tax Return (Yamanashi)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 31
+          },
+          "rule": "31 January (assets held on 1 January)",
+          "applies": "Businesses with depreciable business assets in Yamanashi",
+          "description": "Filed with the city, town or village where the assets are.",
+          "authority": "Municipality in Yamanashi",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium"
+        },
+        {
+          "id": "jp-yamanashi-sole-enterprise",
+          "category": "Conditional",
+          "name": "Yamanashi Individual Enterprise Tax",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 8,
+                "day": 31
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "End of August and end of November",
+          "applies": "Sole proprietors in taxable business categories with income over the deduction",
+          "description": "Assessed by the prefecture from the income tax return.",
+          "authority": "Yamanashi Prefectural Tax Office",
+          "source": "https://www.eltax.lta.go.jp/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sole Proprietorship (kojin jigyo)"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

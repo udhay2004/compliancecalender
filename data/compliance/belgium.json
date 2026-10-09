@@ -1,0 +1,405 @@
+{
+  "country": "Belgium",
+  "updated": "2026-10-09",
+  "notes": "Federal rules; company, tax and payroll deadlines are the same in Flanders, Wallonia and Brussels.",
+  "items": [
+    {
+      "id": "be-agm",
+      "category": "Mandatory Annual",
+      "name": "Annual General Meeting",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 6,
+        "day": "last"
+      },
+      "rule": "Within 6 months after financial year end",
+      "applies": "BV/SRL and NV/SA",
+      "description": "The shareholders approve the annual accounts and discharge the directors.",
+      "authority": "Companies and Associations Code (WVV / CSA)",
+      "source": "https://economie.fgov.be/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "BV / SRL (private limited company)",
+          "NV / SA (public limited company)"
+        ]
+      }
+    },
+    {
+      "id": "be-accounts",
+      "category": "Mandatory Annual",
+      "name": "Annual Accounts Filed with the National Bank of Belgium",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 7,
+        "day": "last"
+      },
+      "rule": "Within 30 days of approval and no later than 7 months after financial year end",
+      "applies": "BV/SRL and NV/SA; branches file the foreign company's accounts",
+      "description": "Filed with the Central Balance Sheet Office; surcharges start in the 9th month after year end.",
+      "authority": "National Bank of Belgium, Central Balance Sheet Office",
+      "source": "https://www.nbb.be/en/central-balance-sheet-office",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "BV / SRL (private limited company)",
+          "NV / SA (public limited company)",
+          "Branch of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "be-corp-tax-dec",
+      "category": "Mandatory Annual",
+      "name": "Corporate Income Tax Return (Biztax)",
+      "schedule": {
+        "type": "annual",
+        "month": 9,
+        "day": 30
+      },
+      "rule": "30 September of the following year",
+      "applies": "Companies with a 31 December year end",
+      "description": "Filed through Biztax; non-resident companies with a Belgian establishment file the non-resident return on the same date.",
+      "authority": "FPS Finance (FOD Financiën / SPF Finances)",
+      "source": "https://finance.belgium.be/en/enterprises/corporation_tax",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "BV / SRL (private limited company)",
+          "NV / SA (public limited company)",
+          "Partnership (VOF / CommV)",
+          "Branch of Foreign Company"
+        ],
+        "fyEndMonth": [
+          12
+        ]
+      }
+    },
+    {
+      "id": "be-corp-tax-other",
+      "category": "Mandatory Annual",
+      "name": "Corporate Income Tax Return (Biztax)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 7,
+        "day": "last"
+      },
+      "rule": "Last day of the 7th month after financial year end",
+      "applies": "Companies whose year does not end on 31 December",
+      "description": "Filed through Biztax.",
+      "authority": "FPS Finance (FOD Financiën / SPF Finances)",
+      "source": "https://finance.belgium.be/en/enterprises/corporation_tax",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "BV / SRL (private limited company)",
+          "NV / SA (public limited company)",
+          "Partnership (VOF / CommV)",
+          "Branch of Foreign Company"
+        ],
+        "not": {
+          "fyEndMonth": [
+            12
+          ]
+        }
+      }
+    },
+    {
+      "id": "be-advance-tax",
+      "category": "Conditional",
+      "name": "Advance Tax Payments",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 4,
+            "day": 10
+          },
+          {
+            "month": 7,
+            "day": 10
+          },
+          {
+            "month": 10,
+            "day": 10
+          },
+          {
+            "month": 12,
+            "day": 20
+          }
+        ]
+      },
+      "rule": "10 April, 10 July, 10 October and 20 December (calendar financial year)",
+      "applies": "Companies and self-employed people who want to avoid the surcharge for insufficient advance payments",
+      "description": "Paid during the financial year; small companies are exempt from the surcharge in their first three years.",
+      "authority": "FPS Finance (FOD Financiën / SPF Finances)",
+      "source": "https://finance.belgium.be/en/enterprises/corporation_tax/advance-payments",
+      "confidence": "medium"
+    },
+    {
+      "id": "be-company-contribution",
+      "category": "Conditional",
+      "name": "Annual Company Social Contribution (vennootschapsbijdrage)",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "On the date in the social insurance fund's payment notice each year",
+      "applies": "Companies subject to corporate income tax",
+      "description": "A flat annual contribution paid to the company's social insurance fund.",
+      "authority": "Social insurance fund / RSVZ-INASTI",
+      "source": "https://www.rsvz-inasti.fgov.be/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "BV / SRL (private limited company)",
+          "NV / SA (public limited company)",
+          "Partnership (VOF / CommV)"
+        ]
+      }
+    },
+    {
+      "id": "be-ubo",
+      "category": "Event-Based",
+      "name": "UBO Register — Annual Confirmation",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Confirm once a year; report changes within 1 month",
+      "applies": "Companies and partnerships",
+      "description": "Beneficial owners are recorded in the UBO register through MyMinFin.",
+      "authority": "FPS Finance, Treasury",
+      "source": "https://finance.belgium.be/en/ubo-register",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "BV / SRL (private limited company)",
+          "NV / SA (public limited company)",
+          "Partnership (VOF / CommV)"
+        ]
+      }
+    },
+    {
+      "id": "be-pit",
+      "category": "Mandatory Annual",
+      "name": "Personal Income Tax Return (with business income)",
+      "schedule": {
+        "type": "annual",
+        "month": 10,
+        "day": 15
+      },
+      "rule": "Mid-October for returns with business income (earlier for simple returns)",
+      "applies": "Sole proprietors",
+      "description": "Filed through MyMinFin (Tax-on-web) or by an accountant.",
+      "authority": "FPS Finance (FOD Financiën / SPF Finances)",
+      "source": "https://finance.belgium.be/en/private-individuals/tax-return",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sole Proprietorship (eenmanszaak)"
+        ]
+      }
+    },
+    {
+      "id": "be-self-employed",
+      "category": "Conditional",
+      "name": "Self-Employed Social Contributions",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 3,
+            "day": 31
+          },
+          {
+            "month": 6,
+            "day": 30
+          },
+          {
+            "month": 9,
+            "day": 30
+          },
+          {
+            "month": 12,
+            "day": 31
+          }
+        ]
+      },
+      "rule": "31 March, 30 June, 30 September and 31 December",
+      "applies": "Sole proprietors, working partners and company directors",
+      "description": "Quarterly contributions paid to the social insurance fund.",
+      "authority": "Social insurance fund / RSVZ-INASTI",
+      "source": "https://www.rsvz-inasti.fgov.be/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sole Proprietorship (eenmanszaak)",
+          "Partnership (VOF / CommV)"
+        ]
+      }
+    },
+    {
+      "id": "be-vat-monthly",
+      "category": "Conditional",
+      "name": "VAT Return (monthly)",
+      "schedule": {
+        "type": "monthly",
+        "day": 20
+      },
+      "rule": "20th of the following month",
+      "applies": "VAT-registered businesses with turnover over €2.5 million, or that chose monthly returns",
+      "description": "Filed through Intervat with payment.",
+      "authority": "FPS Finance (FOD Financiën / SPF Finances)",
+      "source": "https://finance.belgium.be/en/enterprises/vat",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Monthly"
+        ]
+      }
+    },
+    {
+      "id": "be-vat-quarterly",
+      "category": "Conditional",
+      "name": "VAT Return (quarterly)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 4,
+            "day": 25
+          },
+          {
+            "month": 7,
+            "day": 25
+          },
+          {
+            "month": 10,
+            "day": 25
+          },
+          {
+            "month": 1,
+            "day": 25
+          }
+        ]
+      },
+      "rule": "25 April, 25 July, 25 October and 25 January",
+      "applies": "VAT-registered businesses with turnover up to €2.5 million",
+      "description": "Filed through Intervat with payment.",
+      "authority": "FPS Finance (FOD Financiën / SPF Finances)",
+      "source": "https://finance.belgium.be/en/enterprises/vat",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Quarterly"
+        ]
+      }
+    },
+    {
+      "id": "be-vat-listing",
+      "category": "Mandatory Annual",
+      "name": "Annual VAT Customer Listing",
+      "schedule": {
+        "type": "annual",
+        "month": 3,
+        "day": 31
+      },
+      "rule": "31 March",
+      "applies": "VAT-identified businesses, including small businesses under the exemption scheme",
+      "description": "Lists Belgian VAT-registered customers supplied with more than €250 in the year.",
+      "authority": "FPS Finance (FOD Financiën / SPF Finances)",
+      "source": "https://finance.belgium.be/en/enterprises/vat",
+      "confidence": "medium"
+    },
+    {
+      "id": "be-withholding",
+      "category": "Conditional",
+      "name": "Payroll Withholding Tax Return (bedrijfsvoorheffing / précompte professionnel)",
+      "schedule": {
+        "type": "monthly",
+        "day": 15
+      },
+      "rule": "15th of the following month",
+      "applies": "Employers",
+      "description": "Filed through FinProf with payment.",
+      "authority": "FPS Finance (FOD Financiën / SPF Finances)",
+      "source": "https://finance.belgium.be/en/enterprises/personnel_and_remuneration/withholding_tax",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "be-onss",
+      "category": "Conditional",
+      "name": "Quarterly Social Security Declaration (DmfA)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 4,
+            "day": 30
+          },
+          {
+            "month": 7,
+            "day": 31
+          },
+          {
+            "month": 10,
+            "day": 31
+          },
+          {
+            "month": 1,
+            "day": 31
+          }
+        ]
+      },
+      "rule": "Last day of the month after each quarter",
+      "applies": "Employers",
+      "description": "Declares wages and working time per employee; contributions are paid in monthly advances with the balance by the same date.",
+      "authority": "National Social Security Office (RSZ / ONSS)",
+      "source": "https://www.socialsecurity.be/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "be-belcotax",
+      "category": "Conditional",
+      "name": "Salary Slips 281.10 (Belcotax)",
+      "schedule": {
+        "type": "annual",
+        "month": 2,
+        "day": 28
+      },
+      "rule": "End of February (for the previous calendar year)",
+      "applies": "Employers",
+      "description": "Annual salary information for every employee and director, sent through Belcotax-on-web.",
+      "authority": "FPS Finance (FOD Financiën / SPF Finances)",
+      "source": "https://finance.belgium.be/en/E-services/Belcotax-on-web",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "be-tp",
+      "category": "Transfer Pricing",
+      "name": "Transfer Pricing Forms (local file 275.LF, master file 275.MF)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 12,
+        "day": "last"
+      },
+      "rule": "Local file with the tax return; master file within 12 months after the group's year end",
+      "applies": "Belgian entities of multinational groups above the thresholds (€50 million income, €1 billion balance sheet or 100 employees)",
+      "description": "The country-by-country notification is due by the last day of the group's financial year.",
+      "authority": "FPS Finance (FOD Financiën / SPF Finances)",
+      "source": "https://finance.belgium.be/en/enterprises/international/transfer-pricing",
+      "confidence": "medium",
+      "when": {
+        "foreignOwned": true
+      }
+    }
+  ]
+}

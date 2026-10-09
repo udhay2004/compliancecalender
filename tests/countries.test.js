@@ -7,13 +7,13 @@ const { checkProfile, SUPPORTED_COUNTRIES, FORMS, formDefinition } = require("..
 
 const page = (f) => fs.readFileSync(path.join(__dirname, "..", "public", f), "utf8");
 
-test("only the six covered countries are accepted", () => {
-  assert.deepStrictEqual([...SUPPORTED_COUNTRIES].sort(), ["Canada", "Germany", "Singapore", "United Arab Emirates", "United Kingdom", "United States"]);
+test("only the covered countries are accepted", () => {
+  assert.deepStrictEqual([...SUPPORTED_COUNTRIES].sort(), ["Australia", "Austria", "Belgium", "Canada", "Denmark", "France", "Germany", "Hong Kong", "Ireland", "Italy", "Japan", "Netherlands", "Norway", "Portugal", "Singapore", "South Korea", "Spain", "Sweden", "Switzerland", "United Arab Emirates", "United Kingdom", "United States"]);
   const r = checkProfile({ country: "Other", entityType: "Corporation", state: "x" });
   assert.strictEqual(r.ok, false);
   assert.strictEqual(r.field, "country");
   assert.match(r.error, /don't prepare calendars for Other yet/);
-  assert.strictEqual(checkProfile({ country: "France", entityType: "SAS" }).ok, false);
+  assert.strictEqual(checkProfile({ country: "Brazil", entityType: "Ltda" }).ok, false);
 });
 
 test("US needs a state, entity type and a tax status that fits the entity", () => {

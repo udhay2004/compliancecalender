@@ -1,0 +1,583 @@
+{
+  "country": "Austria",
+  "updated": "2026-10-09",
+  "notes": "Federal rules, plus state levies: Vienna's employer levy and the tourism contributions of the western and southern states.",
+  "items": [
+    {
+      "id": "at-accounts",
+      "category": "Mandatory Annual",
+      "name": "Annual Financial Statements Filed with the Company Register (Firmenbuch)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 9,
+        "day": "last"
+      },
+      "rule": "Within 9 months after the balance sheet date",
+      "applies": "GmbH, FlexKapG and AG; branches file the foreign company's accounts",
+      "description": "Filed electronically; automatic fines apply to the company and each director for late filing.",
+      "authority": "Firmenbuchgericht (UGB §277)",
+      "source": "https://www.justiz.gv.at/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "GmbH",
+          "FlexKapG (FlexCo)",
+          "AG",
+          "Branch of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "at-approval",
+      "category": "Mandatory Annual",
+      "name": "Shareholders' Approval of the Annual Accounts / Annual General Meeting",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 8,
+        "day": "last"
+      },
+      "rule": "Within the first 8 months of the financial year",
+      "applies": "GmbH, FlexKapG and AG",
+      "description": "The shareholders adopt the accounts, decide on the profit and discharge the management.",
+      "authority": "GmbHG §35 / AktG §104",
+      "source": "https://www.ris.bka.gv.at/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "GmbH",
+          "FlexKapG (FlexCo)",
+          "AG"
+        ]
+      }
+    },
+    {
+      "id": "at-koest",
+      "category": "Mandatory Annual",
+      "name": "Corporate Income Tax Return (Körperschaftsteuererklärung)",
+      "schedule": {
+        "type": "annual",
+        "month": 6,
+        "day": 30
+      },
+      "rule": "30 June of the following year when filed electronically (later under a tax adviser's quota)",
+      "applies": "GmbH, FlexKapG, AG and branches",
+      "description": "Filed through FinanzOnline.",
+      "authority": "Finanzamt Österreich",
+      "source": "https://www.bmf.gv.at/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "GmbH",
+          "FlexKapG (FlexCo)",
+          "AG",
+          "Branch of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "at-koest-prepay",
+      "category": "Conditional",
+      "name": "Corporate Income Tax Prepayments",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 2,
+            "day": 15
+          },
+          {
+            "month": 5,
+            "day": 15
+          },
+          {
+            "month": 8,
+            "day": 15
+          },
+          {
+            "month": 11,
+            "day": 15
+          }
+        ]
+      },
+      "rule": "15 February, 15 May, 15 August and 15 November",
+      "applies": "GmbH, FlexKapG, AG and branches",
+      "description": "Quarterly prepayments set by the tax office; at least the minimum corporate income tax.",
+      "authority": "Finanzamt Österreich",
+      "source": "https://www.bmf.gv.at/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "GmbH",
+          "FlexKapG (FlexCo)",
+          "AG",
+          "Branch of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "at-est",
+      "category": "Mandatory Annual",
+      "name": "Income Tax Return (and partnership return)",
+      "schedule": {
+        "type": "annual",
+        "month": 6,
+        "day": 30
+      },
+      "rule": "30 June of the following year when filed electronically",
+      "applies": "Sole proprietors and partners; partnerships file a return determining the profit",
+      "description": "Filed through FinanzOnline.",
+      "authority": "Finanzamt Österreich",
+      "source": "https://www.bmf.gv.at/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sole Proprietorship (Einzelunternehmen)",
+          "Partnership (OG / KG)"
+        ]
+      }
+    },
+    {
+      "id": "at-est-prepay",
+      "category": "Conditional",
+      "name": "Income Tax Prepayments",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 2,
+            "day": 15
+          },
+          {
+            "month": 5,
+            "day": 15
+          },
+          {
+            "month": 8,
+            "day": 15
+          },
+          {
+            "month": 11,
+            "day": 15
+          }
+        ]
+      },
+      "rule": "15 February, 15 May, 15 August and 15 November",
+      "applies": "Sole proprietors and partners",
+      "description": "Quarterly prepayments set by the tax office.",
+      "authority": "Finanzamt Österreich",
+      "source": "https://www.bmf.gv.at/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sole Proprietorship (Einzelunternehmen)",
+          "Partnership (OG / KG)"
+        ]
+      }
+    },
+    {
+      "id": "at-svs",
+      "category": "Conditional",
+      "name": "Social Insurance Contributions of the Self-Employed (SVS)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 2,
+            "day": 28
+          },
+          {
+            "month": 5,
+            "day": 31
+          },
+          {
+            "month": 8,
+            "day": 31
+          },
+          {
+            "month": 11,
+            "day": 30
+          }
+        ]
+      },
+      "rule": "End of February, May, August and November",
+      "applies": "Sole proprietors and partners insured with the SVS",
+      "description": "Quarterly contributions for pension, health and accident insurance.",
+      "authority": "Sozialversicherung der Selbständigen (SVS)",
+      "source": "https://www.svs.at/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sole Proprietorship (Einzelunternehmen)",
+          "Partnership (OG / KG)"
+        ]
+      }
+    },
+    {
+      "id": "at-vat-annual",
+      "category": "Mandatory Annual",
+      "name": "Annual VAT Return (Umsatzsteuererklärung)",
+      "schedule": {
+        "type": "annual",
+        "month": 6,
+        "day": 30
+      },
+      "rule": "30 June of the following year when filed electronically",
+      "applies": "VAT-registered businesses",
+      "description": "Reconciles the year's advance returns.",
+      "authority": "Finanzamt Österreich",
+      "source": "https://www.bmf.gv.at/",
+      "confidence": "medium",
+      "when": {
+        "not": {
+          "vat": [
+            "Not registered"
+          ]
+        }
+      }
+    },
+    {
+      "id": "at-vat-monthly",
+      "category": "Conditional",
+      "name": "VAT Advance Return (UVA, monthly)",
+      "schedule": {
+        "type": "monthly",
+        "day": 15
+      },
+      "rule": "15th of the second following month",
+      "applies": "Businesses with prior-year turnover over €100,000",
+      "description": "Filed through FinanzOnline with payment.",
+      "authority": "Finanzamt Österreich",
+      "source": "https://www.bmf.gv.at/",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Monthly"
+        ]
+      }
+    },
+    {
+      "id": "at-vat-quarterly",
+      "category": "Conditional",
+      "name": "VAT Advance Return (UVA, quarterly)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 5,
+            "day": 15
+          },
+          {
+            "month": 8,
+            "day": 15
+          },
+          {
+            "month": 11,
+            "day": 15
+          },
+          {
+            "month": 2,
+            "day": 15
+          }
+        ]
+      },
+      "rule": "15 May, 15 August, 15 November and 15 February",
+      "applies": "Businesses with prior-year turnover up to €100,000",
+      "description": "Filed through FinanzOnline with payment.",
+      "authority": "Finanzamt Österreich",
+      "source": "https://www.bmf.gv.at/",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Quarterly"
+        ]
+      }
+    },
+    {
+      "id": "at-vat-register",
+      "category": "Event-Based",
+      "name": "VAT Registration (leaving the small-business exemption)",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "When annual turnover passes the small-business threshold",
+      "applies": "Small businesses (Kleinunternehmer)",
+      "description": "Once the threshold is passed, VAT is charged and advance returns begin.",
+      "authority": "Finanzamt Österreich",
+      "source": "https://www.bmf.gv.at/",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Not registered"
+        ]
+      }
+    },
+    {
+      "id": "at-wiereg",
+      "category": "Event-Based",
+      "name": "Beneficial Owners Register (WiEReG) — Annual Review",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Review and confirm once a year; report changes within 4 weeks",
+      "applies": "Companies and partnerships",
+      "description": "Beneficial owners are reported through the Unternehmensserviceportal.",
+      "authority": "Registerbehörde für wirtschaftliche Eigentümer (BMF)",
+      "source": "https://www.bmf.gv.at/services/wiereg.html",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "GmbH",
+          "FlexKapG (FlexCo)",
+          "AG",
+          "Partnership (OG / KG)"
+        ]
+      }
+    },
+    {
+      "id": "at-payroll",
+      "category": "Conditional",
+      "name": "Wage Tax, Employer Contribution (DB) and Surcharge (DZ)",
+      "schedule": {
+        "type": "monthly",
+        "day": 15
+      },
+      "rule": "15th of the following month",
+      "applies": "Employers",
+      "description": "Wage tax withheld and the employer contribution to the family fund are paid to the tax office.",
+      "authority": "Finanzamt Österreich",
+      "source": "https://www.bmf.gv.at/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "at-oegk",
+      "category": "Conditional",
+      "name": "Social Insurance Contributions and Monthly Contribution Statement (mBGM)",
+      "schedule": {
+        "type": "monthly",
+        "day": 15
+      },
+      "rule": "15th of the following month",
+      "applies": "Employers",
+      "description": "Employer and employee contributions are reported and paid to the health insurance fund.",
+      "authority": "Österreichische Gesundheitskasse (ÖGK)",
+      "source": "https://www.gesundheitskasse.at/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "at-kommunalsteuer",
+      "category": "Conditional",
+      "name": "Municipal Payroll Tax (Kommunalsteuer)",
+      "schedule": {
+        "type": "monthly",
+        "day": 15
+      },
+      "rule": "15th of the following month",
+      "applies": "Employers",
+      "description": "3% of wages, paid to the municipality where the employees work.",
+      "authority": "Municipality (Gemeinde)",
+      "source": "https://www.usp.gv.at/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "at-kommunalsteuer-annual",
+      "category": "Conditional",
+      "name": "Municipal Payroll Tax — Annual Declaration",
+      "schedule": {
+        "type": "annual",
+        "month": 3,
+        "day": 31
+      },
+      "rule": "31 March (for the previous calendar year)",
+      "applies": "Employers",
+      "description": "Filed through FinanzOnline for every municipality with a place of business.",
+      "authority": "Municipality (Gemeinde) via FinanzOnline",
+      "source": "https://www.usp.gv.at/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "at-l16",
+      "category": "Conditional",
+      "name": "Annual Pay Slips (Lohnzettel L16)",
+      "schedule": {
+        "type": "annual",
+        "month": 2,
+        "day": 28
+      },
+      "rule": "End of February (for the previous calendar year)",
+      "applies": "Employers",
+      "description": "Transmitted electronically for every employee.",
+      "authority": "Finanzamt Österreich",
+      "source": "https://www.bmf.gv.at/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "at-tp",
+      "category": "Transfer Pricing",
+      "name": "Transfer Pricing Documentation",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Provided within 30 days of the tax office's request",
+      "applies": "Companies with cross-border related-party transactions (master file and local file from €50 million turnover)",
+      "description": "Country-by-country notifications are due by the end of the group's financial year.",
+      "authority": "Finanzamt Österreich",
+      "source": "https://www.bmf.gv.at/",
+      "confidence": "medium",
+      "when": {
+        "foreignOwned": true
+      }
+    }
+  ],
+  "regions": {
+    "Burgenland": {
+      "items": []
+    },
+    "Carinthia": {
+      "items": [
+        {
+          "id": "at-carinthia-tourism",
+          "category": "Conditional",
+          "name": "Carinthia Tourism Levy (Tourismusabgabe)",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "Annual declaration and payment on the dates in the state's notice",
+          "applies": "Businesses in Carinthia that benefit directly or indirectly from tourism",
+          "description": "The contribution is based on turnover and the business's sector group; the state or tourism association sets the filing date each year.",
+          "authority": "Land Kärnten",
+          "source": "https://www.ktn.gv.at/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Lower Austria": {
+      "items": []
+    },
+    "Salzburg": {
+      "items": [
+        {
+          "id": "at-salzburg-tourism",
+          "category": "Conditional",
+          "name": "Salzburg Tourism Contribution (Tourismusbeitrag)",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "Annual declaration and payment on the dates in the state's notice",
+          "applies": "Businesses in Salzburg that benefit directly or indirectly from tourism",
+          "description": "The contribution is based on turnover and the business's sector group; the state or tourism association sets the filing date each year.",
+          "authority": "Land Salzburg, Landesabgabenamt",
+          "source": "https://www.salzburg.gv.at/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Styria": {
+      "items": [
+        {
+          "id": "at-styria-tourism",
+          "category": "Conditional",
+          "name": "Styria Tourism Contribution (Tourismusinteressentenbeitrag)",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "Annual declaration and payment on the dates in the state's notice",
+          "applies": "Businesses in Styria that benefit directly or indirectly from tourism",
+          "description": "The contribution is based on turnover and the business's sector group; the state or tourism association sets the filing date each year.",
+          "authority": "Land Steiermark",
+          "source": "https://www.verwaltung.steiermark.at/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Tyrol": {
+      "items": [
+        {
+          "id": "at-tyrol-tourism",
+          "category": "Conditional",
+          "name": "Tyrol Tourism Contribution (Pflichtbeitrag an den Tourismusverband)",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "Annual declaration and payment on the dates in the state's notice",
+          "applies": "Businesses in Tyrol that benefit directly or indirectly from tourism",
+          "description": "The contribution is based on turnover and the business's sector group; the state or tourism association sets the filing date each year.",
+          "authority": "Amt der Tiroler Landesregierung",
+          "source": "https://www.tirol.gv.at/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Upper Austria": {
+      "items": [
+        {
+          "id": "at-upper-austria-tourism",
+          "category": "Conditional",
+          "name": "Upper Austria Tourism Contribution (Tourismusbeitrag)",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "Annual declaration and payment on the dates in the state's notice",
+          "applies": "Businesses in Upper Austria that benefit directly or indirectly from tourism",
+          "description": "The contribution is based on turnover and the business's sector group; the state or tourism association sets the filing date each year.",
+          "authority": "Land Oberösterreich",
+          "source": "https://www.land-oberoesterreich.gv.at/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Vienna": {
+      "items": [],
+      "employerItems": [
+        {
+          "id": "at-vienna-dienstgeberabgabe",
+          "category": "Conditional",
+          "name": "Vienna Employer Levy (Dienstgeberabgabe, \"U-Bahn-Steuer\")",
+          "schedule": {
+            "type": "monthly",
+            "day": 15
+          },
+          "rule": "15th of the following month",
+          "applies": "Employers with employees working in Vienna",
+          "description": "A weekly amount per employee, paid monthly to the City of Vienna.",
+          "authority": "Stadt Wien, MA 6 (Rechnungs- und Abgabenwesen)",
+          "source": "https://www.wien.gv.at/amtshelfer/finanzielles/rechnungswesen/abgaben/dienstgeberabgabe.html",
+          "confidence": "medium"
+        },
+        {
+          "id": "at-vienna-dienstgeberabgabe-annual",
+          "category": "Conditional",
+          "name": "Vienna Employer Levy — Annual Declaration",
+          "schedule": {
+            "type": "annual",
+            "month": 3,
+            "day": 31
+          },
+          "rule": "31 March (for the previous calendar year)",
+          "applies": "Employers with employees working in Vienna",
+          "description": "The annual declaration of the employer levy.",
+          "authority": "Stadt Wien, MA 6 (Rechnungs- und Abgabenwesen)",
+          "source": "https://www.wien.gv.at/amtshelfer/finanzielles/rechnungswesen/abgaben/dienstgeberabgabe.html",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Vorarlberg": {
+      "items": []
+    }
+  }
+}

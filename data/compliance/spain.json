@@ -1,0 +1,987 @@
+{
+  "country": "Spain",
+  "updated": "2026-10-09",
+  "notes": "State rules for most of Spain; the Basque Country and Navarre have their own tax offices, the Canary Islands charge IGIC and Ceuta and Melilla charge IPSI instead of VAT.",
+  "items": [
+    {
+      "id": "es-books",
+      "category": "Mandatory Annual",
+      "name": "Legalisation of the Accounting Books",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 4,
+        "day": "last"
+      },
+      "rule": "Within 4 months after financial year end",
+      "applies": "S.L., S.A. and branches",
+      "description": "Filed electronically with the Mercantile Registry.",
+      "authority": "Registro Mercantil",
+      "source": "https://www.registradores.org/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sociedad Limitada (S.L.)",
+          "Sociedad Anónima (S.A.)",
+          "Branch of Foreign Company (sucursal)"
+        ]
+      }
+    },
+    {
+      "id": "es-approve",
+      "category": "Mandatory Annual",
+      "name": "Approval of the Annual Accounts",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 6,
+        "day": "last"
+      },
+      "rule": "Within 6 months after financial year end (the directors prepare them within 3 months)",
+      "applies": "S.L. and S.A.",
+      "description": "The shareholders' meeting approves the accounts and the allocation of the result.",
+      "authority": "Ley de Sociedades de Capital",
+      "source": "https://www.registradores.org/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sociedad Limitada (S.L.)",
+          "Sociedad Anónima (S.A.)"
+        ]
+      }
+    },
+    {
+      "id": "es-deposit",
+      "category": "Mandatory Annual",
+      "name": "Annual Accounts Deposited at the Mercantile Registry",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 7,
+        "day": "last"
+      },
+      "rule": "Within 1 month of approval",
+      "applies": "S.L. and S.A.; branches deposit the foreign company's accounts",
+      "description": "Includes the beneficial ownership declaration; the registry closes to new filings after a year of non-deposit.",
+      "authority": "Registro Mercantil",
+      "source": "https://www.registradores.org/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sociedad Limitada (S.L.)",
+          "Sociedad Anónima (S.A.)",
+          "Branch of Foreign Company (sucursal)"
+        ]
+      }
+    },
+    {
+      "id": "es-200",
+      "category": "Mandatory Annual",
+      "name": "Corporate Income Tax Return (Modelo 200)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 7,
+        "day": 25
+      },
+      "rule": "Within 25 days after 6 months from financial year end (25 July for a calendar year)",
+      "applies": "Companies and branches",
+      "description": "Filed online with payment.",
+      "authority": "Agencia Tributaria (AEAT)",
+      "source": "https://sede.agenciatributaria.gob.es/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sociedad Limitada (S.L.)",
+          "Sociedad Anónima (S.A.)",
+          "Branch of Foreign Company (sucursal)"
+        ],
+        "not": {
+          "region": [
+            "Basque Country",
+            "Navarre"
+          ]
+        }
+      }
+    },
+    {
+      "id": "es-202",
+      "category": "Conditional",
+      "name": "Corporate Income Tax Payments on Account (Modelo 202)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 4,
+            "day": 20
+          },
+          {
+            "month": 10,
+            "day": 20
+          },
+          {
+            "month": 12,
+            "day": 20
+          }
+        ]
+      },
+      "rule": "20 April, 20 October and 20 December",
+      "applies": "Companies and branches with tax due the year before",
+      "description": "Three payments on account during the year.",
+      "authority": "Agencia Tributaria (AEAT)",
+      "source": "https://sede.agenciatributaria.gob.es/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sociedad Limitada (S.L.)",
+          "Sociedad Anónima (S.A.)",
+          "Branch of Foreign Company (sucursal)"
+        ],
+        "not": {
+          "region": [
+            "Basque Country",
+            "Navarre"
+          ]
+        }
+      }
+    },
+    {
+      "id": "es-303-q",
+      "category": "Conditional",
+      "name": "VAT Return (Modelo 303, quarterly)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 4,
+            "day": 20
+          },
+          {
+            "month": 7,
+            "day": 20
+          },
+          {
+            "month": 10,
+            "day": 20
+          },
+          {
+            "month": 1,
+            "day": 30
+          }
+        ]
+      },
+      "rule": "20 April, 20 July, 20 October and 30 January",
+      "applies": "VAT-registered businesses",
+      "description": "Filed online with payment.",
+      "authority": "Agencia Tributaria (AEAT)",
+      "source": "https://sede.agenciatributaria.gob.es/",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Quarterly"
+        ],
+        "not": {
+          "region": [
+            "Basque Country",
+            "Navarre",
+            "Canary Islands",
+            "Ceuta",
+            "Melilla"
+          ]
+        }
+      }
+    },
+    {
+      "id": "es-303-m",
+      "category": "Conditional",
+      "name": "VAT Return (Modelo 303, monthly) with Immediate Supply of Information (SII)",
+      "schedule": {
+        "type": "monthly",
+        "day": 30
+      },
+      "rule": "30th of the following month (the end of February for January)",
+      "applies": "Large companies, VAT groups and businesses on the monthly refund register",
+      "description": "Invoice records are sent through SII within 4 days.",
+      "authority": "Agencia Tributaria (AEAT)",
+      "source": "https://sede.agenciatributaria.gob.es/",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Monthly"
+        ],
+        "not": {
+          "region": [
+            "Basque Country",
+            "Navarre",
+            "Canary Islands",
+            "Ceuta",
+            "Melilla"
+          ]
+        }
+      }
+    },
+    {
+      "id": "es-390",
+      "category": "Mandatory Annual",
+      "name": "VAT Annual Summary (Modelo 390)",
+      "schedule": {
+        "type": "annual",
+        "month": 1,
+        "day": 30
+      },
+      "rule": "30 January",
+      "applies": "VAT-registered businesses filing quarterly",
+      "description": "Summarises the year's VAT returns.",
+      "authority": "Agencia Tributaria (AEAT)",
+      "source": "https://sede.agenciatributaria.gob.es/",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Quarterly"
+        ],
+        "not": {
+          "region": [
+            "Basque Country",
+            "Navarre",
+            "Canary Islands",
+            "Ceuta",
+            "Melilla"
+          ]
+        }
+      }
+    },
+    {
+      "id": "es-347",
+      "category": "Mandatory Annual",
+      "name": "Annual Statement of Transactions with Third Parties (Modelo 347)",
+      "schedule": {
+        "type": "annual",
+        "month": 2,
+        "day": "last"
+      },
+      "rule": "During February",
+      "applies": "Businesses with more than €3,005.06 of transactions with any one customer or supplier (not those in SII)",
+      "description": "Lists the customers and suppliers above the limit.",
+      "authority": "Agencia Tributaria (AEAT)",
+      "source": "https://sede.agenciatributaria.gob.es/",
+      "confidence": "medium",
+      "when": {
+        "not": {
+          "region": [
+            "Basque Country",
+            "Navarre"
+          ]
+        }
+      }
+    },
+    {
+      "id": "es-verifactu",
+      "category": "Event-Based",
+      "name": "Verifiable Invoicing Software (VERI*FACTU)",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "From 1 January 2027 for companies and 1 July 2027 for other businesses",
+      "applies": "Businesses issuing invoices with software (not those in SII)",
+      "description": "Invoicing systems must meet the anti-fraud regulation's requirements.",
+      "authority": "Agencia Tributaria (AEAT)",
+      "source": "https://sede.agenciatributaria.gob.es/Sede/iva/sistemas-informaticos-facturacion-verifactu.html",
+      "confidence": "medium",
+      "when": {
+        "not": {
+          "region": [
+            "Basque Country",
+            "Navarre"
+          ]
+        }
+      }
+    },
+    {
+      "id": "es-111",
+      "category": "Conditional",
+      "name": "Withholding Tax Return (Modelo 111)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 4,
+            "day": 20
+          },
+          {
+            "month": 7,
+            "day": 20
+          },
+          {
+            "month": 10,
+            "day": 20
+          },
+          {
+            "month": 1,
+            "day": 20
+          }
+        ]
+      },
+      "rule": "20 April, 20 July, 20 October and 20 January (monthly for large companies)",
+      "applies": "Employers and businesses paying professionals",
+      "description": "Tax withheld from wages and professional fees.",
+      "authority": "Agencia Tributaria (AEAT)",
+      "source": "https://sede.agenciatributaria.gob.es/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true,
+        "not": {
+          "region": [
+            "Basque Country",
+            "Navarre"
+          ]
+        }
+      }
+    },
+    {
+      "id": "es-190",
+      "category": "Conditional",
+      "name": "Annual Withholding Summary (Modelo 190)",
+      "schedule": {
+        "type": "annual",
+        "month": 1,
+        "day": 31
+      },
+      "rule": "31 January",
+      "applies": "Employers and businesses paying professionals",
+      "description": "Summarises the year's withholdings per recipient.",
+      "authority": "Agencia Tributaria (AEAT)",
+      "source": "https://sede.agenciatributaria.gob.es/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true,
+        "not": {
+          "region": [
+            "Basque Country",
+            "Navarre"
+          ]
+        }
+      }
+    },
+    {
+      "id": "es-ss",
+      "category": "Conditional",
+      "name": "Social Security Contributions",
+      "schedule": {
+        "type": "monthly",
+        "day": "last"
+      },
+      "rule": "Last day of the following month",
+      "applies": "Employers",
+      "description": "Settled through the RED system.",
+      "authority": "Tesorería General de la Seguridad Social (TGSS)",
+      "source": "https://www.seg-social.es/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "es-130",
+      "category": "Mandatory Annual",
+      "name": "Personal Income Tax Payments on Account (Modelo 130)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 4,
+            "day": 20
+          },
+          {
+            "month": 7,
+            "day": 20
+          },
+          {
+            "month": 10,
+            "day": 20
+          },
+          {
+            "month": 1,
+            "day": 30
+          }
+        ]
+      },
+      "rule": "20 April, 20 July, 20 October and 30 January",
+      "applies": "Self-employed people under direct assessment",
+      "description": "20% of the year-to-date profit, less earlier payments.",
+      "authority": "Agencia Tributaria (AEAT)",
+      "source": "https://sede.agenciatributaria.gob.es/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Autónomo (self-employed)"
+        ],
+        "not": {
+          "region": [
+            "Basque Country",
+            "Navarre"
+          ]
+        }
+      }
+    },
+    {
+      "id": "es-100",
+      "category": "Mandatory Annual",
+      "name": "Personal Income Tax Return (Renta, Modelo 100)",
+      "schedule": {
+        "type": "annual",
+        "month": 6,
+        "day": 30
+      },
+      "rule": "Between early April and 30 June",
+      "applies": "Self-employed people",
+      "description": "Reports the previous calendar year's business income.",
+      "authority": "Agencia Tributaria (AEAT)",
+      "source": "https://sede.agenciatributaria.gob.es/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Autónomo (self-employed)"
+        ],
+        "not": {
+          "region": [
+            "Basque Country",
+            "Navarre"
+          ]
+        }
+      }
+    },
+    {
+      "id": "es-reta",
+      "category": "Mandatory Annual",
+      "name": "Self-Employed Social Security Contribution (RETA)",
+      "schedule": {
+        "type": "monthly",
+        "day": "last"
+      },
+      "rule": "Last business day of each month",
+      "applies": "Self-employed people",
+      "description": "The monthly contribution, based on expected net income.",
+      "authority": "Tesorería General de la Seguridad Social (TGSS)",
+      "source": "https://www.seg-social.es/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Autónomo (self-employed)"
+        ]
+      }
+    },
+    {
+      "id": "es-232",
+      "category": "Transfer Pricing",
+      "name": "Related-Party Transactions Return (Modelo 232)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 11,
+        "day": "last"
+      },
+      "rule": "During the month after 10 months from financial year end (November for a calendar year)",
+      "applies": "Companies with related-party transactions above the thresholds",
+      "description": "Transfer pricing documentation must be available from the corporate tax return deadline.",
+      "authority": "Agencia Tributaria (AEAT)",
+      "source": "https://sede.agenciatributaria.gob.es/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sociedad Limitada (S.L.)",
+          "Sociedad Anónima (S.A.)",
+          "Branch of Foreign Company (sucursal)"
+        ],
+        "foreignOwned": true,
+        "not": {
+          "region": [
+            "Basque Country",
+            "Navarre"
+          ]
+        }
+      }
+    }
+  ],
+  "regions": {
+    "Andalusia": {
+      "items": []
+    },
+    "Aragon": {
+      "items": []
+    },
+    "Asturias": {
+      "items": []
+    },
+    "Balearic Islands": {
+      "items": []
+    },
+    "Basque Country": {
+      "items": [
+        {
+          "id": "es-basque-is",
+          "category": "Mandatory Annual",
+          "name": "Corporate Income Tax Return — Basque Country (Álava, Bizkaia or Gipuzkoa)",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 7,
+            "day": 25
+          },
+          "rule": "Within 25 days after 6 months from financial year end (25 July for a calendar year)",
+          "applies": "Companies and branches taxed in Basque Country (Álava, Bizkaia or Gipuzkoa)",
+          "description": "Basque Country (Álava, Bizkaia or Gipuzkoa) has its own corporate income tax, filed with its own tax office rather than the state tax agency. Each of the three provinces sets its own forms and dates.",
+          "authority": "Hacienda Foral of Álava, Bizkaia or Gipuzkoa",
+          "source": "https://www.euskadi.eus/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sociedad Limitada (S.L.)",
+              "Sociedad Anónima (S.A.)",
+              "Branch of Foreign Company (sucursal)"
+            ]
+          }
+        },
+        {
+          "id": "es-basque-vat-q",
+          "category": "Conditional",
+          "name": "VAT Return (quarterly) — Basque Country (Álava, Bizkaia or Gipuzkoa)",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 4,
+                "day": 25
+              },
+              {
+                "month": 7,
+                "day": 25
+              },
+              {
+                "month": 10,
+                "day": 25
+              },
+              {
+                "month": 1,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "By about the 20th–25th of April, July and October, and the end of January, on the dates the tax office publishes",
+          "applies": "VAT-registered businesses taxed in Basque Country (Álava, Bizkaia or Gipuzkoa)",
+          "description": "VAT follows the state rules but is filed with and paid to the regional tax office.",
+          "authority": "Hacienda Foral of Álava, Bizkaia or Gipuzkoa",
+          "source": "https://www.euskadi.eus/",
+          "confidence": "medium",
+          "when": {
+            "vat": [
+              "Quarterly"
+            ]
+          }
+        },
+        {
+          "id": "es-basque-vat-m",
+          "category": "Conditional",
+          "name": "VAT Return (monthly) — Basque Country (Álava, Bizkaia or Gipuzkoa)",
+          "schedule": {
+            "type": "monthly",
+            "day": 30
+          },
+          "rule": "By about the 25th–30th of the following month, on the dates the tax office publishes",
+          "applies": "VAT-registered businesses on monthly returns taxed in Basque Country (Álava, Bizkaia or Gipuzkoa)",
+          "description": "VAT follows the state rules but is filed with and paid to the regional tax office.",
+          "authority": "Hacienda Foral of Álava, Bizkaia or Gipuzkoa",
+          "source": "https://www.euskadi.eus/",
+          "confidence": "medium",
+          "when": {
+            "vat": [
+              "Monthly"
+            ]
+          }
+        },
+        {
+          "id": "es-basque-withholding",
+          "category": "Conditional",
+          "name": "Payroll Withholding Tax Returns — Basque Country (Álava, Bizkaia or Gipuzkoa)",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 4,
+                "day": 25
+              },
+              {
+                "month": 7,
+                "day": 25
+              },
+              {
+                "month": 10,
+                "day": 25
+              },
+              {
+                "month": 1,
+                "day": 25
+              }
+            ]
+          },
+          "rule": "By about the 25th of April, July, October and January, with the annual summary in January",
+          "applies": "Employers with staff working in Basque Country (Álava, Bizkaia or Gipuzkoa)",
+          "description": "Tax withheld from wages is paid to the regional tax office.",
+          "authority": "Hacienda Foral of Álava, Bizkaia or Gipuzkoa",
+          "source": "https://www.euskadi.eus/",
+          "confidence": "medium",
+          "when": {
+            "hasEmployees": true
+          }
+        },
+        {
+          "id": "es-basque-irpf",
+          "category": "Mandatory Annual",
+          "name": "Personal Income Tax Return and Quarterly Payments on Account — Basque Country (Álava, Bizkaia or Gipuzkoa)",
+          "schedule": {
+            "type": "annual",
+            "month": 6,
+            "day": 30
+          },
+          "rule": "Annual return between April and the end of June; payments on account each quarter",
+          "applies": "Self-employed people resident in Basque Country (Álava, Bizkaia or Gipuzkoa)",
+          "description": "Personal income tax is filed with the regional tax office.",
+          "authority": "Hacienda Foral of Álava, Bizkaia or Gipuzkoa",
+          "source": "https://www.euskadi.eus/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Autónomo (self-employed)"
+            ]
+          }
+        },
+        {
+          "id": "es-basque-ticketbai",
+          "category": "Event-Based",
+          "name": "TicketBAI Invoicing System",
+          "schedule": {
+            "type": "event"
+          },
+          "rule": "Every invoice, as it is issued",
+          "applies": "Businesses taxed in the Basque Country",
+          "description": "Invoicing software must sign each invoice and send it to the provincial tax office (in Bizkaia, through Batuz).",
+          "authority": "Hacienda Foral of Álava, Bizkaia or Gipuzkoa",
+          "source": "https://www.euskadi.eus/ticketbai/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Canary Islands": {
+      "items": [
+        {
+          "id": "es-canary-igic-q",
+          "category": "Conditional",
+          "name": "IGIC Return (Modelo 420, quarterly)",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 4,
+                "day": 20
+              },
+              {
+                "month": 7,
+                "day": 20
+              },
+              {
+                "month": 10,
+                "day": 20
+              },
+              {
+                "month": 1,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "20 April, 20 July, 20 October and 30 January",
+          "applies": "Businesses in the Canary Islands",
+          "description": "The Canary Islands charge IGIC instead of VAT.",
+          "authority": "Agencia Tributaria Canaria",
+          "source": "https://www3.gobiernodecanarias.org/tributos/",
+          "confidence": "medium",
+          "when": {
+            "vat": [
+              "Quarterly"
+            ]
+          }
+        },
+        {
+          "id": "es-canary-igic-m",
+          "category": "Conditional",
+          "name": "IGIC Return (Modelo 412, monthly)",
+          "schedule": {
+            "type": "monthly",
+            "day": 30
+          },
+          "rule": "By the end of the following month",
+          "applies": "Large businesses and those on the monthly refund register in the Canary Islands",
+          "description": "The Canary Islands charge IGIC instead of VAT.",
+          "authority": "Agencia Tributaria Canaria",
+          "source": "https://www3.gobiernodecanarias.org/tributos/",
+          "confidence": "medium",
+          "when": {
+            "vat": [
+              "Monthly"
+            ]
+          }
+        },
+        {
+          "id": "es-canary-igic-annual",
+          "category": "Mandatory Annual",
+          "name": "IGIC Annual Summary (Modelo 425)",
+          "schedule": {
+            "type": "annual",
+            "month": 1,
+            "day": 30
+          },
+          "rule": "30 January",
+          "applies": "Businesses in the Canary Islands",
+          "description": "Summarises the year's IGIC returns.",
+          "authority": "Agencia Tributaria Canaria",
+          "source": "https://www3.gobiernodecanarias.org/tributos/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Cantabria": {
+      "items": []
+    },
+    "Castile and León": {
+      "items": []
+    },
+    "Castilla-La Mancha": {
+      "items": []
+    },
+    "Catalonia": {
+      "items": []
+    },
+    "Ceuta": {
+      "items": [
+        {
+          "id": "es-ceuta-ipsi",
+          "category": "Conditional",
+          "name": "IPSI Returns (Ceuta)",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 4,
+                "day": 20
+              },
+              {
+                "month": 7,
+                "day": 20
+              },
+              {
+                "month": 10,
+                "day": 20
+              },
+              {
+                "month": 1,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "Quarterly, on the dates the city's tax office publishes",
+          "applies": "Businesses in Ceuta",
+          "description": "Ceuta charges IPSI (tax on production, services and imports) instead of VAT.",
+          "authority": "Ciudad Autónoma de Ceuta",
+          "source": "https://www.ceuta.es/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Extremadura": {
+      "items": []
+    },
+    "Galicia": {
+      "items": []
+    },
+    "La Rioja": {
+      "items": []
+    },
+    "Madrid": {
+      "items": []
+    },
+    "Melilla": {
+      "items": [
+        {
+          "id": "es-melilla-ipsi",
+          "category": "Conditional",
+          "name": "IPSI Returns (Melilla)",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 4,
+                "day": 20
+              },
+              {
+                "month": 7,
+                "day": 20
+              },
+              {
+                "month": 10,
+                "day": 20
+              },
+              {
+                "month": 1,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "Quarterly, on the dates the city's tax office publishes",
+          "applies": "Businesses in Melilla",
+          "description": "Melilla charges IPSI (tax on production, services and imports) instead of VAT.",
+          "authority": "Ciudad Autónoma de Melilla",
+          "source": "https://www.melilla.es/",
+          "confidence": "medium"
+        }
+      ]
+    },
+    "Murcia": {
+      "items": []
+    },
+    "Navarre": {
+      "items": [
+        {
+          "id": "es-navarre-is",
+          "category": "Mandatory Annual",
+          "name": "Corporate Income Tax Return — Navarre",
+          "schedule": {
+            "type": "fy_relative",
+            "monthsAfter": 7,
+            "day": 25
+          },
+          "rule": "Within 25 days after 6 months from financial year end (25 July for a calendar year)",
+          "applies": "Companies and branches taxed in Navarre",
+          "description": "Navarre has its own corporate income tax, filed with its own tax office rather than the state tax agency.",
+          "authority": "Hacienda Foral de Navarra",
+          "source": "https://hacienda.navarra.es/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Sociedad Limitada (S.L.)",
+              "Sociedad Anónima (S.A.)",
+              "Branch of Foreign Company (sucursal)"
+            ]
+          }
+        },
+        {
+          "id": "es-navarre-vat-q",
+          "category": "Conditional",
+          "name": "VAT Return (quarterly) — Navarre",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 4,
+                "day": 25
+              },
+              {
+                "month": 7,
+                "day": 25
+              },
+              {
+                "month": 10,
+                "day": 25
+              },
+              {
+                "month": 1,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "By about the 20th–25th of April, July and October, and the end of January, on the dates the tax office publishes",
+          "applies": "VAT-registered businesses taxed in Navarre",
+          "description": "VAT follows the state rules but is filed with and paid to the regional tax office.",
+          "authority": "Hacienda Foral de Navarra",
+          "source": "https://hacienda.navarra.es/",
+          "confidence": "medium",
+          "when": {
+            "vat": [
+              "Quarterly"
+            ]
+          }
+        },
+        {
+          "id": "es-navarre-vat-m",
+          "category": "Conditional",
+          "name": "VAT Return (monthly) — Navarre",
+          "schedule": {
+            "type": "monthly",
+            "day": 30
+          },
+          "rule": "By about the 25th–30th of the following month, on the dates the tax office publishes",
+          "applies": "VAT-registered businesses on monthly returns taxed in Navarre",
+          "description": "VAT follows the state rules but is filed with and paid to the regional tax office.",
+          "authority": "Hacienda Foral de Navarra",
+          "source": "https://hacienda.navarra.es/",
+          "confidence": "medium",
+          "when": {
+            "vat": [
+              "Monthly"
+            ]
+          }
+        },
+        {
+          "id": "es-navarre-withholding",
+          "category": "Conditional",
+          "name": "Payroll Withholding Tax Returns — Navarre",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 4,
+                "day": 25
+              },
+              {
+                "month": 7,
+                "day": 25
+              },
+              {
+                "month": 10,
+                "day": 25
+              },
+              {
+                "month": 1,
+                "day": 25
+              }
+            ]
+          },
+          "rule": "By about the 25th of April, July, October and January, with the annual summary in January",
+          "applies": "Employers with staff working in Navarre",
+          "description": "Tax withheld from wages is paid to the regional tax office.",
+          "authority": "Hacienda Foral de Navarra",
+          "source": "https://hacienda.navarra.es/",
+          "confidence": "medium",
+          "when": {
+            "hasEmployees": true
+          }
+        },
+        {
+          "id": "es-navarre-irpf",
+          "category": "Mandatory Annual",
+          "name": "Personal Income Tax Return and Quarterly Payments on Account — Navarre",
+          "schedule": {
+            "type": "annual",
+            "month": 6,
+            "day": 30
+          },
+          "rule": "Annual return between April and the end of June; payments on account each quarter",
+          "applies": "Self-employed people resident in Navarre",
+          "description": "Personal income tax is filed with the regional tax office.",
+          "authority": "Hacienda Foral de Navarra",
+          "source": "https://hacienda.navarra.es/",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "Autónomo (self-employed)"
+            ]
+          }
+        }
+      ]
+    },
+    "Valencian Community": {
+      "items": []
+    }
+  }
+}

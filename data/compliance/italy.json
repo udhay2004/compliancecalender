@@ -1,0 +1,1251 @@
+{
+  "country": "Italy",
+  "updated": "2026-10-09",
+  "notes": "National rules, with IRAP owed to the company's region. Dates assume a calendar financial year unless stated.",
+  "items": [
+    {
+      "id": "it-approve",
+      "category": "Mandatory Annual",
+      "name": "Approval of the Financial Statements (bilancio)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 4,
+        "day": 30
+      },
+      "rule": "Within 120 days after financial year end (180 days where the by-laws allow)",
+      "applies": "S.r.l., S.r.l.s. and S.p.A.",
+      "description": "The shareholders' meeting approves the statements.",
+      "authority": "Codice civile art. 2364 and 2478-bis",
+      "source": "https://www.registroimprese.it/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "S.r.l.",
+          "S.r.l.s. (simplified)",
+          "S.p.A."
+        ]
+      }
+    },
+    {
+      "id": "it-file-bilancio",
+      "category": "Mandatory Annual",
+      "name": "Financial Statements Filed with the Business Register (Registro Imprese)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 5,
+        "day": 30
+      },
+      "rule": "Within 30 days of approval",
+      "applies": "S.r.l., S.r.l.s. and S.p.A.; branches file the foreign company's accounts",
+      "description": "Filed in XBRL through the Chamber of Commerce.",
+      "authority": "Registro Imprese (Camera di Commercio)",
+      "source": "https://www.registroimprese.it/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "S.r.l.",
+          "S.r.l.s. (simplified)",
+          "S.p.A.",
+          "Branch of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "it-libri",
+      "category": "Mandatory Annual",
+      "name": "Annual Tax on Company Books (tassa libri sociali)",
+      "schedule": {
+        "type": "annual",
+        "month": 3,
+        "day": 16
+      },
+      "rule": "16 March",
+      "applies": "S.r.l., S.r.l.s. and S.p.A.",
+      "description": "A flat annual government fee paid with form F24.",
+      "authority": "Agenzia delle Entrate",
+      "source": "https://www.agenziaentrate.gov.it/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "S.r.l.",
+          "S.r.l.s. (simplified)",
+          "S.p.A."
+        ]
+      }
+    },
+    {
+      "id": "it-redditi-sc",
+      "category": "Mandatory Annual",
+      "name": "Income Tax and IRAP Returns (Redditi SC and IRAP)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 10,
+        "day": "last"
+      },
+      "rule": "Last day of the 10th month after financial year end (31 October for a calendar year)",
+      "applies": "Companies and branches",
+      "description": "Filed electronically.",
+      "authority": "Agenzia delle Entrate",
+      "source": "https://www.agenziaentrate.gov.it/portale/web/guest/schede/dichiarazioni",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "S.r.l.",
+          "S.r.l.s. (simplified)",
+          "S.p.A.",
+          "Branch of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "it-ires",
+      "category": "Mandatory Annual",
+      "name": "IRES — Balance and First Advance Payment",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 6,
+        "day": "last"
+      },
+      "rule": "Last day of the 6th month after financial year end (30 June for a calendar year)",
+      "applies": "Companies and branches",
+      "description": "Paid with form F24; payment within the following 30 days carries a 0.4% surcharge.",
+      "authority": "Agenzia delle Entrate",
+      "source": "https://www.agenziaentrate.gov.it/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "S.r.l.",
+          "S.r.l.s. (simplified)",
+          "S.p.A.",
+          "Branch of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "it-ires-2",
+      "category": "Mandatory Annual",
+      "name": "IRES — Second Advance Payment",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 11,
+        "day": "last"
+      },
+      "rule": "Last day of the 11th month of the financial year (30 November for a calendar year)",
+      "applies": "Companies and branches",
+      "description": "Paid with form F24.",
+      "authority": "Agenzia delle Entrate",
+      "source": "https://www.agenziaentrate.gov.it/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "S.r.l.",
+          "S.r.l.s. (simplified)",
+          "S.p.A.",
+          "Branch of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "it-redditi-pf",
+      "category": "Mandatory Annual",
+      "name": "Income Tax Return (Redditi PF / Redditi SP)",
+      "schedule": {
+        "type": "annual",
+        "month": 10,
+        "day": 31
+      },
+      "rule": "31 October",
+      "applies": "Sole proprietors and partnerships",
+      "description": "Partnerships file Redditi SP and the partners report their shares.",
+      "authority": "Agenzia delle Entrate",
+      "source": "https://www.agenziaentrate.gov.it/portale/web/guest/schede/dichiarazioni",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sole Proprietorship (ditta individuale)",
+          "Partnership (S.n.c. / S.a.s.)"
+        ]
+      }
+    },
+    {
+      "id": "it-irpef",
+      "category": "Mandatory Annual",
+      "name": "IRPEF — Balance and Advance Payments",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 6,
+            "day": 30
+          },
+          {
+            "month": 11,
+            "day": 30
+          }
+        ]
+      },
+      "rule": "30 June (balance and first advance) and 30 November (second advance)",
+      "applies": "Sole proprietors and partners",
+      "description": "Paid with form F24.",
+      "authority": "Agenzia delle Entrate",
+      "source": "https://www.agenziaentrate.gov.it/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sole Proprietorship (ditta individuale)",
+          "Partnership (S.n.c. / S.a.s.)"
+        ]
+      }
+    },
+    {
+      "id": "it-inps-fixed",
+      "category": "Conditional",
+      "name": "INPS Contributions for Artisans and Traders",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 5,
+            "day": 16
+          },
+          {
+            "month": 8,
+            "day": 20
+          },
+          {
+            "month": 11,
+            "day": 16
+          },
+          {
+            "month": 2,
+            "day": 16
+          }
+        ]
+      },
+      "rule": "16 May, 20 August, 16 November and 16 February",
+      "applies": "Sole proprietors and working partners enrolled as artisans or traders",
+      "description": "Fixed quarterly contributions on the minimum income; contributions above it are paid with the income tax.",
+      "authority": "INPS",
+      "source": "https://www.inps.it/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sole Proprietorship (ditta individuale)",
+          "Partnership (S.n.c. / S.a.s.)"
+        ]
+      }
+    },
+    {
+      "id": "it-diritto-annuale",
+      "category": "Mandatory Annual",
+      "name": "Chamber of Commerce Annual Fee (diritto annuale)",
+      "schedule": {
+        "type": "annual",
+        "month": 6,
+        "day": 30
+      },
+      "rule": "30 June (with the income tax balance)",
+      "applies": "Every business on the Business Register",
+      "description": "Paid with form F24.",
+      "authority": "Camera di Commercio",
+      "source": "https://www.registroimprese.it/",
+      "confidence": "medium"
+    },
+    {
+      "id": "it-vat-annual",
+      "category": "Mandatory Annual",
+      "name": "Annual VAT Return",
+      "schedule": {
+        "type": "annual",
+        "month": 4,
+        "day": 30
+      },
+      "rule": "Between 1 February and 30 April",
+      "applies": "Businesses charging VAT",
+      "description": "The annual VAT balance is due by 16 March.",
+      "authority": "Agenzia delle Entrate",
+      "source": "https://www.agenziaentrate.gov.it/portale/web/guest/schede/dichiarazioni/iva",
+      "confidence": "medium",
+      "when": {
+        "not": {
+          "vat": [
+            "Not registered"
+          ]
+        }
+      }
+    },
+    {
+      "id": "it-lipe",
+      "category": "Mandatory Annual",
+      "name": "Quarterly VAT Settlement Communications (LIPE)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 5,
+            "day": 31
+          },
+          {
+            "month": 9,
+            "day": 30
+          },
+          {
+            "month": 11,
+            "day": 30
+          },
+          {
+            "month": 2,
+            "day": 28
+          }
+        ]
+      },
+      "rule": "31 May, 30 September, 30 November and the end of February",
+      "applies": "Businesses charging VAT",
+      "description": "Reports each period's VAT settlement.",
+      "authority": "Agenzia delle Entrate",
+      "source": "https://www.agenziaentrate.gov.it/",
+      "confidence": "medium",
+      "when": {
+        "not": {
+          "vat": [
+            "Not registered"
+          ]
+        }
+      }
+    },
+    {
+      "id": "it-vat-advance",
+      "category": "Mandatory Annual",
+      "name": "VAT Advance Payment (acconto IVA)",
+      "schedule": {
+        "type": "annual",
+        "month": 12,
+        "day": 27
+      },
+      "rule": "27 December",
+      "applies": "Businesses charging VAT",
+      "description": "An advance on the last settlement of the year.",
+      "authority": "Agenzia delle Entrate",
+      "source": "https://www.agenziaentrate.gov.it/",
+      "confidence": "medium",
+      "when": {
+        "not": {
+          "vat": [
+            "Not registered"
+          ]
+        }
+      }
+    },
+    {
+      "id": "it-vat-monthly",
+      "category": "Conditional",
+      "name": "VAT Settlement and Payment (monthly)",
+      "schedule": {
+        "type": "monthly",
+        "day": 16
+      },
+      "rule": "16th of the following month",
+      "applies": "Businesses on monthly VAT settlements",
+      "description": "Paid with form F24.",
+      "authority": "Agenzia delle Entrate",
+      "source": "https://www.agenziaentrate.gov.it/",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Monthly"
+        ]
+      }
+    },
+    {
+      "id": "it-vat-quarterly",
+      "category": "Conditional",
+      "name": "VAT Settlement and Payment (quarterly)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 5,
+            "day": 16
+          },
+          {
+            "month": 8,
+            "day": 20
+          },
+          {
+            "month": 11,
+            "day": 16
+          },
+          {
+            "month": 3,
+            "day": 16
+          }
+        ]
+      },
+      "rule": "16 May, 20 August, 16 November, and 16 March for the fourth quarter",
+      "applies": "Smaller businesses that chose quarterly settlements",
+      "description": "Paid with form F24 with 1% interest.",
+      "authority": "Agenzia delle Entrate",
+      "source": "https://www.agenziaentrate.gov.it/",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Quarterly"
+        ]
+      }
+    },
+    {
+      "id": "it-f24-payroll",
+      "category": "Conditional",
+      "name": "Payroll Withholding Tax and INPS Contributions (F24)",
+      "schedule": {
+        "type": "monthly",
+        "day": 16
+      },
+      "rule": "16th of the following month",
+      "applies": "Employers",
+      "description": "Tax withheld from wages and social contributions are paid with form F24.",
+      "authority": "Agenzia delle Entrate / INPS",
+      "source": "https://www.inps.it/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "it-uniemens",
+      "category": "Conditional",
+      "name": "Monthly Contribution Report (UniEmens)",
+      "schedule": {
+        "type": "monthly",
+        "day": "last"
+      },
+      "rule": "Last day of the following month",
+      "applies": "Employers",
+      "description": "Reports each employee's pay and contributions to INPS.",
+      "authority": "INPS",
+      "source": "https://www.inps.it/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "it-cu",
+      "category": "Conditional",
+      "name": "Employee Tax Certificates (Certificazione Unica)",
+      "schedule": {
+        "type": "annual",
+        "month": 3,
+        "day": 16
+      },
+      "rule": "16 March",
+      "applies": "Employers and businesses that paid professionals",
+      "description": "Sent to the tax agency and given to each recipient.",
+      "authority": "Agenzia delle Entrate",
+      "source": "https://www.agenziaentrate.gov.it/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "it-770",
+      "category": "Conditional",
+      "name": "Withholding Agents' Return (Modello 770)",
+      "schedule": {
+        "type": "annual",
+        "month": 10,
+        "day": 31
+      },
+      "rule": "31 October",
+      "applies": "Employers and businesses that withheld tax",
+      "description": "Summarises the year's withholding taxes and payments.",
+      "authority": "Agenzia delle Entrate",
+      "source": "https://www.agenziaentrate.gov.it/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "it-inail",
+      "category": "Conditional",
+      "name": "INAIL Self-Assessment (autoliquidazione)",
+      "schedule": {
+        "type": "annual",
+        "month": 2,
+        "day": 16
+      },
+      "rule": "Premium by 16 February; wage declaration by the end of February",
+      "applies": "Employers",
+      "description": "The workplace accident insurance premium is settled for the past year and advanced for the current one.",
+      "authority": "INAIL",
+      "source": "https://www.inail.it/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "it-tp",
+      "category": "Transfer Pricing",
+      "name": "Transfer Pricing Documentation",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 10,
+        "day": "last"
+      },
+      "rule": "Signed and time-stamped by the date the income tax return is filed",
+      "applies": "Companies with cross-border related-party transactions",
+      "description": "A master file and local file in the prescribed form give penalty protection; possession is declared in the tax return.",
+      "authority": "Agenzia delle Entrate",
+      "source": "https://www.agenziaentrate.gov.it/",
+      "confidence": "medium",
+      "when": {
+        "foreignOwned": true
+      }
+    }
+  ],
+  "regions": {
+    "Abruzzo": {
+      "items": [
+        {
+          "id": "it-abruzzo-irap",
+          "category": "Mandatory Annual",
+          "name": "IRAP — Regional Tax on Productive Activities (Abruzzo)",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 6,
+                "day": 30
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "Balance and first advance by 30 June; second advance by 30 November (calendar financial year)",
+          "applies": "Companies and partnerships producing in Abruzzo",
+          "description": "IRAP is owed to the region where the business produces, at the rate Abruzzo sets; businesses active in several regions split the tax base between them in the IRAP return.",
+          "authority": "Regione Abruzzo / Agenzia delle Entrate",
+          "source": "https://www.agenziaentrate.gov.it/portale/web/guest/schede/dichiarazioni/irap",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "S.r.l.",
+              "S.r.l.s. (simplified)",
+              "S.p.A.",
+              "Partnership (S.n.c. / S.a.s.)",
+              "Branch of Foreign Company"
+            ]
+          }
+        }
+      ]
+    },
+    "Aosta Valley": {
+      "items": [
+        {
+          "id": "it-aosta-valley-irap",
+          "category": "Mandatory Annual",
+          "name": "IRAP — Regional Tax on Productive Activities (Aosta Valley)",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 6,
+                "day": 30
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "Balance and first advance by 30 June; second advance by 30 November (calendar financial year)",
+          "applies": "Companies and partnerships producing in Aosta Valley",
+          "description": "IRAP is owed to the region where the business produces, at the rate Aosta Valley sets; businesses active in several regions split the tax base between them in the IRAP return.",
+          "authority": "Regione Aosta Valley / Agenzia delle Entrate",
+          "source": "https://www.agenziaentrate.gov.it/portale/web/guest/schede/dichiarazioni/irap",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "S.r.l.",
+              "S.r.l.s. (simplified)",
+              "S.p.A.",
+              "Partnership (S.n.c. / S.a.s.)",
+              "Branch of Foreign Company"
+            ]
+          }
+        }
+      ]
+    },
+    "Apulia": {
+      "items": [
+        {
+          "id": "it-apulia-irap",
+          "category": "Mandatory Annual",
+          "name": "IRAP — Regional Tax on Productive Activities (Apulia)",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 6,
+                "day": 30
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "Balance and first advance by 30 June; second advance by 30 November (calendar financial year)",
+          "applies": "Companies and partnerships producing in Apulia",
+          "description": "IRAP is owed to the region where the business produces, at the rate Apulia sets; businesses active in several regions split the tax base between them in the IRAP return.",
+          "authority": "Regione Apulia / Agenzia delle Entrate",
+          "source": "https://www.agenziaentrate.gov.it/portale/web/guest/schede/dichiarazioni/irap",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "S.r.l.",
+              "S.r.l.s. (simplified)",
+              "S.p.A.",
+              "Partnership (S.n.c. / S.a.s.)",
+              "Branch of Foreign Company"
+            ]
+          }
+        }
+      ]
+    },
+    "Basilicata": {
+      "items": [
+        {
+          "id": "it-basilicata-irap",
+          "category": "Mandatory Annual",
+          "name": "IRAP — Regional Tax on Productive Activities (Basilicata)",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 6,
+                "day": 30
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "Balance and first advance by 30 June; second advance by 30 November (calendar financial year)",
+          "applies": "Companies and partnerships producing in Basilicata",
+          "description": "IRAP is owed to the region where the business produces, at the rate Basilicata sets; businesses active in several regions split the tax base between them in the IRAP return.",
+          "authority": "Regione Basilicata / Agenzia delle Entrate",
+          "source": "https://www.agenziaentrate.gov.it/portale/web/guest/schede/dichiarazioni/irap",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "S.r.l.",
+              "S.r.l.s. (simplified)",
+              "S.p.A.",
+              "Partnership (S.n.c. / S.a.s.)",
+              "Branch of Foreign Company"
+            ]
+          }
+        }
+      ]
+    },
+    "Calabria": {
+      "items": [
+        {
+          "id": "it-calabria-irap",
+          "category": "Mandatory Annual",
+          "name": "IRAP — Regional Tax on Productive Activities (Calabria)",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 6,
+                "day": 30
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "Balance and first advance by 30 June; second advance by 30 November (calendar financial year)",
+          "applies": "Companies and partnerships producing in Calabria",
+          "description": "IRAP is owed to the region where the business produces, at the rate Calabria sets; businesses active in several regions split the tax base between them in the IRAP return.",
+          "authority": "Regione Calabria / Agenzia delle Entrate",
+          "source": "https://www.agenziaentrate.gov.it/portale/web/guest/schede/dichiarazioni/irap",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "S.r.l.",
+              "S.r.l.s. (simplified)",
+              "S.p.A.",
+              "Partnership (S.n.c. / S.a.s.)",
+              "Branch of Foreign Company"
+            ]
+          }
+        }
+      ]
+    },
+    "Campania": {
+      "items": [
+        {
+          "id": "it-campania-irap",
+          "category": "Mandatory Annual",
+          "name": "IRAP — Regional Tax on Productive Activities (Campania)",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 6,
+                "day": 30
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "Balance and first advance by 30 June; second advance by 30 November (calendar financial year)",
+          "applies": "Companies and partnerships producing in Campania",
+          "description": "IRAP is owed to the region where the business produces, at the rate Campania sets; businesses active in several regions split the tax base between them in the IRAP return.",
+          "authority": "Regione Campania / Agenzia delle Entrate",
+          "source": "https://www.agenziaentrate.gov.it/portale/web/guest/schede/dichiarazioni/irap",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "S.r.l.",
+              "S.r.l.s. (simplified)",
+              "S.p.A.",
+              "Partnership (S.n.c. / S.a.s.)",
+              "Branch of Foreign Company"
+            ]
+          }
+        }
+      ]
+    },
+    "Emilia-Romagna": {
+      "items": [
+        {
+          "id": "it-emilia-romagna-irap",
+          "category": "Mandatory Annual",
+          "name": "IRAP — Regional Tax on Productive Activities (Emilia-Romagna)",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 6,
+                "day": 30
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "Balance and first advance by 30 June; second advance by 30 November (calendar financial year)",
+          "applies": "Companies and partnerships producing in Emilia-Romagna",
+          "description": "IRAP is owed to the region where the business produces, at the rate Emilia-Romagna sets; businesses active in several regions split the tax base between them in the IRAP return.",
+          "authority": "Regione Emilia-Romagna / Agenzia delle Entrate",
+          "source": "https://www.agenziaentrate.gov.it/portale/web/guest/schede/dichiarazioni/irap",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "S.r.l.",
+              "S.r.l.s. (simplified)",
+              "S.p.A.",
+              "Partnership (S.n.c. / S.a.s.)",
+              "Branch of Foreign Company"
+            ]
+          }
+        }
+      ]
+    },
+    "Friuli-Venezia Giulia": {
+      "items": [
+        {
+          "id": "it-friuli-venezia-giulia-irap",
+          "category": "Mandatory Annual",
+          "name": "IRAP — Regional Tax on Productive Activities (Friuli-Venezia Giulia)",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 6,
+                "day": 30
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "Balance and first advance by 30 June; second advance by 30 November (calendar financial year)",
+          "applies": "Companies and partnerships producing in Friuli-Venezia Giulia",
+          "description": "IRAP is owed to the region where the business produces, at the rate Friuli-Venezia Giulia sets; businesses active in several regions split the tax base between them in the IRAP return.",
+          "authority": "Regione Friuli-Venezia Giulia / Agenzia delle Entrate",
+          "source": "https://www.agenziaentrate.gov.it/portale/web/guest/schede/dichiarazioni/irap",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "S.r.l.",
+              "S.r.l.s. (simplified)",
+              "S.p.A.",
+              "Partnership (S.n.c. / S.a.s.)",
+              "Branch of Foreign Company"
+            ]
+          }
+        }
+      ]
+    },
+    "Lazio": {
+      "items": [
+        {
+          "id": "it-lazio-irap",
+          "category": "Mandatory Annual",
+          "name": "IRAP — Regional Tax on Productive Activities (Lazio)",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 6,
+                "day": 30
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "Balance and first advance by 30 June; second advance by 30 November (calendar financial year)",
+          "applies": "Companies and partnerships producing in Lazio",
+          "description": "IRAP is owed to the region where the business produces, at the rate Lazio sets; businesses active in several regions split the tax base between them in the IRAP return.",
+          "authority": "Regione Lazio / Agenzia delle Entrate",
+          "source": "https://www.agenziaentrate.gov.it/portale/web/guest/schede/dichiarazioni/irap",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "S.r.l.",
+              "S.r.l.s. (simplified)",
+              "S.p.A.",
+              "Partnership (S.n.c. / S.a.s.)",
+              "Branch of Foreign Company"
+            ]
+          }
+        }
+      ]
+    },
+    "Liguria": {
+      "items": [
+        {
+          "id": "it-liguria-irap",
+          "category": "Mandatory Annual",
+          "name": "IRAP — Regional Tax on Productive Activities (Liguria)",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 6,
+                "day": 30
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "Balance and first advance by 30 June; second advance by 30 November (calendar financial year)",
+          "applies": "Companies and partnerships producing in Liguria",
+          "description": "IRAP is owed to the region where the business produces, at the rate Liguria sets; businesses active in several regions split the tax base between them in the IRAP return.",
+          "authority": "Regione Liguria / Agenzia delle Entrate",
+          "source": "https://www.agenziaentrate.gov.it/portale/web/guest/schede/dichiarazioni/irap",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "S.r.l.",
+              "S.r.l.s. (simplified)",
+              "S.p.A.",
+              "Partnership (S.n.c. / S.a.s.)",
+              "Branch of Foreign Company"
+            ]
+          }
+        }
+      ]
+    },
+    "Lombardy": {
+      "items": [
+        {
+          "id": "it-lombardy-irap",
+          "category": "Mandatory Annual",
+          "name": "IRAP — Regional Tax on Productive Activities (Lombardy)",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 6,
+                "day": 30
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "Balance and first advance by 30 June; second advance by 30 November (calendar financial year)",
+          "applies": "Companies and partnerships producing in Lombardy",
+          "description": "IRAP is owed to the region where the business produces, at the rate Lombardy sets; businesses active in several regions split the tax base between them in the IRAP return.",
+          "authority": "Regione Lombardy / Agenzia delle Entrate",
+          "source": "https://www.agenziaentrate.gov.it/portale/web/guest/schede/dichiarazioni/irap",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "S.r.l.",
+              "S.r.l.s. (simplified)",
+              "S.p.A.",
+              "Partnership (S.n.c. / S.a.s.)",
+              "Branch of Foreign Company"
+            ]
+          }
+        }
+      ]
+    },
+    "Marche": {
+      "items": [
+        {
+          "id": "it-marche-irap",
+          "category": "Mandatory Annual",
+          "name": "IRAP — Regional Tax on Productive Activities (Marche)",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 6,
+                "day": 30
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "Balance and first advance by 30 June; second advance by 30 November (calendar financial year)",
+          "applies": "Companies and partnerships producing in Marche",
+          "description": "IRAP is owed to the region where the business produces, at the rate Marche sets; businesses active in several regions split the tax base between them in the IRAP return.",
+          "authority": "Regione Marche / Agenzia delle Entrate",
+          "source": "https://www.agenziaentrate.gov.it/portale/web/guest/schede/dichiarazioni/irap",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "S.r.l.",
+              "S.r.l.s. (simplified)",
+              "S.p.A.",
+              "Partnership (S.n.c. / S.a.s.)",
+              "Branch of Foreign Company"
+            ]
+          }
+        }
+      ]
+    },
+    "Molise": {
+      "items": [
+        {
+          "id": "it-molise-irap",
+          "category": "Mandatory Annual",
+          "name": "IRAP — Regional Tax on Productive Activities (Molise)",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 6,
+                "day": 30
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "Balance and first advance by 30 June; second advance by 30 November (calendar financial year)",
+          "applies": "Companies and partnerships producing in Molise",
+          "description": "IRAP is owed to the region where the business produces, at the rate Molise sets; businesses active in several regions split the tax base between them in the IRAP return.",
+          "authority": "Regione Molise / Agenzia delle Entrate",
+          "source": "https://www.agenziaentrate.gov.it/portale/web/guest/schede/dichiarazioni/irap",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "S.r.l.",
+              "S.r.l.s. (simplified)",
+              "S.p.A.",
+              "Partnership (S.n.c. / S.a.s.)",
+              "Branch of Foreign Company"
+            ]
+          }
+        }
+      ]
+    },
+    "Piedmont": {
+      "items": [
+        {
+          "id": "it-piedmont-irap",
+          "category": "Mandatory Annual",
+          "name": "IRAP — Regional Tax on Productive Activities (Piedmont)",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 6,
+                "day": 30
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "Balance and first advance by 30 June; second advance by 30 November (calendar financial year)",
+          "applies": "Companies and partnerships producing in Piedmont",
+          "description": "IRAP is owed to the region where the business produces, at the rate Piedmont sets; businesses active in several regions split the tax base between them in the IRAP return.",
+          "authority": "Regione Piedmont / Agenzia delle Entrate",
+          "source": "https://www.agenziaentrate.gov.it/portale/web/guest/schede/dichiarazioni/irap",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "S.r.l.",
+              "S.r.l.s. (simplified)",
+              "S.p.A.",
+              "Partnership (S.n.c. / S.a.s.)",
+              "Branch of Foreign Company"
+            ]
+          }
+        }
+      ]
+    },
+    "Sardinia": {
+      "items": [
+        {
+          "id": "it-sardinia-irap",
+          "category": "Mandatory Annual",
+          "name": "IRAP — Regional Tax on Productive Activities (Sardinia)",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 6,
+                "day": 30
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "Balance and first advance by 30 June; second advance by 30 November (calendar financial year)",
+          "applies": "Companies and partnerships producing in Sardinia",
+          "description": "IRAP is owed to the region where the business produces, at the rate Sardinia sets; businesses active in several regions split the tax base between them in the IRAP return.",
+          "authority": "Regione Sardinia / Agenzia delle Entrate",
+          "source": "https://www.agenziaentrate.gov.it/portale/web/guest/schede/dichiarazioni/irap",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "S.r.l.",
+              "S.r.l.s. (simplified)",
+              "S.p.A.",
+              "Partnership (S.n.c. / S.a.s.)",
+              "Branch of Foreign Company"
+            ]
+          }
+        }
+      ]
+    },
+    "Sicily": {
+      "items": [
+        {
+          "id": "it-sicily-irap",
+          "category": "Mandatory Annual",
+          "name": "IRAP — Regional Tax on Productive Activities (Sicily)",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 6,
+                "day": 30
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "Balance and first advance by 30 June; second advance by 30 November (calendar financial year)",
+          "applies": "Companies and partnerships producing in Sicily",
+          "description": "IRAP is owed to the region where the business produces, at the rate Sicily sets; businesses active in several regions split the tax base between them in the IRAP return.",
+          "authority": "Regione Sicily / Agenzia delle Entrate",
+          "source": "https://www.agenziaentrate.gov.it/portale/web/guest/schede/dichiarazioni/irap",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "S.r.l.",
+              "S.r.l.s. (simplified)",
+              "S.p.A.",
+              "Partnership (S.n.c. / S.a.s.)",
+              "Branch of Foreign Company"
+            ]
+          }
+        }
+      ]
+    },
+    "Trentino-South Tyrol": {
+      "items": [
+        {
+          "id": "it-trentino-south-tyrol-irap",
+          "category": "Mandatory Annual",
+          "name": "IRAP — Regional Tax on Productive Activities (Trentino-South Tyrol)",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 6,
+                "day": 30
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "Balance and first advance by 30 June; second advance by 30 November (calendar financial year)",
+          "applies": "Companies and partnerships producing in Trentino-South Tyrol",
+          "description": "IRAP is owed to the region where the business produces, at the rate Trentino-South Tyrol sets; businesses active in several regions split the tax base between them in the IRAP return.",
+          "authority": "Regione Trentino-South Tyrol / Agenzia delle Entrate",
+          "source": "https://www.agenziaentrate.gov.it/portale/web/guest/schede/dichiarazioni/irap",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "S.r.l.",
+              "S.r.l.s. (simplified)",
+              "S.p.A.",
+              "Partnership (S.n.c. / S.a.s.)",
+              "Branch of Foreign Company"
+            ]
+          }
+        }
+      ]
+    },
+    "Tuscany": {
+      "items": [
+        {
+          "id": "it-tuscany-irap",
+          "category": "Mandatory Annual",
+          "name": "IRAP — Regional Tax on Productive Activities (Tuscany)",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 6,
+                "day": 30
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "Balance and first advance by 30 June; second advance by 30 November (calendar financial year)",
+          "applies": "Companies and partnerships producing in Tuscany",
+          "description": "IRAP is owed to the region where the business produces, at the rate Tuscany sets; businesses active in several regions split the tax base between them in the IRAP return.",
+          "authority": "Regione Tuscany / Agenzia delle Entrate",
+          "source": "https://www.agenziaentrate.gov.it/portale/web/guest/schede/dichiarazioni/irap",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "S.r.l.",
+              "S.r.l.s. (simplified)",
+              "S.p.A.",
+              "Partnership (S.n.c. / S.a.s.)",
+              "Branch of Foreign Company"
+            ]
+          }
+        }
+      ]
+    },
+    "Umbria": {
+      "items": [
+        {
+          "id": "it-umbria-irap",
+          "category": "Mandatory Annual",
+          "name": "IRAP — Regional Tax on Productive Activities (Umbria)",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 6,
+                "day": 30
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "Balance and first advance by 30 June; second advance by 30 November (calendar financial year)",
+          "applies": "Companies and partnerships producing in Umbria",
+          "description": "IRAP is owed to the region where the business produces, at the rate Umbria sets; businesses active in several regions split the tax base between them in the IRAP return.",
+          "authority": "Regione Umbria / Agenzia delle Entrate",
+          "source": "https://www.agenziaentrate.gov.it/portale/web/guest/schede/dichiarazioni/irap",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "S.r.l.",
+              "S.r.l.s. (simplified)",
+              "S.p.A.",
+              "Partnership (S.n.c. / S.a.s.)",
+              "Branch of Foreign Company"
+            ]
+          }
+        }
+      ]
+    },
+    "Veneto": {
+      "items": [
+        {
+          "id": "it-veneto-irap",
+          "category": "Mandatory Annual",
+          "name": "IRAP — Regional Tax on Productive Activities (Veneto)",
+          "schedule": {
+            "type": "multiple",
+            "dates": [
+              {
+                "month": 6,
+                "day": 30
+              },
+              {
+                "month": 11,
+                "day": 30
+              }
+            ]
+          },
+          "rule": "Balance and first advance by 30 June; second advance by 30 November (calendar financial year)",
+          "applies": "Companies and partnerships producing in Veneto",
+          "description": "IRAP is owed to the region where the business produces, at the rate Veneto sets; businesses active in several regions split the tax base between them in the IRAP return.",
+          "authority": "Regione Veneto / Agenzia delle Entrate",
+          "source": "https://www.agenziaentrate.gov.it/portale/web/guest/schede/dichiarazioni/irap",
+          "confidence": "medium",
+          "when": {
+            "entityType": [
+              "S.r.l.",
+              "S.r.l.s. (simplified)",
+              "S.p.A.",
+              "Partnership (S.n.c. / S.a.s.)",
+              "Branch of Foreign Company"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

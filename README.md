@@ -1,6 +1,7 @@
 # ComplyGlobally — Compliance Calendar Platform
 
-Companies in the US, Canada, the UK, Singapore, the UAE and Germany get a
+Companies in 22 countries (the US, Canada, the UK, the UAE, Singapore, Hong Kong,
+Japan, South Korea, Australia and 13 European countries) get a
 compliance calendar built from a researched database of official filing
 rules: every filing they owe, with real due dates. They can then ask ComplyGlobally to handle any filing. They upload
 documents, pay online, and get proof when it's done. The ComplyGlobally team

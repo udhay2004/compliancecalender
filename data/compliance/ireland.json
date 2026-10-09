@@ -1,0 +1,368 @@
+{
+  "country": "Ireland",
+  "updated": "2026-10-09",
+  "notes": "National rules; no region is needed. Revenue dates are the ROS (online) dates.",
+  "items": [
+    {
+      "id": "ie-b1",
+      "category": "Mandatory Annual",
+      "name": "CRO Annual Return (Form B1) with Financial Statements",
+      "schedule": {
+        "type": "anniversary",
+        "monthsAfter": 6,
+        "daysAfter": 56
+      },
+      "rule": "Within 56 days after the Annual Return Date (first ARD: 6 months after incorporation; then each anniversary of it)",
+      "applies": "LTD, DAC and PLC",
+      "description": "The first return needs no financial statements; later ones attach statements made up to a date no more than 9 months before the ARD. Late filing loses the audit exemption.",
+      "authority": "Companies Registration Office (CRO)",
+      "source": "https://cro.ie/annual-return/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Private Company Limited by Shares (LTD)",
+          "Designated Activity Company (DAC)",
+          "Public Limited Company (PLC)"
+        ]
+      }
+    },
+    {
+      "id": "ie-agm",
+      "category": "Mandatory Annual",
+      "name": "Annual General Meeting",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 9,
+        "day": "last"
+      },
+      "rule": "Within 9 months after financial year end, and at least once each calendar year",
+      "applies": "Companies (an LTD may replace it with a written resolution)",
+      "description": "Financial statements are laid before the members.",
+      "authority": "Companies Act 2014 s.175",
+      "source": "https://cro.ie/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Private Company Limited by Shares (LTD)",
+          "Designated Activity Company (DAC)",
+          "Public Limited Company (PLC)"
+        ]
+      }
+    },
+    {
+      "id": "ie-rbo",
+      "category": "Event-Based",
+      "name": "Register of Beneficial Ownership (RBO)",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Within 5 months of incorporation; changes within 14 days",
+      "applies": "Companies",
+      "description": "Beneficial owners are filed on the central register as well as kept in the company's own register.",
+      "authority": "Registrar of Beneficial Ownership of Companies",
+      "source": "https://rbo.gov.ie/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Private Company Limited by Shares (LTD)",
+          "Designated Activity Company (DAC)",
+          "Public Limited Company (PLC)"
+        ]
+      }
+    },
+    {
+      "id": "ie-branch-accounts",
+      "category": "Mandatory Annual",
+      "name": "Branch — Filing the Foreign Company's Accounts with the CRO",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Each year, within the period the CRO sets after the company's accounts are published at home",
+      "applies": "Branches of foreign companies",
+      "description": "The foreign company's accounting documents are delivered to the CRO annually.",
+      "authority": "Companies Registration Office (CRO)",
+      "source": "https://cro.ie/registration/external-company/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Branch of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "ie-ct1",
+      "category": "Mandatory Annual",
+      "name": "Corporation Tax Return (CT1) and Balance of Tax",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 9,
+        "day": 23
+      },
+      "rule": "23rd day of the 9th month after the accounting period ends",
+      "applies": "Companies and branches",
+      "description": "Filed on ROS with payment of the balance.",
+      "authority": "Revenue Commissioners",
+      "source": "https://www.revenue.ie/en/companies-and-charities/corporation-tax-for-companies/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Private Company Limited by Shares (LTD)",
+          "Designated Activity Company (DAC)",
+          "Public Limited Company (PLC)",
+          "Branch of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "ie-ixbrl",
+      "category": "Mandatory Annual",
+      "name": "iXBRL Financial Statements to Revenue",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 12,
+        "day": 23
+      },
+      "rule": "Within 3 months after the CT1 due date",
+      "applies": "Companies filing a CT1 (small companies may be exempt)",
+      "description": "The financial statements are uploaded in iXBRL format.",
+      "authority": "Revenue Commissioners",
+      "source": "https://www.revenue.ie/en/companies-and-charities/corporation-tax-for-companies/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Private Company Limited by Shares (LTD)",
+          "Designated Activity Company (DAC)",
+          "Public Limited Company (PLC)",
+          "Branch of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "ie-prelim-ct",
+      "category": "Conditional",
+      "name": "Preliminary Corporation Tax",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 11,
+        "day": 23
+      },
+      "rule": "23rd day of the 11th month of the accounting period (large companies also pay on the 23rd of the 6th month)",
+      "applies": "Companies and branches",
+      "description": "At least 90% of the year's tax, or 100% of last year's for small companies.",
+      "authority": "Revenue Commissioners",
+      "source": "https://www.revenue.ie/en/companies-and-charities/corporation-tax-for-companies/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Private Company Limited by Shares (LTD)",
+          "Designated Activity Company (DAC)",
+          "Public Limited Company (PLC)",
+          "Branch of Foreign Company"
+        ]
+      }
+    },
+    {
+      "id": "ie-form11",
+      "category": "Mandatory Annual",
+      "name": "Income Tax Return (Form 11) and Preliminary Tax",
+      "schedule": {
+        "type": "annual",
+        "month": 10,
+        "day": 31
+      },
+      "rule": "31 October (extended to mid-November when filed and paid on ROS)",
+      "applies": "Sole traders and partners; partnerships also file Form 1 (Firms)",
+      "description": "Pay and file: the return, the balance for last year and preliminary tax for this year.",
+      "authority": "Revenue Commissioners",
+      "source": "https://www.revenue.ie/en/self-assessment-and-self-employment/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sole Trader",
+          "Partnership"
+        ]
+      }
+    },
+    {
+      "id": "ie-business-name",
+      "category": "Event-Based",
+      "name": "Business Name Registration",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Within 1 month of starting to trade under a name other than the owners' own",
+      "applies": "Sole traders and partnerships using a business name",
+      "description": "Registered with the CRO; changes are notified within 1 month.",
+      "authority": "Companies Registration Office (CRO)",
+      "source": "https://cro.ie/registration/business-name/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Sole Trader",
+          "Partnership"
+        ]
+      }
+    },
+    {
+      "id": "ie-vat-bimonthly",
+      "category": "Conditional",
+      "name": "VAT Return (VAT3, every two months)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 3,
+            "day": 23
+          },
+          {
+            "month": 5,
+            "day": 23
+          },
+          {
+            "month": 7,
+            "day": 23
+          },
+          {
+            "month": 9,
+            "day": 23
+          },
+          {
+            "month": 11,
+            "day": 23
+          },
+          {
+            "month": 1,
+            "day": 23
+          }
+        ]
+      },
+      "rule": "23rd of March, May, July, September, November and January",
+      "applies": "VAT-registered businesses",
+      "description": "Filed and paid on ROS.",
+      "authority": "Revenue Commissioners",
+      "source": "https://www.revenue.ie/en/vat/",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Bi-monthly"
+        ]
+      }
+    },
+    {
+      "id": "ie-vat-monthly",
+      "category": "Conditional",
+      "name": "VAT Return (VAT3, monthly)",
+      "schedule": {
+        "type": "monthly",
+        "day": 23
+      },
+      "rule": "23rd of the following month",
+      "applies": "VAT-registered businesses on monthly returns",
+      "description": "Filed and paid on ROS.",
+      "authority": "Revenue Commissioners",
+      "source": "https://www.revenue.ie/en/vat/",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Monthly"
+        ]
+      }
+    },
+    {
+      "id": "ie-rtd",
+      "category": "Mandatory Annual",
+      "name": "VAT Return of Trading Details (RTD)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 1,
+        "day": 23
+      },
+      "rule": "23rd of the month after the accounting year ends",
+      "applies": "VAT-registered businesses",
+      "description": "An annual breakdown of sales and purchases by VAT rate.",
+      "authority": "Revenue Commissioners",
+      "source": "https://www.revenue.ie/en/vat/",
+      "confidence": "medium",
+      "when": {
+        "not": {
+          "vat": [
+            "Not registered"
+          ]
+        }
+      }
+    },
+    {
+      "id": "ie-vat-register",
+      "category": "Event-Based",
+      "name": "VAT Registration",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Within 30 days of passing the turnover threshold",
+      "applies": "Businesses not yet VAT-registered",
+      "description": "Separate thresholds apply to goods and to services.",
+      "authority": "Revenue Commissioners",
+      "source": "https://www.revenue.ie/en/vat/vat-registration/",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Not registered"
+        ]
+      }
+    },
+    {
+      "id": "ie-paye",
+      "category": "Conditional",
+      "name": "Payroll Submissions and Monthly PAYE, PRSI and USC Payment",
+      "schedule": {
+        "type": "monthly",
+        "day": 23
+      },
+      "rule": "Payroll submission on or before each pay date; monthly return and payment by the 23rd of the following month",
+      "applies": "Employers",
+      "description": "Revenue issues a monthly statement from the payroll submissions, which the employer accepts and pays.",
+      "authority": "Revenue Commissioners",
+      "source": "https://www.revenue.ie/en/employing-people/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "ie-auto-enrolment",
+      "category": "Conditional",
+      "name": "Pension Auto-Enrolment (My Future Fund)",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "With each payroll, from 1 January 2026",
+      "applies": "Employers with eligible employees who are not in a pension scheme",
+      "description": "Employer and employee contributions are deducted through payroll and paid to the central authority.",
+      "authority": "National Automatic Enrolment Retirement Savings Authority (NAERSA)",
+      "source": "https://www.gov.ie/en/campaigns/auto-enrolment/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true
+      }
+    },
+    {
+      "id": "ie-tp",
+      "category": "Transfer Pricing",
+      "name": "Transfer Pricing Documentation",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 9,
+        "day": 23
+      },
+      "rule": "Prepared by the CT1 filing date",
+      "applies": "Companies with related-party arrangements (master file and local file above the group revenue thresholds)",
+      "description": "Provided to Revenue within 30 days of a request.",
+      "authority": "Revenue Commissioners",
+      "source": "https://www.revenue.ie/en/companies-and-charities/international-tax/transfer-pricing/",
+      "confidence": "medium",
+      "when": {
+        "foreignOwned": true
+      }
+    }
+  ]
+}

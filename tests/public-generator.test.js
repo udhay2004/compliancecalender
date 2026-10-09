@@ -131,7 +131,7 @@ const asThePageSends = (answers, extra = {}) => ({
 // Every country, every entity type
 // =====================================================================
 test("the form covers the six countries, each with an entity-type question", () => {
-  assert.deepStrictEqual([...DEF.countries].sort(), ["Canada", "Germany", "Singapore", "United Arab Emirates", "United Kingdom", "United States"]);
+  assert.deepStrictEqual([...DEF.countries].sort(), ["Australia", "Austria", "Belgium", "Canada", "Denmark", "France", "Germany", "Hong Kong", "Ireland", "Italy", "Japan", "Netherlands", "Norway", "Portugal", "Singapore", "South Korea", "Spain", "Sweden", "Switzerland", "United Arab Emirates", "United Kingdom", "United States"]);
   for (const country of DEF.countries) {
     assert.ok(DEF.fields[country].some((f) => f.key === "entityType" && f.required), `${country} asks for the entity type`);
   }

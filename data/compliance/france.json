@@ -1,0 +1,527 @@
+{
+  "country": "France",
+  "updated": "2026-10-09",
+  "notes": "National rules. Payroll dates depend on headcount.",
+  "items": [
+    {
+      "id": "fr-approve-accounts",
+      "category": "Mandatory Annual",
+      "name": "Approval of the Annual Accounts",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 6,
+        "day": "last"
+      },
+      "rule": "Within 6 months after financial year end",
+      "applies": "SAS, SASU, SARL, EURL and SA",
+      "description": "The shareholders (or sole shareholder) approve the accounts and decide on the result.",
+      "authority": "Code de commerce",
+      "source": "https://entreprendre.service-public.fr/",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "SAS",
+          "SASU",
+          "SARL",
+          "EURL",
+          "SA"
+        ]
+      }
+    },
+    {
+      "id": "fr-file-accounts",
+      "category": "Mandatory Annual",
+      "name": "Annual Accounts Filed with the Commercial Court Registry (greffe)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 7,
+        "day": "last"
+      },
+      "rule": "Within 1 month of approval (2 months when filed online)",
+      "applies": "SAS, SASU, SARL, EURL and SA; branches file the foreign company's accounts",
+      "description": "Small companies may ask for their accounts to be kept confidential.",
+      "authority": "Greffe du tribunal de commerce / Guichet unique (INPI)",
+      "source": "https://entreprendre.service-public.fr/vosdroits/F31214",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "SAS",
+          "SASU",
+          "SARL",
+          "EURL",
+          "SA",
+          "Branch of Foreign Company (succursale)"
+        ]
+      }
+    },
+    {
+      "id": "fr-is-return-dec",
+      "category": "Mandatory Annual",
+      "name": "Corporate Tax Return (form 2065 and the tax package)",
+      "schedule": {
+        "type": "annual",
+        "month": 5,
+        "day": 18
+      },
+      "rule": "Second working day after 1 May, plus 15 days when filed online (about 18–20 May)",
+      "applies": "Companies subject to corporate tax with a 31 December year end (an EURL only if it chose corporate tax)",
+      "description": "Filed electronically (EDI-TDFC).",
+      "authority": "Direction générale des Finances publiques (DGFiP)",
+      "source": "https://www.impots.gouv.fr/professionnel",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "SAS",
+          "SASU",
+          "SARL",
+          "EURL",
+          "SA",
+          "Branch of Foreign Company (succursale)"
+        ],
+        "fyEndMonth": [
+          12
+        ]
+      }
+    },
+    {
+      "id": "fr-is-return-other",
+      "category": "Mandatory Annual",
+      "name": "Corporate Tax Return (form 2065 and the tax package)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 3,
+        "day": "last"
+      },
+      "rule": "Within 3 months after financial year end (plus 15 days when filed online)",
+      "applies": "Companies subject to corporate tax whose year does not end on 31 December",
+      "description": "Filed electronically (EDI-TDFC).",
+      "authority": "Direction générale des Finances publiques (DGFiP)",
+      "source": "https://www.impots.gouv.fr/professionnel",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "SAS",
+          "SASU",
+          "SARL",
+          "EURL",
+          "SA",
+          "Branch of Foreign Company (succursale)"
+        ],
+        "not": {
+          "fyEndMonth": [
+            12
+          ]
+        }
+      }
+    },
+    {
+      "id": "fr-is-instalments",
+      "category": "Conditional",
+      "name": "Corporate Tax Instalments (acomptes d'IS)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 3,
+            "day": 15
+          },
+          {
+            "month": 6,
+            "day": 15
+          },
+          {
+            "month": 9,
+            "day": 15
+          },
+          {
+            "month": 12,
+            "day": 15
+          }
+        ]
+      },
+      "rule": "15 March, 15 June, 15 September and 15 December",
+      "applies": "Companies whose previous corporate tax was over €3,000",
+      "description": "Four instalments based on the last year's tax.",
+      "authority": "Direction générale des Finances publiques (DGFiP)",
+      "source": "https://www.impots.gouv.fr/professionnel",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "SAS",
+          "SASU",
+          "SARL",
+          "EURL",
+          "SA",
+          "Branch of Foreign Company (succursale)"
+        ]
+      }
+    },
+    {
+      "id": "fr-is-balance",
+      "category": "Mandatory Annual",
+      "name": "Corporate Tax Balance (form 2572)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 4,
+        "day": 15
+      },
+      "rule": "15th of the 4th month after financial year end (15 May for a 31 December year end)",
+      "applies": "Companies subject to corporate tax",
+      "description": "The balance after instalments is paid online.",
+      "authority": "Direction générale des Finances publiques (DGFiP)",
+      "source": "https://www.impots.gouv.fr/professionnel",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "SAS",
+          "SASU",
+          "SARL",
+          "EURL",
+          "SA",
+          "Branch of Foreign Company (succursale)"
+        ]
+      }
+    },
+    {
+      "id": "fr-cfe",
+      "category": "Mandatory Annual",
+      "name": "Business Property Tax (CFE)",
+      "schedule": {
+        "type": "annual",
+        "month": 12,
+        "day": 15
+      },
+      "rule": "15 December (with an instalment on 15 June when the previous CFE was €3,000 or more)",
+      "applies": "All businesses, from their second year",
+      "description": "Paid online from the professional tax account; no notice is posted.",
+      "authority": "Direction générale des Finances publiques (DGFiP)",
+      "source": "https://www.impots.gouv.fr/professionnel/cfe",
+      "confidence": "medium"
+    },
+    {
+      "id": "fr-rbe",
+      "category": "Event-Based",
+      "name": "Register of Beneficial Owners",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "On formation and within 30 days of any change",
+      "applies": "Companies",
+      "description": "Declared through the Guichet unique.",
+      "authority": "INPI / Greffe du tribunal de commerce",
+      "source": "https://entreprendre.service-public.fr/vosdroits/F35207",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "SAS",
+          "SASU",
+          "SARL",
+          "EURL",
+          "SA"
+        ]
+      }
+    },
+    {
+      "id": "fr-einvoicing",
+      "category": "Event-Based",
+      "name": "Electronic Invoicing",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Receiving e-invoices from 1 September 2026; issuing them from 1 September 2026 (large and mid-sized companies) or 1 September 2027 (small companies)",
+      "applies": "VAT-registered businesses established in France",
+      "description": "Invoices between French businesses pass through an approved platform, with transaction data reported to the tax authority.",
+      "authority": "Direction générale des Finances publiques (DGFiP)",
+      "source": "https://www.impots.gouv.fr/facturation-electronique",
+      "confidence": "medium",
+      "when": {
+        "not": {
+          "vat": [
+            "Not registered"
+          ]
+        }
+      }
+    },
+    {
+      "id": "fr-ei-results",
+      "category": "Mandatory Annual",
+      "name": "Business Results Return (form 2031 or 2035)",
+      "schedule": {
+        "type": "annual",
+        "month": 5,
+        "day": 18
+      },
+      "rule": "Second working day after 1 May, plus 15 days when filed online",
+      "applies": "Sole proprietors taxed on actual profits",
+      "description": "Filed electronically; the result is carried to the personal income tax return.",
+      "authority": "Direction générale des Finances publiques (DGFiP)",
+      "source": "https://www.impots.gouv.fr/professionnel",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Entreprise Individuelle (sole proprietor)"
+        ]
+      }
+    },
+    {
+      "id": "fr-ei-income-tax",
+      "category": "Mandatory Annual",
+      "name": "Personal Income Tax Return (form 2042-C-PRO)",
+      "schedule": {
+        "type": "annual",
+        "month": 5,
+        "day": 22
+      },
+      "rule": "Late May to early June, depending on the département",
+      "applies": "Sole proprietors",
+      "description": "Business income and social contribution data are declared online.",
+      "authority": "Direction générale des Finances publiques (DGFiP)",
+      "source": "https://www.impots.gouv.fr/particulier",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "Entreprise Individuelle (sole proprietor)"
+        ]
+      }
+    },
+    {
+      "id": "fr-vat-monthly",
+      "category": "Conditional",
+      "name": "VAT Return CA3 (monthly)",
+      "schedule": {
+        "type": "monthly",
+        "day": 15
+      },
+      "rule": "Between the 15th and 24th of the following month, on the date set for the business",
+      "applies": "Businesses under the normal VAT regime",
+      "description": "Filed and paid online.",
+      "authority": "Direction générale des Finances publiques (DGFiP)",
+      "source": "https://www.impots.gouv.fr/professionnel/tva",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Monthly"
+        ]
+      }
+    },
+    {
+      "id": "fr-vat-quarterly",
+      "category": "Conditional",
+      "name": "VAT Return CA3 (quarterly)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 4,
+            "day": 15
+          },
+          {
+            "month": 7,
+            "day": 15
+          },
+          {
+            "month": 10,
+            "day": 15
+          },
+          {
+            "month": 1,
+            "day": 15
+          }
+        ]
+      },
+      "rule": "Between the 15th and 24th of April, July, October and January",
+      "applies": "Businesses under the normal VAT regime with annual VAT under €4,000",
+      "description": "Filed and paid online.",
+      "authority": "Direction générale des Finances publiques (DGFiP)",
+      "source": "https://www.impots.gouv.fr/professionnel/tva",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Quarterly"
+        ]
+      }
+    },
+    {
+      "id": "fr-vat-annual",
+      "category": "Conditional",
+      "name": "Annual VAT Return CA12",
+      "schedule": {
+        "type": "annual",
+        "month": 5,
+        "day": 4
+      },
+      "rule": "Second working day after 1 May (within 3 months of year end when the year does not end on 31 December)",
+      "applies": "Businesses under the simplified VAT regime",
+      "description": "One return a year reconciling the two instalments.",
+      "authority": "Direction générale des Finances publiques (DGFiP)",
+      "source": "https://www.impots.gouv.fr/professionnel/tva",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Annual"
+        ]
+      }
+    },
+    {
+      "id": "fr-vat-instalments",
+      "category": "Conditional",
+      "name": "VAT Instalments (simplified regime)",
+      "schedule": {
+        "type": "multiple",
+        "dates": [
+          {
+            "month": 7,
+            "day": 15
+          },
+          {
+            "month": 12,
+            "day": 15
+          }
+        ]
+      },
+      "rule": "Between 15 and 24 July (55%) and 15 and 24 December (40%)",
+      "applies": "Businesses under the simplified VAT regime",
+      "description": "Instalments based on the previous year's VAT.",
+      "authority": "Direction générale des Finances publiques (DGFiP)",
+      "source": "https://www.impots.gouv.fr/professionnel/tva",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Annual"
+        ]
+      }
+    },
+    {
+      "id": "fr-vat-register",
+      "category": "Event-Based",
+      "name": "Leaving the VAT Exemption (franchise en base)",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "From the first day the turnover threshold is passed",
+      "applies": "Businesses under the VAT exemption",
+      "description": "VAT is charged and returns begin once the threshold is passed.",
+      "authority": "Direction générale des Finances publiques (DGFiP)",
+      "source": "https://www.impots.gouv.fr/professionnel/tva",
+      "confidence": "medium",
+      "when": {
+        "vat": [
+          "Not registered"
+        ]
+      }
+    },
+    {
+      "id": "fr-dsn-15",
+      "category": "Conditional",
+      "name": "Monthly Payroll Declaration (DSN) and Social Contributions",
+      "schedule": {
+        "type": "monthly",
+        "day": 15
+      },
+      "rule": "15th of the following month",
+      "applies": "Employers with fewer than 50 employees",
+      "description": "The DSN reports wages, social contributions and income tax withheld at source.",
+      "authority": "URSSAF (via net-entreprises.fr)",
+      "source": "https://www.net-entreprises.fr/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true,
+        "employeeBand": [
+          "Fewer than 11",
+          "11–49"
+        ]
+      }
+    },
+    {
+      "id": "fr-dsn-5",
+      "category": "Conditional",
+      "name": "Monthly Payroll Declaration (DSN) and Social Contributions",
+      "schedule": {
+        "type": "monthly",
+        "day": 5
+      },
+      "rule": "5th of the following month",
+      "applies": "Employers with 50 or more employees paying wages in the month worked",
+      "description": "The DSN reports wages, social contributions and income tax withheld at source.",
+      "authority": "URSSAF (via net-entreprises.fr)",
+      "source": "https://www.net-entreprises.fr/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true,
+        "employeeBand": [
+          "50 or more"
+        ]
+      }
+    },
+    {
+      "id": "fr-cse",
+      "category": "Event-Based",
+      "name": "Staff Representative Body (CSE) Elections",
+      "schedule": {
+        "type": "event"
+      },
+      "rule": "Once the company has had 11 employees for 12 consecutive months; then every 4 years",
+      "applies": "Employers with 11 or more employees",
+      "description": "The employer organises the elections of the social and economic committee.",
+      "authority": "Ministère du Travail",
+      "source": "https://travail-emploi.gouv.fr/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true,
+        "employeeBand": [
+          "11–49",
+          "50 or more"
+        ]
+      }
+    },
+    {
+      "id": "fr-egapro",
+      "category": "Conditional",
+      "name": "Gender Equality Index — Publication and Declaration",
+      "schedule": {
+        "type": "annual",
+        "month": 3,
+        "day": 1
+      },
+      "rule": "1 March each year",
+      "applies": "Employers with 50 or more employees",
+      "description": "The index is published on the company's website and declared on the Egapro portal.",
+      "authority": "Ministère du Travail",
+      "source": "https://egapro.travail.gouv.fr/",
+      "confidence": "medium",
+      "when": {
+        "hasEmployees": true,
+        "employeeBand": [
+          "50 or more"
+        ]
+      }
+    },
+    {
+      "id": "fr-tp",
+      "category": "Transfer Pricing",
+      "name": "Transfer Pricing Return (form 2257-SD)",
+      "schedule": {
+        "type": "fy_relative",
+        "monthsAfter": 11,
+        "day": 20
+      },
+      "rule": "Within 6 months after the corporate tax return deadline",
+      "applies": "Companies with turnover or gross assets of €50 million or more (or belonging to such a group) and related-party transactions over €100,000 per type",
+      "description": "Larger companies must also keep full transfer pricing documentation available for a tax audit.",
+      "authority": "Direction générale des Finances publiques (DGFiP)",
+      "source": "https://www.impots.gouv.fr/professionnel",
+      "confidence": "medium",
+      "when": {
+        "entityType": [
+          "SAS",
+          "SASU",
+          "SARL",
+          "EURL",
+          "SA",
+          "Branch of Foreign Company (succursale)"
+        ],
+        "foreignOwned": true
+      }
+    }
+  ]
+}
