@@ -353,6 +353,17 @@
   .emailed-note { display: flex; gap: 12px; align-items: flex-start; margin: 0 0 18px; padding: 14px 16px; font-size: 14px; line-height: 1.55; color: var(--ink); background: var(--brand-tint); border: 1px solid #BFE3DF; border-radius: 14px; }
   .emailed-note .ic { flex-shrink: 0; margin-top: 2px; font-size: 18px; color: var(--brand-text); }
   .emailed-note strong { display: block; }
+  .emailed-note.warn { background: var(--urgent-bg); border-color: transparent; }
+  .emailed-note.warn .ic { color: var(--urgent-text); }
+  .sent-card { max-width: 680px; margin: 8px auto 0; padding: 36px 32px 30px; text-align: center; background: #fff; border: 1px solid var(--rule); border-radius: 20px; box-shadow: var(--shadow-md); }
+  .sent-ic { display: inline-grid; place-items: center; width: 56px; height: 56px; margin-bottom: 14px; font-size: 28px; color: #fff; background: var(--btn-b); border-radius: 50%; }
+  .sent-card h2 { margin: 0 0 10px; font: 800 26px/1.2 var(--display); letter-spacing: -.02em; }
+  .sent-lead { margin: 0 auto 20px; max-width: 52ch; font-size: 15.5px; line-height: 1.6; color: var(--ink-soft); }
+  .sent-lead strong { color: var(--ink); overflow-wrap: anywhere; }
+  .sent-login { display: grid; gap: 4px; margin: 0 auto 22px; padding: 16px 18px; text-align: left; font-size: 14px; line-height: 1.55; color: var(--ink-soft); background: var(--brand-tint); border-radius: 14px; }
+  .sent-login strong { color: var(--ink); }
+  .sent-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+  .sent-foot { margin: 18px 0 0; font-size: 13px; color: var(--ink-soft); }
   .no-match { display: flex; align-items: center; gap: 14px; padding: 22px; margin-bottom: 16px; color: var(--ink-soft); background: #fff; border: 1.5px dashed #C8D8D6; border-radius: 16px; font-size: 14px; }
   .no-match .ic { font-size: 24px; color: var(--brand); }
   .no-match strong { display: block; color: var(--ink); font-size: 14.5px; }
@@ -1095,7 +1106,33 @@
 
   let caseCount = 0;
 
-  function renderCase(profile, allItems, calendarId) {
+  // After generating: "it's in your inbox", with the optional sign-in.
+  function renderEmailed(profile, data) {
+    const el = document.createElement('div');
+    caseCount++;
+    el.className = 'case sent-case';
+    el.innerHTML = `
+      <div class="sent-card" role="status">
+        <span class="sent-ic">${icon('check')}</span>
+        <h2>Your compliance calendar is on its way</h2>
+        <p class="sent-lead">We've emailed the calendar for <strong>${escapeHtml(profile.companyName || 'your company')}</strong>
+          to <strong>${escapeHtml(data.emailedTo)}</strong>: ${Number(data.itemCount) || ''} filings, each with its due date.</p>
+        <div class="sent-login">
+          <strong>Want us to handle the filings? Your portal is ready (optional).</strong>
+          <span>Username: your email. Password: the phone number you gave us. Both are in the email.
+          Sign in whenever you like to complete your details, upload documents and message our team.</span>
+        </div>
+        <div class="sent-actions">
+          <a class="btn btn-primary btn-lg" href="/login?as=client&mode=password">Sign in to your portal ${icon('arrow')}</a>
+          <button class="btn btn-ghost js-new" type="button">Build another calendar</button>
+        </div>
+        <p class="sent-foot">Not in your inbox within a few minutes? Check spam or promotions, or sign in to see it in your portal.</p>
+      </div>`;
+    document.getElementById('cases').prepend(el);
+    el.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' });
+  }
+
+  function renderCase(profile, allItems, calendarId, opts = {}) {
     caseCount++;
     document.body.dataset.hasResults = '1';
 
@@ -1125,6 +1162,7 @@
         <button class="btn btn-ghost btn-back js-edit" type="button">${icon('arrow-left')}Edit details</button>
       </header>
       ${emailedNotice(calendarId)}
+      ${opts.emailFailed ? `<div class="emailed-note warn" role="status">${icon('alert')}<div><strong>We couldn't email your calendar just now, so here it is.</strong> Our team has your details and will send it to you.</div></div>` : ''}
 
       <div class="stats">
         <div class="stat"><span class="stat-ic">${icon('list')}</span><div><div class="stat-num" data-count="${total}">${total}</div><div class="stat-label">Total obligations</div></div></div>
@@ -1377,7 +1415,10 @@
       loader.el.remove();
       if (data.portalUrl) portalUrls[data.calendarId] = data.portalUrl;
       if (data.emailedTo) emailedTo[data.calendarId] = data.emailedTo;
-      renderCase(profile, items, data.calendarId);
+      // Emailed: the page confirms where it went instead of showing it.
+      // Only if the email could not be sent is the calendar shown here.
+      if (data.emailedTo && !data.savedToPortal) renderEmailed(profile, data);
+      else renderCase(profile, items, data.calendarId, { emailFailed: !data.emailedTo && !data.savedToPortal });
     } catch (err) {
       loader.stop();
       loader.el.remove();
