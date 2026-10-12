@@ -28,7 +28,7 @@ const { sendEmail } = require("../lib/mailer");
 const { loadUserFromRequest } = require("../middleware/auth");
 const { getPriceInfo } = require("../lib/complianceFees");
 const { normalizePhone } = require("../lib/calendarView");
-const { deliverCalendar } = require("../lib/leadDelivery");
+const { deliverCalendar, sendCalendarEmail } = require("../lib/leadDelivery");
 const { notifyStaff, notifyClient } = require("../lib/notify");
 
 const { checkProfile, formDefinition } = require("../lib/countries");
@@ -261,9 +261,12 @@ router.post("/generate", generateLimiter, async (req, res) => {
         link: `/portal?calendar=${calendar._id}`,
         email: false,
       });
+      // A signed-in client gets the same email of the calendar.
+      const sent = await sendCalendarEmail({ calendar, to: signedInClient.email, name: signedInClient.name, account: { kind: "existing" } });
       return res.status(201).json({
         calendarId: calendar._id,
         itemCount: items.length,
+        emailedTo: sent === "sent" ? signedInClient.email : null,
         savedToPortal: true,
         portalUrl: `/portal?calendar=${calendar._id}`,
         items: items.map((it) => ({ ...it, locked: false, daysUntil: daysUntilFor(it, profile), price: getPriceInfo(it) })),
