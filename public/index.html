@@ -360,7 +360,7 @@
   .sent-card h2 { margin: 0 0 10px; font: 800 26px/1.2 var(--display); letter-spacing: -.02em; }
   .sent-lead { margin: 0 auto 20px; max-width: 52ch; font-size: 15.5px; line-height: 1.6; color: var(--ink-soft); }
   .sent-lead strong { color: var(--ink); overflow-wrap: anywhere; }
-  .sent-login { display: grid; gap: 4px; margin: 0 auto 22px; padding: 16px 18px; text-align: left; font-size: 14px; line-height: 1.55; color: var(--ink-soft); background: var(--brand-tint); border-radius: 14px; }
+  .sent-login { display: grid; gap: 8px; margin: 0 auto 22px; padding: 16px 18px; text-align: left; font-size: 14px; line-height: 1.55; color: var(--ink-soft); background: var(--brand-tint); border-radius: 14px; }
   .sent-login strong { color: var(--ink); }
   .sent-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
   .sent-foot { margin: 18px 0 0; font-size: 13px; color: var(--ink-soft); }
@@ -1106,28 +1106,48 @@
 
   let caseCount = 0;
 
-  // After generating: "it's in your inbox", with the optional sign-in.
-  function renderEmailed(profile, data) {
+  // After generating: a confirmation only. The calendar is in their email
+  // and in their portal; it is not shown on this page.
+  //   emailed          "on its way", with the sign-in details
+  //   email not sent   the same, saying the email is delayed and that the
+  //                    calendar is already in the portal
+  //   signed in        "saved to your portal"
+  function renderEmailed(profile, data, contact) {
     const el = document.createElement('div');
     caseCount++;
     el.className = 'case sent-case';
-    el.innerHTML = `
-      <div class="sent-card" role="status">
-        <span class="sent-ic">${icon('check')}</span>
-        <h2>Your compliance calendar is on its way</h2>
-        <p class="sent-lead">We've emailed the calendar for <strong>${escapeHtml(profile.companyName || 'your company')}</strong>
-          to <strong>${escapeHtml(data.emailedTo)}</strong>: ${Number(data.itemCount) || ''} filings, each with its due date.</p>
+    const company = `<strong>${escapeHtml(profile.companyName || 'your company')}</strong>`;
+    const count = Number(data.itemCount) || '';
+    const another = `<button class="btn btn-ghost js-new" type="button">Build another calendar</button>`;
+    let body;
+    if (data.savedToPortal) {
+      body = `
+        <h2>Saved to your portal</h2>
+        <p class="sent-lead">The calendar for ${company} (${count} filings, each with its due date) is in your portal${data.emailedTo ? `, and we've emailed a copy to <strong>${escapeHtml(data.emailedTo)}</strong>` : ''}.
+          Choose the filings you want us to handle, upload documents and pay there.</p>
+        <div class="sent-actions">
+          <a class="btn btn-primary btn-lg" href="${escapeHtml(data.portalUrl || '/portal')}">Open in your portal ${icon('arrow')}</a>
+          ${another}
+        </div>`;
+    } else {
+      const to = data.emailedTo || (contact && contact.email) || 'your email';
+      body = `
+        <h2>${data.emailedTo ? 'Your compliance calendar is on its way' : 'Your compliance calendar is ready'}</h2>
+        <p class="sent-lead">${data.emailedTo
+          ? `We've emailed the calendar for ${company} to <strong>${escapeHtml(to)}</strong>: ${count} filings, each with its due date.`
+          : `The calendar for ${company} (${count} filings, each with its due date) is in your portal now. The email to <strong>${escapeHtml(to)}</strong> is delayed; our team will make sure it reaches you.`}</p>
         <div class="sent-login">
-          <strong>Want us to handle the filings? Your portal is ready (optional).</strong>
-          <span>Username: your email. Password: the phone number you gave us. Both are in the email.
-          Sign in whenever you like to complete your details, upload documents and message our team.</span>
+          <strong>Your portal sign-in</strong>
+          <span>Username: <b>your email address</b><br>Password: <b>the phone number you gave us</b> (or your own password, if you already had an account)</span>
+          <span>Signing in is optional. Your calendar is already there: choose the filings you want us to handle, upload documents, pay and message our team.</span>
         </div>
         <div class="sent-actions">
           <a class="btn btn-primary btn-lg" href="/login?as=client&mode=password">Sign in to your portal ${icon('arrow')}</a>
-          <button class="btn btn-ghost js-new" type="button">Build another calendar</button>
+          ${another}
         </div>
-        <p class="sent-foot">Not in your inbox within a few minutes? Check spam or promotions, or sign in to see it in your portal.</p>
-      </div>`;
+        ${data.emailedTo ? '<p class="sent-foot">Not in your inbox within a few minutes? Check spam or promotions, or sign in to see it in your portal.</p>' : ''}`;
+    }
+    el.innerHTML = `<div class="sent-card" role="status"><span class="sent-ic">${icon('check')}</span>${body}</div>`;
     document.getElementById('cases').prepend(el);
     el.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' });
   }
@@ -1415,10 +1435,9 @@
       loader.el.remove();
       if (data.portalUrl) portalUrls[data.calendarId] = data.portalUrl;
       if (data.emailedTo) emailedTo[data.calendarId] = data.emailedTo;
-      // Emailed: the page confirms where it went instead of showing it.
-      // Only if the email could not be sent is the calendar shown here.
-      if (data.emailedTo && !data.savedToPortal) renderEmailed(profile, data);
-      else renderCase(profile, items, data.calendarId, { emailFailed: !data.emailedTo && !data.savedToPortal });
+      // The calendar itself is never shown on this page: it goes to their
+      // email and their portal, and the page confirms that.
+      renderEmailed(profile, data, contact);
     } catch (err) {
       loader.stop();
       loader.el.remove();
