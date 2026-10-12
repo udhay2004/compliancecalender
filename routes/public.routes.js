@@ -28,6 +28,7 @@ const { sendEmail } = require("../lib/mailer");
 const { loadUserFromRequest } = require("../middleware/auth");
 const { getPriceInfo } = require("../lib/complianceFees");
 const { normalizePhone } = require("../lib/calendarView");
+const { deliverCalendar } = require("../lib/leadDelivery");
 const { notifyStaff, notifyClient } = require("../lib/notify");
 
 const { checkProfile, formDefinition } = require("../lib/countries");
@@ -287,9 +288,15 @@ router.post("/generate", generateLimiter, async (req, res) => {
 
     notifyAdminOfLead(calendar, contact);
 
+    // The whole calendar goes to their inbox, with a portal account they
+    // can use if they want to (lib/leadDelivery.js). The answer is the
+    // same whether or not the email already had an account.
+    const delivery = await deliverCalendar(calendar, contact);
+
     return res.status(201).json({
       calendarId: calendar._id,
       itemCount: items.length,
+      emailedTo: delivery.emailed ? calendar.leadContact.email : null,
       items: applyRevealPolicy(items, profile),
     });
   } catch (err) {

@@ -329,7 +329,9 @@
       <div class="list-section" style="margin-top:28px;">
         <div class="section-title">${has ? 'Your password' : 'Sign in faster with a password'}</div>
         <div class="contact-card">
-          <div class="contact-card-row">${has
+          <div class="contact-card-row">${me && me.initialPassword
+            ? 'Your password is still the phone number you gave us, as shown in our email. You can keep it, or choose your own here; your current password is that phone number.'
+            : has
             ? 'You can sign in with your password, an email code or Google.'
             : 'Add a password to sign in without waiting for an email code. Email codes and Google keep working.'}</div>
           <form id="pwForm" class="edit-grid" style="margin-top:8px;">

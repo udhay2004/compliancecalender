@@ -57,6 +57,10 @@ stub("models/Calendar.js", {
 });
 stub("lib/mailer.js", { sendEmail: async (m) => { emails.push(m); return {}; } });
 stub("lib/notify.js", { notifyStaff: () => {}, notifyClient: () => {} });
+// Emailing the calendar and setting up the account has its own tests
+// (tests/client-signin.test.js); here it only records what it was given.
+const deliveries = [];
+stub("lib/leadDelivery.js", { deliverCalendar: async (calendar, contact) => { deliveries.push({ calendar, contact }); return { emailed: true, accountCreated: true }; } });
 stub("middleware/auth.js", { loadUserFromRequest: async () => { throw new Error("no session"); } });
 
 // Cloudflare Turnstile: the route calls fetch() for it and nothing else.
@@ -87,7 +91,7 @@ let base;
 test.before(async () => { await new Promise((r) => server.listen(0, r)); base = `http://127.0.0.1:${server.address().port}`; });
 test.after(() => { server.close(); global.fetch = realFetch; });
 test.beforeEach(() => {
-  calendars = []; emails.length = 0;
+  calendars = []; emails.length = 0; deliveries.length = 0;
   Object.values(publicRoutes.rateLimitStores).forEach((s) => s.resetAll());
   _resetMemory();
   turnstile = { calls: [], answer: { success: true }, down: false };
@@ -432,4 +436,18 @@ test("a calendar id that isn't an id is 'not found' everywhere, not a server err
   } finally {
     s.close();
   }
+});
+
+test("a generated calendar is emailed to the visitor, and the page is told where it went", async () => {
+  const r = await call("POST", "/api/public/generate", { profile: asThePageSends(answer("United Kingdom")), contact: CONTACT });
+  assert.strictEqual(r.status, 201, JSON.stringify(r.body));
+  assert.strictEqual(r.body.emailedTo, "lee@example.com");
+  assert.strictEqual(deliveries.length, 1);
+  assert.strictEqual(String(deliveries[0].calendar._id), String(r.body.calendarId));
+  assert.strictEqual(deliveries[0].contact.phone, "+1 415 555 0100");
+  assert.ok(!("accountCreated" in r.body), "the answer doesn't say whether the email already had an account");
+  // Nothing is emailed for input that is refused.
+  const bad = await call("POST", "/api/public/generate", { profile: asThePageSends(answer("United Kingdom")), contact: { ...CONTACT, phone: "abc" } });
+  assert.strictEqual(bad.status, 400);
+  assert.strictEqual(deliveries.length, 1);
 });

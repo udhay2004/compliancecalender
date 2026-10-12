@@ -376,3 +376,127 @@ test("clients may have no password; team accounts always need a way in", async (
   const staff = new RealUser({ email: "s@b.io", role: "staff" });
   await assert.rejects(staff.validate(), /passwordHash, a googleId, or mustSetPassword/);
 });
+
+// ---------------------------------------------------------------------
+// Generating a calendar: it is emailed, with a portal account to use or
+// ignore (lib/leadDelivery.js)
+// ---------------------------------------------------------------------
+const { deliverCalendar, phonePassword, MAX_EMAILS_PER_DAY } = require("../lib/leadDelivery");
+const { _resetMemory } = require("../lib/rateLimitStore");
+const settle = () => new Promise((r) => setTimeout(r, 20));
+
+function generated(email, phone = "+1 415 555 0100", companyName = "Northwind Ltd") {
+  const c = publicCalendar(email, companyName, {
+    profile: { companyName, country: "United Kingdom", state: "United Kingdom", entityType: "Private Limited Company (Ltd)", fyEnd: "Dec", incorpDate: "2021-07-15" },
+    items: [
+      { compliance_name: "Company Tax Return (CT600)", category: "Mandatory Annual", authority: "HMRC", due_date: "12 months after the end of the accounting period", schedule: { type: "fy_relative", monthsAfter: 12, day: "last" } },
+      { compliance_name: "VAT <Registration>", category: "Event-Based", authority: "HMRC", due_date: "Within 30 days of passing the threshold", schedule: { type: "event" } },
+    ],
+  });
+  c.leadContact.phone = phone;
+  return c;
+}
+
+test("a new visitor gets the whole calendar by email, with an account: email as username, phone as password", async () => {
+  _resetMemory();
+  const cal = generated("nina@northwind.example");
+  const out = await deliverCalendar(cal, { name: "Nina", email: "nina@northwind.example", phone: "+1 415 555 0100" });
+  await settle();
+  assert.deepStrictEqual(out, { emailed: true, accountCreated: true });
+
+  const user = users.find((u) => u.email === "nina@northwind.example");
+  assert.ok(user && user.role === "client" && user.clientOrgId && user.initialPassword === true);
+  assert.strictEqual(cal.clientOrgId, user.clientOrgId, "the calendar is already in their portal");
+  assert.strictEqual(orgs.find((o) => o._id === user.clientOrgId).name, "Northwind Ltd");
+
+  const mail = sentEmails.find((m) => m.to === "nina@northwind.example");
+  assert.match(mail.subject, /compliance calendar for Northwind Ltd/);
+  for (const body of [mail.text, mail.html]) {
+    assert.match(body, /Company Tax Return \(CT600\)/);
+    assert.match(body, /31 Dec 20\d\d/, "the due date is in the email");
+    assert.match(body, /nina@northwind\.example/);
+    assert.ok(body.includes("+14155550100"), "the password is the phone number");
+    assert.match(body, /login\?as=client&(amp;)?mode=password/);
+    assert.match(body, /email code/i, "says how to get in if the password is forgotten");
+  }
+  assert.ok(mail.html.includes("VAT &lt;Registration&gt;") && !mail.html.includes("<Registration>"), "names are escaped");
+  assert.strictEqual(staffNotes.length, 1);
+  assert.match(staffNotes[0].body, /emailed to them/);
+
+  // Signing in is optional, and forgiving about how the number is typed.
+  for (const typed of ["+14155550100", "+1 415 555 0100", "+1 (415) 555-0100", "14155550100"]) {
+    const r = await makeClient().post("/api/auth/login", { email: "nina@northwind.example", password: typed });
+    assert.strictEqual(r.status, 200, typed);
+    assert.strictEqual(r.data.user.initialPassword, true);
+  }
+  assert.strictEqual((await makeClient().post("/api/auth/login", { email: "nina@northwind.example", password: "+1 415 555 0199" })).status, 401);
+  assert.strictEqual((await makeClient().post("/api/auth/login", { email: "nina@northwind.example", password: "password" })).status, 401);
+});
+
+test("the phone password can be replaced, and an email code still gets them in if it's forgotten", async () => {
+  _resetMemory();
+  await deliverCalendar(generated("omar@example.com", "+91 99999 81613"), { name: "Omar", email: "omar@example.com", phone: "+91 99999 81613" });
+  const c = makeClient();
+  assert.strictEqual((await c.post("/api/auth/login", { email: "omar@example.com", password: "+919999981613" })).status, 200);
+  // Choosing their own needs the current one, and follows the normal rules.
+  assert.strictEqual((await c.post("/api/auth/password/set", { password: "919999981613", confirmPassword: "919999981613", currentPassword: "+919999981613" })).status, 400, "a phone number isn't accepted as a chosen password");
+  const wrong = await c.post("/api/auth/password/set", { password: "Quiet-river-2026", confirmPassword: "Quiet-river-2026", currentPassword: "+91 99999 81614" });
+  assert.strictEqual(wrong.status, 401);
+  const ok = await c.post("/api/auth/password/set", { password: "Quiet-river-2026", confirmPassword: "Quiet-river-2026", currentPassword: "+91 99999 81613" });
+  assert.strictEqual(ok.status, 200, JSON.stringify(ok.data));
+  assert.strictEqual(ok.data.user.initialPassword, false);
+  assert.strictEqual((await makeClient().post("/api/auth/login", { email: "omar@example.com", password: "+919999981613" })).status, 401, "the phone number no longer works");
+  assert.strictEqual((await makeClient().post("/api/auth/login", { email: "omar@example.com", password: "Quiet-river-2026" })).status, 200);
+
+  // Forgotten: an email code signs them in without the password.
+  const code = makeClient();
+  await code.post("/api/auth/client/code/request", { email: "omar@example.com", mode: "signin" });
+  assert.strictEqual((await code.post("/api/auth/client/code/verify", { email: "omar@example.com", code: lastCodeFor("omar@example.com"), mode: "signin" })).status, 200);
+});
+
+test("an existing account is never changed by someone generating a calendar with its email", async () => {
+  _resetMemory();
+  const owner = users.find((u) => u.email === "owner@acme.com");
+  await owner.setPassword("Blue-harbour-2026");
+  const before = { hash: owner.passwordHash, version: owner.tokenVersion };
+
+  const cal = generated("owner@acme.com", "+1 999 000 1234", "Somebody Else Inc");
+  const out = await deliverCalendar(cal, { name: "Mallory", email: "owner@acme.com", phone: "+1 999 000 1234" });
+  await settle();
+  assert.deepStrictEqual(out, { emailed: true, accountCreated: false });
+  assert.deepStrictEqual({ hash: owner.passwordHash, version: owner.tokenVersion }, before, "password and sessions untouched");
+  assert.ok(!owner.initialPassword);
+  assert.strictEqual(cal.clientOrgId, null, "not put in their portal until they sign in themselves");
+  assert.strictEqual((await makeClient().post("/api/auth/login", { email: "owner@acme.com", password: "+19990001234" })).status, 401);
+
+  const mail = sentEmails.find((m) => m.to === "owner@acme.com");
+  assert.match(mail.text, /already have a portal/);
+  assert.ok(!/Password:/.test(mail.text) && !mail.text.includes("9990001234") && !mail.html.includes("9990001234"), "no password in the email");
+
+  // Their own sign-in brings the calendar in.
+  const login = await makeClient().post("/api/auth/login", { email: "owner@acme.com", password: "Blue-harbour-2026" });
+  assert.strictEqual(login.status, 200);
+  assert.strictEqual(login.data.redirect, `/portal?calendar=${cal._id}`);
+  assert.strictEqual(cal.clientOrgId, "org_acme");
+
+  // A team address gets the calendar and nothing about signing in.
+  sentEmails.length = 0;
+  const staffCal = generated("tech@theconnectventures.com");
+  await deliverCalendar(staffCal, { name: "T", email: "tech@theconnectventures.com", phone: "+1 415 555 0100" });
+  await settle();
+  const staffMail = sentEmails.find((m) => m.to === "tech@theconnectventures.com");
+  assert.ok(staffMail && !/portal/i.test(staffMail.text));
+  assert.strictEqual(users.find((u) => u.email === "tech@theconnectventures.com").role, "staff");
+});
+
+test("one inbox gets a limited number of calendar emails a day; a failing mail server doesn't lose the calendar", async () => {
+  _resetMemory();
+  for (let i = 0; i < MAX_EMAILS_PER_DAY; i++) {
+    assert.strictEqual((await deliverCalendar(generated("flood@example.com"), { name: "F", email: "flood@example.com", phone: "+1 415 555 0100" })).emailed, true);
+  }
+  assert.strictEqual((await deliverCalendar(generated("flood@example.com"), { name: "F", email: "flood@example.com", phone: "+1 415 555 0100" })).emailed, false);
+  await settle();
+  assert.strictEqual(sentEmails.filter((m) => m.to === "flood@example.com").length, MAX_EMAILS_PER_DAY);
+  assert.strictEqual(users.filter((u) => u.email === "flood@example.com").length, 1, "one account, not one per calendar");
+  assert.strictEqual(phonePassword(" +44 (0)20 7946-0958 "), "+4402079460958");
+});
