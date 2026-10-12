@@ -131,6 +131,7 @@ stub("middleware/auth.js", {
 });
 stub("lib/mailer.js", { sendEmail: async () => ({}) });
 stub("lib/notify.js", { notifyStaff: () => {}, notifyClient: () => {} });
+stub("lib/leadDelivery.js", { deliverCalendar: async () => ({ emailed: true, accountCreated: true }) }); // tested in client-signin.test.js
 
 const express = require("express");
 const app = express();

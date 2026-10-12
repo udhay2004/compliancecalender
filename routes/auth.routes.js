@@ -27,6 +27,7 @@ const otp = require("../lib/otp");
 const { checkPassword, MIN_LENGTH } = require("../lib/passwordPolicy");
 const { logActivity } = require("../lib/auditLog");
 const { createClientAccount, claimCalendars, portalUrlFor } = require("../lib/clientAccounts");
+const { phonePasswordGuesses } = require("../lib/leadDelivery");
 
 const router = express.Router();
 
@@ -80,6 +81,18 @@ const loginAccountLimiter = rateLimit({
   message: { error: "Too many wrong passwords for this account. Wait 15 minutes, or sign in with an email code instead." },
 });
 
+// A first password that is still the phone number we emailed
+// (lib/leadDelivery.js) is accepted however it is typed: with or without
+// spaces, brackets or the leading +.
+async function passwordMatches(user, password) {
+  if (await user.checkPassword(password)) return true;
+  if (!user.initialPassword) return false;
+  for (const guess of phonePasswordGuesses(password)) {
+    if (await user.checkPassword(guess)) return true;
+  }
+  return false;
+}
+
 router.post("/login", loginLimiter, loginAccountLimiter, async (req, res) => {
   const { email, password } = req.body || {};
   if (typeof email !== "string" || typeof password !== "string" || !email || !password) {
@@ -110,7 +123,7 @@ router.post("/login", loginLimiter, loginAccountLimiter, async (req, res) => {
       needsOtp: true,
     });
   }
-  const ok = await user.checkPassword(password);
+  const ok = await passwordMatches(user, password);
   if (!ok) {
     return res.status(401).json({ error: "Invalid email or password." });
   }
@@ -120,7 +133,18 @@ router.post("/login", loginLimiter, loginAccountLimiter, async (req, res) => {
   await user.save();
 
   const step = setSessionCookie(res, user);
-  return res.json({ user: user.toSafeJSON(), redirect: step === "mfa" ? "/two-factor" : destinationFor(user), mfaRequired: step === "mfa" });
+  // Calendars a client generated with this email since they last signed in
+  // join their portal, as they do after a code or Google sign-in.
+  let destination = destinationFor(user);
+  if (user.role === "client") {
+    try {
+      const claimed = await claimCalendars(user);
+      if (claimed.length) destination = portalUrlFor(claimed);
+    } catch (err) {
+      console.error("[login] Failed to link calendars (non-fatal):", err.message);
+    }
+  }
+  return res.json({ user: user.toSafeJSON(), redirect: step === "mfa" ? "/two-factor" : destination, mfaRequired: step === "mfa" });
 });
 
 // POST /api/auth/logout-everywhere — invalidate every session this
@@ -366,7 +390,7 @@ router.post("/password/set", async (req, res) => {
     if (!currentPassword) {
       return res.status(400).json({ error: "Enter your current password." });
     }
-    const ok = await user.checkPassword(currentPassword);
+    const ok = typeof currentPassword === "string" && (await passwordMatches(user, currentPassword));
     if (!ok) {
       return res.status(401).json({ error: "Your current password isn't right." });
     }

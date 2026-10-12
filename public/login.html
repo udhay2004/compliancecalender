@@ -323,6 +323,7 @@
           </div>
         </form>
         <div class="form-foot" style="margin-top:16px;">
+          <span id="firstPasswordHint" hidden>First time here? Your password is the phone number you gave us, as shown in the email with your calendar.<br></span>
           Forgotten it? <a href="#" id="useCodeInstead">Sign in with an email code</a>
         </div>
       </div>
@@ -627,6 +628,7 @@
   var passwordFor = 'staff';
   function openPasswordLogin(who, email) {
     passwordFor = who;
+    $('firstPasswordHint').hidden = who !== 'client';
     if (email) $('loginEmail').value = email;
     setHint('loginHint', '');
     show('stepPasswordLogin');
