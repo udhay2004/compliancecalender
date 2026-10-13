@@ -29,6 +29,7 @@ const { loadUserFromRequest } = require("../middleware/auth");
 const { getPriceInfo } = require("../lib/complianceFees");
 const { normalizePhone } = require("../lib/calendarView");
 const { deliverCalendar, sendCalendarEmail } = require("../lib/leadDelivery");
+const { checkEmail } = require("../lib/emailCheck");
 const { notifyStaff, notifyClient } = require("../lib/notify");
 
 const { checkProfile, formDefinition } = require("../lib/countries");
@@ -54,6 +55,7 @@ const rateLimitStores = {
   generate: mongoStore("public-generate"),
   review: mongoStore("public-review"),
   preview: mongoStore("public-preview"),
+  checkEmail: mongoStore("public-check-email"),
 };
 const generateLimiter = rateLimit({
   store: rateLimitStores.generate,
@@ -210,9 +212,16 @@ router.post("/generate", generateLimiter, async (req, res) => {
   const viewer = await loadUserFromRequest(req).catch(() => null);
   const signedInClient = viewer && viewer.role === "client" && viewer.clientOrgId ? viewer : null;
 
-  if (!contact.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(contact.email).trim())) {
+  // The calendar and the sign-in details go to this address, so it has to
+  // be one we can deliver to (lib/emailCheck.js).
+  if (!contact.email) {
     return res.status(400).json({ error: "A valid email is required to generate your compliance calendar.", field: "email" });
   }
+  const emailVerdict = await checkEmail(contact.email);
+  if (!emailVerdict.ok) {
+    return res.status(400).json({ error: emailVerdict.error, field: "email", suggestion: emailVerdict.suggestion });
+  }
+  contact.email = emailVerdict.email;
   const phone = normalizePhone(String(contact.phone || ""));
   if (!phone) {
     return res.status(400).json({ error: "A valid phone number (with country code) is required so our team can reach you.", field: "phone" });
@@ -308,6 +317,24 @@ router.post("/generate", generateLimiter, async (req, res) => {
     // Never show internal error text to website visitors.
     return res.status(500).json({ error: "We couldn't build your calendar just now. Please try again in a few minutes." });
   }
+});
+
+// POST /api/public/check-email
+// Body: { email }. The first step of the form asks this before moving on,
+// so a mistyped address is caught while the visitor is still looking at it.
+const checkEmailLimiter = rateLimit({
+  store: rateLimitStores.checkEmail,
+  windowMs: 10 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests. Please slow down." },
+});
+router.post("/check-email", checkEmailLimiter, async (req, res) => {
+  const verdict = await checkEmail(req.body?.email);
+  res.set("Cache-Control", "no-store");
+  if (!verdict.ok) return res.status(400).json({ error: verdict.error, field: "email", suggestion: verdict.suggestion });
+  return res.json({ ok: true });
 });
 
 // POST /api/public/preview — signed in only.
