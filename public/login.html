@@ -323,7 +323,8 @@
           </div>
         </form>
         <div class="form-foot" style="margin-top:16px;">
-          <span id="firstPasswordHint" hidden>First time here? Your password is the phone number you entered when you generated your calendar (it is in our email). If you already had an account before, use that account's password.<br></span>
+          <button type="button" class="primary" id="loginCodeOffer" hidden style="margin:0 0 12px;">Email me a sign-in code instead →</button>
+          <span id="firstPasswordHint" hidden>Your password is the phone number on your account (the one you entered when you generated your calendar), unless you chose your own.<br></span>
           Forgotten it? <a href="#" id="useCodeInstead">Sign in with an email code</a>
         </div>
       </div>
@@ -388,6 +389,7 @@
         if (!res.ok) {
           var err = new Error(data.error || 'Something went wrong. Please try again.');
           err.code = data.code || '';
+          err.needsOtp = Boolean(data.needsOtp);
           throw err;
         }
         return data;
@@ -628,6 +630,7 @@
   var passwordFor = 'staff';
   function openPasswordLogin(who, email) {
     passwordFor = who;
+    $('loginCodeOffer').hidden = true;
     $('firstPasswordHint').hidden = who !== 'client';
     if (email) $('loginEmail').value = email;
     setHint('loginHint', '');
@@ -644,6 +647,14 @@
     }
   }
   $('passwordBack').addEventListener('click', leavePasswordLogin);
+  $('loginCodeOffer').addEventListener('click', function () {
+    var email = $('loginEmail').value.trim().toLowerCase();
+    $('loginCodeOffer').hidden = true;
+    $('clientEmail').value = email;
+    openClient('signin');
+    client.email = email;
+    requestClientCode($('clientSubmit'), 'clientHint');
+  });
 
   $('useCodeInstead').addEventListener('click', function (e) {
     e.preventDefault();
@@ -795,6 +806,10 @@
       .catch(function (err) {
         setHint('loginHint', err.message, true);
         btn.disabled = false;
+        // A client account that can't use this password: one click sends
+        // them a sign-in code instead of leaving them stuck.
+        var offer = $('loginCodeOffer');
+        offer.hidden = !(err.needsOtp && passwordFor === 'client');
       });
   });
 
