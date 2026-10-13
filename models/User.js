@@ -73,6 +73,9 @@ const userSchema = new mongoose.Schema(
     // portal then suggests choosing their own; any password they set
     // clears it.
     initialPassword: { type: Boolean, default: false },
+    // That phone number's digits, kept only while it is the password, so
+    // sign-in can accept it with or without the country code.
+    initialPhone: { type: String, default: null },
     // Bumped on every password change and on "log out everywhere".
     // Embedded in the JWT and re-checked on every request, so changing
     // a password instantly kills every other session that account had
@@ -138,6 +141,7 @@ userSchema.methods.setPassword = async function (plainPassword) {
   this.passwordHash = await bcrypt.hash(plainPassword, 12);
   this.mustSetPassword = false;
   this.initialPassword = false;
+  this.initialPhone = null;
   this.passwordUpdatedAt = new Date();
   this.tokenVersion = (this.tokenVersion || 0) + 1;
   this.failedOtpAttempts = 0;
