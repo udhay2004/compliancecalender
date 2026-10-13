@@ -424,7 +424,9 @@ test("a new visitor gets the whole calendar by email, with an account: email as 
   assert.match(staffNotes[0].body, /emailed to them/);
 
   // Signing in is optional, and forgiving about how the number is typed.
-  for (const typed of ["+14155550100", "+1 415 555 0100", "+1 (415) 555-0100", "14155550100"]) {
+  assert.match(mail.text, /take every one of these deadlines off your plate/);
+  assert.match(mail.html, /Message our compliance team directly/);
+  for (const typed of ["+14155550100", "+1 415 555 0100", "+1 (415) 555-0100", "14155550100", "4155550100", "(415) 555-0100"]) { // with or without the country code
     const r = await makeClient().post("/api/auth/login", { email: "nina@northwind.example", password: typed });
     assert.strictEqual(r.status, 200, typed);
     assert.strictEqual(r.data.user.initialPassword, true);

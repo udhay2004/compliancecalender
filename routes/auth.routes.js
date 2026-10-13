@@ -27,7 +27,8 @@ const otp = require("../lib/otp");
 const { checkPassword, MIN_LENGTH } = require("../lib/passwordPolicy");
 const { logActivity } = require("../lib/auditLog");
 const { createClientAccount, claimCalendars, portalUrlFor } = require("../lib/clientAccounts");
-const { phonePasswordGuesses } = require("../lib/leadDelivery");
+const { phonePasswordGuesses, samePhone } = require("../lib/leadDelivery");
+const ClientOrg = require("../models/ClientOrg");
 
 const router = express.Router();
 
@@ -90,7 +91,14 @@ async function passwordMatches(user, password) {
   for (const guess of phonePasswordGuesses(password)) {
     if (await user.checkPassword(guess)) return true;
   }
-  return false;
+  // With or without the country code. Accounts made before the number was
+  // kept on the account fall back to the phone on their company record.
+  let phone = user.initialPhone;
+  if (!phone && user.clientOrgId) {
+    const org = await ClientOrg.findById(user.clientOrgId).catch(() => null);
+    phone = org && org.primaryContactPhone;
+  }
+  return samePhone(password, phone);
 }
 
 router.post("/login", loginLimiter, loginAccountLimiter, async (req, res) => {
