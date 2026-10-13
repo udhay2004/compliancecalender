@@ -451,3 +451,26 @@ test("a generated calendar is emailed to the visitor, and the page is told where
   assert.strictEqual(bad.status, 400);
   assert.strictEqual(deliveries.length, 1);
 });
+
+test("the email is checked before anything is built: typos, throwaway inboxes and malformed addresses", async () => {
+  const profile = asThePageSends(answer("United Kingdom"));
+  const typo = await call("POST", "/api/public/generate", { profile, contact: { ...CONTACT, email: "lee@gmial.com" } });
+  assert.strictEqual(typo.status, 400);
+  assert.strictEqual(typo.body.field, "email");
+  assert.strictEqual(typo.body.suggestion, "lee@gmail.com");
+  for (const email of ["lee@mailinator.com", "lee@@example.com", "lee example.com", "lee@example"]) {
+    const r = await call("POST", "/api/public/generate", { profile, contact: { ...CONTACT, email } });
+    assert.strictEqual(r.status, 400, email);
+    assert.strictEqual(r.body.field, "email", email);
+  }
+  assert.strictEqual(calendars.length, 0, "nothing saved");
+  assert.strictEqual(deliveries.length, 0, "nothing emailed");
+
+  // The form's first step asks the same question on its own.
+  assert.deepStrictEqual((await call("POST", "/api/public/check-email", { email: " Lee@Example.com " })).body, { ok: true });
+  const check = await call("POST", "/api/public/check-email", { email: "lee@hotmial.com" });
+  assert.strictEqual(check.status, 400);
+  assert.strictEqual(check.body.suggestion, "lee@hotmail.com");
+  assert.strictEqual((await call("POST", "/api/public/check-email", {})).status, 400);
+  assert.strictEqual((await call("POST", "/api/public/check-email", { email: { $gt: "" } })).status, 400);
+});

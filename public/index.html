@@ -834,7 +834,7 @@
     });
     resetHumanCheck(); // each check can only be used once
     const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data.error || `Server error ${response.status}`);
+    if (!response.ok) { const err = new Error(data.error || `Server error ${response.status}`); err.field = data.field; throw err; }
     return data; // { calendarId, itemCount, items: [ {locked:false, ...full} | {locked:true, category, daysUntil} ] }
   }
 
@@ -1345,7 +1345,37 @@
     setStep(n, true);
   }
 
-  document.querySelectorAll('[data-next]').forEach(b => b.addEventListener('click', () => { if (validateStep(currentStep)) setStep(currentStep + 1, true); }));
+  // Step 1 also asks the server whether the address can receive email (a
+  // typo like gmial.com, or a domain that doesn't exist). If the check
+  // itself can't be reached the visitor carries on; the server checks
+  // again when the calendar is generated.
+  let emailOk = '';
+  async function emailDeliverable() {
+    const email = document.getElementById('contactEmail').value.trim();
+    if (email === emailOk) return true;
+    try {
+      const r = await fetch('/api/public/check-email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+      if (r.status === 400) {
+        const data = await r.json().catch(() => ({}));
+        showEmailError(data.error || 'Enter a valid email so we can send you your calendar.');
+        document.getElementById('contactEmail').focus();
+        return false;
+      }
+    } catch (e) { /* offline or blocked: don't hold them up */ }
+    emailOk = email;
+    return true;
+  }
+  async function goNext(btn) {
+    if (!validateStep(currentStep)) return;
+    if (currentStep === 1) {
+      if (btn) btn.disabled = true;
+      const ok = await emailDeliverable();
+      if (btn) btn.disabled = false;
+      if (!ok) return;
+    }
+    setStep(currentStep + 1, true);
+  }
+  document.querySelectorAll('[data-next]').forEach(b => b.addEventListener('click', () => goNext(b)));
   document.querySelectorAll('[data-back]').forEach(b => b.addEventListener('click', () => setStep(currentStep - 1, true)));
   document.querySelectorAll('.step-dot').forEach(b => b.addEventListener('click', () => goToStep(Number(b.dataset.goto))));
 
@@ -1353,7 +1383,7 @@
   document.querySelector('.intake').addEventListener('keydown', e => {
     if (e.key !== 'Enter' || e.target.tagName !== 'INPUT' || e.target.type === 'checkbox') return;
     e.preventDefault();
-    if (currentStep < stepEls.length) { if (validateStep(currentStep)) setStep(currentStep + 1, true); }
+    if (currentStep < stepEls.length) { goNext(null); }
     else handleSubmit();
   });
 
@@ -1441,6 +1471,13 @@
     } catch (err) {
       loader.stop();
       loader.el.remove();
+      // A problem with the email address goes back to where it was typed.
+      if (err.field === 'email') {
+        setView('landing'); setStep(1, false);
+        showEmailError(err.message);
+        document.getElementById('contactEmail').focus();
+        return;
+      }
       const errEl = document.createElement('div');
       errEl.className = 'error-case';
       errEl.setAttribute('role', 'alert');
