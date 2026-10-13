@@ -473,7 +473,8 @@ test("an existing account is never changed by someone generating a calendar with
 
   const mail = sentEmails.find((m) => m.to === "owner@acme.com");
   assert.match(mail.text, /already have a portal/);
-  assert.ok(!/Password:/.test(mail.text) && !mail.text.includes("9990001234") && !mail.html.includes("9990001234"), "no password in the email");
+  assert.match(mail.text, /Password: the password you chose/);
+  assert.ok(!mail.text.includes("9990001234") && !mail.html.includes("9990001234"), "the phone typed into the form is not in the email");
 
   // Their own sign-in brings the calendar in.
   const login = await makeClient().post("/api/auth/login", { email: "owner@acme.com", password: "Blue-harbour-2026" });
@@ -501,4 +502,65 @@ test("one inbox gets a limited number of calendar emails a day; a failing mail s
   assert.strictEqual(sentEmails.filter((m) => m.to === "flood@example.com").length, MAX_EMAILS_PER_DAY);
   assert.strictEqual(users.filter((u) => u.email === "flood@example.com").length, 1, "one account, not one per calendar");
   assert.strictEqual(phonePassword(" +44 (0)20 7946-0958 "), "+4402079460958");
+});
+
+test("an account that never set a password signs in with the phone number on its record", async () => {
+  _resetMemory();
+  const owner = users.find((u) => u.email === "owner@acme.com"); // only ever used email codes
+  const acme = orgs.find((o) => o._id === "org_acme");
+  assert.strictEqual(owner.passwordHash, null);
+
+  // No phone on file: there is nothing to sign in with but an email code.
+  const none = await makeClient().post("/api/auth/login", { email: "owner@acme.com", password: "+1 415 555 0100" });
+  assert.strictEqual(none.status, 409);
+  assert.strictEqual(none.data.needsOtp, true);
+
+  // With a phone on the company record, that number is the password.
+  acme.primaryContactPhone = "+91 98765 43210";
+  owner.tokenVersion = 4;
+  const wrong = await makeClient().post("/api/auth/login", { email: "owner@acme.com", password: "+91 98765 43211" });
+  assert.strictEqual(wrong.status, 401);
+  assert.strictEqual(wrong.data.needsOtp, true, "the page can offer an email code");
+  assert.strictEqual(owner.passwordHash, null, "a wrong guess changes nothing");
+  assert.strictEqual((await makeClient().post("/api/auth/login", { email: "owner@acme.com", password: "Blue-harbour-2026" })).status, 401);
+
+  const c = makeClient();
+  const ok = await c.post("/api/auth/login", { email: "owner@acme.com", password: "98765 43210" });
+  assert.strictEqual(ok.status, 200, JSON.stringify(ok.data));
+  assert.strictEqual(ok.data.redirect, "/portal");
+  assert.strictEqual(ok.data.user.initialPassword, true);
+  assert.strictEqual(owner.tokenVersion, 4, "other devices stay signed in");
+  assert.strictEqual((await c.get("/api/auth/me")).status, 200);
+  assert.strictEqual((await makeClient().post("/api/auth/login", { email: "owner@acme.com", password: "+919876543210" })).status, 200, "and again");
+
+  // The email for a new calendar tells them so.
+  sentEmails.length = 0;
+  await deliverCalendar(generated("owner@acme.com", "+1 999 000 1234"), { name: "O", email: "owner@acme.com", phone: "+1 999 000 1234" });
+  await settle();
+  assert.match(sentEmails.find((m) => m.to === "owner@acme.com").text, /Password: the phone number on your account/);
+
+  // Team accounts are never signed in by phone number.
+  assert.notStrictEqual((await makeClient().post("/api/auth/login", { email: "tech@theconnectventures.com", password: "+91 98765 43210" })).status, 200);
+});
+
+test("a phone number typed by a stranger never becomes the way into someone's account", async () => {
+  _resetMemory();
+  const owner = users.find((u) => u.email === "owner@acme.com");
+  const acme = orgs.find((o) => o._id === "org_acme");
+  // A stranger generates a calendar with the owner's email and their own phone.
+  const cal = generated("owner@acme.com", "+1 202 555 0147", "Stranger Co");
+  await deliverCalendar(cal, { name: "Mallory", email: "owner@acme.com", phone: "+1 202 555 0147" });
+  await settle();
+  assert.match(sentEmails.find((m) => m.to === "owner@acme.com").text, /Sign in with an email code/);
+  assert.strictEqual((await makeClient().post("/api/auth/login", { email: "owner@acme.com", password: "+12025550147" })).status, 409);
+
+  // The owner signs in with a code; the calendar joins their portal, but
+  // the stranger's phone number does not go onto the company record.
+  const c = makeClient();
+  await c.post("/api/auth/client/code/request", { email: "owner@acme.com", mode: "signin" });
+  assert.strictEqual((await c.post("/api/auth/client/code/verify", { email: "owner@acme.com", code: lastCodeFor("owner@acme.com"), mode: "signin" })).status, 200);
+  assert.strictEqual(cal.clientOrgId, "org_acme");
+  assert.ok(!acme.primaryContactPhone, "phone not taken from a calendar matched by email alone");
+  assert.strictEqual((await makeClient().post("/api/auth/login", { email: "owner@acme.com", password: "+12025550147" })).status, 409);
+  assert.strictEqual(owner.passwordHash, null);
 });

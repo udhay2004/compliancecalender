@@ -27,7 +27,7 @@ const otp = require("../lib/otp");
 const { checkPassword, MIN_LENGTH } = require("../lib/passwordPolicy");
 const { logActivity } = require("../lib/auditLog");
 const { createClientAccount, claimCalendars, portalUrlFor } = require("../lib/clientAccounts");
-const { phonePasswordGuesses, samePhone } = require("../lib/leadDelivery");
+const { phonePasswordGuesses, samePhone, phonePassword } = require("../lib/leadDelivery");
 const ClientOrg = require("../models/ClientOrg");
 
 const router = express.Router();
@@ -124,12 +124,27 @@ router.post("/login", loginLimiter, loginAccountLimiter, async (req, res) => {
       needsOtp: true,
     });
   }
-  // A client who has only ever used email codes or Google.
+  // A client who has only ever used email codes or Google: the phone number
+  // on their account works as the password, as it does for accounts made
+  // when a calendar is generated. It then becomes their password until
+  // they choose their own. Without a phone on file, an email code it is.
   if (user.role === "client" && !user.passwordHash) {
-    return res.status(409).json({
-      error: "You haven't set a password yet. Sign in with an email code (or Google), then add a password in your portal.",
-      needsOtp: true,
-    });
+    const org = user.clientOrgId ? await ClientOrg.findById(user.clientOrgId).catch(() => null) : null;
+    const phone = org && org.primaryContactPhone;
+    if (!phone) {
+      return res.status(409).json({
+        error: "This account has no password or phone number yet. Sign in with an email code (or Google); you can add a password in your portal.",
+        needsOtp: true,
+      });
+    }
+    if (!samePhone(password, phone)) {
+      return res.status(401).json({ error: "Invalid email or password. Your password is the phone number on your account, or sign in with an email code.", needsOtp: true });
+    }
+    const sessions = user.tokenVersion; // other devices stay signed in
+    await user.setPassword(phonePassword(phone));
+    user.tokenVersion = sessions;
+    user.initialPassword = true;
+    user.initialPhone = String(phone).replace(/\D/g, "");
   }
   const ok = await passwordMatches(user, password);
   if (!ok) {
