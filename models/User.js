@@ -60,7 +60,9 @@ const userSchema = new mongoose.Schema(
     // meaningful for role "staff" — this is what makes tech@ and
     // finance@ land on two genuinely different dashboards instead of
     // one shared staff screen. Left "" for admin/super_admin/client.
-    department: { type: String, enum: ["", "tech", "finance"], default: "" },
+    // "operations" gets the same delivery view as tech for now (see
+    // canSeeTech in routes/dashboard.routes.js).
+    department: { type: String, enum: ["", "tech", "finance", "operations"], default: "" },
     // True between "the account was created by an admin/seed script"
     // and "the person finished their first OTP login and chose a
     // password". While true the account has NO passwordHash at all, so
