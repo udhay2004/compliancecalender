@@ -20,7 +20,8 @@
 // That is the same "invite, don't issue" pattern every serious SaaS
 // uses, and it's why there's no --password flag here.
 //
-// To add someone later, add a row to TEAM below and re-run, or use the
+// To add someone later, add a row to TEAM in lib/teamRoster.js — the app
+// creates missing accounts itself on its next start-up — or use the
 // admin UI. To take someone off, deactivate them in the admin UI rather
 // than deleting the row — deleting loses the audit trail.
 
@@ -28,50 +29,7 @@ require("dotenv").config();
 const { connectDB } = require("../config/db");
 const User = require("../models/User");
 
-const TEAM = [
-  {
-    email: "tech@theconnectventures.com",
-    name: "Tech Team",
-    role: "staff",
-    department: "tech",
-  },
-  {
-    email: "finance@theconnectventures.com",
-    name: "Finance Team",
-    role: "staff",
-    department: "finance",
-  },
-  {
-    email: "partners@theconnectventures.com",
-    name: "Partners",
-    role: "staff",
-    department: "finance",
-  },
-  {
-    email: "tanu.lata@theconnectventures.com",
-    name: "Tanu Lata",
-    role: "staff",
-    department: "finance",
-  },
-  {
-    email: "operations@theconnectventures.com",
-    name: "Operations Team",
-    role: "staff",
-    department: "operations",
-  },
-  {
-    email: "operations.cv@theconnectventures.com",
-    name: "Operations CV",
-    role: "staff",
-    department: "operations",
-  },
-  {
-    email: "anil.gupta@theconnectventures.com",
-    name: "Anil Gupta",
-    role: "super_admin",
-    department: "",
-  },
-];
+const { TEAM } = require("../lib/teamRoster");
 
 async function main() {
   await connectDB();
