@@ -12,6 +12,7 @@
 //
 //   tech (staff, department "tech")  - the review queue and delivery work
 //   finance (staff, department "finance") - invoicing, receipts, overdue
+//   operations (staff, department "operations") - same view as tech
 //   admin / super_admin              - both of the above, and for
 //                                      super_admin additionally the team
 //                                      roster and the security log

@@ -1,6 +1,6 @@
 // scripts/seedTeam.js
 //
-// Creates (or repairs) the three real internal accounts. Run it once
+// Creates (or repairs) the real internal accounts. Run it once
 // after deploying, and again any time you want to be sure the roster is
 // what it should be — it's idempotent, so running it twice is harmless.
 //
@@ -40,6 +40,30 @@ const TEAM = [
     name: "Finance Team",
     role: "staff",
     department: "finance",
+  },
+  {
+    email: "partners@theconnectventures.com",
+    name: "Partners",
+    role: "staff",
+    department: "finance",
+  },
+  {
+    email: "tanu.lata@theconnectventures.com",
+    name: "Tanu Lata",
+    role: "staff",
+    department: "finance",
+  },
+  {
+    email: "operations@theconnectventures.com",
+    name: "Operations Team",
+    role: "staff",
+    department: "operations",
+  },
+  {
+    email: "operations.cv@theconnectventures.com",
+    name: "Operations CV",
+    role: "staff",
+    department: "operations",
   },
   {
     email: "anil.gupta@theconnectventures.com",
