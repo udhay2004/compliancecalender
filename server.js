@@ -278,6 +278,9 @@ function validCron(value, fallback, name) {
 
 async function start() {
   await connectDB();
+  // Creates any internal team account listed in lib/teamRoster.js that
+  // doesn't exist yet. Never edits existing accounts.
+  await require("./lib/teamRoster").ensureTeamAccounts(require("./models/User"));
   const { track, addCronTask, installShutdown } = require("./lib/lifecycle");
   const { runExclusive } = require("./lib/jobLock");
   const today = () => new Date().toISOString().slice(0, 10);
