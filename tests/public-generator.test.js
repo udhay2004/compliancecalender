@@ -56,7 +56,8 @@ stub("models/Calendar.js", {
   },
 });
 stub("lib/mailer.js", { sendEmail: async (m) => { emails.push(m); return {}; } });
-stub("lib/notify.js", { notifyStaff: () => {}, notifyClient: () => {} });
+const staffAlerts = [];
+stub("lib/notify.js", { notifyStaff: (n) => { staffAlerts.push(n); }, notifyClient: () => {} });
 // Emailing the calendar and setting up the account has its own tests
 // (tests/client-signin.test.js); here it only records what it was given.
 const deliveries = [];
@@ -91,7 +92,7 @@ let base;
 test.before(async () => { await new Promise((r) => server.listen(0, r)); base = `http://127.0.0.1:${server.address().port}`; });
 test.after(() => { server.close(); global.fetch = realFetch; });
 test.beforeEach(() => {
-  calendars = []; emails.length = 0; deliveries.length = 0;
+  calendars = []; emails.length = 0; deliveries.length = 0; staffAlerts.length = 0;
   Object.values(publicRoutes.rateLimitStores).forEach((s) => s.resetAll());
   _resetMemory();
   turnstile = { calls: [], answer: { success: true }, down: false };
@@ -269,7 +270,23 @@ test("locked filings reveal only a category and a day count", async () => {
   const days = r.body.items.map((i) => i.daysUntil ?? Infinity);
   assert.deepStrictEqual(days, [...days].sort((a, b) => a - b), "nearest deadline first");
   assert.strictEqual(emails.length, 1, "the team is told about the lead once");
-  assert.strictEqual(emails[0].to, "team@firm.example");
+  // Sales (LEAD_NOTIFY_EMAIL, default sales@complyglobally.com) and the team inbox.
+  assert.deepStrictEqual(emails[0].to, ["sales@complyglobally.com", "team@firm.example"]);
+  assert.match(emails[0].text, /\/leads/);
+  // And a bell notification for the whole team, linking to the Leads page.
+  assert.strictEqual(staffAlerts.length, 1);
+  assert.strictEqual(staffAlerts[0].type, "new_lead");
+  assert.strictEqual(staffAlerts[0].link, "/leads");
+  assert.strictEqual(staffAlerts[0].email, false);
+});
+
+test("lead email recipients: LEAD_NOTIFY_EMAIL list, plus ADMIN_EMAIL, no repeats", () => {
+  const { leadRecipients } = require("../routes/public.routes");
+  process.env.LEAD_NOTIFY_EMAIL = " sales@complyglobally.com, , Team@Firm.example ,ops@firm.example";
+  assert.deepStrictEqual(leadRecipients(), ["sales@complyglobally.com", "Team@Firm.example", "ops@firm.example"]);
+  process.env.LEAD_NOTIFY_EMAIL = "  ";
+  assert.deepStrictEqual(leadRecipients(), ["sales@complyglobally.com", "team@firm.example"]);
+  delete process.env.LEAD_NOTIFY_EMAIL;
 });
 
 test("bad input is refused with the field to fix, and nothing is saved", async () => {
