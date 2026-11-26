@@ -37,6 +37,7 @@ const TYPES = [
   "message",
   "documents_requested",
   "filing_assigned",
+  "new_lead",
 ];
 
 const notificationSchema = new mongoose.Schema(

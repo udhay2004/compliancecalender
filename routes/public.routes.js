@@ -167,9 +167,34 @@ function applyRevealPolicy(items, profile) {
   });
 }
 
+// Who is emailed about each new lead: LEAD_NOTIFY_EMAIL (comma-separated,
+// default sales@complyglobally.com) plus ADMIN_EMAIL if set, without
+// repeats. The whole team also gets a bell notification linking to /leads.
+const DEFAULT_LEAD_NOTIFY_EMAIL = "sales@complyglobally.com";
+function leadRecipients() {
+  const raw = [(process.env.LEAD_NOTIFY_EMAIL || "").trim() || DEFAULT_LEAD_NOTIFY_EMAIL, process.env.ADMIN_EMAIL || ""].join(",");
+  const seen = new Set();
+  return raw.split(",").map((a) => a.trim()).filter((a) => {
+    const key = a.toLowerCase();
+    if (!a || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 function notifyAdminOfLead(calendar, contact, { isReviewRequest = false } = {}) {
-  const notifyTo = process.env.ADMIN_EMAIL;
-  if (!notifyTo) return;
+  const company = calendar.profile.companyName || calendar.profile.state;
+  notifyStaff({
+    calendarId: calendar._id,
+    type: "new_lead",
+    title: isReviewRequest ? `Lead asked to talk to us: ${company}` : `New lead: ${company}`,
+    body: `${contact.name || "A visitor"} (${contact.email}${contact.phone ? `, ${contact.phone}` : ""}) generated a calendar for ${calendar.profile.companyName || "their company"} (${calendar.profile.state}, ${calendar.profile.entityType}).`,
+    link: "/leads",
+    actorName: contact.name || contact.email,
+    email: false,
+  });
+  const notifyTo = leadRecipients();
+  if (!notifyTo.length) return;
   sendEmail({
     to: notifyTo,
     subject: isReviewRequest
@@ -185,7 +210,7 @@ function notifyAdminOfLead(calendar, contact, { isReviewRequest = false } = {}) 
       `Company: ${calendar.profile.companyName || "(not given)"}\n` +
       `Country: ${calendar.profile.country || "United States"}\n` +
       `State/Region: ${calendar.profile.state}, Entity: ${calendar.profile.entityType}\n\n` +
-      `View in admin: ${process.env.APP_URL || ""}/admin`,
+      `See all leads: ${process.env.APP_URL || ""}/leads`,
     logPrefix: "[public-lead]",
   }).catch((err) => console.error("[public-lead] Notify email failed (non-fatal):", err.message));
 }
@@ -387,5 +412,6 @@ router.post("/:id/request-review", reviewLimiter, async (req, res) => {
 });
 
 module.exports = router;
+module.exports.leadRecipients = leadRecipients;
 // For the test suite, and for clearing a counter by hand (same as routes/auth.routes.js).
 module.exports.rateLimitStores = rateLimitStores;

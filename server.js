@@ -170,14 +170,14 @@ app.use(cookieParser());
 // and notifications already sent) go to the new one, query string included.
 // Registered before everything else that serves pages, so a guarded page
 // can never be reached as a plain file.
-const PAGE_NAMES = ["app", "review", "calendar", "pipeline", "reports", "admin", "dashboard", "portal", "login", "two-factor", "index"];
+const PAGE_NAMES = ["app", "review", "calendar", "pipeline", "reports", "leads", "admin", "dashboard", "portal", "login", "two-factor", "index"];
 app.get(PAGE_NAMES.map((name) => `/${name}.html`), (req, res) => {
   const name = req.path.slice(1, -".html".length);
   res.redirect(301, (name === "index" ? "/" : `/${name}`) + req.originalUrl.slice(req.path.length));
 });
 const pageFile = (route) => path.join(__dirname, "public", `${route.slice(1)}.html`);
 
-const STAFF_PAGES = ["/app", "/review", "/calendar", "/pipeline", "/reports"];
+const STAFF_PAGES = ["/app", "/review", "/calendar", "/pipeline", "/reports", "/leads"];
 STAFF_PAGES.forEach((route) => {
   app.get(route, requirePageAuth, requirePageRole("staff"), (req, res) => {
     res.sendFile(pageFile(route));
@@ -264,6 +264,7 @@ app.use("/api/notifications", notificationsRoutes);
 app.use("/api/invoices", invoicesRoutes);
 app.use("/api/pipeline", require("./routes/pipeline.routes"));
 app.use("/api/reports", require("./routes/reports.routes"));
+app.use("/api/leads", require("./routes/leads.routes"));
 
 // Last: turns any unexpected error into a clear response (never a hang).
 app.use(errorHandler);
